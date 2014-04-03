@@ -1,0 +1,21 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver axiethernet
+
+  OPTION supported_peripherals = (axi_ethernet axi_ethernet_buffer);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axiethernet;
+  OPTION supported_os_types = (DTS);
+
+  PARAMETER name = dts.alias , type = reference, default = ethernet;
+  PARAMETER name = axistream-connected , type = reference;
+  PARAMETER name = axistream-control-connected, type = reference;
+  PARAMETER name = clock-frequency, type = int, default = 100000000;
+  PARAMETER name = compatible, type =stringlist, default = "xlnx,axi-ethernet-1.00.a";
+  PARAMETER name = device_type, type = string, default = network;
+  PARAMETER name = local-mac-address, default = "00 0a 35 00 00 00", type = bytelist;
+  PARAMETER name = phy-handle, type = reference;
+
+END driver
+
+

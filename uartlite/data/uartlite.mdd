@@ -1,0 +1,17 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver uartlite
+
+  OPTION supported_peripherals = (mdm axi_uartlite);
+  OPTION driver_state = ACTIVE;
+  OPTION supported_os_types = (DTS);
+  OPTION NAME = uartlite; 
+
+  PARAMETER name = dts.alias, type = string, default = serial;
+  PARAMETER name = port-number, type = int, default = 0;
+  PARAMETER name = current-speed, type = int, default = 115200;
+  PARAMETER name = compatible, type = stringlist,  default = "xlnx,xps-uartlite-1.00.a";
+  PARAMETER name = device_type, type = string, default = serial;
+  PARAMETER name = dts.device_type, type = string, default = serial;
+
+END driver
