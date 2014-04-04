@@ -11,7 +11,6 @@ BEGIN driver uartns
   PARAMETER name = current-speed, type = int, default = 115200; 
   PARAMETER name = device_type, type = string, default = serial; 
   PARAMETER name = dts.alias, type = string, default = serial;
-  PARAMETER name = dts.device_type, type = string, default = serial; 
   PARAMETER name = reg-offset, type = hexint, default = 0x1000; 
   PARAMETER name = reg-shift, type = int, default = 2; 
   PARAMETER name = clock-frequency, type = int, default = 100000000;

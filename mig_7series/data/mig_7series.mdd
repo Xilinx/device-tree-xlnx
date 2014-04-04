@@ -8,6 +8,5 @@ BEGIN driver mig_7series
   OPTION NAME = mig_7series;
 
   PARAMETER name = device_type, default = memory, type = string;
-  PARAMETER name = dts.device_type, default = memory, type = string;
 
 END driver

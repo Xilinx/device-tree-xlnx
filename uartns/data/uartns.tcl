@@ -8,4 +8,9 @@ proc generate {drv_handle} {
     }
     set freq [xget_ip_clk_pin_freq $ip "$clock_port"]
     set_property clock-frequency $freq $drv_handle
+
+    set consoleip [get_property CONFIG.console_device [get_os]]
+    if { [string match -nocase $consoleip $ip] } {
+        hsm::utils::set_os_parameter_value "console" "ttyS0,115200"
+    }
 }

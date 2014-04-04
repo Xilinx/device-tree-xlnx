@@ -10,5 +10,7 @@ BEGIN driver qspips
   PARAMETER name = "#size-cells", default = 0, type = int;
   PARAMETER name = is-dual, type = int;
   PARAMETER name = num-chip-select, default = 1, type =int;
+  PARAMETER name = dts.alias , default = spi;
+
   
 END driver

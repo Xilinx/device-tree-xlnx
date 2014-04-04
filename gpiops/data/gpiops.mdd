@@ -6,7 +6,7 @@ BEGIN driver gpiops
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = gpiops;
-  PARAMETER name = emio-gpio-width;
+  PARAMETER name = emio-gpio-width, type = int;
   PARAMETER name = gpio-controller;
   PARAMETER name = gpio-mask-high, type = hexint;
   PARAMETER name = gpio-mask-low, type = hexint;

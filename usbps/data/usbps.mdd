@@ -8,5 +8,6 @@ BEGIN driver usbps
   OPTION NAME = usbps;
   PARAMETER name = dr_mode, default = host , type = string ;
   PARAMETER name = phy_type, default = ulpi, type = string;
+  PARAMETER name = usb-reset , type = reference;
   
 END driver

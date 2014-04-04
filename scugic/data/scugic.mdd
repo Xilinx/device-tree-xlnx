@@ -13,6 +13,6 @@ BEGIN driver scugic
   PARAMETER name = compatible, type = stringlist, default = "arm,cortex-a9-gic arm,gic";
   PARAMETER name = num_cpus, type = int, default = 2;
   PARAMETER name = num_interrupts, type = int, default = 96;
-  PARAMETER name = reg, type = hexint;
+  PARAMETER name = reg, type = hexintlist;
   
 END driver

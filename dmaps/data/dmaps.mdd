@@ -7,10 +7,10 @@ BEGIN driver dmaps
   OPTION driver_state = ACTIVE;
   OPTION NAME = dmaps;
 
-  PARAMETER name = compatible, type = stringlist, default = "arm,primecell arm,pl330"  
+  PARAMETER name = compatible, type = stringlist, default = "arm,primecell arm,pl330";  
   PARAMETER name = "#dma-cells", default = 1 , type = int ;
   PARAMETER name = "#dma-channels", default = 8, type = int;
   PARAMETER name = "#dma-requests", default = 4, type = int;
-  PARAMETER name = arm,primecell-periphid", default = "0x00041330", type = hexint;
+  PARAMETER name = "arm,primecell-periphid", default = "0x00041330", type = hexint;
   
 END driver

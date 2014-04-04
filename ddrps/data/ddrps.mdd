@@ -1,0 +1,12 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver ddrps
+
+  OPTION supported_peripherals = (ps7_ddr);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = ddrps;
+  PARAMETER name = device_type , default = memory, type = string;
+  PARAMETER name = reg, type = hexintlist;
+
+END driver

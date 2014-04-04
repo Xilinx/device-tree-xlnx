@@ -12,6 +12,5 @@ BEGIN driver uartlite
   PARAMETER name = current-speed, type = int, default = 115200;
   PARAMETER name = compatible, type = stringlist,  default = "xlnx,xps-uartlite-1.00.a";
   PARAMETER name = device_type, type = string, default = serial;
-  PARAMETER name = dts.device_type, type = string, default = serial;
 
 END driver
