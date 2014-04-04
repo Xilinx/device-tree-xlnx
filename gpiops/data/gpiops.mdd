@@ -11,5 +11,6 @@ BEGIN driver gpiops
   PARAMETER name = gpio-mask-high, type = hexint;
   PARAMETER name = gpio-mask-low, type = hexint;
   PARAMETER name = "#gpio-cells", default = 2, type = int
+  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-gpio-1.0";
   
 END driver
