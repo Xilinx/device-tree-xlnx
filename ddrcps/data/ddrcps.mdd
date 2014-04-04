@@ -6,6 +6,6 @@ BEGIN driver ddrcps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ddrcps;
-  PARAMETER name = compatible, default = "xlnx,ps7-ddrc", type = stringlist;
+  PARAMETER name = compatible, default = "xlnx,zynq-ddrc-1.0", type = stringlist;
 
 END driver
