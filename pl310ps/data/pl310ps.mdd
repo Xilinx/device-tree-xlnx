@@ -13,4 +13,7 @@ BEGIN driver pl310ps
   PARAMETER name = "arm,tag-latency", type = intlist, default = <2 2 2>
   PARAMETER name = cache-unified;
 
+#FIXME: hack
+  PARAMETER name = interrupt-parent, type = int, default = "&ps7_scugic_0"
+  PARAMETER name = interrupts, type = int, default = "0 2 4"
 END driver
