@@ -8,5 +8,6 @@ BEGIN driver sdps
   OPTION NAME = sdps;
   PARAMETER name = clock-frequency , type = int ;
   PARAMETER name = compatible, type = stringlist, default = "arasan,sdhci-8.9a"
+  PARAMETER name = clock-names, type = stringlist, default = "clk_xin clk_ahb"
   
 END driver
