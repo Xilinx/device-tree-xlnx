@@ -6,5 +6,8 @@ BEGIN driver slcrps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = slcrps;
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-slcr";
+  PARAMETER name = "#address-cells", default = 1, type = int;
+  PARAMETER name = "#size-cells", default = 1 , type = int;
+  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-slcr syscon";
+  PARAMETER name = "ranges ";
 END driver
