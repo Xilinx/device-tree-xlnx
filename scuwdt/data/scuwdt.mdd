@@ -7,5 +7,6 @@ BEGIN driver scuwdt
   OPTION driver_state = ACTIVE;
   OPTION NAME = scuwdt;
   PARAMETER name = device_type, default = watchdog , type = string ;
+  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-scuwdt-1.00.a";
   
 END driver
