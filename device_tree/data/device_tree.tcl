@@ -42,5 +42,5 @@ proc add_chosen { os_handle } {
         hsm::utils::add_new_property $chosen_node "bootargs" string $bootargs
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
-    hsm::utils::add_new_property $chosen_node "linux.stdout-path" reference $consoleip
+    hsm::utils::add_new_property $chosen_node "linux,stdout-path" aliasref $consoleip
 }
