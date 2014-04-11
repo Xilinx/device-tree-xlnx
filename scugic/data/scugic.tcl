@@ -8,8 +8,8 @@ proc get_highaddr { slave_ip } {
 }
 
 proc generate {drv_handle} {
-    set baseaddr [get_baseaddr [get_cells $drv_handle]]
-    set highaddr [get_highaddr [get_cells $drv_handle]]
-    set size [expr $highaddr -$baseaddr + 1]
-    set_property CONFIG.reg "$baseaddr $size $baseaddr $size" $drv_handle
+   # set baseaddr [get_baseaddr [get_cells $drv_handle]]
+   # set highaddr [get_highaddr [get_cells $drv_handle]]
+   # set size [expr $highaddr -$baseaddr + 1]
+   # set_property CONFIG.reg "$baseaddr $size $baseaddr $size" $drv_handle
 }
