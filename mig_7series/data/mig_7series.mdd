@@ -7,6 +7,6 @@ BEGIN driver mig_7series
   OPTION driver_state = ACTIVE;
   OPTION NAME = mig_7series;
 
-  PARAMETER name = device_type, default = memory, type = string;
+  DTGPARAM name = device_type, default = memory, type = string;
 
 END driver

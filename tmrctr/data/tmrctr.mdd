@@ -7,6 +7,6 @@ BEGIN driver tmrctr
   OPTION NAME = tmrctr;
   OPTION supported_os_types = (DTS);
 
-  PARAMETER name = clock-frequency, type = int, default = 100000000;
+  DTGPARAM name = clock-frequency, type = int, default = 100000000;
 
 END driver

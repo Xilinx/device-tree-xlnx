@@ -6,7 +6,7 @@ BEGIN driver sdps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = sdps;
-  PARAMETER name = clock-frequency , type = int ;
-  PARAMETER name = compatible, type = stringlist, default = "generic-sdhci arasan,sdhci" 
+  DTGPARAM name = clock-frequency , type = int ;
+  DTGPARAM name = compatible, type = stringlist, default = "generic-sdhci arasan,sdhci" 
   
 END driver

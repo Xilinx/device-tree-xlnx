@@ -7,13 +7,13 @@ OPTION supported_peripherals = (ps7_cortexa9);
 OPTION supported_os_types = (DTS);
 OPTION NAME = cpu_cortexa9;
 
-PARAMETER name = d-cache-line-size , type = hexint , default = "0x20"
-PARAMETER name = d-cache-size , type = hexint , default = "0x8000"
-PARAMETER name = i-cache-line-size , type = hexint , default = "0x20"
-PARAMETER name = i-cache-size , type = hexint , default = "0x8000"
-PARAMETER name = device_type, default = cpu , type = string;
+DTGPARAM name = d-cache-line-size , type = hexint , default = "0x20"
+DTGPARAM name = d-cache-size , type = hexint , default = "0x8000"
+DTGPARAM name = i-cache-line-size , type = hexint , default = "0x20"
+DTGPARAM name = i-cache-size , type = hexint , default = "0x8000"
+DTGPARAM name = device_type, default = cpu , type = string;
 
-PARAMETER name = compatible, default = "arm,cortex-a9" , type = stringlist;
+DTGPARAM name = compatible, default = "arm,cortex-a9" , type = stringlist;
 
 
 END driver

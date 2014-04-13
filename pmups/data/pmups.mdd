@@ -6,7 +6,7 @@ BEGIN driver pmups
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = pmups;
-  PARAMETER name = compatible, type = stringlist, default = "arm,cortex-a9-pmu" 
-  PARAMETER name = reg-names, type = stringlist, default = "cpu0  cpu1" 
+  DTGPARAM name = compatible, type = stringlist, default = "arm,cortex-a9-pmu" 
+  DTGPARAM name = reg-names, type = stringlist, default = "cpu0  cpu1" 
   
 END driver
