@@ -7,13 +7,13 @@ OPTION supported_peripherals = (ps7_cortexa9);
 OPTION supported_os_types = (DTS);
 OPTION NAME = cpu_cortexa9;
 
-PARAMETER name = device_type, default = cpu , type = string;
-PARAMETER name = compatible, default = "arm,cortex-a9" , type = stringlist;
+DTGPARAM name = device_type, default = cpu , type = string;
+DTGPARAM name = compatible, default = "arm,cortex-a9" , type = stringlist;
 
 # hack
-PARAMETER name = clocks, default = "&clkc 3" , type = int;
+DTGPARAM name = clocks, default = "&clkc 3" , type = int;
 # only required for first cpu
-PARAMETER name = clock-latency, default = "1000" , type = int;
-PARAMETER name = operating-points, default = "666667 1000000 333334 1000000 222223 1000000", type = int;
+DTGPARAM name = clock-latency, default = "1000" , type = int;
+DTGPARAM name = operating-points, default = "666667 1000000 333334 1000000 222223 1000000", type = int;
 
 END driver

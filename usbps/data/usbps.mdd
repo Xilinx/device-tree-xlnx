@@ -6,9 +6,9 @@ BEGIN driver usbps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = usbps;
-  PARAMETER name = dr_mode, default = host , type = string ;
-  PARAMETER name = phy_type, default = ulpi, type = string;
-  PARAMETER name = usb-reset , type = reference;
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-usb-1.00.a";
+  DTGPARAM name = dr_mode, default = host , type = string ;
+  DTGPARAM name = phy_type, default = ulpi, type = string;
+  DTGPARAM name = usb-reset , type = reference;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-usb-1.00.a";
   
 END driver

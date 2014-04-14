@@ -6,6 +6,6 @@ BEGIN driver scutimer
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = scutimer;
-  PARAMETER name = compatible, type = stringlist, default = "arm,cortex-a9-twd-timer" 
+  DTGPARAM name = compatible, type = stringlist, default = "arm,cortex-a9-twd-timer" 
   
 END driver

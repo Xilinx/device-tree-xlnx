@@ -7,7 +7,7 @@ BEGIN driver tmrctr
   OPTION NAME = tmrctr;
   OPTION supported_os_types = (DTS);
 
-  PARAMETER name = clock-frequency, type = int, default = 100000000;
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,xps-timer-1.00.a"
+  DTGPARAM name = clock-frequency, type = int, default = 100000000;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-timer-1.00.a"
 
 END driver

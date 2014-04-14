@@ -7,8 +7,8 @@ BEGIN driver axidma
   OPTION driver_state = ACTIVE;
   OPTION NAME = axidma;  
 
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,axi-dma-1.00.a";
-  PARAMETER name = axistream-connected, type = reference;
-  PARAMETER name = axistream-control-connected, type = reference;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma-1.00.a";
+  DTGPARAM name = axistream-connected, type = reference;
+  DTGPARAM name = axistream-control-connected, type = reference;
 
 END driver

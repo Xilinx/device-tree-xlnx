@@ -7,9 +7,9 @@ BEGIN driver iicps
   OPTION driver_state = ACTIVE;
   OPTION NAME = iicps;
   
-  PARAMETER name = bus-id, type = int ;
-  PARAMETER name = i2c-clk, type = int , default = 400000;
-  PARAMETER name = dts.alias , type = reference, default = i2c;
-  PARAMETER name = compatible, default = "cdns,i2c-r1p10", type = stringlist;
+  DTGPARAM name = bus-id, type = int ;
+  DTGPARAM name = i2c-clk, type = int , default = 400000;
+  DTGPARAM name = dts.alias , type = reference, default = i2c;
+  DTGPARAM name = compatible, default = "cdns,i2c-r1p10", type = stringlist;
 
 END driver

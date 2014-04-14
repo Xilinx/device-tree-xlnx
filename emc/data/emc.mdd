@@ -7,7 +7,7 @@ BEGIN driver emc
  OPTION NAME = emc;
  OPTION supported_os_types = (DTS);
 
- PARAMETER name = compatible, type =stringlist, default = "cfi-flash";
- PARAMETER name = bank-width, type = int;
+ DTGPARAM name = compatible, type =stringlist, default = "cfi-flash";
+ DTGPARAM name = bank-width, type = int;
 
 END driver
