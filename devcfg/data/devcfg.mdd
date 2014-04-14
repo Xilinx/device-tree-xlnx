@@ -6,5 +6,5 @@ BEGIN driver devcfg
   OPTION supported_os_types = (DTS)
   OPTION driver_state = ACTIVE;
   OPTION NAME = devcfg;
-  PARAMETER name = compatible, default = "xlnx,zynq-devcfg-1.0", type = stringlist;
+  DTGPARAM name = compatible, default = "xlnx,zynq-devcfg-1.0", type = stringlist;
 END driver

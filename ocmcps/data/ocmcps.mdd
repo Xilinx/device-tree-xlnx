@@ -6,8 +6,8 @@ BEGIN driver ocmcps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ocmcps;
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,zynq-ocmc-1.0"
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-ocmc-1.0"
 #FIXME: hack
-  PARAMETER name = interrupt-parent, type = int, default = "&ps7_scugic_0"
-  PARAMETER name = interrupts, type = int, default = "0 3 4"
+  DTGPARAM name = interrupt-parent, type = int, default = "&ps7_scugic_0"
+  DTGPARAM name = interrupts, type = int, default = "0 3 4"
 END driver

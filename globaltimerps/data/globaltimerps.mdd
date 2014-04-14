@@ -7,9 +7,9 @@ BEGIN driver globaltimerps
   OPTION driver_state = ACTIVE;
   OPTION NAME = globaltimerps;
 
-  PARAMETER name = compatible, default = "arm,cortex-a9-global-timer", type = stringlist;
+  DTGPARAM name = compatible, default = "arm,cortex-a9-global-timer", type = stringlist;
 
 #FIXME: hack
-  PARAMETER name = interrupt-parent, type = int, default = "&ps7_scugic_0";
-  PARAMETER name = interrupts, type = int, default = "1 11 0x301";
+  DTGPARAM name = interrupt-parent, type = int, default = "&ps7_scugic_0";
+  DTGPARAM name = interrupts, type = int, default = "1 11 0x301";
 END driver
