@@ -23,6 +23,6 @@ proc gen_clocks_node { drv_handle} {
     hsm::utils::add_new_property $clocks fclk-enable int 0xf
     hsm::utils::add_new_property $clocks ps-clk-frequency int 33333333
     # FIXME: quick hack to get kernel booting
-    hsm::utils::add_new_property $clocks reg hex "0x100 0x100"
+    hsm::utils::add_new_property $clocks reg hexlist "0x100 0x100"
     return $clocks
 }
