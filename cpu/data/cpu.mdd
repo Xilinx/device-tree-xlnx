@@ -9,6 +9,7 @@ BEGIN driver cpu
 
     DTGPARAM name = device_type, default = cpu , type = string;
     DTGPARAM name = clock-frequency, type = int , default = 1000000 ;
+    DTGPARAM name = clocks, type = int, default = &clk_cpu;
     DTGPARAM name = timebase-frequency, type = int , default = 1000000 ;
     DTGPARAM name = d-cache-baseaddr, type = hexint ;
     DTGPARAM name = d-cache-highaddr, type = hexint ;

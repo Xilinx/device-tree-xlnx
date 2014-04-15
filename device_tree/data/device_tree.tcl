@@ -1,3 +1,70 @@
+proc get_clock_frequency {ip_handle portname} {
+    set clk ""
+    set clkhandle [get_pins -of_objects $ip_handle $portname]
+    if {[string compare -nocase $clkhandle ""] != 0} {
+        set clk [get_property CLK_FREQ $clkhandle ]
+    }
+    return $clk
+}
+
+proc gen_mb_ccf_subnode {dts_handle name freq reg} {
+    set clk_node [hsm::utils::get_or_create_child_node $dts_handle "clocks"]
+
+    set node_name "clk_${name}"
+    set node_handle [hsm::utils::get_or_create_child_node $clk_node ${node_name}]
+
+    hsm::utils::add_new_property $clk_node "#address-cells" int 1
+    hsm::utils::add_new_property $clk_node "#size-cells" int 0
+
+    # clk subnode data
+    hsm::utils::add_new_property $node_handle "compatible" stringlist "fixed-clock"
+    hsm::utils::add_new_property $node_handle "#clock-cells" int 0
+    hsm::utils::add_new_property $node_handle "clock-output-names" string $node_name
+    hsm::utils::add_new_property $node_handle "reg" int $reg
+    hsm::utils::add_new_property $node_handle "clock-frequency" int $freq
+}
+
+proc generate_mb_ccf_node {os_handle} {
+    set drv_list [get_drivers]
+    set pl_node [hsm::utils::get_or_create_child_node $os_handle "dtg.pl"]
+    # list of ip should have the clocks property
+    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer"
+
+    set proc_name [get_property HW_INSTANCE [get_sw_processor]]
+    set hwproc [get_cells -filter " NAME==$proc_name"]
+    set proctype [get_property IP_NAME $hwproc]
+    if {[string match -nocase $proctype "microblaze"]} {
+        set bus_clk_list ""
+        foreach drv ${drv_list} {
+            set hwinst [get_property HW_INSTANCE $drv]
+            set iptype [get_property IP_NAME [get_cells $hwinst]]
+            if  {[lsearch $valid_ip_list $iptype] < 0 } {
+                continue
+            }
+            # get bus clock frequency
+            set clk_freq [get_clock_frequency [get_cells $drv] "S_AXI_ACLK"]
+            if {![string equal $clk_freq ""]} {
+                # FIXME: bus clk source count should based on the clock generator not based on clk freq diff
+                if  {[lsearch $bus_clk_list $clk_freq] < 0 } {
+                    set bus_clk_list [lappend $bus_clk_list $clk_freq]
+                }
+                set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+                # create the node and assuming reg 0 is taken by cpu
+                gen_mb_ccf_subnode $pl_node bus_${bus_clk_cnt} $clk_freq [expr ${bus_clk_cnt} + 1]
+                # set bus clock frequency (current it is there)
+                set_property CONFIG.clock-frequency $clk_freq [get_drivers $drv]
+                hsm::utils::add_new_property [get_drivers $drv] "clocks" int &clk_bus_${bus_clk_cnt}
+            }
+        }
+        set cpu_clk_freq [get_clock_frequency $hwproc "CLK"]
+        # issue:
+        # - hardcoded reg number cpu clock node
+        # - assume clk_cpu for mb cpu
+        # - only applies to master mb cpu
+        gen_mb_ccf_subnode $pl_node cpu $cpu_clk_freq 0
+        #hsm::utils::add_new_property [get_drivers $hwproc] "clocks" int &clk_cpu
+    }
+}
 
 # For calling from top level BSP
 proc bsp_drc {os_handle} {
@@ -16,6 +83,7 @@ proc post_generate {os_handle} {
     add_chosen $os_handle 
     clean_os $os_handle
     add_ps7_pmu $os_handle
+    generate_mb_ccf_node $os_handle
 }
 
 proc clean_os { os_handle } {
