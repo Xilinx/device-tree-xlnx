@@ -7,7 +7,5 @@ BEGIN driver ocmcps
   OPTION driver_state = ACTIVE;
   OPTION NAME = ocmcps;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-ocmc-1.0"
-#FIXME: hack
-  DTGPARAM name = interrupt-parent, type = int, default = "&ps7_scugic_0"
-  DTGPARAM name = interrupts, type = int, default = "0 3 4"
+
 END driver
