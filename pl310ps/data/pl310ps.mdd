@@ -13,7 +13,4 @@ BEGIN driver pl310ps
   DTGPARAM name = "arm,tag-latency", type = intlist, default = 2 2 2
   DTGPARAM name = cache-unified;
 
-#FIXME: hack
-  DTGPARAM name = interrupt-parent, type = int, default = "&ps7_scugic_0"
-  DTGPARAM name = interrupts, type = intlist, default = 0 2 4
 END driver
