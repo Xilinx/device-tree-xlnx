@@ -1,0 +1,11 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver xadcps
+
+  OPTION supported_peripherals = (ps7_xadc);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = xadcps;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-xadc-1.00.a";
+
+END driver
