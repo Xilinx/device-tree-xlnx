@@ -9,7 +9,7 @@ BEGIN driver iicps
   
   DTGPARAM name = bus-id, type = int ;
   DTGPARAM name = i2c-clk, type = int , default = 400000;
-  DTGPARAM name = dts.alias , type = reference, default = i2c;
+  DTGPARAM name = dtg.alias , type = reference, default = i2c;
   DTGPARAM name = compatible, default = "cdns,i2c-r1p10", type = stringlist;
 
 END driver
