@@ -66,6 +66,62 @@ proc generate_mb_ccf_node {os_handle} {
     }
 }
 
+# workaround for moving nodes around until HSM core to support it
+proc move_node {node_drv parent_node_drv} {
+    set new_node ""
+    if {[llength $node_drv] == 0 && [llength $parent_node_drv] == 0 } {
+        return $new_node
+    }
+    set node_class [get_property CLASS $node_drv]
+    set parent_class [get_property CLASS $parent_node_drv ]
+    #set ip [get_cells $node_drv]
+    #set ip_base_addr [string tolower [get_property CONFIG.C_S_AXI_BASEADDR $ip]]
+    #set ip_name [get_property IP_NAME $ip]
+    #regsub -- "_" $ip_name "-" ip_name
+    # FIXME: the node can't be create with <node name>: <node nome>@<addr>
+    set new_node [::hsm::utils::add_new_child_node $parent_node_drv "${node_drv}"]
+    set params [get_comp_params -of_objects $node_drv]
+    foreach param $params {
+        set type [get_property CONFIG.type $param]
+        set value [get_property VALUE $param]
+        ::hsm::utils::add_new_property $new_node "$param" "$type" $value
+    }
+    # disable the old node generation
+    set_property NAME "none" $node_drv
+    return $new_node
+}
+
+proc get_ip_prop {drv_handle pram} {
+    set ip [get_cells $drv_handle]
+    set value [get_property ${pram} $ip]
+    return $value
+}
+
+# move nand or nor/sram flash under smcc node
+proc ps7_smc_workaround {os_handle} {
+    foreach drv_handle [get_drivers] {
+        set ip_name [get_ip_prop $drv_handle IP_NAME]
+        switch -exact $ip_name {
+            "ps7_nand" {set nand $drv_handle}
+            "ps7_sram" {set sram $drv_handle}
+            "ps7_smcc" {set smcc $drv_handle}
+            default {continue}
+        }
+    }
+    # check if smcc and nand exists
+    if {[info exists smcc]} {
+        if {[info exists nand]} {
+            set nand_node [move_node $nand $smcc]
+            # Hack to add reg as hsm core did not export the data
+            ::hsm::utils::add_new_property $nand_node "reg" "hexintlist" "0xe1000000 0x1000000"
+        } elseif {[info exists sram]} {
+            set sram_node [move_node $sram $smcc]
+            # TODO: check configuration before setting the size
+            ::hsm::utils::add_new_property $sram_node "reg" "hexintlist" "0xe2000000 0x2000000"
+        }
+    }
+}
+
 # For calling from top level BSP
 proc bsp_drc {os_handle} {
 }
@@ -84,6 +140,7 @@ proc post_generate {os_handle} {
     clean_os $os_handle
     add_ps7_pmu $os_handle
     generate_mb_ccf_node $os_handle
+    ps7_smc_workaround $os_handle
 }
 
 proc clean_os { os_handle } {
