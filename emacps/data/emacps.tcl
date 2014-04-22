@@ -10,6 +10,20 @@ proc gen_mdio_node {drv_handle} {
     return $mdio
 }
 
+proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
+    set ip [get_cells $drv_handle]
+    set value [get_property CONFIG.${reset_pram} $ip]
+    # workaround for reset not been selected
+    regsub -all "<Select>" $value "" value
+    if { [llength $value] } {
+        regsub -all "MIO( |)" $value "" value
+        if { $value != "-1" && [llength $value] !=0  } {
+            set_property CONFIG.${conf_prop} "ps7_gpio_0 $value 0" $drv_handle
+        }
+    }
+}
+
+
 proc generate {drv_handle} {
      gen_mdio_node $drv_handle
 
@@ -26,6 +40,7 @@ proc generate {drv_handle} {
         set ps7_cortexa9_1x_clk [get_ip_param_value $hwproc "C_CPU_1X_CLK_FREQ_HZ"]
         set_property CONFIG.xlnx,ptp-enet-clock "$ps7_cortexa9_1x_clk" $drv_handle
     }
+    ps7_reset_handle $drv_handle C_ENET_RESET enet-reset
 }
 
 

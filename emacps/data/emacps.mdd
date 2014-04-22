@@ -12,4 +12,5 @@ BEGIN driver emacps
   DTGPARAM name = dtg.alias, type = string, default = ethernet;
   DTGPARAM name = phy-mode, default = gmii
   DTGPARAM name = "xlnx,ptp-enet-clock"
+  DTGPARAM name = "enet-reset", type = reference;
 END driver
