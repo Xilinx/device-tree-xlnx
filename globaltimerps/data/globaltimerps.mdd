@@ -9,7 +9,4 @@ BEGIN driver globaltimerps
 
   DTGPARAM name = compatible, default = "arm,cortex-a9-global-timer", type = stringlist;
 
-#FIXME: hack
-  DTGPARAM name = interrupt-parent, type = int, default = "&ps7_scugic_0";
-  DTGPARAM name = interrupts, type = int, default = "1 11 0x301";
 END driver
