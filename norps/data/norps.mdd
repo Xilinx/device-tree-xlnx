@@ -10,5 +10,12 @@ BEGIN driver norps
 
   DTGPARAM name = bank-width, type = int, default = 1;
   # TODO: ensure the xlnx,sram-cycle-tX (X from 0 to 6) is generated
+  DTGPARAM name = "xlnx,sram-cycle-t0", type = hexint, default = 0xb;
+  DTGPARAM name = "xlnx,sram-cycle-t1", type = hexint, default = 0xb;
+  DTGPARAM name = "xlnx,sram-cycle-t2", type = hexint, default = 0x4;
+  DTGPARAM name = "xlnx,sram-cycle-t3", type = hexint, default = 0x4;
+  DTGPARAM name = "xlnx,sram-cycle-t4", type = hexint, default = 0x3;
+  DTGPARAM name = "xlnx,sram-cycle-t5", type = hexint, default = 0x3;
+  DTGPARAM name = "xlnx,sram-cycle-t6", type = hexint, default = 0x2;
 
 END driver
