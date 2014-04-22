@@ -1,0 +1,14 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver norps
+
+  OPTION supported_peripherals = (ps7_sram);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = norps;
+  DTGPARAM name = compatible, type = stringlist, default = "cfi-flash";
+
+  DTGPARAM name = bank-width, type = int, default = 1;
+  # TODO: ensure the xlnx,sram-cycle-tX (X from 0 to 6) is generated
+
+END driver
