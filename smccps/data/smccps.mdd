@@ -1,0 +1,27 @@
+OPTION psf_version = 2.1;
+
+BEGIN driver smccps
+
+  OPTION supported_peripherals = (ps7_smcc);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = smccps;
+  DTGPARAM name = compatible, type = stringlist, default = "arm,pl353-smc-r2p1";
+
+  DTGPARAM name = "#address-cells", default = 1, type = int;
+  DTGPARAM name = "#size-cells", default = 1, type = int;
+  DTGPARAM name = ranges;
+
+  DTGPARAM name = "arm,addr25", type = hexint, default = 0;
+  DTGPARAM name = "arm,nor-chip-sel0", type = hexint, default = 0;
+  DTGPARAM name = "arm,nor-chip-sel1", type = hexint, default = 0;
+  DTGPARAM name = "arm,sram-chip-sel0", type = hexint, default = 0;
+  DTGPARAM name = "arm,sram-chip-sel1", type = hexint, default = 0;
+
+
+#FIXME: Update the data for clock-names to memclk
+  DTGPARAM name = clock-names, type = stringlist, default = "memclk aclk";
+
+#TODO: check with Heera for interrupt-parent and interrupts
+
+END driver
