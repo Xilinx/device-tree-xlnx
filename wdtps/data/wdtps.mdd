@@ -8,5 +8,6 @@ BEGIN driver wdtps
   OPTION NAME = wdtps;
   DTGPARAM name = device_type, default = watchdog , type = string ;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-wdt-r1p2";
-  
+  DTGPARAM name = "timeout-sec", type = int, default = 10;
+
 END driver
