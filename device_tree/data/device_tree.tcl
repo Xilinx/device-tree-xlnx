@@ -28,7 +28,7 @@ proc generate_mb_ccf_node {os_handle} {
     set drv_list [get_drivers]
     set pl_node [hsm::utils::get_or_create_child_node $os_handle "dtg.pl"]
     # list of ip should have the clocks property
-    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer"
+    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_timebase_wdt axi_can can"
 
     set proc_name [get_property HW_INSTANCE [get_sw_processor]]
     set hwproc [get_cells -filter " NAME==$proc_name"]
