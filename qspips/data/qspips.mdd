@@ -9,7 +9,7 @@ BEGIN driver qspips
   DTGPARAM name = "#address-cells", default = 1, type = int;
   DTGPARAM name = "#size-cells", default = 0, type = int;
   DTGPARAM name = is-dual, type = int;
-  DTGPARAM name = num-chip-select, default = 1, type =int;
+  DTGPARAM name = num-cs, default = 1, type =int;
   DTGPARAM name = dtg.alias , default = spi;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-qspi-1.0";
   
