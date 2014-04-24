@@ -1,0 +1,11 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axican
+
+  OPTION supported_peripherals = (can);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axican;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-can-1.00.a";
+  
+END driver
