@@ -66,6 +66,31 @@ proc generate_mb_ccf_node {os_handle} {
     }
 }
 
+proc zynq_gen_pl_clk_binding {} {
+    # add dts binding for required nodes
+    #   clock-names = "ref_clk";
+    #   clocks = <&clkc 0>;
+    set proc_name [get_property HW_INSTANCE [get_sw_processor]]
+    set hwproc [get_cells -filter " NAME==$proc_name"]
+    set proctype [get_property IP_NAME $hwproc]
+    # Assuming the device support mb ccf should generated this
+    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_timebase_wdt axi_can can"
+
+    set drv_list [get_drivers]
+    if { [string match -nocase $proctype "ps7_cortexa9"] } {
+        foreach drv ${drv_list} {
+            set hwinst [get_property HW_INSTANCE $drv]
+            set iptype [get_property IP_NAME [get_cells $hwinst]]
+            if  {[lsearch $valid_ip_list $iptype] < 0 } {
+                continue
+        }
+        # this is hardcoded - maybe dynamic detection
+        hsm::utils::add_new_property $drv "clock-names" stringlist "ref_clk"
+        hsm::utils::add_new_property $drv "clocks" reference "clkc 0"
+        }
+    }
+}
+
 # workaround for moving nodes around until HSM core to support it
 proc move_node {node_drv parent_node_drv} {
     set new_node ""
@@ -141,6 +166,7 @@ proc post_generate {os_handle} {
     add_ps7_pmu $os_handle
     generate_mb_ccf_node $os_handle
     ps7_smc_workaround $os_handle
+    zynq_gen_pl_clk_binding
 }
 
 proc clean_os { os_handle } {
