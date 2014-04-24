@@ -12,5 +12,6 @@ BEGIN driver qspips
   DTGPARAM name = num-cs, default = 1, type =int;
   DTGPARAM name = dtg.alias , default = spi;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-qspi-1.0";
-  
+  DTGPARAM name = clock-names, type = stringlist, default = "ref_clk pclk"
+
 END driver
