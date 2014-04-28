@@ -14,6 +14,6 @@ BEGIN driver uartns
   DTGPARAM name = reg-offset, type = hexint, default = 0x1000; 
   DTGPARAM name = reg-shift, type = int, default = 2; 
   DTGPARAM name = clock-frequency, type = int, default = 100000000;
-
+  DTGPARAM name = port-number, type = int, default = 0;
 
 END driver
