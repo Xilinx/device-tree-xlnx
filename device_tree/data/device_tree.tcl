@@ -206,7 +206,7 @@ proc post_generate {os_handle} {
 
 proc clean_os { os_handle } {
     #deleting unwanted child nodes of OS for dumping into dts file
-    set node [get_child_nodes -of_objects $os_handle "global_params"]
+    set node [get_nodes -of_objects $os_handle "global_params"]
     if { [llength $node] } {
         delete_objs $node
     }
