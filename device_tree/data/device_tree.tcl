@@ -122,6 +122,40 @@ proc get_ip_prop {drv_handle pram} {
     return $value
 }
 
+proc inc_os_prop {drv_handle var_name conf_prop} {
+    set count [hsm::utils::get_os_parameter_value $var_name]
+    if { [llength $count] == 0 } {
+        set count 1
+    }
+
+    set ip [get_cells $drv_handle]
+    set consoleip [get_property CONFIG.console_device [get_os]]
+    if { [string match -nocase $consoleip $ip] } {
+        set ip_type [get_property IP_NAME $ip]
+        if { [string match -nocase $ip_type] } {
+            set_property ${conf_prop} 0 $drv_handle
+        }
+    } else {
+        set_property $conf_prop $count $drv_handle
+        incr count
+        ::hsm::utils::set_os_parameter_value $var_name $count
+    }
+}
+
+proc gen_uart_port_number {os_handle} {
+    # generate post-number binding for uart devices
+    set valid_ip_list "axi_uartlite axi_uart16550 ps7_uart"
+    set drv_list [get_drivers]
+    foreach drv ${drv_list} {
+        set hwinst [get_property HW_INSTANCE $drv]
+        set iptype [get_property IP_NAME [get_cells $hwinst]]
+        if  {[lsearch $valid_ip_list $iptype] < 0 } {
+            continue
+        }
+        inc_os_prop $drv "serial_count" "CONFIG.port-number"
+    }
+}
+
 # move nand or nor/sram flash under smcc node
 proc ps7_smc_workaround {os_handle} {
     foreach drv_handle [get_drivers] {
@@ -167,6 +201,7 @@ proc post_generate {os_handle} {
     generate_mb_ccf_node $os_handle
     ps7_smc_workaround $os_handle
     zynq_gen_pl_clk_binding
+    gen_uart_port_number $os_handle
 }
 
 proc clean_os { os_handle } {
