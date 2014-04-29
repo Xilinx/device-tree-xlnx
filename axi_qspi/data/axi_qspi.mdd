@@ -1,0 +1,12 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_qspi
+
+  OPTION supported_peripherals = (axi_quad_spi);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_qspi;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-spi-2.00.a";
+
+END driver
+
