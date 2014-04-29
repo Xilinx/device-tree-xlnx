@@ -1,0 +1,12 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_tft
+
+  OPTION supported_peripherals = (axi_tft);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_tft;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-tft-1.00.a";
+
+END driver
+
