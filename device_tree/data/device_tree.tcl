@@ -122,24 +122,38 @@ proc get_ip_prop {drv_handle pram} {
     return $value
 }
 
-proc inc_os_prop {drv_handle var_name conf_prop} {
-    set count [hsm::utils::get_os_parameter_value $var_name]
-    if { [llength $count] == 0 } {
-        set count 1
+proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
+    set ip_check "False"
+    set os_ip [get_property ${os_conf_dev_var} [get_os]]
+    if {![string match -nocase "" $os_ip]} {
+        set os_ip [get_property ${os_conf_dev_var} [get_os]]
+        set ip_check "True"
     }
 
-    set ip [get_cells $drv_handle]
-    set consoleip [get_property CONFIG.console_device [get_os]]
-    if { [string match -nocase $consoleip $ip] } {
-        set ip_type [get_property IP_NAME $ip]
-        if { [string match -nocase $ip_type] } {
-            set_property ${conf_prop} 0 $drv_handle
+    set count [hsm::utils::get_os_parameter_value $var_name]
+    if {[llength $count] == 0} {
+        if {[string match -nocase "True" $ip_check]} {
+            set count 1
+        } else {
+            set count 0
         }
-    } else {
-        set_property $conf_prop $count $drv_handle
-        incr count
-        ::hsm::utils::set_os_parameter_value $var_name $count
     }
+
+    if {[string match -nocase "True" $ip_check]} {
+        set ip [get_cells $drv_handle]
+        if {[string match -nocase $os_ip $ip]} {
+            set ip_type [get_property IP_NAME $ip]
+            if {[string match -nocase $ip_type]} {
+                set_property ${conf_prop} 0 $drv_handle
+            }
+            return
+        }
+    }
+
+    set_property $conf_prop $count $drv_handle
+    incr count
+    ::hsm::utils::set_os_parameter_value $var_name $count
+
 }
 
 proc gen_uart_port_number {os_handle} {
@@ -152,7 +166,7 @@ proc gen_uart_port_number {os_handle} {
         if  {[lsearch $valid_ip_list $iptype] < 0 } {
             continue
         }
-        inc_os_prop $drv "serial_count" "CONFIG.port-number"
+        inc_os_prop $drv "CONFIG.console_device" "serial_count" "CONFIG.port-number"
     }
 }
 
