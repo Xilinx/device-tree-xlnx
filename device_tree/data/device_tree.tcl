@@ -187,6 +187,12 @@ proc gen_dev_conf {} {
             os_count_name "sysace_count"
             drv_conf "CONFIG.port-number"
         }
+        traffic_gen {
+            os_device "trafficgen_device"
+            ip "axi_traffic_gen"
+            os_count_name "trafficgen_count"
+            drv_conf "CONFIG.xlnx,device-id"
+        }
     }
     # update CONFIG.<para> for each driver when match driver is found
     foreach drv [get_drivers] {
