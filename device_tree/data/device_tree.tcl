@@ -156,17 +156,35 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
 
 }
 
-proc gen_uart_port_number {os_handle} {
-    # generate post-number binding for uart devices
-    set valid_ip_list "axi_uartlite axi_uart16550 ps7_uart"
-    set drv_list [get_drivers]
-    foreach drv ${drv_list} {
-        set hwinst [get_property HW_INSTANCE $drv]
+proc gen_count_prop {drv_handle data_dict} {
+    dict for {dev_type dev_conf_mapping} [dict get $data_dict] {
+        set os_conf_dev_var [dict get $data_dict $dev_type "os_device"]
+        set valid_ip_list [dict get $data_dict $dev_type "ip"]
+        set drv_conf [dict get $data_dict $dev_type "drv_conf"]
+        set os_count_name [dict get $data_dict $dev_type "os_count_name"]
+
+        set hwinst [get_property HW_INSTANCE $drv_handle]
         set iptype [get_property IP_NAME [get_cells $hwinst]]
         if  {[lsearch $valid_ip_list $iptype] < 0 } {
             continue
         }
-        inc_os_prop $drv "CONFIG.console_device" "serial_count" "CONFIG.port-number"
+        inc_os_prop $drv_handle $os_conf_dev_var $os_count_name $drv_conf
+    }
+}
+
+proc gen_dev_conf {} {
+    # data to populated certain configs for different devices
+    set data_dict {
+        uart {
+            os_device "CONFIG.console_device"
+            ip "axi_uartlite axi_uart16550 ps7_uart"
+            os_count_name "serial_count"
+            drv_conf "CONFIG.port-number"
+        }
+    }
+    # update CONFIG.<para> for each driver when match driver is found
+    foreach drv [get_drivers] {
+        gen_count_prop $drv $data_dict
     }
 }
 
@@ -215,7 +233,7 @@ proc post_generate {os_handle} {
     generate_mb_ccf_node $os_handle
     ps7_smc_workaround $os_handle
     zynq_gen_pl_clk_binding
-    gen_uart_port_number $os_handle
+    gen_dev_conf
 }
 
 proc clean_os { os_handle } {
