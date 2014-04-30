@@ -181,6 +181,12 @@ proc gen_dev_conf {} {
             os_count_name "serial_count"
             drv_conf "CONFIG.port-number"
         }
+        syace {
+            os_device "sysace_device"
+            ip "axi_sysace"
+            os_count_name "sysace_count"
+            drv_conf "CONFIG.port-number"
+        }
     }
     # update CONFIG.<para> for each driver when match driver is found
     foreach drv [get_drivers] {
