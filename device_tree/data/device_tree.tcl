@@ -166,6 +166,21 @@ proc gen_count_prop {drv_handle data_dict} {
         if  {[lsearch $valid_ip_list $iptype] < 0 } {
             continue
         }
+
+        set irq_chk [dict get $data_dict $dev_type "irq_chk"]
+        if {![string match -nocase "false" $irq_chk]} {
+            set ip_obj [get_cells $drv_handle]
+            set rt [catch {xget_port_interrupt_id $ip_obj $irq_chk}]
+            if {$rt != 0} {
+                puts "Warning: Fail to located interrupt pin - $irq_chk. The $drv_conf is not set for $dev_type"
+                continue
+            }
+            set irq_id [xget_port_interrupt_id $ip_obj $irq_chk]
+            if {[llength $irq_id] < 0} {
+                continue
+            }
+        }
+
         inc_os_prop $drv_handle $os_conf_dev_var $os_count_name $drv_conf
     }
 }
@@ -178,18 +193,21 @@ proc gen_dev_conf {} {
             ip "axi_uartlite axi_uart16550 ps7_uart"
             os_count_name "serial_count"
             drv_conf "CONFIG.port-number"
+            irq_chk "false"
         }
         syace {
             os_device "sysace_device"
             ip "axi_sysace"
             os_count_name "sysace_count"
             drv_conf "CONFIG.port-number"
+            irq_chk "false"
         }
         traffic_gen {
             os_device "trafficgen_device"
             ip "axi_traffic_gen"
             os_count_name "trafficgen_count"
             drv_conf "CONFIG.xlnx,device-id"
+            irq_chk "false"
         }
     }
     # update CONFIG.<para> for each driver when match driver is found
