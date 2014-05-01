@@ -143,9 +143,7 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
         set ip [get_cells $drv_handle]
         if {[string match -nocase $os_ip $ip]} {
             set ip_type [get_property IP_NAME $ip]
-            if {[string match -nocase $ip_type]} {
-                set_property ${conf_prop} 0 $drv_handle
-            }
+            set_property ${conf_prop} 0 $drv_handle
             return
         }
     }
