@@ -7,5 +7,6 @@ BEGIN driver spips
   OPTION driver_state = ACTIVE;
   OPTION NAME = spips;
   DTGPARAM name = compatible, type = stringlist, default = "cdns,spi-r1p6";
-  
+  DTGPARAM name = num-cs , type = int, default = 1;
+  DTGPARAM name = is-decoded-cs , type = int, default = 0;
 END driver
