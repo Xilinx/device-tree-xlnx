@@ -10,5 +10,5 @@ BEGIN driver axidma
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma";
   DTGPARAM name = axistream-connected, type = reference;
   DTGPARAM name = axistream-control-connected, type = reference;
-
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
 END driver
