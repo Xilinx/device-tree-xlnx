@@ -1,11 +1,11 @@
 OPTION psf_version = 3.0;
 
-BEGIN driver axiiic
+BEGIN driver axi_iic
 
   OPTION supported_peripherals = (axi_iic);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
-  OPTION NAME = axiiic;
+  OPTION NAME = axi_iic;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-iic-2.00.a";
 
 END driver
