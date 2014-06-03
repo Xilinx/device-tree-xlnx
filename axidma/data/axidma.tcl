@@ -17,7 +17,6 @@ proc get_intr_id { periph_name intr_port_name } {
     return $intr_info
 }
 
-
 proc generate {drv_handle} {
     set dma_ip [get_cells $drv_handle]
     set dma_count [hsm::utils::get_os_parameter_value "dma_count"]
@@ -72,5 +71,19 @@ proc add_dma_channel { drv_handle xdma addr mode devid} {
     set node_name [format "dma-channel@%x" $addr]
     set dma_channel [hsm::utils::add_new_child_node $drv_handle $node_name]
     hsm::utils::add_new_property $dma_channel "compatible" stringlist [format "xlnx,%s-%s-channel" $xdma $modellow] 
+
+    set tmp [get_ip_param_value $ip [format "C_INCLUDE_%s_DRE" $mode]]
+    hsm::utils::add_new_property $dma_channel "xlnx,include-dre" hexint $tmp
+
+    hsm::utils::add_new_property $dma_channel "xlnx,device-id" hexint $devid
+    set tmp [get_ip_param_value $ip [format "C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode ] ]
+    if { [llength $tmp] } {
+        hsm::utils::add_new_property $dma_channel "xlnx,datawidth" hexint $tmp
+    }
+    set tmp [get_ip_param_value $ip [format "C_%s_AXIS_%s_DATA_WIDTH"  $modeIndex $mode ] ]
+    if { [llength $tmp] } {
+        hsm::utils::add_new_property $dma_channel "xlnx,datawidth" hexint $tmp
+    }
+
     return $dma_channel
 }
