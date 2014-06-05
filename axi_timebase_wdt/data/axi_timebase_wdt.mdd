@@ -1,0 +1,13 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_timebase_wdt
+
+  OPTION supported_peripherals = (axi_timebase_wdt);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_timebase_wdt;
+
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-timebase-wdt-1.00.a";
+
+END driver
