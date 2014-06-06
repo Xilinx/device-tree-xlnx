@@ -7,6 +7,9 @@ BEGIN driver axi_pcie
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_pcie;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-pcie-1.05.a";
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+  DTGPARAM name = "#address-cells", default = 3, type = int;
+  DTGPARAM name = "#size-cells", default = 2 , type = int;
 
 END driver
 
