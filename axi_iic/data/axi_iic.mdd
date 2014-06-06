@@ -7,5 +7,8 @@ BEGIN driver axi_iic
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_iic;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-iic-2.00.a";
+  DTGPARAM name = "#address-cells", default = 1, type = int;
+  DTGPARAM name = "#size-cells", default = 0, type = int;
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
 
 END driver
