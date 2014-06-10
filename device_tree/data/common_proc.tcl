@@ -43,6 +43,34 @@ proc set_boolean_property {drv_handle value conf_prop} {
 	}
 }
 
+proc add_cross_property args {
+	set src_handle [lindex $args 0]
+	set src_prams [lindex $args 1]
+	set dest_handle [lindex $args 2]
+	set dest_prop [lindex $args 3]
+	set ip [get_cells $src_handle]
+	foreach conf_prop $src_prams {
+		set value [get_property ${conf_prop} $ip]
+		if { [llength $value] } {
+			if { $value != "-1" && [llength $value] !=0  } {
+				set type "hexint"
+				if {[llength $args] >= 5} {
+					set type [lindex $args 4]
+					if {[string equal -nocase $type "boolean"]} {
+						set type referencelist
+						if {[expr $value >= 1]} {
+							hsm::utils::add_new_property $dest_handle $dest_prop $type ""
+						}
+						return 0
+					}
+				}
+				hsm::utils::add_new_property $dest_handle $dest_prop $type $value
+				return 0
+			}
+		}
+	}
+}
+
 proc get_ip_property {drv_handle parameter} {
 	set ip [get_cells $drv_handle]
 	return [get_property ${parameter} $ip]
