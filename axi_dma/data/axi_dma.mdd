@@ -1,11 +1,11 @@
 OPTION psf_version = 3.0;
 
-BEGIN driver axidma
+BEGIN driver axi_dma
 
   OPTION supported_peripherals = (axi_dma);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
-  OPTION NAME = axidma;  
+  OPTION NAME = axi_dma;
 
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma";
   DTGPARAM name = axistream-connected, type = reference;
