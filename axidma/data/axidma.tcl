@@ -1,23 +1,14 @@
-proc get_intr_id { periph_name intr_port_name } {
-    set ip [get_cells $periph_name]
-    set intr_id [hsm::utils::get_interrupt_id "$periph_name" "$intr_port_name"]
-    if { [string match -nocase $intr_id "-1"] } {
-        set intr_id [xget_port_interrupt_id "$periph_name" "$intr_port_name" ]
-    }
-    set intc [get_connected_interrupt_controller $periph_name $intr_port_name]
-    set intr_type [hsm::utils::get_dtg_interrupt_type $intc $ip $intr_port_name]
-    if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
-        if { $intr_id > 32 } {
-            set intr_id [expr $intr_id -32]
-        }
-        set intr_info "0 $intr_id $intr_type"
-    } else {
-        set intr_info "0 $intr_id $intr_type"
-    }
-    return $intr_info
-}
-
 proc generate {drv_handle} {
+    # try to source the common tcl procs
+    # assuming the order of return is based on repo priority
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
+        }
+    }
+
     set dma_ip [get_cells $drv_handle]
     set dma_count [hsm::utils::get_os_parameter_value "dma_count"]
     if { [llength $dma_count] == 0 } {
@@ -33,6 +24,9 @@ proc generate {drv_handle} {
         }
     }
     if { $axiethernetfound != 1 } {
+        set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
+        set_drv_conf_prop $drv_handle C_SG_INCLUDE_STSCNTRL_STRM xlnx,sg-include-stscntrl-strm boolean
+
         set mem_range  [lindex [xget_ip_mem_ranges $dma_ip] 0 ]
         set baseaddr   [get_property BASE_VALUE $mem_range]
         set highaddr   [get_property HIGH_VALUE $mem_range]
@@ -71,19 +65,11 @@ proc add_dma_channel { drv_handle xdma addr mode devid} {
     set node_name [format "dma-channel@%x" $addr]
     set dma_channel [hsm::utils::add_new_child_node $drv_handle $node_name]
     hsm::utils::add_new_property $dma_channel "compatible" stringlist [format "xlnx,%s-%s-channel" $xdma $modellow] 
-
-    set tmp [get_ip_param_value $ip [format "C_INCLUDE_%s_DRE" $mode]]
-    hsm::utils::add_new_property $dma_channel "xlnx,include-dre" hexint $tmp
-
     hsm::utils::add_new_property $dma_channel "xlnx,device-id" hexint $devid
-    set tmp [get_ip_param_value $ip [format "C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode ] ]
-    if { [llength $tmp] } {
-        hsm::utils::add_new_property $dma_channel "xlnx,datawidth" hexint $tmp
-    }
-    set tmp [get_ip_param_value $ip [format "C_%s_AXIS_%s_DATA_WIDTH"  $modeIndex $mode ] ]
-    if { [llength $tmp] } {
-        hsm::utils::add_new_property $dma_channel "xlnx,datawidth" hexint $tmp
-    }
+    add_cross_property $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
+    # detection based on two property
+    set datawidth_list "[format "CONFIG.C_%s_AXIS_%s_DATA_WIDTH" $modeIndex $mode] [format "CONFIG.C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode]"
+    add_cross_property $drv_handle $datawidth_list $dma_channel "xlnx,datawidth"
 
     return $dma_channel
 }
