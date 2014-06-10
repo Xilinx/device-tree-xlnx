@@ -75,3 +75,60 @@ proc get_ip_property {drv_handle parameter} {
 	set ip [get_cells $drv_handle]
 	return [get_property ${parameter} $ip]
 }
+
+proc get_intr_id { periph_name intr_port_name } {
+	set ip [get_cells $periph_name]
+
+	set intr_pin [get_pins -of_objects $ip $intr_port_name -filter "TYPE==INTERRUPT"]
+	if { [llength $intr_pin] == 0 } {
+		return -1
+	}
+
+	# identify the source controller port
+	set intc_port ""
+	set intc_periph ""
+	set intr_sink_pins [xget_sink_pins $intr_pin]
+	foreach intr_sink $intr_sink_pins {
+		set sink_periph [get_cells -of_objects $intr_sink]
+		if { [is_interrupt_controller $sink_periph] == 1} {
+			set intc_port $intr_sink
+			set intc_periph $sink_periph
+			break
+		}
+	}
+	if {$intc_port == ""} {
+		return -1
+	}
+
+	# now get the interrupt id
+	set intr_id [hsm::utils::get_interrupt_id "$periph_name" "$intr_port_name"]
+	if { [string match -nocase $intr_id "-1"] } {
+		set intr_id [xget_port_interrupt_id "$periph_name" "$intr_port_name" ]
+	}
+
+	set intc [get_connected_interrupt_controller $periph_name $intr_port_name]
+	set intr_type [hsm::utils::get_dtg_interrupt_type $intc $ip $intr_port_name]
+	# interrupt id conversion for ps7_scugic
+	if { [string match -nocase "[get_property IP_NAME $intc]" "ps7_scugic"] && [string match -nocase $intc_port "IRQ_F2P"]} {
+		set intr_id [expr $intr_id - 1]
+		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $ip]
+		if { [string match -nocase "$ip_param" "REVERSE"]} {
+			set $intr_id [expr 15 -$intr_id]
+		}
+		if { $intr_id < 8 } {
+			set intr_id [expr $intr_id + 60]
+		} elseif { $intr_id  < 16} {
+			set intr_id [expr $intr_id + 83 - 8]
+		}
+	}
+
+	if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
+		if { $intr_id > 32 } {
+			set intr_id [expr $intr_id -32]
+		}
+		set intr_info "0 $intr_id $intr_type"
+	} else {
+		set intr_info "$intr_id $intr_type"
+	}
+	return $intr_info
+}

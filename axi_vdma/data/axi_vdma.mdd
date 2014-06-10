@@ -1,0 +1,12 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_vdma
+
+  OPTION supported_peripherals = (axi_vdma);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_vdma;
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-vdma";
+
+END driver
