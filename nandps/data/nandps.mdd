@@ -6,14 +6,7 @@ BEGIN driver nandps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = nandps;
+  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
   DTGPARAM name = compatible, type = stringlist, default = "arm,pl353-nand-r2p1";
-  DTGPARAM name = nand-bus-width, type = int;
-  DTGPARAM name = "arm,nand-cycle-t0", type = int, default = 4;
-  DTGPARAM name = "arm,nand-cycle-t1", type = int, default = 4;
-  DTGPARAM name = "arm,nand-cycle-t2", type = int, default = 1;
-  DTGPARAM name = "arm,nand-cycle-t3", type = int, default = 2;
-  DTGPARAM name = "arm,nand-cycle-t4", type = int, default = 2;
-  DTGPARAM name = "arm,nand-cycle-t5", type = int, default = 2;
-  DTGPARAM name = "arm,nand-cycle-t6", type = int, default = 4;
 
 END driver
