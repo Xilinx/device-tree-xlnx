@@ -1,0 +1,13 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_traffic_gen
+
+  OPTION supported_peripherals = (axi_traffic_gen);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_traffic_gen;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-traffic-gen";
+  DTGPARAM name = "xlnx,device-id", type = int, default = 0;
+
+END driver
+

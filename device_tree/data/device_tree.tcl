@@ -28,7 +28,7 @@ proc generate_mb_ccf_node {os_handle} {
     set drv_list [get_drivers]
     set pl_node [hsm::utils::get_or_create_child_node $os_handle "dtg.pl"]
     # list of ip should have the clocks property
-    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_timebase_wdt axi_can can"
+    set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_timebase_wdt axi_can can mdm"
 
     set proc_name [get_property HW_INSTANCE [get_sw_processor]]
     set hwproc [get_cells -filter " NAME==$proc_name"]
@@ -122,37 +122,104 @@ proc get_ip_prop {drv_handle pram} {
     return $value
 }
 
-proc inc_os_prop {drv_handle var_name conf_prop} {
-    set count [hsm::utils::get_os_parameter_value $var_name]
-    if { [llength $count] == 0 } {
-        set count 1
+proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
+    set ip_check "False"
+    set os_ip [get_property ${os_conf_dev_var} [get_os]]
+    if {![string match -nocase "" $os_ip]} {
+        set os_ip [get_property ${os_conf_dev_var} [get_os]]
+        set ip_check "True"
     }
 
-    set ip [get_cells $drv_handle]
-    set consoleip [get_property CONFIG.console_device [get_os]]
-    if { [string match -nocase $consoleip $ip] } {
-        set ip_type [get_property IP_NAME $ip]
-        if { [string match -nocase $ip_type] } {
-            set_property ${conf_prop} 0 $drv_handle
+    set count [hsm::utils::get_os_parameter_value $var_name]
+    if {[llength $count] == 0} {
+        if {[string match -nocase "True" $ip_check]} {
+            set count 1
+        } else {
+            set count 0
         }
-    } else {
-        set_property $conf_prop $count $drv_handle
-        incr count
-        ::hsm::utils::set_os_parameter_value $var_name $count
     }
+
+    if {[string match -nocase "True" $ip_check]} {
+        set ip [get_cells $drv_handle]
+        if {[string match -nocase $os_ip $ip]} {
+            set ip_type [get_property IP_NAME $ip]
+            set_property ${conf_prop} 0 $drv_handle
+            return
+        }
+    }
+
+    set_property $conf_prop $count $drv_handle
+    incr count
+    ::hsm::utils::set_os_parameter_value $var_name $count
+
 }
 
-proc gen_uart_port_number {os_handle} {
-    # generate post-number binding for uart devices
-    set valid_ip_list "axi_uartlite axi_uart16550 ps7_uart"
-    set drv_list [get_drivers]
-    foreach drv ${drv_list} {
-        set hwinst [get_property HW_INSTANCE $drv]
+proc gen_count_prop {drv_handle data_dict} {
+    dict for {dev_type dev_conf_mapping} [dict get $data_dict] {
+        set os_conf_dev_var [dict get $data_dict $dev_type "os_device"]
+        set valid_ip_list [dict get $data_dict $dev_type "ip"]
+        set drv_conf [dict get $data_dict $dev_type "drv_conf"]
+        set os_count_name [dict get $data_dict $dev_type "os_count_name"]
+
+        set hwinst [get_property HW_INSTANCE $drv_handle]
         set iptype [get_property IP_NAME [get_cells $hwinst]]
         if  {[lsearch $valid_ip_list $iptype] < 0 } {
             continue
         }
-        inc_os_prop $drv "serial_count" "CONFIG.port-number"
+
+        set irq_chk [dict get $data_dict $dev_type "irq_chk"]
+        if {![string match -nocase "false" $irq_chk]} {
+            set ip_obj [get_cells $drv_handle]
+            set rt [catch {xget_port_interrupt_id $ip_obj $irq_chk}]
+            if {$rt != 0} {
+                puts "Warning: Fail to located interrupt pin - $irq_chk. The $drv_conf is not set for $dev_type"
+                continue
+            }
+            set irq_id [xget_port_interrupt_id $ip_obj $irq_chk]
+            if {[llength $irq_id] < 0} {
+                continue
+            }
+        }
+
+        inc_os_prop $drv_handle $os_conf_dev_var $os_count_name $drv_conf
+    }
+}
+
+proc gen_dev_conf {} {
+    # data to populated certain configs for different devices
+    set data_dict {
+        uart {
+            os_device "CONFIG.console_device"
+            ip "axi_uartlite axi_uart16550 ps7_uart"
+            os_count_name "serial_count"
+            drv_conf "CONFIG.port-number"
+            irq_chk "false"
+        }
+        mdm_uart {
+            os_device "CONFIG.console_device"
+            ip "mdm"
+            os_count_name "serial_count"
+            drv_conf "CONFIG.port-number"
+            irq_chk "Interrupt"
+        }
+        syace {
+            os_device "sysace_device"
+            ip "axi_sysace"
+            os_count_name "sysace_count"
+            drv_conf "CONFIG.port-number"
+            irq_chk "false"
+        }
+        traffic_gen {
+            os_device "trafficgen_device"
+            ip "axi_traffic_gen"
+            os_count_name "trafficgen_count"
+            drv_conf "CONFIG.xlnx,device-id"
+            irq_chk "false"
+        }
+    }
+    # update CONFIG.<para> for each driver when match driver is found
+    foreach drv [get_drivers] {
+        gen_count_prop $drv $data_dict
     }
 }
 
@@ -201,7 +268,7 @@ proc post_generate {os_handle} {
     generate_mb_ccf_node $os_handle
     ps7_smc_workaround $os_handle
     zynq_gen_pl_clk_binding
-    gen_uart_port_number $os_handle
+    gen_dev_conf
 }
 
 proc clean_os { os_handle } {

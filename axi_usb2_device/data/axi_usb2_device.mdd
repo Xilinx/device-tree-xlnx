@@ -1,0 +1,12 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_usb2_device
+
+  OPTION supported_peripherals = (axi_usb2_device);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_usb2_device;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-usb2-device-4.00.a";
+
+END driver
+

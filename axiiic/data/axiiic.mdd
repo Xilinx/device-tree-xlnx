@@ -6,6 +6,6 @@ BEGIN driver axiiic
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axiiic;
-  PARAMETER name = compatible, type = stringlist, default = "xlnx,axi-can-1.00.a";
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-iic-2.00.a";
 
 END driver

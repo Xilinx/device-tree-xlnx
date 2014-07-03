@@ -1,0 +1,13 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_sysace
+
+  OPTION supported_peripherals = (axi_sysace);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_sysace;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-sysace-1.00.a";
+  DTGPARAM name = port-number, type = int, default = 0;
+
+END driver
+
