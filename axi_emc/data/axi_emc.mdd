@@ -2,7 +2,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver axi_emc
 
- OPTION supported_peripherals = (axi_axi_emc);
+ OPTION supported_peripherals = (axi_emc);
  OPTION driver_state = ACTIVE;
  OPTION NAME = axi_emc;
  OPTION supported_os_types = (DTS);
