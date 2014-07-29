@@ -8,4 +8,9 @@ proc generate {drv_handle} {
 		}
 	}
 	set_property CONFIG.num-cs ${cs-num} $drv_handle
+
+	# the is-decoded-cs property is hard coded as we do not know if the
+	# board has external decoder connected or not
+	# Once we had the board level information, is-decoded-cs need to be
+	# generated based on it.
 }
