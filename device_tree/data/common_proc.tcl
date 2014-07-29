@@ -76,7 +76,29 @@ proc get_ip_property {drv_handle parameter} {
 	return [get_property ${parameter} $ip]
 }
 
+proc is_it_in_pl {ip} {
+	# FIXME: This is a workaround to check if IP that's in PL however,
+	# this is not entirely correct, it is a hack and only works for
+	# IP_NAME that does not matches ps7_*
+	# better detection is required
+
+	# handles interrupt that coming from get_drivers only
+	if {[llength [get_drivers $ip]] < 1} {
+		return -1
+	}
+	set ip_type [get_property IP_NAME $ip]
+	if {![regexp "ps7_*" "$ip_type" match]} {
+		return 1
+	}
+	return -1
+}
+
+#
+# HSM 2014.2 workaround
+# This proc is designed to generated the correct interrupt cells for both
+# MB and Zynq
 proc get_intr_id { periph_name intr_port_name } {
+	set intr_info -1
 	set ip [get_cells $periph_name]
 
 	set intr_pin [get_pins -of_objects $ip $intr_port_name -filter "TYPE==INTERRUPT"]
@@ -100,31 +122,94 @@ proc get_intr_id { periph_name intr_port_name } {
 		return -1
 	}
 
-	# now get the interrupt id
-	set intr_id [hsm::utils::get_interrupt_id "$periph_name" "$intr_port_name"]
+	# workaround for 2014.2
+	# get_interrupt_id returns incorrect id for Zynq
+	# issue: the xget_interrupt_sources returns all interrupt signals
+	# connected to the interrupt controller, which is not limited to IP
+	# in PL
+	set intc_type [get_property IP_NAME $intc_periph]
+	# CHECK with Heera for zynq the intc_src_ports are in reverse order
+	if { [string match -nocase $intc_type "ps7_scugic"] } {
+		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $intc_periph]
+		if { [string match -nocase "$ip_param" "REVERSE"]} {
+			set intc_src_ports [xget_interrupt_sources $intc_periph]
+		} else {
+			set intc_src_ports [lreverse [xget_interrupt_sources $intc_periph]]
+		}
+		set total_intr_count -1
+		foreach intc_src_port $intc_src_ports {
+			set intr_periph [get_cells -of_objects $intc_src_port]
+			if { [string match -nocase $intc_type "ps7_scugic"] } {
+				if {[is_it_in_pl "$intr_periph"] == 1} {
+					incr total_intr_count
+					continue
+				}
+			}
+		}
+	} else {
+		set intc_src_ports [xget_interrupt_sources $intc_periph]
+	}
+
+	set i 0
+	set intr_id -1
+	set ret -1
+	foreach intc_src_port $intc_src_ports {
+		if { [llength $intc_src_port] == 0 } {
+			incr i
+			continue
+		}
+		set intr_periph [get_cells -of_objects $intc_src_port]
+		set ip_type [get_property IP_NAME $intr_periph]
+		if { [string compare -nocase "$intr_port_name"  "$intc_src_port" ] == 0 } {
+			if { [string compare -nocase "$intr_periph" "$ip"] == 0 } {
+				set ret $i
+				break
+			}
+		}
+		if { [string match -nocase $intc_type "ps7_scugic"] } {
+			if {[is_it_in_pl "$intr_periph"] == 1} {
+				incr i
+				continue
+			}
+		} else {
+			incr i
+		}
+	}
+
+	if { [string match -nocase $intc_type "ps7_scugic"] && [string match -nocase $intc_port "IRQ_F2P"] } {
+		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $intc_periph]
+		if { [string match -nocase "$ip_param" "REVERSE"]} {
+			set diff [expr $total_intr_count - $ret]
+			if { $diff < 8 } {
+				set intr_id [expr 91 - $diff]
+			} elseif { $diff  < 16} {
+				set intr_id [expr 68 - ${diff} + 8 ]
+			}
+		} else {
+			if { $ret < 8 } {
+				set intr_id [expr 61 + $ret]
+			} elseif { $ret  < 16} {
+				set intr_id [expr 84 + $ret - 8 ]
+			}
+		}
+	} else {
+		set intr_id $ret
+	}
+
 	if { [string match -nocase $intr_id "-1"] } {
 		set intr_id [xget_port_interrupt_id "$periph_name" "$intr_port_name" ]
 	}
 
-	set intc [get_connected_interrupt_controller $periph_name $intr_port_name]
-	set intr_type [hsm::utils::get_dtg_interrupt_type $intc $ip $intr_port_name]
-	# interrupt id conversion for ps7_scugic
-	if { [string match -nocase "[get_property IP_NAME $intc]" "ps7_scugic"] && [string match -nocase $intc_port "IRQ_F2P"]} {
-		set intr_id [expr $intr_id - 1]
-		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $ip]
-		if { [string match -nocase "$ip_param" "REVERSE"]} {
-			set $intr_id [expr 15 -$intr_id]
-		}
-		if { $intr_id < 8 } {
-			set intr_id [expr $intr_id + 60]
-		} elseif { $intr_id  < 16} {
-			set intr_id [expr $intr_id + 83 - 8]
-		}
+	if { [string match -nocase $intr_id "-1"] } {
+		return -1
 	}
 
+	# format the interrupt cells
+	set intc [get_connected_interrupt_controller $periph_name $intr_port_name]
+	set intr_type [hsm::utils::get_dtg_interrupt_type $intc $ip $intr_port_name]
 	if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
 		if { $intr_id > 32 } {
-			set intr_id [expr $intr_id -32]
+			set intr_id [expr $intr_id - 32]
 		}
 		set intr_info "0 $intr_id $intr_type"
 	} else {
