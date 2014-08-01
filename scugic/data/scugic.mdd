@@ -13,5 +13,5 @@ BEGIN driver scugic
   DTGPARAM name = compatible, type = stringlist, default = "arm,cortex-a9-gic arm,gic";
   DTGPARAM name = num_cpus, type = int, default = 2;
   DTGPARAM name = num_interrupts, type = int, default = 96;
-  DTGPARAM name = reg, type = intlist;
+  DTGPARAM name = reg, type = intlist, default = "0xF8F01000 0x1000 0xF8F00100 0x100";
 END driver
