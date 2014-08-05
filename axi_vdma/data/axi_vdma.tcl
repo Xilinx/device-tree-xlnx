@@ -14,6 +14,22 @@ proc generate {drv_handle} {
 		set vdma_count 0
 	}
 
+	# check for C_ENABLE_DEBUG parameters
+	# C_ENABLE_DEBUG_INFO_15 - Enable S2MM Frame Count Interrupt bit
+	# C_ENABLE_DEBUG_INFO_14 - Enable S2MM Delay Counter Interrupt bit
+	# C_ENABLE_DEBUG_INFO_7 - Enable MM2S Frame Count Interrupt bit
+	# C_ENABLE_DEBUG_INFO_6 - Enable MM2S Delay Counter Interrupt bit
+	set dbg15 [get_ip_param_value $dma_ip C_ENABLE_DEBUG_INFO_15]
+	set dbg14 [get_ip_param_value $dma_ip C_ENABLE_DEBUG_INFO_14]
+	set dbg07 [get_ip_param_value $dma_ip C_ENABLE_DEBUG_INFO_7]
+	set dbg06 [get_ip_param_value $dma_ip C_ENABLE_DEBUG_INFO_6]
+
+	if { $dbg15 != 1 || $dbg14 != 1 || $dbg07 != 1 || $dbg06 != 1 } {
+		puts "ERROR: Failed to generate AXI VDMA node,"
+		puts "ERROR: Essential VDMA Debug parameters for driver are not enabled in IP"
+		return;
+	}
+
 	set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
 	set_drv_conf_prop $drv_handle C_NUM_FSTORES xlnx,num-fstores
 	set_drv_conf_prop $drv_handle C_USE_FSYNC xlnx,flush-fsync
