@@ -262,7 +262,7 @@ proc generate {lib_handle} {
 }
 
 proc post_generate {os_handle} {
-    add_chosen $os_handle 
+    add_chosen $os_handle
     clean_os $os_handle
     add_ps7_pmu $os_handle
     generate_mb_ccf_node $os_handle
@@ -283,7 +283,7 @@ proc add_chosen { os_handle } {
     set system_node [hsm::utils::get_or_create_child_node $os_handle "dtg.system"]
     set chosen_node [hsm::utils::get_or_create_child_node $system_node "chosen"]
 
-    #getting boot arguments 
+    #getting boot arguments
     set bootargs [get_property CONFIG.bootargs $os_handle]
     if { [llength $bootargs] == 0 } {
         set console [hsm::utils::get_os_parameter_value "console"]
@@ -306,8 +306,8 @@ proc add_ps7_pmu { os_handle } {
     if { [string match -nocase $proctype "ps7_cortexa9"] } {
 
 
-        #get PMU driver handler and disabling it 
-        set all_drivers [get_drivers] 
+        #get PMU driver handler and disabling it
+        set all_drivers [get_drivers]
         foreach driver $all_drivers {
             set hwinst [get_property HW_INSTANCE $driver]
             set ip [get_cells $hwinst]
