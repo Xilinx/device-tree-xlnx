@@ -21,7 +21,12 @@ proc gen_clocks_node { drv_handle} {
 									dbg_trc dbg_apb}
     hsm::utils::add_new_property $clocks compatible stringlist "xlnx,ps7-clkc"
     hsm::utils::add_new_property $clocks fclk-enable int 0xf
-    hsm::utils::add_new_property $clocks ps-clk-frequency int 33333333
+    set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells ps7_clockc_0]]
+    if {[string match ${ps_clk_freq} ""]} {
+        puts "WARNING: DTG failed to detect the ps-clk-frequency, Using default value - 33333333"
+        set ps_clk_freq 33333333
+    }
+    hsm::utils::add_new_property $clocks ps-clk-frequency int ${ps_clk_freq}
     # FIXME: quick hack to get kernel booting
     hsm::utils::add_new_property $clocks reg hexintlist "0x100 0x100"
     return $clocks
