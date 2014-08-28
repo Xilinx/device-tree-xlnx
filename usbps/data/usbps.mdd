@@ -11,5 +11,5 @@ BEGIN driver usbps
   DTGPARAM name = usb-reset , type = reference;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-usb-1.00.a";
   DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
-  
+
 END driver

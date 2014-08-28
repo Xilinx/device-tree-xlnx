@@ -7,5 +7,5 @@ BEGIN driver axi_can
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_can;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-can-1.00.a";
-  
+
 END driver

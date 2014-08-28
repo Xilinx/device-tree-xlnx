@@ -5,7 +5,7 @@ BEGIN driver uartps
   OPTION supported_peripherals = (ps7_uart);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
-  OPTION NAME = uartps; 
+  OPTION NAME = uartps;
 
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,xuartps"
   DTGPARAM name = current-speed , type = int, default = 115200;

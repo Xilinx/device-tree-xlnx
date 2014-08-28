@@ -32,7 +32,7 @@ proc generate {drv_handle} {
         set_property CONFIG.d-cache-highaddr  "$dcache_high"      $drv_handle
         set_property CONFIG.d-cache-size      "$dcache_size"      $drv_handle
         set_property CONFIG.d-cache-line-size "$dcache_line_size" $drv_handle
-    } 
+    }
 
     set model "[get_property IP_NAME $ip],[get_ip_version $ip]"
     set_property CONFIG.model $model $drv_handle

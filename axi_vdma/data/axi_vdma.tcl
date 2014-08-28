@@ -51,7 +51,7 @@ proc add_dma_channel { drv_handle xdma addr mode devid} {
 	set modeIndex [string index $mode 0]
 	set node_name [format "dma-channel@%x" $addr]
 	set dma_channel [hsm::utils::add_new_child_node $drv_handle $node_name]
-	hsm::utils::add_new_property $dma_channel "compatible" stringlist [format "xlnx,%s-%s-channel" $xdma $modellow] 
+	hsm::utils::add_new_property $dma_channel "compatible" stringlist [format "xlnx,%s-%s-channel" $xdma $modellow]
 	hsm::utils::add_new_property $dma_channel "xlnx,device-id" hexint $devid
 	add_cross_property $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
 	# detection based on two property

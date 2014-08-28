@@ -19,6 +19,6 @@ BEGIN driver cpu
     DTGPARAM name = i-cache-highaddr, type = hexint ;
     DTGPARAM name = i-cache-line-size, type = hexint ;
     DTGPARAM name = i-cache-size, type = hexint ;
-    DTGPARAM name = model, type = string; 
+    DTGPARAM name = model, type = string;
 
 END driver

@@ -8,5 +8,5 @@ BEGIN driver scuwdt
   OPTION NAME = scuwdt;
   DTGPARAM name = device_type, default = watchdog , type = string ;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-scuwdt-1.00.a";
-  
+
 END driver

@@ -6,7 +6,7 @@ BEGIN driver iicps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = iicps;
-  
+
   DTGPARAM name = bus-id, type = int ;
   DTGPARAM name = clock-frequency, type = int , default = 400000;
   DTGPARAM name = dtg.alias , type = reference, default = i2c;

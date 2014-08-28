@@ -12,5 +12,5 @@ BEGIN driver gpiops
   DTGPARAM name = gpio-mask-low, type = hexint;
   DTGPARAM name = "#gpio-cells", default = 2, type = int
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-gpio-1.0";
-  
+
 END driver
