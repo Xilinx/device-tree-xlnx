@@ -11,6 +11,4 @@ BEGIN driver dmaps
   DTGPARAM name = "#dma-cells", default = 1 , type = int ;
   DTGPARAM name = "#dma-channels", default = 8, type = int;
   DTGPARAM name = "#dma-requests", default = 4, type = int;
-  DTGPARAM name = "arm,primecell-periphid", default = "0x00041330", type = hexint;
-
 END driver
