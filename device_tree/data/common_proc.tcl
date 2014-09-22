@@ -1520,3 +1520,19 @@ proc gen_cpu_nodes {drv_handle} {
 	hsm::utils::add_new_dts_param "${cpu_root_node}" "#cpus" $cpu_no int ""
 	return $rt_node
 }
+
+proc remove_all_tree {} {
+	# for testing
+	set test_dummy "for_test_dummy.dts"
+	if {[lsearch [get_dt_trees] ${test_dummy}] < 0} {
+		create_dt_tree -dts_file $test_dummy
+	}
+	set_cur_working_dts $test_dummy
+
+	foreach tree [get_dt_trees] {
+		if {[string equal -nocase $test_dummy $tree]} {
+			continue
+		}
+		catch {delete_objs $tree} msg
+	}
+}
