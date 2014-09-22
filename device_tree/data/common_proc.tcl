@@ -217,3 +217,17 @@ proc get_intr_id { periph_name intr_port_name } {
 	}
 	return $intr_info
 }
+
+proc dtg_debug msg {
+	return
+	puts "# [lindex [info level -1] 0] #>> $msg"
+}
+
+proc dtg_warning msg {
+	puts "WARNING: $msg"
+}
+
+proc proc_called_by {} {
+	return
+	puts "# [lindex [info level -1] 0] #>> called by [lindex [info level -2] 0]"
+}
