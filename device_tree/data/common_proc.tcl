@@ -386,3 +386,24 @@ proc update_dt_parent args {
 	}
 	return $node
 }
+
+proc get_all_dt_labels {{dts_files ""}} {
+	# get all dt node labels
+	set cur_dts [current_dt_tree]
+	set labels ""
+	if [string_is_empty $dts_files] {
+		set dts_files [get_dt_trees]
+	}
+	foreach dts_file ${dts_files} {
+		set dts_nodes [get_all_tree_nodes $dts_file]
+		foreach node ${dts_nodes} {
+			set node_label [get_property "NODE_LABEL" $node]
+			if {[string_is_empty $node_label]} {
+				continue
+			}
+			lappend labels $node_label
+		}
+	}
+	current_dt_tree $cur_dts
+	return $labels
+}
