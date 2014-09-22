@@ -1028,3 +1028,43 @@ proc get_intr_type {intc_name ip_name port_name} {
 	}
 	return -1
 }
+
+proc set_drv_prop args {
+	set drv_handle [lindex $args 0]
+	set prop_name [lindex $args 1]
+	set value [lindex $args 2]
+
+	# check if property exists if not create it
+	set list [get_drv_conf_prop_list $drv_handle]
+	if {[lsearch -glob ${list} ${prop_name}] < 0} {
+		hsm::utils::add_new_property $drv_handle $prop_name string "$value"
+	}
+
+	if {[llength $args] >= 4} {
+		set type [lindex $args 3]
+		set_property ${prop_name} $value $drv_handle
+		set prop [get_comp_params ${prop_name} $drv_handle]
+		set_property CONFIG.TYPE $type $prop
+	} else {
+		set_property ${prop_name} $value $drv_handle
+	}
+	return 0
+}
+
+proc set_drv_prop_if_empty args {
+	set drv_handle [lindex $args 0]
+	set prop_name [lindex $args 1]
+	set value [lindex $args 2]
+	set cur_prop_value [get_property CONFIG.$prop_name $drv_handle]
+	if {[string_is_empty $cur_prop_value] == 0} {
+		dtg_debug "$drv_handle $prop_name property is not empty, current value is '$cur_prop_value'"
+		return -1
+	}
+	if {[llength $args] >= 4} {
+		set type [lindex $args 3]
+		set_drv_prop $drv_handle $prop_name $value $type
+	} else {
+		set_drv_prop $drv_handle $prop_name $value
+	}
+	return 0
+}
