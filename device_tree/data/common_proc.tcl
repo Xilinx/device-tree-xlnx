@@ -243,6 +243,13 @@ proc Pop {varname {nth 0}} {
 	return $r
 }
 
+proc string_is_empty {input} {
+	if {[string compare -nocase $input ""] != 0} {
+		return 0
+	}
+	return 1
+}
+
 proc gen_dt_node_search_pattern args {
 	proc_called_by
 	# generates device tree node search pattern and return it
