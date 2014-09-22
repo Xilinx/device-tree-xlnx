@@ -741,3 +741,26 @@ proc get_driver_conf_list {drv_handle} {
 	set dts_conf_list [list_remove_element $dts_conf_list "CONFIG.def_dts CONFIG.dev_type CONFIG.dtg.alias CONFIG.dtg.ip_params"]
 	return $dts_conf_list
 }
+
+proc add_driver_prop {drv_handle dt_node prop} {
+	# driver property to DT node
+	set value [get_property ${prop} $drv_handle]
+	if {[string_is_empty ${prop}] != 0} {
+		continue
+	}
+
+	regsub -all {CONFIG.} $prop {} prop
+	set conf_prop [lindex [get_comp_params ${prop} $drv_handle] 0 ]
+	if {[string_is_empty ${conf_prop}] == 0} {
+		set type [lindex [get_property CONFIG.TYPE $conf_prop] 0]
+	} else {
+		error "Unable to add the $prop property for $drv_handle due to missing valid type"
+	}
+	# CHK: skip if empty? when conf_prop is not referencelist
+	# if {[string_is_empty ${value}] == 1} {
+	# 	continue
+	# }
+	# TODO: sanity check is missing
+	dtg_debug "${dt_node} - ${prop} - ${value} - ${type}"
+	hsm::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
+}
