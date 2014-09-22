@@ -469,3 +469,20 @@ proc set_drv_def_dts {drv_handle} {
 	update_system_dts_include $default_dts
 	return $default_dts
 }
+
+proc dt_node_def_checking {node_label node_name node_ua node_obj} {
+	# check if the node_object has matching label, name and unit_address properties
+	# ignore reference node as it does not have label and unit_addr
+	if {![regexp "^&.*" "$node_obj" match]} {
+		set old_label [get_property "NODE_LABEL" $node_obj]
+		set old_name [get_property "NODE_NAME" $node_obj]
+		set old_ua [get_property "UNIT_ADDRESS" $node_obj]
+		if {![string equal -nocase $node_label $old_label] || \
+			![string equal -nocase $node_ua $old_ua] || \
+			![string equal -nocase $node_name $old_name] } {
+			dtg_debug "dt_node_def_checking($node_obj): label: ${node_label} - ${old_label}, name: ${node_name} - ${old_name}, unit addr: ${node_ua} - ${old_ua}"
+			return 0
+		}
+	}
+	return 1
+}
