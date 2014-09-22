@@ -317,3 +317,23 @@ proc get_all_tree_nodes {dts_file} {
 	current_dt_tree $cur_dts
 	return $all_nodes
 }
+
+proc check_node_in_dts {node_name dts_file_list} {
+	# check if the node is in the device-tree file
+	# return 1 if found
+	# return 0 if not found
+	proc_called_by
+	foreach tmp_dts_file ${dts_file_list} {
+		set dts_nodes [get_all_tree_nodes $tmp_dts_file]
+		# TODO: better detection here
+		foreach pattern ${node_name} {
+			foreach node ${dts_nodes} {
+				if {[regexp $pattern $node match]} {
+					dtg_debug "Node $node ($pattern) found in $tmp_dts_file"
+					return 1
+				}
+			}
+		}
+	}
+	return 0
+}
