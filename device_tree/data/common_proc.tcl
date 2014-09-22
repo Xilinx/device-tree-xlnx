@@ -1324,6 +1324,7 @@ proc gen_peripheral_nodes {drv_handle} {
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
 	}
 
+	zynq_gen_pl_clk_binding $drv_handle
 	set dts_file_list ""
 	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
 		set rt ""
@@ -1355,7 +1356,6 @@ proc gen_peripheral_nodes {drv_handle} {
 	foreach drv_prop_name $drv_dt_prop_list {
 		add_driver_prop $drv_handle $rt_node ${drv_prop_name}
 	}
-	zynq_gen_pl_clk_binding $drv_handle
 	return $rt_node
 }
 
@@ -1393,4 +1393,33 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		hsm::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
 	}
 	return $bus_node
+}
+
+proc gen_root_node {drv_handle} {
+	set default_dts [set_drv_def_dts $drv_handle]
+	# add compatible
+	set ip_name [get_property IP_NAME [get_cell ${drv_handle}]]
+	switch $ip_name {
+		"ps7_cortexa9" {
+			create_dt_tree_from_dts_file
+			global zynq_7000_fname
+			update_system_dts_include ${zynq_7000_fname}
+			# no root_node required as zynq-7000.dtsi
+			return 0
+		}
+		"microblaze" {
+			set compatible "xlnx,microblaze"
+			set model "Xilinx MicroBlaze"
+		}
+		default {
+			return -code error "Unknown arch"
+		}
+	}
+	set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+	hsm::utils::add_new_dts_param "${root_node}" "#address-cells" 1 int ""
+	hsm::utils::add_new_dts_param "${root_node}" "#size-cells" 1 int ""
+	hsm::utils::add_new_dts_param "${root_node}" model $model string ""
+	hsm::utils::add_new_dts_param "${root_node}" compatible $compatible string ""
+
+	return $root_node
 }
