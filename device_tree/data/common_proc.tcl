@@ -1457,3 +1457,66 @@ proc gen_root_node {drv_handle} {
 
 	return $root_node
 }
+
+# Q: common function for all processor or one for each driver lib
+proc gen_cpu_nodes {drv_handle} {
+	set ip_name [get_property IP_NAME [get_cell [get_sw_processor]]]
+	switch $ip_name {
+		"ps7_cortexa9" {
+			# skip node generation for static zynq-7000 dtsi
+			# TODO: this needs to be fixed to allow override
+			return 0
+		} "microblaze" {}
+		default {
+			error "Unknown arch"
+		}
+	}
+
+	set processor [get_sw_processor]
+	set dev_type [get_property CONFIG.dev_type $processor]
+	if {[string_is_empty $dev_type] == 1} {
+		set dev_type $drv_handle
+	}
+	gen_compatible_property $processor
+	gen_mb_interrupt_property $processor
+	gen_drv_prop_from_ip $processor
+
+	set default_dts [set_drv_def_dts $processor]
+	set cpu_root_node [add_or_get_dt_node -n cpus -d ${default_dts} -p /]
+	hsm::utils::add_new_dts_param "${cpu_root_node}" "#address-cells" 1 int ""
+	hsm::utils::add_new_dts_param "${cpu_root_node}" "#size-cells" 0 int ""
+
+	set processor_type [get_property IP_NAME [get_cell ${processor}]]
+	set processor_list [eval "get_cells -filter { IP_TYPE == \"PROCESSOR\" && IP_NAME == \"${processor_type}\" }"]
+
+	set drv_dt_prop_list [get_driver_conf_list $processor]
+	set add_reg 0
+	set cpu0_only ""
+	if {![string equal -nocase ${processor_type} "microblaze"]} {
+		set add_reg 1
+		set cpu0_only [get_property CONFIG.cpu0_only $processor]
+		foreach prop "${cpu0_only} cpu0_only" {
+			set drv_dt_prop_list [list_remove_element $drv_dt_prop_list "CONFIG.${prop}"]
+		}
+	}
+	set bus_node [add_or_get_bus_node $drv_handle $default_dts]
+	set cpu_no 0
+	foreach cpu ${processor_list} {
+		set cpu_node [add_or_get_dt_node -n ${dev_type} -l ${cpu} -u ${cpu_no} -d ${default_dts} -p ${cpu_root_node}]
+		foreach drv_prop_name $drv_dt_prop_list {
+			add_driver_prop $processor $cpu_node ${drv_prop_name}
+		}
+		if {[string equal -nocase ${cpu} ${drv_handle}]} {
+			set rt_node $cpu_node
+			foreach cpu_prop ${cpu0_only} {
+				add_driver_prop $processor $cpu_node CONFIG.${cpu_prop}
+			}
+		}
+		if {$add_reg == 1} {
+			hsm::utils::add_new_dts_param "${cpu_node}" "reg" $cpu_no int ""
+		}
+		incr cpu_no
+	}
+	hsm::utils::add_new_dts_param "${cpu_root_node}" "#cpus" $cpu_no int ""
+	return $rt_node
+}
