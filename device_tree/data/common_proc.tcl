@@ -942,3 +942,25 @@ proc ps_node_mapping {ip_name prop} {
 	}
 	return $ip_name
 }
+
+proc remove_empty_reference_node {} {
+	# check for ps_ips
+	global zynq_soc_dt_tree
+	set dts_files [list_remove_element [get_dt_trees] $zynq_soc_dt_tree]
+	foreach dts_file $dts_files {
+		set_cur_working_dts $dts_file
+		foreach node [get_all_tree_nodes $dts_file] {
+			if {[regexp "^&.*" $node matched]} {
+				# check if it has child node
+				set child_nodes [get_dt_nodes -of_objects $node]
+				if {![string_is_empty $child_nodes]} {
+					continue
+				}
+				set prop_list [list_property -regexp $node "CONFIG.*"]
+				if {[string_is_empty $prop_list]} {
+					delete_objs $node
+				}
+			}
+		}
+	}
+}
