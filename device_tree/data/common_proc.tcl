@@ -486,3 +486,175 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 	}
 	return 1
 }
+
+proc add_or_get_dt_node args {
+	# Creates the dt node or the parent node if required
+	# return dt node
+	proc_called_by
+	global def_string
+	foreach var {node_name node_label node_unit_addr parent_obj dts_file} {
+		set ${var} ${def_string}
+	}
+	set auto_ref 1
+	set auto_ref_parent 0
+	while {[string match -* [lindex $args 0]]} {
+		switch -glob -- [lindex $args 0] {
+			-disable_auto_ref {set auto_ref 0}
+			-auto_ref_parent {set auto_ref_parent 1}
+			-n* {set node_name [Pop args 1]}
+			-l* {set node_label [Pop args 1]}
+			-u* {set node_unit_addr [Pop args 1]}
+			-p* {set parent_obj [Pop args 1]}
+			-d* {set dts_file [Pop args 1]}
+			--    { Pop args ; break }
+			default {
+				error "add_or_get_dt_node bad option - [lindex $args 0]"
+			}
+		}
+		Pop args
+	}
+
+	# if no dts_file provided
+	if {[string equal -nocase ${dts_file} ${def_string}]} {
+		set dts_file [current_dt_tree]
+	}
+
+	# Generate unique label name to prevent issue caused by static dtsi
+	# better way of handling this issue is required
+	set label_list [get_all_dt_labels]
+	# TODO: This only handle label duplication once. if multiple IP has
+	# the same label, it will not work. Better handling required.
+	if {[lsearch $label_list $node_label] >= 0} {
+		set tmp_node [get_node_object ${node_label}]
+		# rename if the node default properties differs
+		if {[dt_node_def_checking $node_label $node_name $node_unit_addr $tmp_node] == 0} {
+			dtg_warning "label found in existing tree, rename to dtg_$node_label"
+			set node_label "dtg_${node_label}"
+		}
+	}
+
+	set search_pattern [gen_dt_node_search_pattern -n ${node_name} -l ${node_label} -u ${node_unit_addr}]
+
+	dtg_debug ""
+	dtg_debug "node_name: ${node_name}"
+	dtg_debug "node_label: ${node_label}"
+	dtg_debug "node_unit_addr: ${node_unit_addr}"
+	dtg_debug "search_pattern: ${search_pattern}"
+	dtg_debug "parent_obj: ${parent_obj}"
+	dtg_debug "dts_file: ${dts_file}"
+
+	# save the current working dt_tree first
+	set cur_working_dts [current_dt_tree]
+	# tree switch the target tree
+	set_cur_working_dts ${dts_file}
+	set parent_dts_file ${dts_file}
+
+	# Set correct parent object
+	#  Check if the parent object in other dt_trees or not. If yes, update
+	#  parent node with reference node (&parent_obj).
+	#  Check if parent is / and see if it in the target dts file
+	#  if not /, then check if parent is created (FIXME: is right???)
+	set tmp_dts_list [list_remove_element [get_dt_trees] ${dts_file}]
+	set node_in_dts [check_node_in_dts ${parent_obj} ${tmp_dts_list}]
+	if {${node_in_dts} ==  1 && \
+		 ![string equal ${parent_obj} "/" ]} {
+		set parent_obj [get_node_object ${parent_obj} ${tmp_dts_list}]
+		set parent_label [get_property "NODE_LABEL" $parent_obj]
+		if {[string_is_empty $parent_label]} {
+			set parent_label [get_property "NODE_NAME" $parent_obj]
+		}
+		if {[string_is_empty $parent_label]} {
+			error "no parent node name/label"
+		}
+		if {[regexp "^&.*" "$parent_label" match]} {
+			set ref_node "${parent_label}"
+		} else {
+			set ref_node "&${parent_label}"
+		}
+		set parent_ref_in_dts [check_node_in_dts "${ref_node}" ${dts_file}]
+		if {${parent_ref_in_dts} != 1} {
+			if { $auto_ref_parent } {
+				set_cur_working_dts ${dts_file}
+				set parent_obj [create_dt_node -n "${ref_node}"]
+			}
+		}
+	}
+
+	# if dt node in the target dts file
+	# get the nodes in the current dts file
+	set dts_nodes [get_all_tree_nodes $dts_file]
+	foreach pattern ${search_pattern} {
+		foreach node ${dts_nodes} {
+			if {[regexp $pattern $node match]} {
+				if {[string equal -nocase ${parent_obj} ${def_string}]} {
+					set parent_obj ""
+				}
+				if {[dt_node_def_checking $node_label $node_name $node_unit_addr $node] == 0} {
+					error "$pattern :: $node_label : $node_name @ $node_unit_addr, is differ to the node object $node"
+				}
+				set node [update_dt_parent ${node} ${parent_obj} ${dts_file}]
+				set_cur_working_dts ${cur_working_dts}
+				return $node
+			}
+		}
+	}
+
+	# if dt node in other target dts files
+	# create a reference node if required
+	set found_node 0
+	set tmp_dts_list [list_remove_element [get_dt_trees] ${dts_file}]
+	foreach tmp_dts_file ${tmp_dts_list} {
+		set dts_nodes [get_all_tree_nodes $tmp_dts_file]
+		# TODO: better detection here
+		foreach pattern ${search_pattern} {
+			foreach node ${dts_nodes} {
+				if {[regexp $pattern $node match]} {
+					# create reference node
+					set found_node 1
+					set found_node_obj [get_node_object ${node} $tmp_dts_file]
+					break
+				}
+			}
+		}
+	}
+	if { $found_node == 1 } {
+		if { $auto_ref == 0 } {
+			# return the object found on other dts files
+			set_cur_working_dts ${cur_working_dts}
+			return $found_node_obj
+		}
+		dtg_debug "INFO: Found node and create it as reference node &${node_label}"
+		if {[string equal -nocase ${node_label} ${def_string}]} {
+			error "Unable to create reference node as reference label is not provided"
+		}
+
+		set node [create_dt_node -n "&${node_label}"]
+		set_cur_working_dts ${cur_working_dts}
+		return $node
+	}
+
+	# Others - create the dt node
+	set cmd ""
+	if {![string equal -nocase ${node_name} ${def_string}]} {
+		set cmd "${cmd} -name ${node_name}"
+	}
+	if {![string equal -nocase ${node_label} ${def_string}]} {
+		set cmd "${cmd} -label ${node_label}"
+	}
+	if {![string equal -nocase ${node_unit_addr} ${def_string}]} {
+		set cmd "${cmd} -unit_addr ${node_unit_addr}"
+	}
+	if {![string equal -nocase ${parent_obj} ${def_string}] && \
+		![string_is_empty ${parent_obj}]} {
+		# temp solution for getting the right node object
+		#set cmd "${cmd} -objects \[get_node_object ${parent_obj} $dts_file\]"
+		#report_property [get_node_object ${parent_obj} $dts_file]
+		set cmd "${cmd} -objects \[get_node_object ${parent_obj} $parent_dts_file\]"
+	}
+
+	dtg_debug "create node command: create_dt_node ${cmd}"
+	# FIXME: create_dt_node fail detection here
+	set node [eval "create_dt_node ${cmd}"]
+	set_cur_working_dts ${cur_working_dts}
+	return $node
+}
