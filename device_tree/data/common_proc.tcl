@@ -307,6 +307,17 @@ proc set_cur_working_dts {{dts_file ""}} {
 	return $dt_tree_obj
 }
 
+proc get_baseaddr {slave_ip} {
+	# only returns the first addr
+	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
+	return [string tolower [get_property BASE_VALUE $ip_mem_handle]]
+}
+
+proc get_highaddr {slave_ip} {
+	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
+	return [get_property HIGH_VALUE $ip_mem_handle]
+}
+
 proc get_all_tree_nodes {dts_file} {
 	# Workaround for -hier not working with -of_objects
 	# get all the nodes presented in a dt_tree and return node list
