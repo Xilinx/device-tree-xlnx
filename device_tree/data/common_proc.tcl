@@ -1358,3 +1358,21 @@ proc gen_peripheral_nodes {drv_handle} {
 	zynq_gen_pl_clk_binding $drv_handle
 	return $rt_node
 }
+
+proc detect_bus_name {ip_drv} {
+	# FIXME: currently use single bus assumption
+	# TODO: detect bus connection
+	# 	zynq: uses amba base zynq-7000.dtsi
+	# 	mb: detection is required
+	set valid_buses [get_cells -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
+
+	set proc_name [get_property IP_NAME [get_cell [get_sw_processor]]]
+	if {[string equal -nocase "ps7_cortexa9" $proc_name]} {
+		return "amba 0"
+	}
+
+	if {[llength $valid_buses] == 1} {
+		return "[lindex $valid_buses 0] 0"
+	}
+	return "amba 0"
+}
