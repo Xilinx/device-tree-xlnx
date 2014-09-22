@@ -407,3 +407,11 @@ proc get_all_dt_labels {{dts_files ""}} {
 	current_dt_tree $cur_dts
 	return $labels
 }
+
+proc list_remove_element {cur_list elements} {
+	foreach e ${elements} {
+		set rm_idx [lsearch $cur_list $e]
+		set cur_list [lreplace $cur_list $rm_idx $rm_idx]
+	}
+	return $cur_list
+}
