@@ -337,3 +337,26 @@ proc check_node_in_dts {node_name dts_file_list} {
 	}
 	return 0
 }
+
+proc get_node_object {lu_node {dts_files ""}} {
+	# get the node object based on the args
+	# returns the dt node object
+	proc_called_by
+	if [string_is_empty $dts_files] {
+		set dts_files [get_dt_trees]
+	}
+	set cur_dts [current_dt_tree]
+	foreach dts_file ${dts_files} {
+		set dts_nodes [get_all_tree_nodes $dts_file]
+		foreach node ${dts_nodes} {
+			if {[regexp $lu_node $node match]} {
+				# workaround for -hier not working with -of_objects
+				current_dt_tree $dts_file
+				set node_obj [get_dt_nodes -hier $node]
+				current_dt_tree $cur_dts
+				return $node_obj
+			}
+		}
+	}
+	error "Failed to find $lu_node node !!!"
+}
