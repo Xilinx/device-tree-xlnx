@@ -1068,3 +1068,58 @@ proc set_drv_prop_if_empty args {
 	}
 	return 0
 }
+
+proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
+	# generate interrupts and interrupt-parent properties for soft IP
+	proc_called_by
+	if {[is_ps_ip $drv_handle]} {
+		return 0
+	}
+
+	set slave [get_cells ${drv_handle}]
+	set intr_id -1
+	set intc ""
+	set intr_info ""
+
+	if {[string_is_empty $intr_port_name]} {
+		set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
+	}
+
+	foreach pin ${intr_port_name} {
+		set intc [::hsm::utils::get_interrupt_parent $drv_handle $pin]
+		set intr_id [::hsm::utils::get_interrupt_id $drv_handle $pin]
+		if {[string match -nocase $intr_id "-1"]} {continue}
+		if {[string_is_empty $intc] == 1} {continue}
+
+		set intr_type [get_intr_type $intc $slave $pin]
+		if { [string match -nocase $intr_type "-1"] } {
+			continue
+		}
+
+		set cur_intr_info ""
+		if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
+			if { $intr_id > 32 } {
+				set intr_id [expr $intr_id - 32]
+			}
+			set cur_intr_info "0 $intr_id $intr_type"
+		} else {
+			set cur_intr_info "$intr_id $intr_type"
+		}
+
+		if {[string_is_empty $intr_info]} {
+			set intr_info "$cur_intr_info"
+		} else {
+			append intr_info " " $cur_intr_info
+		}
+	}
+
+	if {[string_is_empty $intr_info]} {
+		return -1
+	}
+	set_drv_prop $drv_handle interrupts $intr_info intlist
+	if {[string_is_empty $intc]} {
+		return -1
+	}
+	set intc [ps_node_mapping $intc label]
+	set_drv_prop $drv_handle interrupt-parent $intc reference
+}
