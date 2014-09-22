@@ -1,6 +1,10 @@
 #
 # common procedures
 #
+
+# global variables
+global def_string
+set def_string "__def_none"
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
 	set clkhandle [get_pins -of_objects $ip_handle $portname]
@@ -230,4 +234,52 @@ proc dtg_warning msg {
 proc proc_called_by {} {
 	return
 	puts "# [lindex [info level -1] 0] #>> called by [lindex [info level -2] 0]"
+}
+
+proc Pop {varname {nth 0}} {
+	upvar $varname args
+	set r [lindex $args $nth]
+	set args [lreplace $args $nth $nth]
+	return $r
+}
+
+proc gen_dt_node_search_pattern args {
+	proc_called_by
+	# generates device tree node search pattern and return it
+
+	global def_string
+	foreach var {node_name node_label node_unit_addr} {
+		set ${var} ${def_string}
+	}
+	while {[string match -* [lindex $args 0]]} {
+		switch -glob -- [lindex $args 0] {
+			-n* {set node_name [Pop args 1]}
+			-l* {set node_label [Pop args 1]}
+			-u* {set node_unit_addr [Pop args 1]}
+			-- { Pop args ; break }
+			default {
+				error "gen_dt_node_search_pattern bad option - [lindex $args 0]"
+			}
+		}
+		Pop args
+	}
+	set pattern ""
+	# TODO: is these search patterns correct
+	# TODO: check if pattern in the list or not
+	if {![string equal -nocase ${node_label} ${def_string}] && \
+		![string equal -nocase ${node_name} ${def_string}] && \
+		![string equal -nocase ${node_unit_addr} ${def_string}] } {
+		lappend pattern "${node_label}:${node_name}@${node_unit_addr}"
+		lappend pattern "${node_name}@${node_unit_addr}"
+	}
+
+	if {![string equal -nocase ${node_label} ${def_string}]} {
+		lappend pattern "&${node_label}"
+		lappend pattern "^${node_label}"
+	}
+	if {![string equal -nocase ${node_name} ${def_string}] && \
+		![string equal -nocase ${node_unit_addr} ${def_string}] } {
+		lappend pattern "${node_name}@${node_unit_addr}"
+	}
+	return $pattern
 }
