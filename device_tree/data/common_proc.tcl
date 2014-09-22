@@ -1347,6 +1347,8 @@ proc gen_peripheral_nodes {drv_handle} {
 
 	if {[is_ps_ip $drv_handle]} {
 		set status_disabled 0
+		set tmp [get_ps_node_unit_addr $drv_handle]
+		if {$tmp != -1} { set unit_addr $tmp}
 		if { [catch {set tmp [dict get $ps7_mapping $unit_addr label]} msg]} {
 			# CHK: if PS IP that's not in the zynq-7000 dtsi, do not generate it
 			return 0
