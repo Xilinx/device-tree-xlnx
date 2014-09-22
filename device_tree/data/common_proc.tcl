@@ -946,6 +946,25 @@ proc ps_node_mapping {ip_name prop} {
 	return $ip_name
 }
 
+proc get_ps_node_unit_addr {ip_name {prop "label"}} {
+	set ip [get_cells $ip_name]
+	set ip_mem_handle [hsi::utils::get_ip_mem_ranges [get_cells $ip]]
+
+	# loop through the base addresses: workaround for intc
+	foreach handler ${ip_mem_handle} {
+		set unit_addr [string tolower [get_property BASE_VALUE $handler]]
+		regsub -all {^0x} $unit_addr {} unit_addr
+		set ps7_mapping [gen_ps7_mapping]
+		if {[is_ps_ip [get_drivers $ip_name]]} {
+			if {[catch {set tmp [dict get $ps7_mapping $unit_addr $prop]} msg]} {
+				continue
+			}
+			return $unit_addr
+		}
+	}
+	return -1
+}
+
 proc remove_empty_reference_node {} {
 	# check for ps_ips
 	global zynq_soc_dt_tree
