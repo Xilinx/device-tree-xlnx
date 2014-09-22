@@ -688,3 +688,21 @@ proc is_ps_ip {ip_inst} {
 	}
 	return 0
 }
+
+proc get_node_name {drv_handle} {
+	# FIXME: handle node that is not an ip
+	# what about it is a bus node
+	set ip [get_cells $drv_handle]
+	# node that is not a ip
+	if {[string_is_empty $ip]} {
+		set dt_node [add_or_get_dt_node -n ${drv_handle}]
+		return $dt_node
+	}
+	set unit_addr [get_baseaddr ${ip}]
+	set dev_type [get_property CONFIG.dev_type $drv_handle]
+	if {[string_is_empty $dev_type] == 1} {
+		set dev_type $drv_handle
+	}
+	set dt_node [add_or_get_dt_node -n ${dev_type} -l ${drv_handle} -u ${unit_addr}]
+	return $dt_node
+}
