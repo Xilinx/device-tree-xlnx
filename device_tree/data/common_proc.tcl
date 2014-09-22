@@ -973,3 +973,20 @@ proc add_dts_header {dts_file str_add} {
 	set_property HEADER $header $dts_obj
 	set_cur_working_dts $cur_dts
 }
+
+proc zynq_gen_pl_clk_binding {drv_handle} {
+	# add dts binding for required nodes
+	#   clock-names = "ref_clk";
+	#   clocks = <&clkc 0>;
+	set proctype [get_property IP_NAME [get_cells [get_sw_processor]]]
+	# Assuming these device supports the clocks
+	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can"
+	if { [string match -nocase $proctype "ps7_cortexa9"] } {
+		set iptype [get_property IP_NAME [get_cells $drv_handle]]
+		if {[lsearch $valid_ip_list $iptype] >= 0} {
+			# FIXME: this is hardcoded - maybe dynamic detection
+			hsi::utils::add_new_property $drv_handle "clock-names" stringlist "ref_clk"
+			hsi::utils::add_new_property $drv_handle "clocks" reference "clkc 0"
+		}
+	}
+}
