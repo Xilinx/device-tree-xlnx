@@ -1045,6 +1045,16 @@ proc get_ip_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
 	return $rt
 }
 
+proc get_ip_handler {ip_name} {
+	# check if it is processor
+	if {[string equal -nocase [get_sw_processor] $ip_name]} {
+		return [get_sw_processor]
+	}
+	# check if it is the target processor
+	# get it from drvers
+	return [get_drivers $ip_name]
+}
+
 proc set_drv_prop args {
 	set drv_handle [lindex $args 0]
 	set prop_name [lindex $args 1]
