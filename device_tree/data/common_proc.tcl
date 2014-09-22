@@ -360,3 +360,29 @@ proc get_node_object {lu_node {dts_files ""}} {
 	}
 	error "Failed to find $lu_node node !!!"
 }
+
+proc update_dt_parent args {
+	# update device tree node's parent
+	# return the node name
+	proc_called_by
+	set node [lindex $args 0]
+	set new_parent [lindex $args 1]
+	if {[llength $args] >= 3} {
+		set dts_file [lindex $args 2]
+	} else {
+		set dts_file [current_dt_tree]
+	}
+	set node [get_node_object $node $dts_file]
+	# Skip if node is a reference node (start with &) or amba
+	if {[regexp "^&.*" "$node" match] || [regexp "amba" "$node" match]} {
+		return $node
+	}
+
+	set cur_parent [get_property PARENT $node]
+	# set new parent if required
+	if {![string equal -nocase ${cur_parent} ${new_parent}] && [string_is_empty ${new_parent}] == 0} {
+		dtg_debug "Update parent to $new_parent"
+		set_property PARENT "${new_parent}" $node
+	}
+	return $node
+}
