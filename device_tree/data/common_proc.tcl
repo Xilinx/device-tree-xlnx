@@ -3,8 +3,11 @@
 #
 
 # global variables
-global def_string
+global def_string zynq_soc_dt_tree zynq_7000_fname
 set def_string "__def_none"
+set zynq_soc_dt_tree "dummy.dtsi"
+set zynq_7000_fname "zynq-7000.dtsi"
+
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
 	set clkhandle [get_pins -of_objects $ip_handle $portname]
@@ -763,4 +766,86 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	# TODO: sanity check is missing
 	dtg_debug "${dt_node} - ${prop} - ${value} - ${type}"
 	hsm::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
+}
+
+proc create_dt_tree_from_dts_file {} {
+	global def_string zynq_7000_fname
+	set kernel_dtsi ""
+	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+	foreach i [get_sw_cores device_tree] {
+		set kernel_dtsi "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${zynq_7000_fname}"
+		if {[file exists $kernel_dtsi] } {
+			foreach file [glob [get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/*] {
+				# NOTE: ./ works only if we did not change our directory
+				file copy -force $file ./
+			}
+			break
+		}
+	}
+
+	if {![file exists $kernel_dtsi] || [string_is_empty $kernel_dtsi]} {
+		error "Unable to find the dts file $kernel_dtsi"
+	}
+
+	global zynq_soc_dt_tree
+	set default_dts [create_dt_tree -dts_file $zynq_soc_dt_tree]
+	set fp [open $kernel_dtsi r]
+	set file_data [read $fp]
+	set data [split $file_data "\n"]
+
+	set node_level -1
+	foreach line $data {
+		set node_start_regexp "\{(\\s+|\\s|)$"
+		set node_end_regexp "\}(\\s+|\\s|);(\\s+|\\s|)$"
+		if {[regexp $node_start_regexp $line matched]} {
+			regsub -all "\{| |\t" $line {} line
+			incr node_level
+			set cur_node [line_to_node $line $node_level $default_dts]
+		} elseif {[regexp $node_end_regexp $line matched]} {
+			set node_level [expr "$node_level - 1"]
+		}
+		# TODO (MAYBE): convert every property into dt node
+		set status_regexp "status(|\\s+)="
+		set value ""
+		if {[regexp $status_regexp $line matched]} {
+			regsub -all "\{| |\t|;|\"" $line {} line
+			set line_data [split $line "="]
+			set value [lindex $line_data 1]
+			hsm::utils::add_new_dts_param "${cur_node}" "status" $value string
+		}
+	}
+}
+
+proc line_to_node {line node_level default_dts} {
+	# TODO: make dt_node_dict as global
+	global dt_node_dict
+	global def_string
+	regsub -all "\{| |\t" $line {} line
+	set parent_node $def_string
+	set node_label $def_string
+	set node_name $def_string
+	set node_unit_addr $def_string
+
+	set node_data [split $line ":"]
+	set node_data_size [llength $node_data]
+	if {$node_data_size == 2} {
+		set node_label [lindex $node_data 0]
+		set tmp_data [split [lindex $node_data 1] "@"]
+		set node_name [lindex $tmp_data 0]
+		if {[llength $tmp_data] >= 2} {
+			set node_unit_addr [lindex $tmp_data 1]
+		}
+	} elseif {$node_data_size == 1} {
+		set node_name [lindex $node_data 0]
+	} else {
+		error "invalid node found - $line"
+	}
+
+	if { $node_level > 0} {
+		set parent_node [dict get $dt_node_dict [expr $node_level - 1] parent_node]
+	}
+
+	set cur_node [add_or_get_dt_node -n ${node_name} -l ${node_label} -u ${node_unit_addr} -d ${default_dts} -p ${parent_node}]
+	dict set dt_node_dict $node_level parent_node $cur_node
+	return $cur_node
 }
