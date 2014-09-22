@@ -1172,3 +1172,75 @@ proc gen_reg_property {drv_handle} {
 	}
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
 }
+
+proc ip2drv_prop {ip_name ip_prop_name} {
+	set drv_handle [get_ip_handler $ip_name]
+	set ip [get_cells $ip_name]
+
+	# remove CONFIG.C_
+	set drv_prop_name $ip_prop_name
+	regsub -all {CONFIG.C_} $drv_prop_name {xlnx,} drv_prop_name
+	regsub -all {_} $drv_prop_name {-} drv_prop_name
+	set drv_prop_name [string tolower $drv_prop_name]
+	add_cross_property $ip $ip_prop_name $drv_handle ${drv_prop_name} hexint
+}
+
+proc gen_drv_prop_from_ip {drv_handle} {
+	# check if we should generating the ip properties or not
+	set gen_ip_prop [get_drv_conf_prop_list $drv_handle "CONFIG.dtg.ip_params"]
+	if {![string_is_empty $gen_ip_prop] } {
+		return 0
+	}
+	set prop_name_list [default_parameters $drv_handle]
+	foreach prop_name ${prop_name_list} {
+		ip2drv_prop $drv_handle $prop_name
+	}
+}
+
+# based on libgen dtg
+proc default_parameters {ip_handle {dont_generate ""}} {
+	set par_handles [get_ip_conf_prop_list $ip_handle "CONFIG.C_.*"]
+	set valid_prop_names {}
+	foreach par $par_handles {
+		regsub -all {CONFIG.} $par {} tmp_par
+		# Ignore some parameters that are always handled specially
+		switch -glob $tmp_par {
+			$dont_generate - \
+			"INSTANCE" - \
+			"*BASEADDR" - \
+			"*HIGHADDR" - \
+			"C_SPLB*" - \
+			"C_DPLB*" - \
+			"C_IPLB*" - \
+			"C_PLB*" - \
+			"M_AXI*" - \
+			"C_M_AXI*" - \
+			"S_AXI_ADDR_WIDTH" - \
+			"C_S_AXI_ADDR_WIDTH" - \
+			"S_AXI_DATA_WIDTH" - \
+			"C_S_AXI_DATA_WIDTH" - \
+			"S_AXI_ACLK_FREQ_HZ" - \
+			"C_S_AXI_ACLK_FREQ_HZ" - \
+			"S_AXI_LITE*" - \
+			"C_S_AXI_LITE*" - \
+			"S_AXI_PROTOCOL" - \
+			"C_S_AXI_PROTOCOL" - \
+			"*INTERCONNECT_?_AXI*" - \
+			"*S_AXI_ACLK_PERIOD_PS" - \
+			"M*_AXIS*" - \
+			"C_M*_AXIS*" - \
+			"S*_AXIS*" - \
+			"C_S*_AXIS*" - \
+			"PRH*" - \
+			"C_FAMILY" - \
+			"FAMILY" - \
+			"*CLK_FREQ_HZ" - \
+			"*ENET_SLCR_*Mbps_DIV?" - \
+			"HW_VER" { } \
+			default {
+				lappend valid_prop_names $par
+			}
+		}
+	}
+	return $valid_prop_names
+}
