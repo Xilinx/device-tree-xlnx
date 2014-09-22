@@ -1376,3 +1376,21 @@ proc detect_bus_name {ip_drv} {
 	}
 	return "amba 0"
 }
+
+proc add_or_get_bus_node {ip_drv dts_file} {
+	set bus_info [detect_bus_name $ip_drv]
+	set bus_label [lindex $bus_info 0]
+	set bus_uaddr [lindex $bus_info 1]
+
+	dtg_debug "bus_label: $bus_label"
+	dtg_debug "bus_uaddr: $bus_uaddr"
+
+	set bus_node [add_or_get_dt_node -n "amba" -l ${bus_label} -u ${bus_uaddr} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
+	if {![string match "&*" $bus_node]} {
+		hsm::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+		hsm::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
+		hsm::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
+		hsm::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
+	}
+	return $bus_node
+}
