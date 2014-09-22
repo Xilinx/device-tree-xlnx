@@ -71,6 +71,9 @@ proc add_cross_property args {
 						return 0
 					}
 				}
+				if {[regexp "(int|hex).*" $type match]} {
+					regsub -all {"} $value "" value
+				}
 				hsm::utils::add_new_property $dest_handle $dest_prop $type $value
 				return 0
 			}
