@@ -1029,6 +1029,22 @@ proc get_intr_type {intc_name ip_name port_name} {
 	return -1
 }
 
+proc get_drv_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
+	set drv_handle [get_ip_handler $ip_name]
+	if { [catch {set rt [list_property -regexp $drv_handle ${def_pattern}]} msg]} {
+		set rt ""
+	}
+	return $rt
+}
+
+proc get_ip_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
+	set ip [get_cells $ip_name]
+	if { [catch {set rt [list_property -regexp $ip ${def_pattern}]} msg]} {
+		set rt ""
+	}
+	return $rt
+}
+
 proc set_drv_prop args {
 	set drv_handle [lindex $args 0]
 	set prop_name [lindex $args 1]
