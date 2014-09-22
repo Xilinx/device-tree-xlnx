@@ -421,6 +421,38 @@ proc list_remove_element {cur_list elements} {
 	return $cur_list
 }
 
+proc update_system_dts_include {include_file} {
+	# where should we get master_dts data
+	set master_dts [get_property CONFIG.master_dts [get_os]]
+	set cur_dts [current_dt_tree]
+	set master_dts_obj [get_dt_trees ${master_dts}]
+
+	if {[string_is_empty $master_dts_obj] == 1} {
+		set master_dts_obj [set_cur_working_dts ${master_dts}]
+	}
+	if { [string equal ${include_file} ${master_dts_obj}] } {
+		return 0
+	}
+	set cur_inc_list [get_property INCLUDE_FILES $master_dts_obj]
+	set tmp_list [split $cur_inc_list ","]
+	if { [lsearch $tmp_list $include_file] < 0} {
+		if {[string_is_empty $cur_inc_list]} {
+			set cur_inc_list $include_file
+		} else {
+			append cur_inc_list "," $include_file
+		}
+		set_property INCLUDE_FILES ${cur_inc_list} $master_dts_obj
+	}
+
+	# set dts version
+	set dts_ver [get_property DTS_VERSION $master_dts_obj]
+	if {[string_is_empty $dts_ver]} {
+		set_property DTS_VERSION "/dts-v1/" $master_dts_obj
+	}
+
+	set_cur_working_dts $cur_dts
+}
+
 proc set_drv_def_dts {drv_handle} {
 	# optional dts control by adding the following line in mdd file
 	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
