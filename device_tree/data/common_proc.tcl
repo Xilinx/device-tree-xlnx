@@ -306,3 +306,14 @@ proc set_cur_working_dts {{dts_file ""}} {
 	}
 	return $dt_tree_obj
 }
+
+proc get_all_tree_nodes {dts_file} {
+	# Workaround for -hier not working with -of_objects
+	# get all the nodes presented in a dt_tree and return node list
+	proc_called_by
+	set cur_dts [current_dt_tree]
+	current_dt_tree $dts_file
+	set all_nodes [get_dt_nodes -hier]
+	current_dt_tree $cur_dts
+	return $all_nodes
+}
