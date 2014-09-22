@@ -990,3 +990,41 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 		}
 	}
 }
+
+proc get_intr_type {intc_name ip_name port_name} {
+	set intc [get_cells $intc_name]
+	set ip [get_cells $ip_name]
+	if {[llength $intc] == 0 && [llength $ip] == 0} {
+		return -1
+	}
+	set intr_pin [get_pins -of_objects $ip $port_name]
+	set sensitivity ""
+	if { [llength $intr_pin] >= 1 } {
+		# TODO: check with HSM dev and see if this is a bug
+		set sensitivity [get_property SENSITIVITY $intr_pin]
+	}
+	set intc_type [get_property IP_NAME $intc ]
+	if { [string match -nocase $intc_type "ps7_scugic"] } {
+		if { [string match -nocase $sensitivity "EDGE_FALLING"] } {
+				return 2;
+		} elseif { [string match -nocase $sensitivity "EDGE_RISING"] } {
+				return 1;
+		} elseif { [string match -nocase $sensitivity "LEVEL_HIGH"] } {
+				return 4;
+		} elseif { [string match -nocase $sensitivity "LEVEL_LOW"] } {
+				return 8;
+		}
+	} else {
+		# Follow the openpic specification
+		if { [string match -nocase $sensitivity "EDGE_FALLING"] } {
+				return 3;
+		} elseif { [string match -nocase $sensitivity "EDGE_RISING"] } {
+				return 0;
+		} elseif { [string match -nocase $sensitivity "LEVEL_HIGH"] } {
+				return 2;
+		} elseif { [string match -nocase $sensitivity "LEVEL_LOW"] } {
+				return 1;
+		}
+	}
+	return -1
+}
