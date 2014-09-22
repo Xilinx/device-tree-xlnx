@@ -658,3 +658,33 @@ proc add_or_get_dt_node args {
 	set_cur_working_dts ${cur_working_dts}
 	return $node
 }
+
+proc is_pl_ip {ip_inst} {
+	# check if the IP is a soft IP (not PS7)
+	# return 1 if it is soft ip
+	# return 0 if not
+	set ip_obj [get_cells $ip_inst]
+	if {[llength [get_cells $ip_inst]] < 1} {
+		return 0
+	}
+	set ip_name [get_property IP_NAME $ip_obj]
+	if {![regexp "ps[7]_*" "$ip_name" match]} {
+		return 1
+	}
+	return 0
+}
+
+proc is_ps_ip {ip_inst} {
+	# check if the IP is a soft IP (not PS7)
+	# return 1 if it is soft ip
+	# return 0 if not
+	set ip_obj [get_cells $ip_inst]
+	if {[llength [get_cells $ip_inst]] < 1} {
+		return 0
+	}
+	set ip_name [get_property IP_NAME $ip_obj]
+	if {[regexp "ps[7]_*" "$ip_name" match]} {
+		return 1
+	}
+	return 0
+}
