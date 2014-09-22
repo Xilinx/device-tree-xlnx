@@ -717,3 +717,27 @@ proc get_node_name {drv_handle} {
 	set dt_node [add_or_get_dt_node -n ${dev_type} -l ${drv_handle} -u ${unit_addr}]
 	return $dt_node
 }
+
+proc get_driver_conf_list {drv_handle} {
+	# Assuming the driver property starts with CONFIG.<xyz>
+	# Returns all the property name that should be add to the node
+	set dts_conf_list ""
+	# handle no CONFIG parameter
+	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG\\..*"]} msg]} {
+		return ""
+	}
+	foreach line [split $rt "\n"] {
+		regsub -all {\s+} $line { } line
+		if {[regexp "CONFIG\\..*\\.dts(i|)" $line matched]} {
+			continue
+		}
+		if {[regexp "CONFIG\\..*" $line matched]} {
+			lappend dts_conf_list [lindex [split $line " "] 0]
+		}
+	}
+	# Remove config based properties
+	# currently it is not possible to different by type: Pending on HSI implementation
+	# this is currently hard coded to remove CONFIG.def_dts CONFIG.dev_type CONFIG.dtg.alias CONFIG.dtg.ip_params
+	set dts_conf_list [list_remove_element $dts_conf_list "CONFIG.def_dts CONFIG.dev_type CONFIG.dtg.alias CONFIG.dtg.ip_params"]
+	return $dts_conf_list
+}
