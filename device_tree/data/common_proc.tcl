@@ -849,3 +849,77 @@ proc line_to_node {line node_level default_dts} {
 	dict set dt_node_dict $node_level parent_node $cur_node
 	return $cur_node
 }
+
+proc gen_ps7_mapping {} {
+	# TODO: check if it is target cpu is cortex a9
+
+	# TODO: remove def_ps7_mapping
+	set def_ps7_mapping [dict create]
+	dict set def_ps7_mapping f8891000 label pmu
+	dict set def_ps7_mapping f8007100 label adc
+	dict set def_ps7_mapping e0008000 label can0
+	dict set def_ps7_mapping e0009000 label can1
+	dict set def_ps7_mapping e000a000 label gpio0
+	dict set def_ps7_mapping e0004000 label i2c0
+	dict set def_ps7_mapping e0005000 label i2c1
+	dict set def_ps7_mapping f8f01000 label intc
+	dict set def_ps7_mapping f8f00100 label intc
+	dict set def_ps7_mapping f8f02000 label L2
+	dict set def_ps7_mapping f8006000 label memory-controller
+	dict set def_ps7_mapping f800c000 label ocmc
+	dict set def_ps7_mapping e0000000 label uart0
+	dict set def_ps7_mapping e0001000 label uart1
+	dict set def_ps7_mapping e0006000 label spi0
+	dict set def_ps7_mapping e0007000 label spi1
+	dict set def_ps7_mapping e000d000 label qspi
+	dict set def_ps7_mapping e000e000 label smcc
+	dict set def_ps7_mapping e1000000 label nand0
+	dict set def_ps7_mapping e2000000 label nor
+	dict set def_ps7_mapping e000b000 label gem0
+	dict set def_ps7_mapping e000c000 label gem1
+	dict set def_ps7_mapping e0100000 label sdhci0
+	dict set def_ps7_mapping e0101000 label sdhci1
+	dict set def_ps7_mapping f8000000 label slcr
+	dict set def_ps7_mapping f8003000 label dmac_s
+	dict set def_ps7_mapping f8007000 label devcfg
+	dict set def_ps7_mapping f8f00200 label global_timer
+	dict set def_ps7_mapping f8001000 label ttc0
+	dict set def_ps7_mapping f8002000 label ttc1
+	dict set def_ps7_mapping f8f00600 label scutimer
+	dict set def_ps7_mapping f8005000 label watchdog0
+	dict set def_ps7_mapping f8f00620 label scuwatchdog
+	dict set def_ps7_mapping e0002000 label usb0
+	dict set def_ps7_mapping e0003000 label usb1
+
+	set ps7_mapping [dict create]
+	global zynq_soc_dt_tree
+	if {[lsearch [get_dt_trees] $zynq_soc_dt_tree] >= 0} {
+		# get nodes under bus
+		foreach node [get_all_tree_nodes $zynq_soc_dt_tree] {
+			# only care about the device with parent ambe
+			set parent [get_property PARENT  $node]
+			set ignore_parent_list {(/|cpu)}
+			if {[regexp $ignore_parent_list $parent matched]} {
+				continue
+			}
+			set unit_addr [get_property UNIT_ADDRESS $node]
+			set node_name [get_property NODE_NAME $node]
+			set node_label [get_property NODE_LABEL $node]
+			if { [catch {set status_prop [get_property CONFIG.status $node]} msg]} {
+				set status_prop "enable"
+			}
+			if {[string_is_empty $node_label] || \
+				[string_is_empty $unit_addr]} {
+				continue
+			}
+			dict set ps7_mapping $unit_addr label $node_label
+			dict set ps7_mapping $unit_addr name $node_name
+			dict set ps7_mapping $unit_addr status $status_prop
+		}
+	}
+	if {[string_is_empty $ps7_mapping] } {
+		return $def_ps7_mapping
+	} else {
+		return $ps7_mapping
+	}
+}
