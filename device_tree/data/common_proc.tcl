@@ -1269,3 +1269,92 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 		}
 	}
 }
+
+proc gen_peripheral_nodes {drv_handle} {
+	set status_enable_flow 0
+	set ip [get_cells $drv_handle]
+	# TODO: check if the base address is correct
+	set unit_addr [get_baseaddr ${ip}]
+	regsub -all {^0x} $unit_addr {} unit_addr
+	set label $drv_handle
+	set dev_type [get_property CONFIG.dev_type $drv_handle]
+	if {[string_is_empty $dev_type] == 1} {
+		set dev_type $drv_handle
+	}
+
+	# TODO: more ignore ip list?
+	set ip_type [get_property IP_NAME $ip]
+	set ignore_list "lmb_bram_if_cntlr"
+	if {[lsearch $ignore_list $ip_type] >= 0  \
+		} {
+		return 0
+	}
+
+	set default_dts [set_drv_def_dts $drv_handle]
+
+	set ps7_mapping [gen_ps7_mapping]
+	set bus_node [add_or_get_bus_node $ip $default_dts]
+
+	if {[is_ps_ip $drv_handle]} {
+		set status_disabled 0
+		if { [catch {set tmp [dict get $ps7_mapping $unit_addr label]} msg]} {
+			# CHK: if PS IP that's not in the zynq-7000 dtsi, do not generate it
+			return 0
+		}
+		if {![string_is_empty $tmp]} {
+			set status_enable_flow 1
+		}
+		if {[catch {set tmp [dict get $ps7_mapping $unit_addr status]} msg]} {
+			set status_disabled 0
+		}
+		if {[string equal -nocase "disabled" $tmp]} {
+			set status_disabled 1
+		}
+	}
+	if {$status_enable_flow} {
+		set label [dict get $ps7_mapping $unit_addr label]
+		set dev_type [dict get $ps7_mapping $unit_addr name]
+		set bus_node ""
+		# check if it has status property
+		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+		if {$status_disabled} {
+			hsm::utils::add_new_dts_param "${rt_node}" "status" "okay" string
+		}
+	} else {
+		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+	}
+
+	set dts_file_list ""
+	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
+		set rt ""
+	}
+	foreach line [split $rt "\n"] {
+		regsub -all {\s+} $line { } line
+		if {[regexp "CONFIG.*\\.dts(i|)" $line matched]} {
+			lappend dts_file_list [lindex [split $line " "] 0]
+		}
+	}
+	regsub -all {CONFIG.} $dts_file_list {} dts_file_list
+
+	set status_enable 0
+	set drv_dt_prop_list [get_driver_conf_list $drv_handle]
+	foreach dts_file ${dts_file_list} {
+		set dts_prop_list [get_property CONFIG.${dts_file} $drv_handle]
+		set dt_node ""
+		if {[string_is_empty ${dts_prop_list}] == 0} {
+			set dt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${dts_file} -p $bus_node]
+			foreach prop ${dts_prop_list} {
+				add_driver_prop $drv_handle $dt_node CONFIG.${prop}
+				# remove from default list
+				set drv_dt_prop_list [list_remove_element $drv_dt_prop_list "CONFIG.${prop}"]
+			}
+		}
+	}
+
+	# update rest of properties to dt node
+	foreach drv_prop_name $drv_dt_prop_list {
+		add_driver_prop $drv_handle $rt_node ${drv_prop_name}
+	}
+	zynq_gen_pl_clk_binding $drv_handle
+	return $rt_node
+}
