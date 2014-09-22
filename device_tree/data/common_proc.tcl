@@ -1244,3 +1244,28 @@ proc default_parameters {ip_handle {dont_generate ""}} {
 	}
 	return $valid_prop_names
 }
+
+proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
+	set src_ip -1
+	set value -1
+	set ip [get_cells $drv_handle]
+	set value [get_property ${reset_pram} $ip]
+	# workaround for reset not been selected and show as "<Select>"
+	regsub -all "<Select>" $value "" value
+	if { [llength $value] } {
+		# if MIO, assume gpio0 (bad assumption as this needs to match zynq-7000.dtsi)
+		if {[regexp "^MIO" $value matched]} {
+			# switch with kernel version
+			set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+			switch -exact $kernel_ver {
+				default {
+					set src_ip "gpio0"
+				}
+			}
+		}
+		regsub -all "MIO( |)" $value "" value
+		if { $value != "-1" && [llength $value] !=0  } {
+			set_property ${conf_prop} "$src_ip $value 0" $drv_handle
+		}
+	}
+}
