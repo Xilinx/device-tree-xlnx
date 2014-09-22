@@ -1149,3 +1149,26 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set intc [ps_node_mapping $intc label]
 	set_drv_prop $drv_handle interrupt-parent $intc reference
 }
+
+proc gen_reg_property {drv_handle} {
+	proc_called_by
+
+	if {[is_ps_ip $drv_handle]} {
+		return 0
+	}
+
+	set reg ""
+	set slave [get_cells ${drv_handle}]
+	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
+	foreach mem_handle ${ip_mem_handles} {
+		set base [get_property BASE_VALUE $mem_handle]
+		set high [get_property HIGH_VALUE $mem_handle]
+		set size [format 0x%x [expr {${high} - ${base} + 1}]]
+		if {[string_is_empty $reg]} {
+			set reg "$base $size"
+		} else {
+			set reg "$reg $base $size"
+		}
+	}
+	set_drv_prop_if_empty $drv_handle reg $reg intlist
+}
