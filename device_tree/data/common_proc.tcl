@@ -964,3 +964,12 @@ proc remove_empty_reference_node {} {
 		}
 	}
 }
+
+proc add_dts_header {dts_file str_add} {
+	set cur_dts [current_dt_tree]
+	set dts_obj [set_cur_working_dts ${dts_file}]
+	set header [get_property HEADER $dts_obj]
+	append header "\n" $str_add
+	set_property HEADER $header $dts_obj
+	set_cur_working_dts $cur_dts
+}
