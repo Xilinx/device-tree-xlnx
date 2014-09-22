@@ -1225,7 +1225,7 @@ proc ip2drv_prop {ip_name ip_prop_name} {
 proc gen_drv_prop_from_ip {drv_handle} {
 	# check if we should generating the ip properties or not
 	set gen_ip_prop [get_drv_conf_prop_list $drv_handle "CONFIG.dtg.ip_params"]
-	if {![string_is_empty $gen_ip_prop] } {
+	if {[string_is_empty $gen_ip_prop] } {
 		return 0
 	}
 	set prop_name_list [default_parameters $drv_handle]
