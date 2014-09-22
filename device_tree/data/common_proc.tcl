@@ -290,3 +290,19 @@ proc gen_dt_node_search_pattern args {
 	}
 	return $pattern
 }
+
+proc set_cur_working_dts {{dts_file ""}} {
+	# set current working device tree
+	# return the tree object
+	proc_called_by
+	if {[string_is_empty ${dts_file}] == 1} {
+		return [current_dt_tree]
+	}
+	set dt_idx [lsearch [get_dt_trees] ${dts_file}]
+	if { $dt_idx >= 0 } {
+		set dt_tree_obj [current_dt_tree [lindex [get_dt_trees] $dt_idx]]
+	} else {
+		set dt_tree_obj [create_dt_tree -dts_file $dts_file]
+	}
+	return $dt_tree_obj
+}
