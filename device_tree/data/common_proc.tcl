@@ -378,6 +378,11 @@ proc update_dt_parent args {
 		return $node
 	}
 
+	# Currently the PARENT node must within the same dt tree
+	if {![check_node_in_dts $new_parent $dts_file]} {
+		error "Node '$node' is not in $dts_file tree"
+	}
+
 	set cur_parent [get_property PARENT $node]
 	# set new parent if required
 	if {![string equal -nocase ${cur_parent} ${new_parent}] && [string_is_empty ${new_parent}] == 0} {
@@ -414,4 +419,21 @@ proc list_remove_element {cur_list elements} {
 		set cur_list [lreplace $cur_list $rm_idx $rm_idx]
 	}
 	return $cur_list
+}
+
+proc set_drv_def_dts {drv_handle} {
+	# optional dts control by adding the following line in mdd file
+	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
+	set default_dts [get_property CONFIG.def_dts $drv_handle]
+	if {[string_is_empty $default_dts]} {
+		if {[is_pl_ip $drv_handle] == 1} {
+			set default_dts "pl.dtsi"
+		} else {
+			# PS IP, read pcw_dts property
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+		}
+	}
+	set default_dts [set_cur_working_dts $default_dts]
+	update_system_dts_include $default_dts
+	return $default_dts
 }
