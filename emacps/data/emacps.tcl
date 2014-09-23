@@ -32,8 +32,7 @@ proc gen_phy_node args {
     set phy_name [lindex $args 1]
     set phya [lindex $args 2]
 
-    set parent_node [get_node_name $mdio_node]
-    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $parent_node]
+    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
     hsm::utils::add_new_dts_param "${phy_node}" "reg" $phya int
     hsm::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
     if {[llength $args] >= 4} {
