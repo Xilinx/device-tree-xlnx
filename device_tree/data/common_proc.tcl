@@ -1223,6 +1223,23 @@ proc gen_reg_property {drv_handle} {
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
 }
 
+proc gen_compatible_property {drv_handle} {
+	proc_called_by
+
+	if {[is_ps_ip $drv_handle]} {
+		return 0
+	}
+
+	set reg ""
+	set slave [get_cells ${drv_handle}]
+	set vlnv [split [get_property VLNV $slave] ":"]
+	set name [lindex $vlnv 2]
+	set ver [lindex $vlnv 3]
+	set comp_prop "xlnx,${name}-${ver}"
+	regsub -all {_} $comp_prop {-} comp_prop
+	set_drv_prop_if_empty $drv_handle compatible $comp_prop stringlist
+}
+
 proc ip2drv_prop {ip_name ip_prop_name} {
 	set drv_handle [get_ip_handler $ip_name]
 	set ip [get_cells $ip_name]
