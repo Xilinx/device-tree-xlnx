@@ -38,14 +38,14 @@ proc generate_mb_ccf_node {os_handle} {
         foreach drv ${drv_list} {
             set hwinst [get_property HW_INSTANCE $drv]
             set iptype [get_property IP_NAME [get_cells $hwinst]]
-            if  {[lsearch $valid_ip_list $iptype] < 0 } {
+            if {[lsearch $valid_ip_list $iptype] < 0} {
                 continue
             }
             # get bus clock frequency
             set clk_freq [get_clock_frequency [get_cells $drv] "S_AXI_ACLK"]
             if {![string equal $clk_freq ""]} {
                 # FIXME: bus clk source count should based on the clock generator not based on clk freq diff
-                if  {[lsearch $bus_clk_list $clk_freq] < 0 } {
+                if {[lsearch $bus_clk_list $clk_freq] < 0} {
                     set bus_clk_list [lappend $bus_clk_list $clk_freq]
                 }
                 set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
@@ -77,11 +77,11 @@ proc zynq_gen_pl_clk_binding {} {
     set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can"
 
     set drv_list [get_drivers]
-    if { [string match -nocase $proctype "ps7_cortexa9"] } {
+    if {[string match -nocase $proctype "ps7_cortexa9"]} {
         foreach drv ${drv_list} {
             set hwinst [get_property HW_INSTANCE $drv]
             set iptype [get_property IP_NAME [get_cells $hwinst]]
-            if  {[lsearch $valid_ip_list $iptype] < 0 } {
+            if {[lsearch $valid_ip_list $iptype] < 0} {
                 continue
         }
         # this is hardcoded - maybe dynamic detection
@@ -94,7 +94,7 @@ proc zynq_gen_pl_clk_binding {} {
 # workaround for moving nodes around until HSM core to support it
 proc move_node {node_drv parent_node_drv} {
     set new_node ""
-    if {[llength $node_drv] == 0 && [llength $parent_node_drv] == 0 } {
+    if {[llength $node_drv] == 0 && [llength $parent_node_drv] == 0} {
         return $new_node
     }
     set node_class [get_property CLASS $node_drv]
@@ -151,7 +151,6 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
     set_property $conf_prop $count $drv_handle
     incr count
     ::hsm::utils::set_os_parameter_value $var_name $count
-
 }
 
 proc gen_count_prop {drv_handle data_dict} {
@@ -163,7 +162,7 @@ proc gen_count_prop {drv_handle data_dict} {
 
         set hwinst [get_property HW_INSTANCE $drv_handle]
         set iptype [get_property IP_NAME [get_cells $hwinst]]
-        if  {[lsearch $valid_ip_list $iptype] < 0 } {
+        if {[lsearch $valid_ip_list $iptype] < 0} {
             continue
         }
 
@@ -254,7 +253,7 @@ proc bsp_drc {os_handle} {
 
 # If standalone purpose
 proc device_tree_drc {os_handle} {
-	bsp_drc $os_handle
+    bsp_drc $os_handle
     hsm::utils::add_new_child_node $os_handle "global_params"
 }
 
@@ -271,27 +270,27 @@ proc post_generate {os_handle} {
     gen_dev_conf
 }
 
-proc clean_os { os_handle } {
+proc clean_os {os_handle} {
     #deleting unwanted child nodes of OS for dumping into dts file
     set node [get_nodes -of_objects $os_handle "global_params"]
-    if { [llength $node] } {
+    if {[llength $node]} {
         delete_objs $node
     }
 }
 
-proc add_chosen { os_handle } {
+proc add_chosen {os_handle} {
     set system_node [hsm::utils::get_or_create_child_node $os_handle "dtg.system"]
     set chosen_node [hsm::utils::get_or_create_child_node $system_node "chosen"]
 
     #getting boot arguments
     set bootargs [get_property CONFIG.bootargs $os_handle]
-    if { [llength $bootargs] == 0 } {
+    if {[llength $bootargs] == 0} {
         set console [hsm::utils::get_os_parameter_value "console"]
-        if { [llength $console] } {
+        if {[llength $console]} {
             set bootargs "console=$console"
         }
     }
-    if { [llength $bootargs]  } {
+    if {[llength $bootargs]} {
         hsm::utils::add_new_property $chosen_node "bootargs" string $bootargs
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
