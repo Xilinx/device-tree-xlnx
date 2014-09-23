@@ -6,7 +6,5 @@ BEGIN driver nandps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = nandps;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
-  DTGPARAM name = compatible, type = stringlist, default = "arm,pl353-nand-r2p1";
 
 END driver
