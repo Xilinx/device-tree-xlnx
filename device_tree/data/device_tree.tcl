@@ -1,3 +1,11 @@
+foreach i [get_sw_cores device_tree] {
+    set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+    if {[file exists $common_tcl_file]} {
+        source $common_tcl_file
+        break
+    }
+}
+
 proc get_clock_frequency {ip_handle portname} {
     set clk ""
     set clkhandle [get_pins -of_objects $ip_handle $portname]
