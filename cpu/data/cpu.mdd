@@ -7,6 +7,7 @@ BEGIN driver cpu
     OPTION supported_os_types = (DTS);
     OPTION NAME = cpu;
 
+    DTGPARAM name = dev_type, default = cpu , type = string;
     DTGPARAM name = device_type, default = cpu , type = string;
     DTGPARAM name = clock-frequency, type = int , default = 1000000 ;
     DTGPARAM name = clocks, type = int, default = &clk_cpu;
@@ -20,5 +21,6 @@ BEGIN driver cpu
     DTGPARAM name = i-cache-line-size, type = hexint ;
     DTGPARAM name = i-cache-size, type = hexint ;
     DTGPARAM name = model, type = string;
+    DTGPARAM name = dtg.ip_params, type = boolean;
 
 END driver

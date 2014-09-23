@@ -1,4 +1,11 @@
 proc generate {drv_handle} {
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
+        }
+    }
 
     set ip [get_cells $drv_handle]
     set clk ""
@@ -11,14 +18,14 @@ proc generate {drv_handle} {
         set_property CONFIG.timebase-frequency "$clk" $drv_handle
     }
 
-    set icache_size [get_ip_param_value $ip "C_CACHE_BYTE_SIZE"]
-	set icache_base [get_ip_param_value $ip "C_ICACHE_BASEADDR"]
-	set icache_high [get_ip_param_value $ip "C_ICACHE_HIGHADDR"]
-	set dcache_size [get_ip_param_value $ip "C_DCACHE_BYTE_SIZE"]
-	set dcache_base [get_ip_param_value $ip "C_DCACHE_BASEADDR"]
-	set dcache_high [get_ip_param_value $ip "C_DCACHE_HIGHADDR"]
-    set icache_line_size [expr 4*[get_ip_param_value $ip "C_ICACHE_LINE_LEN"]]
-	set dcache_line_size [expr 4*[get_ip_param_value $ip "C_DCACHE_LINE_LEN"]]
+    set icache_size [hsi::utils::get_ip_param_value $ip "C_CACHE_BYTE_SIZE"]
+	set icache_base [hsi::utils::get_ip_param_value $ip "C_ICACHE_BASEADDR"]
+	set icache_high [hsi::utils::get_ip_param_value $ip "C_ICACHE_HIGHADDR"]
+	set dcache_size [hsi::utils::get_ip_param_value $ip "C_DCACHE_BYTE_SIZE"]
+	set dcache_base [hsi::utils::get_ip_param_value $ip "C_DCACHE_BASEADDR"]
+	set dcache_high [hsi::utils::get_ip_param_value $ip "C_DCACHE_HIGHADDR"]
+    set icache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_ICACHE_LINE_LEN"]]
+	set dcache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_DCACHE_LINE_LEN"]]
 
 
     if { [llength $icache_size] != 0 } {
@@ -36,4 +43,8 @@ proc generate {drv_handle} {
 
     set model "[get_property IP_NAME $ip],[get_ip_version $ip]"
     set_property CONFIG.model $model $drv_handle
+
+    # create root node
+    set master_root_node [gen_root_node $drv_handle]
+    set nodes [gen_cpu_nodes $drv_handle]
 }
