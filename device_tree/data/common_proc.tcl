@@ -1095,6 +1095,40 @@ proc set_drv_prop_if_empty args {
 	return 0
 }
 
+proc gen_mb_interrupt_property {cpu_handle {intr_port_name ""}} {
+	# generate interrupts and interrupt-parent properties for soft IP
+	proc_called_by
+	if {[is_ps_ip $cpu_handle]} {
+		return 0
+	}
+
+	set slave [get_cells ${cpu_handle}]
+	set intc ""
+
+	if {[string_is_empty $intr_port_name]} {
+		set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
+	}
+
+	foreach pin ${intr_port_name} {
+		set mb_net [get_nets -of_objects $pin]
+		set connected_pin_names [get_pins -of_objects $mb_net]
+		foreach cpin ${connected_pin_names} {
+			if {[string equal -nocase $pin $cpin]} {
+				continue
+			}
+			set intc [get_cells -of_objects $cpin]
+			if {![string_is_empty $intc]} {
+				break
+			}
+		}
+	}
+	if {[string_is_empty $intc]} {
+		error "no interrupt controller found"
+	}
+
+	set_drv_prop $cpu_handle interrupt-handle $intc reference
+}
+
 proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	# generate interrupts and interrupt-parent properties for soft IP
 	proc_called_by
