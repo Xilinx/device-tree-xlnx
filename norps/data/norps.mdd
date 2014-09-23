@@ -6,8 +6,6 @@ BEGIN driver norps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = norps;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
-  DTGPARAM name = compatible, type = stringlist, default = "cfi-flash";
   DTGPARAM name = bank-width, type = int, default = 1;
 
 END driver
