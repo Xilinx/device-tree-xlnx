@@ -50,22 +50,17 @@ proc gen_count_prop {drv_handle data_dict} {
         set drv_conf [dict get $data_dict $dev_type "drv_conf"]
         set os_count_name [dict get $data_dict $dev_type "os_count_name"]
 
-        set hwinst [get_property HW_INSTANCE $drv_handle]
-        set iptype [get_property IP_NAME [get_cells $hwinst]]
+        set slave [get_cells $drv_handle]
+        set iptype [get_property IP_NAME $slave]
         if {[lsearch $valid_ip_list $iptype] < 0} {
             continue
         }
 
         set irq_chk [dict get $data_dict $dev_type "irq_chk"]
         if {![string match -nocase "false" $irq_chk]} {
-            set ip_obj [get_cells $drv_handle]
-            set rt [catch {xget_port_interrupt_id $ip_obj $irq_chk}]
-            if {$rt != 0} {
-                puts "Warning: Fail to located interrupt pin - $irq_chk. The $drv_conf is not set for $dev_type"
-                continue
-            }
-            set irq_id [xget_port_interrupt_id $ip_obj $irq_chk]
+            set irq_id [::hsm::utils::get_interrupt_id $slave $irq_chk]
             if {[llength $irq_id] < 0} {
+                dtg_warning "Fail to located interrupt pin - $irq_chk. The $drv_conf is not set for $dev_type"
                 continue
             }
         }
