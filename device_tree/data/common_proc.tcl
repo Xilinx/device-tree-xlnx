@@ -279,18 +279,18 @@ proc gen_dt_node_search_pattern args {
 	# TODO: check if pattern in the list or not
 	if {![string equal -nocase ${node_label} ${def_string}] && \
 		![string equal -nocase ${node_name} ${def_string}] && \
-		![string equal -nocase ${node_unit_addr} ${def_string}] } {
-		lappend pattern "${node_label}:${node_name}@${node_unit_addr}"
-		lappend pattern "${node_name}@${node_unit_addr}"
+		![string equal -nocase ${node_unit_addr} ${def_string}]} {
+		lappend pattern "^${node_label}:${node_name}@${node_unit_addr}"
+		lappend pattern "^${node_name}@${node_unit_addr}"
 	}
 
 	if {![string equal -nocase ${node_label} ${def_string}]} {
-		lappend pattern "&${node_label}"
+		lappend pattern "^&${node_label}"
 		lappend pattern "^${node_label}"
 	}
 	if {![string equal -nocase ${node_name} ${def_string}] && \
-		![string equal -nocase ${node_unit_addr} ${def_string}] } {
-		lappend pattern "${node_name}@${node_unit_addr}"
+		![string equal -nocase ${node_unit_addr} ${def_string}]} {
+		lappend pattern "^${node_name}@${node_unit_addr}"
 	}
 	return $pattern
 }
