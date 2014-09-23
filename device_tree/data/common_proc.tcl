@@ -1571,3 +1571,10 @@ proc remove_all_tree {} {
 		catch {delete_objs $tree} msg
 	}
 }
+
+proc gen_mdio_node {drv_handle parent_node} {
+	set mdio_node [add_or_get_dt_node -n ${drv_handle}_mdio -p $parent_node]
+	hsm::utils::add_new_dts_param "${mdio_node}" "#address-cells" 1 int ""
+	hsm::utils::add_new_dts_param "${mdio_node}" "#size-cells" 0 int ""
+	return $mdio_node
+}
