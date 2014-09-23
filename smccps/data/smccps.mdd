@@ -6,11 +6,5 @@ BEGIN driver smccps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = smccps;
-  DTGPARAM name = compatible, type = stringlist, default = "arm,pl353-smc-r2p1";
 
-  DTGPARAM name = "#address-cells", default = 1, type = int;
-  DTGPARAM name = "#size-cells", default = 1, type = int;
-  DTGPARAM name = ranges;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
-  DTGPARAM name = clock-names, type = stringlist, default = "memclk aclk";
 END driver
