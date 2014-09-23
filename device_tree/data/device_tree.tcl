@@ -260,8 +260,9 @@ proc clean_os {os_handle} {
 }
 
 proc add_chosen {os_handle} {
-    set system_node [hsm::utils::get_or_create_child_node $os_handle "dtg.system"]
-    set chosen_node [hsm::utils::get_or_create_child_node $system_node "chosen"]
+    set default_dts [get_property CONFIG.master_dts [get_os]]
+    set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
+    set chosen_node [add_or_get_dt_node -n "chosen" -d ${default_dts} -p ${system_root_node}]
 
     #getting boot arguments
     set bootargs [get_property CONFIG.bootargs $os_handle]
@@ -272,8 +273,9 @@ proc add_chosen {os_handle} {
         }
     }
     if {[llength $bootargs]} {
-        hsm::utils::add_new_property $chosen_node "bootargs" string $bootargs
+        hsm::utils::add_new_dts_param "${chosen_node}" "bootargs" $bootargs string
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
-    hsm::utils::add_new_property $chosen_node "linux,stdout-path" aliasref $consoleip
+    set consoleip [ps_node_mapping $consoleip label]
+    hsm::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
 }
