@@ -2,27 +2,6 @@
 variable phy_count 0
 ##############################################################################
 
-proc gen_mdio_node {drv_handle} {
-    set mdio_child_name "mdio"
-    set mdio [hsm::utils::add_new_child_node $drv_handle $mdio_child_name]
-    hsm::utils::add_new_property $mdio "#address-cells" int 1
-    hsm::utils::add_new_property  $mdio "#size-cells" int 0
-    return $mdio
-}
-
-proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
-    set ip [get_cells $drv_handle]
-    set value [get_property CONFIG.${reset_pram} $ip]
-    # workaround for reset not been selected
-    regsub -all "<Select>" $value "" value
-    if { [llength $value] } {
-        regsub -all "MIO( |)" $value "" value
-        if { $value != "-1" && [llength $value] !=0  } {
-            set_property CONFIG.${conf_prop} "ps7_gpio_0 $value 0" $drv_handle
-        }
-    }
-}
-
 proc is_gmii2rgmii_conv_present {slave} {
     set phy_addr -1
     set ipconv 0
@@ -53,20 +32,29 @@ proc gen_phy_node args {
     set phy_name [lindex $args 1]
     set phya [lindex $args 2]
 
-    set phy_node [hsm::utils::add_new_child_node $mdio_node "${phy_name}"]
-    hsm::utils::add_new_property  $phy_node "reg" int $phya
-    hsm::utils::add_new_property  $phy_node "device_type" string "ethernet-phy"
+    set parent_node [get_node_name $mdio_node]
+    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $parent_node]
+    hsm::utils::add_new_dts_param "${phy_node}" "reg" $phya int
+    hsm::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
     if {[llength $args] >= 4} {
-        hsm::utils::add_new_property  $phy_node "compatible" stringlist [lindex $args 3]
+        hsm::utils::add_new_dts_param "${phy_node}" "compatible" [lindex $args 3] stringlist
     }
     return $phy_node
 }
 
 proc generate {drv_handle} {
-    set mdio_node [gen_mdio_node $drv_handle]
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
+        }
+    }
+
+    update_eth_mac_addr $drv_handle
 
     set slave [get_cells $drv_handle]
-    set phymode [get_ip_param_value $slave "C_ETH_MODE"]
+    set phymode [hsi::utils::get_ip_param_value $slave "C_ETH_MODE"]
     if { $phymode == 0 } {
         set_property CONFIG.phy-mode "gmii" $drv_handle
     } else {
@@ -75,17 +63,21 @@ proc generate {drv_handle} {
 
     set hwproc [get_cells [get_sw_processor]]
     if { [llength [get_sw_processor] ] && [llength $hwproc] } {
-        set ps7_cortexa9_1x_clk [get_ip_param_value $hwproc "C_CPU_1X_CLK_FREQ_HZ"]
+        set ps7_cortexa9_1x_clk [hsi::utils::get_ip_param_value $hwproc "C_CPU_1X_CLK_FREQ_HZ"]
         set_property CONFIG.xlnx,ptp-enet-clock "$ps7_cortexa9_1x_clk" $drv_handle
     }
-    ps7_reset_handle $drv_handle C_ENET_RESET enet-reset
+    ps7_reset_handle $drv_handle CONFIG.C_ENET_RESET CONFIG.enet-reset
+
+    # node must be created before child node
+    set node [gen_peripheral_nodes $drv_handle]
+    set mdio_node [gen_mdio_node $drv_handle $node]
 
     # check if gmii2rgmii converter is used.
     set conv_data [is_gmii2rgmii_conv_present $slave]
     set phya [lindex $conv_data 0]
     if { $phya != "-1" } {
         set phy_name "[lindex $conv_data 1]"
-        hsm::utils::add_new_property $drv_handle gmii2rgmii-phy-handle reference "$phy_name"
+        set_drv_prop $drv_handle gmii2rgmii-phy-handle "$phy_name" reference
         gen_phy_node $mdio_node $phy_name $phya
     }
 }

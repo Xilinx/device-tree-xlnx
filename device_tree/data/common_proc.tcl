@@ -1672,3 +1672,18 @@ proc generate_mb_ccf_node {drv_handle} {
 		#hsm::utils::add_new_property [get_drivers $proc_ip] "clocks" int &clk_cpu
 	}
 }
+
+proc update_eth_mac_addr {drv_handle} {
+	set ip [get_cells $drv_handle]
+	set serial_count [hsm::utils::get_os_parameter_value "eth_count"]
+	if {[llength $serial_count] == 0} {
+		set eth_count 0
+	}
+	set mac_addr_data [split [get_property CONFIG.local-mac-address $drv_handle] " "]
+
+	set last_value [format %02x [expr [lindex $mac_addr_data 5] + $eth_count ]]
+	set mac_addr [lreplace $mac_addr_data 5 5 $last_value]
+	dtg_debug "${drv_handle}:set mac addr to $mac_addr"
+	incr eth_count
+	hsm::utils::set_os_parameter_value "eth_count" $eth_count
+}
