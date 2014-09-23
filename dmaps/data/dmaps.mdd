@@ -7,10 +7,4 @@ BEGIN driver dmaps
   OPTION driver_state = ACTIVE;
   OPTION NAME = dmaps;
 
-  DTGPARAM name = compatible, type = stringlist, default = "arm,primecell arm,pl330";
-  DTGPARAM name = "#dma-cells", default = 1 , type = int ;
-  DTGPARAM name = "#dma-channels", default = 8, type = int;
-  DTGPARAM name = "#dma-requests", default = 4, type = int;
-  DTGPARAM name = "arm,primecell-periphid", default = "0x00041330", type = hexint;
-
 END driver
