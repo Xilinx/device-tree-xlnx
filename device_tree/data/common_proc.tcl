@@ -1277,6 +1277,7 @@ proc default_parameters {ip_handle {dont_generate ""}} {
 		switch -glob $tmp_par {
 			$dont_generate - \
 			"INSTANCE" - \
+			"C_INSTANCE" - \
 			"*BASEADDR" - \
 			"*HIGHADDR" - \
 			"C_SPLB*" - \
