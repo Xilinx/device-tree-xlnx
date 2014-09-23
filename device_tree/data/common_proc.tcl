@@ -29,8 +29,7 @@ proc set_drv_conf_prop args {
 			if {[llength $args] >= 4} {
 				set type [lindex $args 3]
 				if {[string equal -nocase $type "boolean"]} {
-					set_boolean_property $drv_handle $value ${conf_prop}
-					return 0
+					set value ""
 				}
 				set_property ${conf_prop} $value $drv_handle
 				set prop [get_comp_params ${conf_prop} $drv_handle]
@@ -63,13 +62,12 @@ proc add_cross_property args {
 				set type "hexint"
 				if {[llength $args] >= 5} {
 					set type [lindex $args 4]
-					if {[string equal -nocase $type "boolean"]} {
-						set type referencelist
-						if {[expr $value >= 1]} {
-							hsm::utils::add_new_property $dest_handle $dest_prop $type ""
-						}
+				}
+				if {[string equal -nocase $type "boolean"]} {
+					if {[expr $value < 1]} {
 						return 0
 					}
+					set value ""
 				}
 				if {[regexp "(int|hex).*" $type match]} {
 					regsub -all {"} $value "" value
