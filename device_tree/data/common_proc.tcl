@@ -1607,3 +1607,61 @@ proc add_memory_node {drv_handle} {
 	set_cur_working_dts $cur_dts
 	return $memory_node
 }
+
+proc gen_mb_ccf_subnode {drv_handle name freq reg} {
+	set cur_dts [current_dt_tree]
+	set default_dts [set_drv_def_dts $drv_handle]
+
+	set clk_node [add_or_get_dt_node -n clocks -p / -d ${default_dts}]
+	hsm::utils::add_new_dts_param "${clk_node}" "#address-cells" 1 int
+	hsm::utils::add_new_dts_param "${clk_node}" "#size-cells" 0 int
+
+	set clk_subnode_name "clk_${name}"
+	set clk_subnode [add_or_get_dt_node -l ${clk_subnode_name} -n ${clk_subnode_name} -u $reg -p ${clk_node} -d ${default_dts}]
+	# clk subnode data
+	hsm::utils::add_new_dts_param "${clk_subnode}" "compatible" "fixed-clock" stringlist
+	hsm::utils::add_new_dts_param "${clk_subnode}" "#clock-cells" 0 int
+
+	hsm::utils::add_new_dts_param $clk_subnode "clock-output-names" $clk_subnode_name string
+	hsm::utils::add_new_dts_param $clk_subnode "reg" $reg int
+	hsm::utils::add_new_dts_param $clk_subnode "clock-frequency" $freq int
+
+	set_cur_working_dts $cur_dts
+}
+
+proc generate_mb_ccf_node {drv_handle} {
+	# list of ip should have the clocks property
+	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can mdm"
+
+	set sw_proc [get_sw_processor]
+	set proc_ip [get_cells $sw_proc]
+	set proctype [get_property IP_NAME $proc_ip]
+	if {[string match -nocase $proctype "microblaze"]} {
+		set bus_clk_list ""
+		set hwinst [get_property HW_INSTANCE $drv_handle]
+		set iptype [get_property IP_NAME [get_cells $hwinst]]
+		if {[lsearch $valid_ip_list $iptype] >= 0} {
+			# get bus clock frequency
+			set clk_freq [get_clock_frequency [get_cells $drv_handle] "S_AXI_ACLK"]
+			if {![string equal $clk_freq ""]} {
+				# FIXME: bus clk source count should based on the clock generator not based on clk freq diff
+				if {[lsearch $bus_clk_list $clk_freq] < 0} {
+					set bus_clk_list [lappend $bus_clk_list $clk_freq]
+				}
+				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+				# create the node and assuming reg 0 is taken by cpu
+				gen_mb_ccf_subnode $drv_handle bus_${bus_clk_cnt} $clk_freq [expr ${bus_clk_cnt} + 1]
+				# set bus clock frequency (current it is there)
+				set_property CONFIG.clock-frequency $clk_freq $drv_handle
+				hsm::utils::add_new_property $drv_handle "clocks" int &clk_bus_${bus_clk_cnt}
+			}
+		}
+		set cpu_clk_freq [get_clock_frequency $proc_ip "CLK"]
+		# issue:
+		# - hardcoded reg number cpu clock node
+		# - assume clk_cpu for mb cpu
+		# - only applies to master mb cpu
+		gen_mb_ccf_subnode $sw_proc cpu $cpu_clk_freq 0
+		#hsm::utils::add_new_property [get_drivers $proc_ip] "clocks" int &clk_cpu
+	}
+}
