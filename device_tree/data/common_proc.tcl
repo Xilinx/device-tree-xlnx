@@ -1396,6 +1396,9 @@ proc gen_peripheral_nodes {drv_handle} {
 	}
 
 	zynq_gen_pl_clk_binding $drv_handle
+	# generate mb ccf node
+	generate_mb_ccf_node $drv_handle
+
 	set dts_file_list ""
 	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
 		set rt ""
@@ -1536,6 +1539,10 @@ proc gen_cpu_nodes {drv_handle} {
 			set drv_dt_prop_list [list_remove_element $drv_dt_prop_list "CONFIG.${prop}"]
 		}
 	}
+
+	# generate mb ccf node
+	generate_mb_ccf_node $processor
+
 	set bus_node [add_or_get_bus_node $drv_handle $default_dts]
 	set cpu_no 0
 	foreach cpu ${processor_list} {
