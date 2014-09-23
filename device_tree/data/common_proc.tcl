@@ -1217,7 +1217,10 @@ proc gen_reg_property {drv_handle} {
 		if {[string_is_empty $reg]} {
 			set reg "$base $size"
 		} else {
-			set reg "$reg $base $size"
+			# ensure no duplication
+			if {![regexp ".*${reg}.*" "$base $size" matched]} {
+				set reg "$reg $base $size"
+			}
 		}
 	}
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
@@ -1577,4 +1580,31 @@ proc gen_mdio_node {drv_handle parent_node} {
 	hsm::utils::add_new_dts_param "${mdio_node}" "#address-cells" 1 int ""
 	hsm::utils::add_new_dts_param "${mdio_node}" "#size-cells" 0 int ""
 	return $mdio_node
+}
+
+proc add_memory_node {drv_handle} {
+	set master_dts [get_property CONFIG.master_dts [get_os]]
+	set cur_dts [current_dt_tree]
+	set master_dts_obj [get_dt_trees ${master_dts}]
+	set_cur_working_dts $master_dts
+
+	# assuming single memory region
+	#  - single memory region
+	#  - / node is created
+	#  - reg property is generated
+	# CHECK node naming
+	set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
+	set unit_addr [get_baseaddr $drv_handle]
+	set memory_node [add_or_get_dt_node -n memory -p $parent_node]
+	set reg_value [get_property CONFIG.reg $drv_handle]
+	hsm::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
+	# maybe hardcoded
+	if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
+		set dev_type memory
+	}
+	if {[string_is_empty $dev_type]} {set dev_type memory}
+	hsm::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
+
+	set_cur_working_dts $cur_dts
+	return $memory_node
 }
