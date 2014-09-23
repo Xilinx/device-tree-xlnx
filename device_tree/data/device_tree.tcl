@@ -230,31 +230,6 @@ proc gen_dev_conf {} {
     }
 }
 
-# move nand or nor/sram flash under smcc node
-proc ps7_smc_workaround {os_handle} {
-    foreach drv_handle [get_drivers] {
-        set ip_name [get_ip_prop $drv_handle IP_NAME]
-        switch -exact $ip_name {
-            "ps7_nand" {set nand $drv_handle}
-            "ps7_sram" {set sram $drv_handle}
-            "ps7_smcc" {set smcc $drv_handle}
-            default {continue}
-        }
-    }
-    # check if smcc and nand exists
-    if {[info exists smcc]} {
-        if {[info exists nand]} {
-            set nand_node [move_node $nand $smcc]
-            # Hack to add reg as hsm core did not export the data
-            ::hsm::utils::add_new_property $nand_node "reg" "hexintlist" "0xe1000000 0x1000000"
-        } elseif {[info exists sram]} {
-            set sram_node [move_node $sram $smcc]
-            # TODO: check configuration before setting the size
-            ::hsm::utils::add_new_property $sram_node "reg" "hexintlist" "0xe2000000 0x2000000"
-        }
-    }
-}
-
 # For calling from top level BSP
 proc bsp_drc {os_handle} {
 }
@@ -271,9 +246,7 @@ proc generate {lib_handle} {
 proc post_generate {os_handle} {
     add_chosen $os_handle
     clean_os $os_handle
-    add_ps7_pmu $os_handle
     generate_mb_ccf_node $os_handle
-    ps7_smc_workaround $os_handle
     zynq_gen_pl_clk_binding
     gen_dev_conf
 }
@@ -304,32 +277,3 @@ proc add_chosen {os_handle} {
     set consoleip [get_property CONFIG.console_device $os_handle]
     hsm::utils::add_new_property $chosen_node "linux,stdout-path" aliasref $consoleip
 }
-
-#Hack to disable ps7_pmu from bus and add it explicitly parallel to cpu
-proc add_ps7_pmu { os_handle } {
-    set proc_name [get_property HW_INSTANCE [get_sw_processor]]
-    set hwproc [get_cells -filter " NAME==$proc_name"]
-    set proctype [get_property IP_NAME $hwproc]
-    if { [string match -nocase $proctype "ps7_cortexa9"] } {
-
-
-        #get PMU driver handler and disabling it
-        set all_drivers [get_drivers]
-        foreach driver $all_drivers {
-            set hwinst [get_property HW_INSTANCE $driver]
-            set ip [get_cells $hwinst]
-            set iptype [get_property IP_NAME $ip]
-            if { [string match -nocase $iptype "ps7_pmu" ] } {
-                set_property NAME "none" $driver
-            }
-        }
-
-        #adding hardcoded pmu into system node
-        set ps_node [hsm::utils::get_or_create_child_node $os_handle "dtg.ps"]
-        set pmu_node [hsm::utils::get_or_create_child_node $ps_node "ps7_pmu"]
-        hsm::utils::add_new_property $pmu_node "reg" hexintlist "0xf8891000 0x1000 0xf8893000 0x1000"
-        hsm::utils::add_new_property $pmu_node "reg-names" stringlist "cpu0 cpu1"
-        hsm::utils::add_new_property $pmu_node "compatible" stringlist "arm,cortex-a9-pmu"
-    }
-}
-
