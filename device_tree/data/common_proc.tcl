@@ -23,9 +23,9 @@ proc set_drv_conf_prop args {
 	set conf_prop [lindex $args 2]
 	set ip [get_cells $drv_handle]
 	set value [get_property CONFIG.${pram} $ip]
-	if { [llength $value] } {
+	if {[llength $value]} {
 		regsub -all "MIO( |)" $value "" value
-		if { $value != "-1" && [llength $value] !=0  } {
+		if {$value != "-1" && [llength $value] !=0} {
 			if {[llength $args] >= 4} {
 				set type [lindex $args 3]
 				if {[string equal -nocase $type "boolean"]} {
@@ -57,8 +57,8 @@ proc add_cross_property args {
 	set ip [get_cells $src_handle]
 	foreach conf_prop $src_prams {
 		set value [get_property ${conf_prop} $ip]
-		if { [llength $value] } {
-			if { $value != "-1" && [llength $value] !=0  } {
+		if {[llength $value]} {
+			if {$value != "-1" && [llength $value] !=0} {
 				set type "hexint"
 				if {[llength $args] >= 5} {
 					set type [lindex $args 4]
@@ -105,12 +105,12 @@ proc is_it_in_pl {ip} {
 # HSM 2014.2 workaround
 # This proc is designed to generated the correct interrupt cells for both
 # MB and Zynq
-proc get_intr_id { periph_name intr_port_name } {
+proc get_intr_id {periph_name intr_port_name} {
 	set intr_info -1
 	set ip [get_cells $periph_name]
 
 	set intr_pin [get_pins -of_objects $ip $intr_port_name -filter "TYPE==INTERRUPT"]
-	if { [llength $intr_pin] == 0 } {
+	if {[llength $intr_pin] == 0} {
 		return -1
 	}
 
@@ -120,7 +120,7 @@ proc get_intr_id { periph_name intr_port_name } {
 	set intr_sink_pins [xget_sink_pins $intr_pin]
 	foreach intr_sink $intr_sink_pins {
 		set sink_periph [get_cells -of_objects $intr_sink]
-		if { [is_interrupt_controller $sink_periph] == 1} {
+		if {[is_interrupt_controller $sink_periph] == 1} {
 			set intc_port $intr_sink
 			set intc_periph $sink_periph
 			break
@@ -137,9 +137,9 @@ proc get_intr_id { periph_name intr_port_name } {
 	# in PL
 	set intc_type [get_property IP_NAME $intc_periph]
 	# CHECK with Heera for zynq the intc_src_ports are in reverse order
-	if { [string match -nocase $intc_type "ps7_scugic"] } {
+	if {[string match -nocase $intc_type "ps7_scugic"]} {
 		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $intc_periph]
-		if { [string match -nocase "$ip_param" "REVERSE"]} {
+		if {[string match -nocase "$ip_param" "REVERSE"]} {
 			set intc_src_ports [xget_interrupt_sources $intc_periph]
 		} else {
 			set intc_src_ports [lreverse [xget_interrupt_sources $intc_periph]]
@@ -147,7 +147,7 @@ proc get_intr_id { periph_name intr_port_name } {
 		set total_intr_count -1
 		foreach intc_src_port $intc_src_ports {
 			set intr_periph [get_cells -of_objects $intc_src_port]
-			if { [string match -nocase $intc_type "ps7_scugic"] } {
+			if {[string match -nocase $intc_type "ps7_scugic"] } {
 				if {[is_it_in_pl "$intr_periph"] == 1} {
 					incr total_intr_count
 					continue
@@ -162,19 +162,19 @@ proc get_intr_id { periph_name intr_port_name } {
 	set intr_id -1
 	set ret -1
 	foreach intc_src_port $intc_src_ports {
-		if { [llength $intc_src_port] == 0 } {
+		if {[llength $intc_src_port] == 0} {
 			incr i
 			continue
 		}
 		set intr_periph [get_cells -of_objects $intc_src_port]
 		set ip_type [get_property IP_NAME $intr_periph]
-		if { [string compare -nocase "$intr_port_name"  "$intc_src_port" ] == 0 } {
-			if { [string compare -nocase "$intr_periph" "$ip"] == 0 } {
+		if {[string compare -nocase "$intr_port_name"  "$intc_src_port" ] == 0} {
+			if {[string compare -nocase "$intr_periph" "$ip"] == 0} {
 				set ret $i
 				break
 			}
 		}
-		if { [string match -nocase $intc_type "ps7_scugic"] } {
+		if {[string match -nocase $intc_type "ps7_scugic"]} {
 			if {[is_it_in_pl "$intr_periph"] == 1} {
 				incr i
 				continue
@@ -184,19 +184,19 @@ proc get_intr_id { periph_name intr_port_name } {
 		}
 	}
 
-	if { [string match -nocase $intc_type "ps7_scugic"] && [string match -nocase $intc_port "IRQ_F2P"] } {
+	if {[string match -nocase $intc_type "ps7_scugic"] && [string match -nocase $intc_port "IRQ_F2P"]} {
 		set ip_param [get_property CONFIG.C_IRQ_F2P_MODE $intc_periph]
-		if { [string match -nocase "$ip_param" "REVERSE"]} {
+		if {[string match -nocase "$ip_param" "REVERSE"]} {
 			set diff [expr $total_intr_count - $ret]
-			if { $diff < 8 } {
+			if {$diff < 8} {
 				set intr_id [expr 91 - $diff]
-			} elseif { $diff  < 16} {
+			} elseif {$diff  < 16} {
 				set intr_id [expr 68 - ${diff} + 8 ]
 			}
 		} else {
-			if { $ret < 8 } {
+			if {$ret < 8} {
 				set intr_id [expr 61 + $ret]
-			} elseif { $ret  < 16} {
+			} elseif {$ret  < 16} {
 				set intr_id [expr 84 + $ret - 8 ]
 			}
 		}
@@ -204,11 +204,11 @@ proc get_intr_id { periph_name intr_port_name } {
 		set intr_id $ret
 	}
 
-	if { [string match -nocase $intr_id "-1"] } {
+	if {[string match -nocase $intr_id "-1"]} {
 		set intr_id [xget_port_interrupt_id "$periph_name" "$intr_port_name" ]
 	}
 
-	if { [string match -nocase $intr_id "-1"] } {
+	if {[string match -nocase $intr_id "-1"]} {
 		return -1
 	}
 
@@ -216,7 +216,7 @@ proc get_intr_id { periph_name intr_port_name } {
 	set intc [get_connected_interrupt_controller $periph_name $intr_port_name]
 	set intr_type [hsm::utils::get_dtg_interrupt_type $intc $ip $intr_port_name]
 	if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
-		if { $intr_id > 32 } {
+		if {$intr_id > 32} {
 			set intr_id [expr $intr_id - 32]
 		}
 		set intr_info "0 $intr_id $intr_type"
@@ -267,7 +267,7 @@ proc gen_dt_node_search_pattern args {
 			-n* {set node_name [Pop args 1]}
 			-l* {set node_label [Pop args 1]}
 			-u* {set node_unit_addr [Pop args 1]}
-			-- { Pop args ; break }
+			-- {Pop args ; break}
 			default {
 				error "gen_dt_node_search_pattern bad option - [lindex $args 0]"
 			}
@@ -303,7 +303,7 @@ proc set_cur_working_dts {{dts_file ""}} {
 		return [current_dt_tree]
 	}
 	set dt_idx [lsearch [get_dt_trees] ${dts_file}]
-	if { $dt_idx >= 0 } {
+	if {$dt_idx >= 0} {
 		set dt_tree_obj [current_dt_tree [lindex [get_dt_trees] $dt_idx]]
 	} else {
 		set dt_tree_obj [create_dt_tree -dts_file $dts_file]
@@ -445,7 +445,7 @@ proc update_system_dts_include {include_file} {
 	if {[string_is_empty $master_dts_obj] == 1} {
 		set master_dts_obj [set_cur_working_dts ${master_dts}]
 	}
-	if { [string equal ${include_file} ${master_dts_obj}] } {
+	if {[string equal ${include_file} ${master_dts_obj}]} {
 		return 0
 	}
 	set cur_inc_list [get_property INCLUDE_FILES $master_dts_obj]
@@ -473,7 +473,7 @@ proc set_drv_def_dts {drv_handle} {
 	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
 	set default_dts [get_property CONFIG.def_dts $drv_handle]
 	if {[string_is_empty $default_dts]} {
-		if {[is_pl_ip $drv_handle] == 1} {
+		if {[is_pl_ip $drv_handle]} {
 			set default_dts "pl.dtsi"
 		} else {
 			# PS IP, read pcw_dts property
@@ -494,7 +494,7 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 		set old_ua [get_property "UNIT_ADDRESS" $node_obj]
 		if {![string equal -nocase $node_label $old_label] || \
 			![string equal -nocase $node_ua $old_ua] || \
-			![string equal -nocase $node_name $old_name] } {
+			![string equal -nocase $node_name $old_name]} {
 			dtg_debug "dt_node_def_checking($node_obj): label: ${node_label} - ${old_label}, name: ${node_name} - ${old_name}, unit addr: ${node_ua} - ${old_ua}"
 			return 0
 		}
@@ -521,7 +521,7 @@ proc add_or_get_dt_node args {
 			-u* {set node_unit_addr [Pop args 1]}
 			-p* {set parent_obj [Pop args 1]}
 			-d* {set dts_file [Pop args 1]}
-			--    { Pop args ; break }
+			--  {Pop args ; break}
 			default {
 				error "add_or_get_dt_node bad option - [lindex $args 0]"
 			}
@@ -588,7 +588,7 @@ proc add_or_get_dt_node args {
 		}
 		set parent_ref_in_dts [check_node_in_dts "${ref_node}" ${dts_file}]
 		if {${parent_ref_in_dts} != 1} {
-			if { $auto_ref_parent } {
+			if {$auto_ref_parent} {
 				set_cur_working_dts ${dts_file}
 				set parent_obj [create_dt_node -n "${ref_node}"]
 			}
@@ -632,8 +632,8 @@ proc add_or_get_dt_node args {
 			}
 		}
 	}
-	if { $found_node == 1 } {
-		if { $auto_ref == 0 } {
+	if {$found_node == 1} {
+		if {$auto_ref == 0} {
 			# return the object found on other dts files
 			set_cur_working_dts ${cur_working_dts}
 			return $found_node_obj
@@ -727,7 +727,7 @@ proc get_driver_conf_list {drv_handle} {
 	# Returns all the property name that should be add to the node
 	set dts_conf_list ""
 	# handle no CONFIG parameter
-	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG\\..*"]} msg]} {
+	if {[catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG\\..*"]} msg]} {
 		return ""
 	}
 	foreach line [split $rt "\n"] {
@@ -775,7 +775,7 @@ proc create_dt_tree_from_dts_file {} {
 	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 	foreach i [get_sw_cores device_tree] {
 		set kernel_dtsi "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${zynq_7000_fname}"
-		if {[file exists $kernel_dtsi] } {
+		if {[file exists $kernel_dtsi]} {
 			foreach file [glob [get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/*] {
 				# NOTE: ./ works only if we did not change our directory
 				file copy -force $file ./
@@ -842,7 +842,7 @@ proc line_to_node {line node_level default_dts} {
 		error "invalid node found - $line"
 	}
 
-	if { $node_level > 0} {
+	if {$node_level > 0} {
 		set parent_node [dict get $dt_node_dict [expr $node_level - 1] parent_node]
 	}
 
@@ -906,7 +906,7 @@ proc gen_ps7_mapping {} {
 			set unit_addr [get_property UNIT_ADDRESS $node]
 			set node_name [get_property NODE_NAME $node]
 			set node_label [get_property NODE_LABEL $node]
-			if { [catch {set status_prop [get_property CONFIG.status $node]} msg]} {
+			if {[catch {set status_prop [get_property CONFIG.status $node]} msg]} {
 				set status_prop "enable"
 			}
 			if {[string_is_empty $node_label] || \
@@ -918,7 +918,7 @@ proc gen_ps7_mapping {} {
 			dict set ps7_mapping $unit_addr status $status_prop
 		}
 	}
-	if {[string_is_empty $ps7_mapping] } {
+	if {[string_is_empty $ps7_mapping]} {
 		return $def_ps7_mapping
 	} else {
 		return $ps7_mapping
@@ -995,7 +995,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	set proctype [get_property IP_NAME [get_cells [get_sw_processor]]]
 	# Assuming these device supports the clocks
 	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can"
-	if { [string match -nocase $proctype "ps7_cortexa9"] } {
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		set iptype [get_property IP_NAME [get_cells $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
@@ -1013,30 +1013,30 @@ proc get_intr_type {intc_name ip_name port_name} {
 	}
 	set intr_pin [get_pins -of_objects $ip $port_name]
 	set sensitivity ""
-	if { [llength $intr_pin] >= 1 } {
+	if {[llength $intr_pin] >= 1} {
 		# TODO: check with HSM dev and see if this is a bug
 		set sensitivity [get_property SENSITIVITY $intr_pin]
 	}
 	set intc_type [get_property IP_NAME $intc ]
-	if { [string match -nocase $intc_type "ps7_scugic"] } {
-		if { [string match -nocase $sensitivity "EDGE_FALLING"] } {
+	if {[string match -nocase $intc_type "ps7_scugic"]} {
+		if {[string match -nocase $sensitivity "EDGE_FALLING"]} {
 				return 2;
-		} elseif { [string match -nocase $sensitivity "EDGE_RISING"] } {
+		} elseif {[string match -nocase $sensitivity "EDGE_RISING"]} {
 				return 1;
-		} elseif { [string match -nocase $sensitivity "LEVEL_HIGH"] } {
+		} elseif {[string match -nocase $sensitivity "LEVEL_HIGH"]} {
 				return 4;
-		} elseif { [string match -nocase $sensitivity "LEVEL_LOW"] } {
+		} elseif {[string match -nocase $sensitivity "LEVEL_LOW"]} {
 				return 8;
 		}
 	} else {
 		# Follow the openpic specification
-		if { [string match -nocase $sensitivity "EDGE_FALLING"] } {
+		if {[string match -nocase $sensitivity "EDGE_FALLING"]} {
 				return 3;
-		} elseif { [string match -nocase $sensitivity "EDGE_RISING"] } {
+		} elseif {[string match -nocase $sensitivity "EDGE_RISING"]} {
 				return 0;
-		} elseif { [string match -nocase $sensitivity "LEVEL_HIGH"] } {
+		} elseif {[string match -nocase $sensitivity "LEVEL_HIGH"]} {
 				return 2;
-		} elseif { [string match -nocase $sensitivity "LEVEL_LOW"] } {
+		} elseif {[string match -nocase $sensitivity "LEVEL_LOW"]} {
 				return 1;
 		}
 	}
@@ -1045,7 +1045,7 @@ proc get_intr_type {intc_name ip_name port_name} {
 
 proc get_drv_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
 	set drv_handle [get_ip_handler $ip_name]
-	if { [catch {set rt [list_property -regexp $drv_handle ${def_pattern}]} msg]} {
+	if {[catch {set rt [list_property -regexp $drv_handle ${def_pattern}]} msg]} {
 		set rt ""
 	}
 	return $rt
@@ -1053,7 +1053,7 @@ proc get_drv_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
 
 proc get_ip_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
 	set ip [get_cells $ip_name]
-	if { [catch {set rt [list_property -regexp $ip ${def_pattern}]} msg]} {
+	if {[catch {set rt [list_property -regexp $ip ${def_pattern}]} msg]} {
 		set rt ""
 	}
 	return $rt
@@ -1166,13 +1166,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		if {[string_is_empty $intc] == 1} {continue}
 
 		set intr_type [get_intr_type $intc $slave $pin]
-		if { [string match -nocase $intr_type "-1"] } {
+		if {[string match -nocase $intr_type "-1"]} {
 			continue
 		}
 
 		set cur_intr_info ""
 		if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
-			if { $intr_id > 32 } {
+			if {$intr_id > 32} {
 				set intr_id [expr $intr_id - 32]
 			}
 			set cur_intr_info "0 $intr_id $intr_type"
@@ -1256,7 +1256,7 @@ proc ip2drv_prop {ip_name ip_prop_name} {
 proc gen_drv_prop_from_ip {drv_handle} {
 	# check if we should generating the ip properties or not
 	set gen_ip_prop [get_drv_conf_prop_list $drv_handle "CONFIG.dtg.ip_params"]
-	if {[string_is_empty $gen_ip_prop] } {
+	if {[string_is_empty $gen_ip_prop]} {
 		return 0
 	}
 	set prop_name_list [default_parameters $drv_handle]
@@ -1321,7 +1321,7 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 	set value [get_property ${reset_pram} $ip]
 	# workaround for reset not been selected and show as "<Select>"
 	regsub -all "<Select>" $value "" value
-	if { [llength $value] } {
+	if {[llength $value]} {
 		# if MIO, assume gpio0 (bad assumption as this needs to match zynq-7000.dtsi)
 		if {[regexp "^MIO" $value matched]} {
 			# switch with kernel version
@@ -1333,7 +1333,7 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 			}
 		}
 		regsub -all "MIO( |)" $value "" value
-		if { $value != "-1" && [llength $value] !=0  } {
+		if {$value != "-1" && [llength $value] !=0} {
 			set_property ${conf_prop} "$src_ip $value 0" $drv_handle
 		}
 	}
@@ -1364,11 +1364,12 @@ proc gen_peripheral_nodes {drv_handle} {
 	set ps7_mapping [gen_ps7_mapping]
 	set bus_node [add_or_get_bus_node $ip $default_dts]
 
+	set status_enable_flow 0
+	set status_disabled 0
 	if {[is_ps_ip $drv_handle]} {
-		set status_disabled 0
 		set tmp [get_ps_node_unit_addr $drv_handle]
-		if {$tmp != -1} { set unit_addr $tmp}
-		if { [catch {set tmp [dict get $ps7_mapping $unit_addr label]} msg]} {
+		if {$tmp != -1} {set unit_addr $tmp}
+		if {[catch {set tmp [dict get $ps7_mapping $unit_addr label]} msg]} {
 			# CHK: if PS IP that's not in the zynq-7000 dtsi, do not generate it
 			return 0
 		}
@@ -1400,7 +1401,7 @@ proc gen_peripheral_nodes {drv_handle} {
 	generate_mb_ccf_node $drv_handle
 
 	set dts_file_list ""
-	if { [catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
+	if {[catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
 		set rt ""
 	}
 	foreach line [split $rt "\n"] {
@@ -1411,7 +1412,6 @@ proc gen_peripheral_nodes {drv_handle} {
 	}
 	regsub -all {CONFIG.} $dts_file_list {} dts_file_list
 
-	set status_enable 0
 	set drv_dt_prop_list [get_driver_conf_list $drv_handle]
 	foreach dts_file ${dts_file_list} {
 		set dts_prop_list [get_property CONFIG.${dts_file} $drv_handle]
