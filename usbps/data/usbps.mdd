@@ -9,7 +9,5 @@ BEGIN driver usbps
   DTGPARAM name = dr_mode, default = host , type = string ;
   DTGPARAM name = phy_type, default = ulpi, type = string;
   DTGPARAM name = usb-reset , type = reference;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-usb-1.00.a";
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
 
 END driver
