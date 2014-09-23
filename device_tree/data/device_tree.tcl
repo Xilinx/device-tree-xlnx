@@ -118,12 +118,25 @@ proc device_tree_drc {os_handle} {
 }
 
 proc generate {lib_handle} {
+    add_chosen [get_os]
+    foreach drv_handle [get_drivers] {
+        gen_reg_property $drv_handle
+        gen_compatible_property $drv_handle
+        gen_drv_prop_from_ip $drv_handle
+        gen_interrupt_property $drv_handle
+    }
 }
 
 proc post_generate {os_handle} {
     add_chosen $os_handle
     clean_os $os_handle
     gen_dev_conf
+    foreach drv_handle [get_drivers] {
+        gen_peripheral_nodes $drv_handle
+    }
+    global zynq_soc_dt_tree
+    delete_objs [get_dt_tree $zynq_soc_dt_tree]
+    remove_empty_reference_node
 }
 
 proc clean_os {os_handle} {
