@@ -6,6 +6,5 @@ BEGIN driver ocmcps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ocmcps;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-ocmc-1.0"
 
 END driver
