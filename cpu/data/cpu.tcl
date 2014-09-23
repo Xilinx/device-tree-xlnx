@@ -19,13 +19,13 @@ proc generate {drv_handle} {
     }
 
     set icache_size [hsi::utils::get_ip_param_value $ip "C_CACHE_BYTE_SIZE"]
-	set icache_base [hsi::utils::get_ip_param_value $ip "C_ICACHE_BASEADDR"]
-	set icache_high [hsi::utils::get_ip_param_value $ip "C_ICACHE_HIGHADDR"]
-	set dcache_size [hsi::utils::get_ip_param_value $ip "C_DCACHE_BYTE_SIZE"]
-	set dcache_base [hsi::utils::get_ip_param_value $ip "C_DCACHE_BASEADDR"]
-	set dcache_high [hsi::utils::get_ip_param_value $ip "C_DCACHE_HIGHADDR"]
+    set icache_base [hsi::utils::get_ip_param_value $ip "C_ICACHE_BASEADDR"]
+    set icache_high [hsi::utils::get_ip_param_value $ip "C_ICACHE_HIGHADDR"]
+    set dcache_size [hsi::utils::get_ip_param_value $ip "C_DCACHE_BYTE_SIZE"]
+    set dcache_base [hsi::utils::get_ip_param_value $ip "C_DCACHE_BASEADDR"]
+    set dcache_high [hsi::utils::get_ip_param_value $ip "C_DCACHE_HIGHADDR"]
     set icache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_ICACHE_LINE_LEN"]]
-	set dcache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_DCACHE_LINE_LEN"]]
+    set dcache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_DCACHE_LINE_LEN"]]
 
 
     if { [llength $icache_size] != 0 } {
