@@ -380,6 +380,7 @@ proc update_dt_parent args {
 	# update device tree node's parent
 	# return the node name
 	proc_called_by
+	global def_string
 	set node [lindex $args 0]
 	set new_parent [lindex $args 1]
 	if {[llength $args] >= 3} {
@@ -390,6 +391,11 @@ proc update_dt_parent args {
 	set node [get_node_object $node $dts_file]
 	# Skip if node is a reference node (start with &) or amba
 	if {[regexp "^&.*" "$node" match] || [regexp "amba" "$node" match]} {
+		return $node
+	}
+
+	if {[string_is_empty $new_parent] || \
+		[string equal ${def_string} "$new_parent"]} {
 		return $node
 	}
 
