@@ -1674,16 +1674,39 @@ proc generate_mb_ccf_node {drv_handle} {
 }
 
 proc update_eth_mac_addr {drv_handle} {
-	set ip [get_cells $drv_handle]
-	set serial_count [hsm::utils::get_os_parameter_value "eth_count"]
-	if {[llength $serial_count] == 0} {
-		set eth_count 0
+	set eth_count [get_os_dev_count "eth_mac_count"]
+	set tmp [list_property $drv_handle CONFIG.local-mac-address]
+	if {![string_is_empty $tmp]} {
+		set def_mac [get_property CONFIG.local-mac-address $drv_handle]
+	} else {
+		set def_mac ""
 	}
-	set mac_addr_data [split [get_property CONFIG.local-mac-address $drv_handle] " "]
-
+	if {[string_is_empty $def_mac]} {
+		set def_mac "00 0a 35 00 00 00"
+	}
+	set mac_addr_data [split $def_mac " "]
 	set last_value [format %02x [expr [lindex $mac_addr_data 5] + $eth_count ]]
 	set mac_addr [lreplace $mac_addr_data 5 5 $last_value]
 	dtg_debug "${drv_handle}:set mac addr to $mac_addr"
 	incr eth_count
-	hsm::utils::set_os_parameter_value "eth_count" $eth_count
+	hsi::utils::set_os_parameter_value "eth_mac_count" $eth_count
+	hsi::utils::add_new_property $drv_handle "local-mac-address" bytelist ${mac_addr}
+}
+
+proc get_os_dev_count {count_para {drv_handle ""} {os_para ""}} {
+	set dev_count [hsi::utils::get_os_parameter_value "${count_para}"]
+	if {[llength $dev_count] == 0} {
+		set dev_count 0
+	}
+	if {[string_is_empty $os_para] || [string_is_empty $drv_handle]} {
+		return $dev_count
+	}
+	set ip [get_cells $drv_handle]
+	set chosen_ip [hsi::utils::get_os_parameter_value "${os_para}"]
+	if {[string match -nocase "$ip" "$chosen_ip"]} {
+		hsi::utils::set_os_parameter_value $count_para 1
+		return 0
+	} else {
+		return $dev_count
+	}
 }
