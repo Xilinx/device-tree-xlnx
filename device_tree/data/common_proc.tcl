@@ -607,9 +607,6 @@ proc add_or_get_dt_node args {
 	foreach pattern ${search_pattern} {
 		foreach node ${dts_nodes} {
 			if {[regexp $pattern $node match]} {
-				if {[string equal -nocase ${parent_obj} ${def_string}]} {
-					set parent_obj ""
-				}
 				if {[dt_node_def_checking $node_label $node_name $node_unit_addr $node] == 0} {
 					error "$pattern :: $node_label : $node_name @ $node_unit_addr, is differ to the node object $node"
 				}
