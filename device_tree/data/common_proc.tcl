@@ -616,6 +616,19 @@ proc add_or_get_dt_node args {
 			}
 		}
 	}
+	# clean up required
+	# special search pattern for name only node
+	set_cur_working_dts ${dts_file}
+	foreach pattern "^${node_name}$" {
+		foreach node ${dts_nodes} {
+			if {[regexp $pattern $node match]} {
+				set_cur_working_dts ${dts_file}
+				set node [update_dt_parent ${node} ${parent_obj} ${dts_file}]
+				set_cur_working_dts ${cur_working_dts}
+				return $node
+			}
+		}
+	}
 
 	# if dt node in other target dts files
 	# create a reference node if required
