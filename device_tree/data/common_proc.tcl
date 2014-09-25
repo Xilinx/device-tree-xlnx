@@ -1232,8 +1232,8 @@ proc gen_reg_property {drv_handle} {
 	set slave [get_cells ${drv_handle}]
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
 	foreach mem_handle ${ip_mem_handles} {
-		set base [get_property BASE_VALUE $mem_handle]
-		set high [get_property HIGH_VALUE $mem_handle]
+		set base [string tolower [get_property BASE_VALUE $mem_handle]]
+		set high [string tolower [get_property HIGH_VALUE $mem_handle]]
 		set size [format 0x%x [expr {${high} - ${base} + 1}]]
 		if {[string_is_empty $reg]} {
 			set reg "$base $size"
