@@ -79,6 +79,37 @@ proc add_cross_property args {
 	}
 }
 
+# TODO: merge to add_cross_property by detecting if dest_node is dt node or driver
+proc add_cross_property_to_dtnode args {
+	set src_handle [lindex $args 0]
+	set src_prams [lindex $args 1]
+	set dest_node [lindex $args 2]
+	set dest_prop [lindex $args 3]
+	set ip [get_cells $src_handle]
+	foreach conf_prop $src_prams {
+		set value [get_property ${conf_prop} $ip]
+		if {[llength $value]} {
+			if {$value != "-1" && [llength $value] !=0} {
+				set type "hexint"
+				if {[llength $args] >= 5} {
+					set type [lindex $args 4]
+				}
+				if {[string equal -nocase $type "boolean"]} {
+					if {[expr $value < 1]} {
+						return 0
+					}
+					set value ""
+				}
+				if {[regexp "(int|hex).*" $type match]} {
+					regsub -all {"} $value "" value
+				}
+				hsi::utils::add_new_dts_param $dest_node $dest_prop $value $type
+				return 0
+			}
+		}
+	}
+}
+
 proc get_ip_property {drv_handle parameter} {
 	set ip [get_cells $drv_handle]
 	return [get_property ${parameter} $ip]
