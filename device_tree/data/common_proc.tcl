@@ -1366,8 +1366,7 @@ proc gen_peripheral_nodes {drv_handle} {
 	set status_enable_flow 0
 	set ip [get_cells $drv_handle]
 	# TODO: check if the base address is correct
-	set unit_addr [get_baseaddr ${ip}]
-	regsub -all {^0x} $unit_addr {} unit_addr
+	set unit_addr [get_baseaddr ${ip} no_prefix]
 	set label $drv_handle
 	set dev_type [get_property CONFIG.dev_type $drv_handle]
 	if {[string_is_empty $dev_type] == 1} {
