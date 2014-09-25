@@ -311,15 +311,23 @@ proc set_cur_working_dts {{dts_file ""}} {
 	return $dt_tree_obj
 }
 
-proc get_baseaddr {slave_ip} {
+proc get_baseaddr {slave_ip {no_prefix ""}} {
 	# only returns the first addr
 	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
-	return [string tolower [get_property BASE_VALUE $ip_mem_handle]]
+	set addr [string tolower [get_property BASE_VALUE $ip_mem_handle]]
+	if {![string_is_empty $no_prefix]} {
+		regsub -all {^0x} $addr {} addr
+	}
+	return $addr
 }
 
-proc get_highaddr {slave_ip} {
+proc get_highaddr {slave_ip {no_prefix ""}} {
 	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
-	return [get_property HIGH_VALUE $ip_mem_handle]
+	set addr [string tolower [get_property HIGH_VALUE $ip_mem_handle]]
+	if {![string_is_empty $no_prefix]} {
+		regsub -all {^0x} $addr {} addr
+	}
+	return $addr
 }
 
 proc get_all_tree_nodes {dts_file} {
