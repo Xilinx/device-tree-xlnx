@@ -1686,7 +1686,6 @@ proc generate_mb_ccf_node {drv_handle} {
 		# - assume clk_cpu for mb cpu
 		# - only applies to master mb cpu
 		gen_mb_ccf_subnode $sw_proc cpu $cpu_clk_freq 0
-		#hsm::utils::add_new_property [get_drivers $proc_ip] "clocks" int &clk_cpu
 	}
 }
 
