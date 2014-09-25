@@ -1561,7 +1561,9 @@ proc gen_cpu_nodes {drv_handle} {
 	set bus_node [add_or_get_bus_node $drv_handle $default_dts]
 	set cpu_no 0
 	foreach cpu ${processor_list} {
+		set bus_label [get_property NODE_LABEL $bus_node]
 		set cpu_node [add_or_get_dt_node -n ${dev_type} -l ${cpu} -u ${cpu_no} -d ${default_dts} -p ${cpu_root_node}]
+		hsm::utils::add_new_dts_param "${cpu_node}" "bus-handle" $bus_label reference
 		foreach drv_prop_name $drv_dt_prop_list {
 			add_driver_prop $processor $cpu_node ${drv_prop_name}
 		}
