@@ -6,7 +6,7 @@ BEGIN driver axi_cdma
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_cdma;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+  DTGPARAM name = dev_type, default = dma , type = string;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-cdma";
 
 END driver
