@@ -294,7 +294,7 @@ proc check_node_in_dts {node_name dts_file_list} {
 	return 0
 }
 
-proc get_node_object {lu_node {dts_files ""}} {
+proc get_node_object {lu_node {dts_files ""} {error_out "yes"}} {
 	# get the node object based on the args
 	# returns the dt node object
 	proc_called_by
@@ -314,7 +314,11 @@ proc get_node_object {lu_node {dts_files ""}} {
 			}
 		}
 	}
-	error "Failed to find $lu_node node !!!"
+	if {[string_is_empty $error_out]} {
+		return ""
+	} else {
+		error "Failed to find $lu_node node !!!"
+	}
 }
 
 proc update_dt_parent args {
