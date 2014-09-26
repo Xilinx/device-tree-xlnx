@@ -6,7 +6,8 @@ BEGIN driver axi_emc
  OPTION driver_state = ACTIVE;
  OPTION NAME = axi_emc;
  OPTION supported_os_types = (DTS);
-
+ DTGPARAM name = dtg.ip_params, type = boolean;
+ DTGPARAM name = dev_type, default = flash , type = string;
  DTGPARAM name = compatible, type =stringlist, default = "cfi-flash";
  DTGPARAM name = bank-width, type = int;
 
