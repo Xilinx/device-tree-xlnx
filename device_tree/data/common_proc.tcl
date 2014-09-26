@@ -23,29 +23,23 @@ proc set_drv_conf_prop args {
 	set conf_prop [lindex $args 2]
 	set ip [get_cells $drv_handle]
 	set value [get_property CONFIG.${pram} $ip]
-	if {[llength $value]} {
+	if {[llength $value] !=0} {
 		regsub -all "MIO( |)" $value "" value
 		if {$value != "-1" && [llength $value] !=0} {
+			set type "hexint"
 			if {[llength $args] >= 4} {
 				set type [lindex $args 3]
 				if {[string equal -nocase $type "boolean"]} {
+					if {[expr $value < 1]} {
+						return 0
+					}
 					set value ""
 				}
-				set_property ${conf_prop} $value $drv_handle
-				set prop [get_comp_params ${conf_prop} $drv_handle]
-				set_property CONFIG.TYPE $type $prop
-				return 0
 			}
 			set_property ${conf_prop} $value $drv_handle
+			set prop [get_comp_params ${conf_prop} $drv_handle]
+			set_property CONFIG.TYPE $type $prop
 		}
-	}
-}
-
-proc set_boolean_property {drv_handle value conf_prop} {
-	if {[expr $value >= 1]} {
-		set_property ${conf_prop} "" $drv_handle
-		set prop [get_comp_params ${conf_prop} $drv_handle]
-		set_property CONFIG.TYPE referencelist $prop
 	}
 }
 
