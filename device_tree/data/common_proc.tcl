@@ -543,6 +543,8 @@ proc add_or_get_dt_node args {
 				set_cur_working_dts ${dts_file}
 				set parent_obj [create_dt_node -n "${ref_node}"]
 			}
+		} else {
+			set parent_obj [get_node_object ${ref_node} ${dts_file}]
 		}
 	}
 
