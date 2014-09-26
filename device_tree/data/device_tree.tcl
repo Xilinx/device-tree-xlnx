@@ -129,6 +129,7 @@ proc generate {lib_handle} {
 
 proc post_generate {os_handle} {
     add_chosen $os_handle
+    add_alias $os_handle
     clean_os $os_handle
     gen_dev_conf
     foreach drv_handle [get_drivers] {
@@ -166,4 +167,28 @@ proc add_chosen {os_handle} {
     set consoleip [get_property CONFIG.console_device $os_handle]
     set consoleip [ps_node_mapping $consoleip label]
     hsm::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
+}
+
+proc add_alias {os_handle} {
+    set default_dts [get_property CONFIG.master_dts [get_os]]
+    set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
+    set all_labels [get_all_dt_labels]
+    foreach drv_handle [get_drivers] {
+        set tmp [list_property $drv_handle CONFIG.dtg.alias]
+        if {[string_is_empty $tmp]} {
+            continue
+        } else {
+            set alias_str [get_property CONFIG.dtg.alias $drv_handle]
+            set alias_count [get_os_dev_count alias_${alias_str}_count]
+            set conf_name ${alias_str}${alias_count}
+            set value [ps_node_mapping $drv_handle label]
+            # TODO: need to check if the label already exists in the current system
+            if {[lsearch $all_labels $conf_name] >=0} {
+                continue
+            }
+            set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
+            hsi::utils::add_new_dts_param "${alias_node}" ${conf_name} ${value} aliasref
+            hsi::utils::set_os_parameter_value alias_${alias_str}_count [expr $alias_count + 1]
+        }
+    }
 }
