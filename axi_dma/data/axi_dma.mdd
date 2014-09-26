@@ -6,9 +6,7 @@ BEGIN driver axi_dma
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_dma;
-
+  DTGPARAM name = dev_type, default = dma , type = string;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma";
-  DTGPARAM name = axistream-connected, type = reference;
-  DTGPARAM name = axistream-control-connected, type = reference;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+
 END driver

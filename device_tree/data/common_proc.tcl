@@ -17,6 +17,29 @@ proc get_clock_frequency {ip_handle portname} {
 	return $clk
 }
 
+proc set_drv_property args {
+	set drv_handle [lindex $args 0]
+	set conf_prop [lindex $args 1]
+	set value [lindex $args 2]
+	if {[llength $value] !=0} {
+		if {$value != "-1" && [llength $value] !=0} {
+			set type "hexint"
+			if {[llength $args] >= 4} {
+				set type [lindex $args 3]
+				if {[string equal -nocase $type "boolean"]} {
+					if {[expr $value < 1]} {
+						return 0
+					}
+					set value ""
+				}
+			}
+			set_property ${conf_prop} $value $drv_handle
+			set prop [get_comp_params ${conf_prop} $drv_handle]
+			set_property CONFIG.TYPE $type $prop
+		}
+	}
+}
+
 proc set_drv_conf_prop args {
 	set drv_handle [lindex $args 0]
 	set pram [lindex $args 1]

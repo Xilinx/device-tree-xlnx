@@ -9,13 +9,15 @@ proc generate {drv_handle} {
         }
     }
 
+    set node [gen_peripheral_nodes $drv_handle]
+
     set dma_ip [get_cells $drv_handle]
-    set dma_count [hsm::utils::get_os_parameter_value "dma_count"]
+    set dma_count [hsi::utils::get_os_parameter_value "dma_count"]
     if { [llength $dma_count] == 0 } {
         set dma_count 0
     }
     set axiethernetfound 0
-    set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
+    set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
     if { [llength $connected_ip] } {
         set connected_ip_type [get_property IP_NAME $connected_ip]
         if { [string match -nocase $connected_ip_type axi_ethernet ]
@@ -27,49 +29,48 @@ proc generate {drv_handle} {
         set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
         set_drv_conf_prop $drv_handle C_SG_INCLUDE_STSCNTRL_STRM xlnx,sg-include-stscntrl-strm boolean
 
-        set mem_range  [lindex [xget_ip_mem_ranges $dma_ip] 0 ]
-        set baseaddr   [get_property BASE_VALUE $mem_range]
-        set highaddr   [get_property HIGH_VALUE $mem_range]
-        set tx_chan [get_ip_param_value $dma_ip C_INCLUDE_MM2S]
+        set baseaddr [get_baseaddr $dma_ip no_prefix]
+        set tx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_MM2S]
         if { $tx_chan == 1 } {
-            set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
-            set tx_chan [add_dma_channel $drv_handle "axi-dma" $baseaddr "MM2S" $dma_count ]
-            set intr_info [get_intr_id $dma_ip "mm2s_introut" ]
-            set intc [hsm::utils::get_interrupt_parent $dma_ip "mm2s_introut"]
+            set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
+            set tx_chan_node [add_dma_channel $drv_handle $node "axi-dma" $baseaddr "MM2S" $dma_count ]
+            set intr_info [get_intr_id $drv_handle "mm2s_introut" ]
+            #set intc [hsi::utils::get_interrupt_parent $dma_ip "mm2s_introut"]
             if { [llength $intr_info] } {
-                hsm::utils::add_new_property $tx_chan "interrupts" int $intr_info
+                hsi::utils::add_new_dts_param $tx_chan_node "interrupts" $intr_info hexintlist
             }
         }
-        set rx_chan [get_ip_param_value $dma_ip C_INCLUDE_S2MM]
+        set rx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_S2MM]
         if { $rx_chan ==1 } {
-            set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
-            set rx_chan [add_dma_channel $drv_handle "axi-dma" [expr $baseaddr + 0x30] "S2MM" $dma_count]
-            set intr_info [get_intr_id $dma_ip "s2mm_introut"]
-            set intc [hsm::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
+            set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
+            set rx_bassaddr [format %08x [expr 0x$baseaddr + 0x30]]
+            set rx_chan_node [add_dma_channel $drv_handle $node "axi-dma" $rx_bassaddr "S2MM" $dma_count]
+            set intr_info [get_intr_id $drv_handle "s2mm_introut" ]
+            #set intc [hsi::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
             if { [llength $intr_info] } {
-                hsm::utils::add_new_property $rx_chan "interrupts" int $intr_info
+                hsi::utils::add_new_dts_param $rx_chan_node "interrupts" $intr_info hexintlist
             }
         }
     } else {
-        set_property axistream-connected "$connected_ip" $drv_handle
-        set_property axistream-control-connected "$connected_ip" $drv_handle
+        set_drv_property $drv_handle axistream-connected "$connected_ip" reference
+        set_drv_property $drv_handle axistream-control-connected "$connected_ip" reference
     }
     incr dma_count
-    hsm::utils::set_os_parameter_value "dma_count" $dma_count
+    hsi::utils::set_os_parameter_value "dma_count" $dma_count
 }
 
-proc add_dma_channel { drv_handle xdma addr mode devid} {
-    set ip [get_cells $drv_handle]
+proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
     set modellow [string tolower $mode]
     set modeIndex [string index $mode 0]
-    set node_name [format "dma-channel@%x" $addr]
-    set dma_channel [hsm::utils::add_new_child_node $drv_handle $node_name]
-    hsm::utils::add_new_property $dma_channel "compatible" stringlist [format "xlnx,%s-%s-channel" $xdma $modellow]
-    hsm::utils::add_new_property $dma_channel "xlnx,device-id" hexint $devid
-    add_cross_property $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
+    set dma_channel [add_or_get_dt_node -n "dma-channel" -u $addr -p $parent_node]
+    hsi::utils::add_new_dts_param $dma_channel "compatible" [format "xlnx,%s-%s-channel" $xdma $modellow] stringlist
+    hsi::utils::add_new_dts_param $dma_channel "xlnx,device-id" $devid hexint
+
+
+    add_cross_property_to_dtnode $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
     # detection based on two property
     set datawidth_list "[format "CONFIG.C_%s_AXIS_%s_DATA_WIDTH" $modeIndex $mode] [format "CONFIG.C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode]"
-    add_cross_property $drv_handle $datawidth_list $dma_channel "xlnx,datawidth"
+    add_cross_property_to_dtnode $drv_handle $datawidth_list $dma_channel "xlnx,datawidth"
 
     return $dma_channel
 }
