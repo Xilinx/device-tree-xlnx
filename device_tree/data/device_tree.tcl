@@ -138,6 +138,7 @@ proc post_generate {os_handle} {
     global zynq_soc_dt_tree
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
     remove_empty_reference_node
+    remove_main_memory_node
 }
 
 proc clean_os {os_handle} {
@@ -189,6 +190,30 @@ proc add_alias {os_handle} {
             set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
             hsi::utils::add_new_dts_param "${alias_node}" ${conf_name} ${value} aliasref
             hsi::utils::set_os_parameter_value alias_${alias_str}_count [expr $alias_count + 1]
+        }
+    }
+}
+
+# remove main memory node
+proc remove_main_memory_node {} {
+    set main_memory [get_property CONFIG.main_memory [get_os]]
+    if {[string_is_empty $main_memory]} {
+        return 0
+    }
+    # in theory it will not del the ps ddr as it snot been generated
+    set mc_obj [get_node_object $main_memory "" ""]
+    if {[string_is_empty $mc_obj]} {
+        return 0
+    }
+    set cur_dts [current_dt_tree]
+    foreach dts_file [get_dt_tree] {
+        set dts_nodes [get_all_tree_nodes $dts_file]
+        foreach node ${dts_nodes} {
+            if {[regexp $mc_obj $node match]} {
+                current_dt_tree $dts_file
+                delete_objs $mc_obj
+                current_dt_tree $cur_dts
+            }
         }
     }
 }
