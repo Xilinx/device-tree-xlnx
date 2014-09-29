@@ -4,5 +4,6 @@ BEGIN driver generic
 
   OPTION NAME = generic;
   OPTION supported_os_types = (DTS);
+  DTGPARAM name = dtg.ip_params, type = boolean;
 
 END driver
