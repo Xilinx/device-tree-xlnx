@@ -461,6 +461,14 @@ proc set_drv_def_dts {drv_handle} {
 
 proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 	# check if the node_object has matching label, name and unit_address properties
+	global def_string
+	if {[string equal -nocase $node_label $def_string]} {
+		set node_label ""
+	}
+	if {[string equal -nocase $node_ua $def_string]} {
+		set node_ua ""
+	}
+
 	# ignore reference node as it does not have label and unit_addr
 	if {![regexp "^&.*" "$node_obj" match]} {
 		set old_label [get_property "NODE_LABEL" $node_obj]
