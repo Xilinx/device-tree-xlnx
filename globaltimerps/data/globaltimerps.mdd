@@ -1,12 +1,8 @@
 OPTION psf_version = 3.0;
 
 BEGIN driver globaltimerps
-
   OPTION supported_peripherals = (ps7_globaltimer);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = globaltimerps;
-
-  DTGPARAM name = compatible, default = "arm,cortex-a9-global-timer", type = stringlist;
-
 END driver
