@@ -517,7 +517,7 @@ proc add_or_get_dt_node args {
 		set tmp_node [get_node_object ${node_label}]
 		# rename if the node default properties differs
 		if {[dt_node_def_checking $node_label $node_name $node_unit_addr $tmp_node] == 0} {
-			dtg_warning "label found in existing tree, rename to dtg_$node_label"
+			dtg_warning "label '$node_label' found in existing tree, rename to dtg_$node_label"
 			set node_label "dtg_${node_label}"
 		}
 	}
