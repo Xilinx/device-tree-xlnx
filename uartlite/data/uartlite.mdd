@@ -6,7 +6,8 @@ BEGIN driver uartlite
   OPTION driver_state = ACTIVE;
   OPTION supported_os_types = (DTS);
   OPTION NAME = uartlite;
-
+  PARAMETER name = dev_type, default = "serial", type = string;
+  DTGPARAM name = dtg.ip_params, type = boolean;
   DTGPARAM name = dtg.alias, type = string, default = serial;
   DTGPARAM name = port-number, type = int, default = 0;
   DTGPARAM name = current-speed, type = int, default = 115200;

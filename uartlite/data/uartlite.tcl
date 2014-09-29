@@ -6,7 +6,7 @@ proc generate {drv_handle} {
         if { [string match -nocase $ip_type] } {
             hsm::utils::set_os_parameter_value "console" "ttyUL0,115200"
         } else {
-            hsm::utils::set_os_parameter_value "console" "ttyUL0,[get_ip_param_value $ip C_BAUDRATE]"
+            hsm::utils::set_os_parameter_value "console" "ttyUL0,[hsi::utils::get_ip_param_value $ip C_BAUDRATE]"
         }
     }
 }
