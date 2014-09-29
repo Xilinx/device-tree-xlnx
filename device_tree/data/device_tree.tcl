@@ -120,6 +120,8 @@ proc device_tree_drc {os_handle} {
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
+        # generate the default properties
+        gen_peripheral_nodes $drv_handle "create_node_only"
         gen_reg_property $drv_handle
         gen_compatible_property $drv_handle
         gen_drv_prop_from_ip $drv_handle
