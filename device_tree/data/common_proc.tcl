@@ -516,6 +516,11 @@ proc add_or_get_dt_node args {
 		set dts_file [current_dt_tree]
 	}
 
+	# node_name sanity checking
+	if {[string equal -nocase ${node_name} ${def_string}]} {
+		error "Node name must be provided..."
+	}
+
 	# Generate unique label name to prevent issue caused by static dtsi
 	# better way of handling this issue is required
 	set label_list [get_all_dt_labels]
