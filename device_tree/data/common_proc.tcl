@@ -1324,7 +1324,7 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 	}
 }
 
-proc gen_peripheral_nodes {drv_handle} {
+proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set status_enable_flow 0
 	set ip [get_cells $drv_handle]
 	# TODO: check if the base address is correct
@@ -1378,6 +1378,10 @@ proc gen_peripheral_nodes {drv_handle} {
 		}
 	} else {
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+	}
+
+	if {![string_is_empty $node_only]} {
+		return $rt_node
 	}
 
 	zynq_gen_pl_clk_binding $drv_handle
