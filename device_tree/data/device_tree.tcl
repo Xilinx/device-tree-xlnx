@@ -130,8 +130,8 @@ proc generate {lib_handle} {
 }
 
 proc post_generate {os_handle} {
-    add_chosen $os_handle
-    add_alias $os_handle
+    update_chosen $os_handle
+    update_alias $os_handle
     gen_dev_conf
     foreach drv_handle [get_drivers] {
         gen_peripheral_nodes $drv_handle
@@ -151,7 +151,7 @@ proc add_skeleton {} {
     set alias_node [add_or_get_dt_node -n "memory" -d ${default_dts} -p ${system_root_node}]
 }
 
-proc add_chosen {os_handle} {
+proc update_chosen {os_handle} {
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set chosen_node [add_or_get_dt_node -n "chosen" -d ${default_dts} -p ${system_root_node}]
@@ -172,7 +172,7 @@ proc add_chosen {os_handle} {
     hsm::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
 }
 
-proc add_alias {os_handle} {
+proc update_alias {os_handle} {
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set all_labels [get_all_dt_labels]
