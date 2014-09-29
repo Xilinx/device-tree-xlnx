@@ -130,7 +130,6 @@ proc generate {lib_handle} {
 proc post_generate {os_handle} {
     add_chosen $os_handle
     add_alias $os_handle
-    clean_os $os_handle
     gen_dev_conf
     foreach drv_handle [get_drivers] {
         gen_peripheral_nodes $drv_handle
@@ -139,14 +138,6 @@ proc post_generate {os_handle} {
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
     remove_empty_reference_node
     remove_main_memory_node
-}
-
-proc clean_os {os_handle} {
-    #deleting unwanted child nodes of OS for dumping into dts file
-    set node [get_nodes -of_objects $os_handle "global_params"]
-    if {[llength $node]} {
-        delete_objs $node
-    }
 }
 
 proc add_chosen {os_handle} {
