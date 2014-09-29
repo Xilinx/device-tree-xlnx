@@ -1438,29 +1438,30 @@ proc detect_bus_name {ip_drv} {
 	# FIXME: currently use single bus assumption
 	# TODO: detect bus connection
 	# 	zynq: uses amba base zynq-7000.dtsi
-	# 	mb: detection is required
+	#		pl ip creates amba_pl
+	# 	mb: detection is required (currently always call amba_pl)
 	set valid_buses [get_cells -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
 
 	set proc_name [get_property IP_NAME [get_cell [get_sw_processor]]]
 	if {[string equal -nocase "ps7_cortexa9" $proc_name]} {
-		return "amba 0"
+		if {[is_pl_ip $ip_drv]} {
+			# create the parent_node for pl.dtsi
+			set default_dts [set_drv_def_dts $ip_drv]
+			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+			return "amba_pl"
+		}
+		return "amba"
 	}
 
-	if {[llength $valid_buses] == 1} {
-		return "[lindex $valid_buses 0] 0"
-	}
-	return "amba 0"
+	return "amba_pl"
 }
 
 proc add_or_get_bus_node {ip_drv dts_file} {
-	set bus_info [detect_bus_name $ip_drv]
-	set bus_label [lindex $bus_info 0]
-	set bus_uaddr [lindex $bus_info 1]
+	set bus_name [detect_bus_name $ip_drv]
+	dtg_debug "bus_name: $bus_name"
+	dtg_debug "bus_label: $bus_name"
 
-	dtg_debug "bus_label: $bus_label"
-	dtg_debug "bus_uaddr: $bus_uaddr"
-
-	set bus_node [add_or_get_dt_node -n "amba" -l ${bus_label} -u ${bus_uaddr} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
+	set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 	if {![string match "&*" $bus_node]} {
 		hsm::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
 		hsm::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
