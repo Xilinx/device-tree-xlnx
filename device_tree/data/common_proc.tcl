@@ -1203,11 +1203,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set_drv_prop $drv_handle interrupt-parent $intc reference
 }
 
-proc gen_reg_property {drv_handle} {
+proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 	proc_called_by
 
-	if {[is_ps_ip $drv_handle]} {
-		return 0
+	if {[string_is_empty $skip_ps_check]} {
+		if {[is_ps_ip $drv_handle]} {
+			return 0
+		}
 	}
 
 	set reg ""
