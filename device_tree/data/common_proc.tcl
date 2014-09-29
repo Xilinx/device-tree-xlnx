@@ -1345,7 +1345,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set label $drv_handle
 	set dev_type [get_property CONFIG.dev_type $drv_handle]
 	if {[string_is_empty $dev_type] == 1} {
-		set dev_type $drv_handle
+		set dev_type [get_property IP_NAME [get_cell $ip]]
 	}
 
 	# TODO: more ignore ip list?
