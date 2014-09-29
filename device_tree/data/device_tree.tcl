@@ -118,7 +118,7 @@ proc device_tree_drc {os_handle} {
 }
 
 proc generate {lib_handle} {
-    add_chosen [get_os]
+    add_skeleton
     foreach drv_handle [get_drivers] {
         gen_reg_property $drv_handle
         gen_compatible_property $drv_handle
@@ -138,6 +138,15 @@ proc post_generate {os_handle} {
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
     remove_empty_reference_node
     remove_main_memory_node
+}
+
+proc add_skeleton {} {
+    set default_dts [get_property CONFIG.master_dts [get_os]]
+    set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
+    set chosen_node [add_or_get_dt_node -n "chosen" -d ${default_dts} -p ${system_root_node}]
+    set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
+    # assuming memory node is call memory
+    set alias_node [add_or_get_dt_node -n "memory" -d ${default_dts} -p ${system_root_node}]
 }
 
 proc add_chosen {os_handle} {
