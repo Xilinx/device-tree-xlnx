@@ -9,6 +9,5 @@ BEGIN driver iicps
   DTGPARAM name = bus-id, type = int ;
   DTGPARAM name = clock-frequency, type = int , default = 400000;
   DTGPARAM name = dtg.alias , type = reference, default = i2c;
-  DTGPARAM name = "i2c-reset", type = reference;
 
 END driver
