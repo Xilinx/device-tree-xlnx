@@ -977,6 +977,7 @@ proc remove_empty_reference_node {} {
 				}
 				set prop_list [list_property -regexp $node "CONFIG.*"]
 				if {[string_is_empty $prop_list]} {
+					dtg_debug "removing $node"
 					delete_objs $node
 				}
 			}
