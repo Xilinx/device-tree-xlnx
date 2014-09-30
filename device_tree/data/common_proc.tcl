@@ -40,6 +40,7 @@ proc set_drv_property args {
 	}
 }
 
+# set driver property based on IP property
 proc set_drv_conf_prop args {
 	set drv_handle [lindex $args 0]
 	set pram [lindex $args 1]
@@ -66,6 +67,7 @@ proc set_drv_conf_prop args {
 	}
 }
 
+# set driver property based on other IP's property
 proc add_cross_property args {
 	set src_handle [lindex $args 0]
 	set src_prams [lindex $args 1]
@@ -1165,6 +1167,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 	}
 
+	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set intc [::hsm::utils::get_interrupt_parent $drv_handle $pin]
 		set intr_id [::hsm::utils::get_interrupt_id $drv_handle $pin]
