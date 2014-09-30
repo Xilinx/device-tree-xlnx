@@ -1726,3 +1726,15 @@ proc get_os_dev_count {count_para {drv_handle ""} {os_para ""}} {
 		return $dev_count
 	}
 }
+
+proc get_hw_version {} {
+	set hw_ver_data [split [get_property VIVADO_VERSION [get_hw_designs]] "."]
+	set hw_ver [lindex $hw_ver_data 0].[lindex $hw_ver_data 1]
+	return $hw_ver
+}
+
+proc get_hsi_version {} {
+	set hsi_ver_data [split [version -short] "."]
+	set hsi_ver [lindex $hsi_ver_data 0].[lindex $hsi_ver_data 1]
+	return $hsi_ver
+}
