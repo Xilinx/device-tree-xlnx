@@ -1343,6 +1343,9 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 		if {$value != "-1" && [llength $value] !=0} {
 			set_property ${conf_prop} "$src_ip $value 0" $drv_handle
 		}
+	} else {
+		dtg_warning "$drv_handle: No reset found"
+		return -1
 	}
 }
 
