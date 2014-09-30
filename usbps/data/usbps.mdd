@@ -8,6 +8,5 @@ BEGIN driver usbps
   OPTION NAME = usbps;
   DTGPARAM name = dr_mode, default = host , type = string ;
   DTGPARAM name = phy_type, default = ulpi, type = string;
-  DTGPARAM name = usb-reset , type = reference;
 
 END driver
