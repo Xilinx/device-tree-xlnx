@@ -821,6 +821,14 @@ proc create_dt_tree_from_dts_file {} {
 			set value [lindex $line_data 1]
 			hsm::utils::add_new_dts_param "${cur_node}" "status" $value string
 		}
+		set status_regexp "compatible(|\\s+)="
+		set value ""
+		if {[regexp $status_regexp $line matched]} {
+			regsub -all "\{| |\t|;|\"" $line {} line
+			set line_data [split $line "="]
+			set value [lindex $line_data 1]
+			hsm::utils::add_new_dts_param "${cur_node}" "compatible" $value stringlist
+		}
 	}
 }
 
