@@ -1341,7 +1341,8 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 		}
 		regsub -all "MIO( |)" $value "" value
 		if {$value != "-1" && [llength $value] !=0} {
-			set_property ${conf_prop} "$src_ip $value 0" $drv_handle
+			regsub -all "CONFIG." $conf_prop "" conf_prop
+			set_drv_property $drv_handle ${conf_prop} "$src_ip $value 0" reference
 		}
 	} else {
 		dtg_warning "$drv_handle: No reset found"
