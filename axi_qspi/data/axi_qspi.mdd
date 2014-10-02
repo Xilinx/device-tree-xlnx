@@ -10,4 +10,3 @@ BEGIN driver axi_qspi
   DTGPARAM name = dtg.alias , default = spi;
 
 END driver
-
