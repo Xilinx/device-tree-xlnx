@@ -37,9 +37,7 @@ proc generate {drv_handle} {
 	set_drv_conf_prop $drv_handle C_NUM_FSTORES xlnx,num-fstores
 	set_drv_conf_prop $drv_handle C_USE_FSYNC xlnx,flush-fsync
 
-	set mem_range [lindex [xget_ip_mem_ranges $dma_ip] 0 ]
-	set baseaddr [get_property BASE_VALUE $mem_range]
-	set highaddr [get_property HIGH_VALUE $mem_range]
+	set baseaddr [get_baseaddr $dma_ip no_prefix]
 	set tx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_MM2S]
 	if { $tx_chan == 1 } {
 		set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
@@ -53,7 +51,8 @@ proc generate {drv_handle} {
 	set rx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_S2MM]
 	if { $rx_chan ==1 } {
 		set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
-		set rx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" [expr $baseaddr + 0x30] "S2MM" $vdma_count]
+		set rx_bassaddr [format %08x [expr 0x$baseaddr + 0x30]]
+		set rx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" $rx_bassaddr "S2MM" $vdma_count]
 		set intr_info [get_intr_id $drv_handle "s2mm_introut"]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
 		if { [llength $intr_info] } {
