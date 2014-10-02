@@ -44,7 +44,7 @@ proc generate {drv_handle} {
 	if { $tx_chan == 1 } {
 		set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
 		set tx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" $baseaddr "MM2S" $vdma_count ]
-		set intr_info [get_intr_id $drv_handle "mm2s_introut" ]
+		set intr_info [get_intr_id $drv_handle "mm2s_introut"]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "mm2s_introut"]
 		if { [llength $intr_info] } {
 			hsi::utils::add_new_dts_param $tx_chan_node "interrupts" $intr_info intlist
@@ -54,7 +54,7 @@ proc generate {drv_handle} {
 	if { $rx_chan ==1 } {
 		set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
 		set rx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" [expr $baseaddr + 0x30] "S2MM" $vdma_count]
-		set intr_info [get_intr_id $drv_handle "s2mm_introut" ]
+		set intr_info [get_intr_id $drv_handle "s2mm_introut"]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
 		if { [llength $intr_info] } {
 			hsi::utils::add_new_dts_param $rx_chan_node "interrupts" $intr_info intlist
