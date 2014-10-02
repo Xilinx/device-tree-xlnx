@@ -33,9 +33,9 @@ proc set_drv_property args {
 					set value ""
 				}
 			}
-			set_property ${conf_prop} $value $drv_handle
-			set prop [get_comp_params ${conf_prop} $drv_handle]
-			set_property CONFIG.TYPE $type $prop
+			# remove CONFIG. as add_new_property does not work with CONFIG.
+			regsub -all {^CONFIG.} $conf_prop {} conf_prop
+			hsi::utils::add_new_property $drv_handle $conf_prop $type $value
 		}
 	}
 }
@@ -60,9 +60,8 @@ proc set_drv_conf_prop args {
 					set value ""
 				}
 			}
-			set_property ${conf_prop} $value $drv_handle
-			set prop [get_comp_params ${conf_prop} $drv_handle]
-			set_property CONFIG.TYPE $type $prop
+			regsub -all {^CONFIG.} $conf_prop {} conf_prop
+			hsi::utils::add_new_property $drv_handle $conf_prop $type $value
 		}
 	}
 }
