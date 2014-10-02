@@ -69,7 +69,6 @@ proc generate {drv_handle} {
 
     # node must be created before child node
     set node [gen_peripheral_nodes $drv_handle]
-    set mdio_node [gen_mdio_node $drv_handle $node]
 
     # check if gmii2rgmii converter is used.
     set conv_data [is_gmii2rgmii_conv_present $slave]
@@ -77,6 +76,6 @@ proc generate {drv_handle} {
     if { $phya != "-1" } {
         set phy_name "[lindex $conv_data 1]"
         set_drv_prop $drv_handle gmii2rgmii-phy-handle "$phy_name" reference
-        gen_phy_node $mdio_node $phy_name $phya
+        gen_phy_node $node $phy_name $phya
     }
 }
