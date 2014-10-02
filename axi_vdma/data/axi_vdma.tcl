@@ -68,7 +68,6 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 	set ip [get_cells $drv_handle]
 	set modellow [string tolower $mode]
 	set modeIndex [string index $mode 0]
-	set node_name [format "dma-channel@%x" $addr]
 	set dma_channel [add_or_get_dt_node -n "dma-channel" -u $addr -p $parent_node]
 	hsi::utils::add_new_dts_param $dma_channel "compatible" [format "xlnx,%s-%s-channel" $xdma $modellow] stringlist
 	hsi::utils::add_new_dts_param $dma_channel "xlnx,device-id" $devid hexint
