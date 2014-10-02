@@ -12,7 +12,7 @@ proc generate {drv_handle} {
 	set node [gen_peripheral_nodes $drv_handle]
 
 	set dma_ip [get_cells $drv_handle]
-	set vdma_count [hsm::utils::get_os_parameter_value "vdma_count"]
+	set vdma_count [hsi::utils::get_os_parameter_value "vdma_count"]
 	if { [llength $vdma_count] == 0 } {
 		set vdma_count 0
 	}
@@ -42,7 +42,7 @@ proc generate {drv_handle} {
 	set highaddr [get_property HIGH_VALUE $mem_range]
 	set tx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_MM2S]
 	if { $tx_chan == 1 } {
-		set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
+		set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "M_AXIS_MM2S"]
 		set tx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" $baseaddr "MM2S" $vdma_count ]
 		set intr_info [get_intr_id $drv_handle "mm2s_introut"]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "mm2s_introut"]
@@ -52,7 +52,7 @@ proc generate {drv_handle} {
 	}
 	set rx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_S2MM]
 	if { $rx_chan ==1 } {
-		set connected_ip [hsm::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
+		set connected_ip [hsi::utils::get_connected_stream_ip $dma_ip "S_AXIS_S2MM"]
 		set rx_chan_node [add_dma_channel $drv_handle $node "axi-vdma" [expr $baseaddr + 0x30] "S2MM" $vdma_count]
 		set intr_info [get_intr_id $drv_handle "s2mm_introut"]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
@@ -61,7 +61,7 @@ proc generate {drv_handle} {
 		}
 	}
 	incr vdma_count
-	hsm::utils::set_os_parameter_value "vdma_count" $vdma_count
+	hsi::utils::set_os_parameter_value "vdma_count" $vdma_count
 }
 
 proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
