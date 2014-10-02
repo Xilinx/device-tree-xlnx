@@ -7,6 +7,7 @@ BEGIN driver axi_vdma
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_vdma;
   PARAMETER name = dev_type, default = dma, type = string;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-vdma";
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-vdma-1.00.a";
+  DTGPARAM name = "#dma-cells", type = int, default = 1;
 
 END driver
