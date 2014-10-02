@@ -9,15 +9,5 @@ proc generate {drv_handle} {
 		}
 	}
 
-	set kernel_version [get_property CONFIG.kernel_version [get_os]]
-	puts $kernel_version
-	switch -exact $kernel_version {
-		"2014.2" {
-			set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "xlnx,num-ss-bits"
-		} "2014.3" -
-		"2014.4" -
-		default {
-			set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "num-cs"
-		}
-	}
+	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "num-cs"
 }
