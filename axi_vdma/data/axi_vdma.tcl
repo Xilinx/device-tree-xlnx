@@ -47,7 +47,7 @@ proc generate {drv_handle} {
 		set intr_info [get_intr_id $drv_handle "mm2s_introut" ]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "mm2s_introut"]
 		if { [llength $intr_info] } {
-			hsi::utils::add_new_dts_param $tx_chan_node "interrupts" $intr_info hexintlist
+			hsi::utils::add_new_dts_param $tx_chan_node "interrupts" $intr_info intlist
 		}
 	}
 	set rx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_S2MM]
@@ -57,7 +57,7 @@ proc generate {drv_handle} {
 		set intr_info [get_intr_id $drv_handle "s2mm_introut" ]
 		#set intc [hsi::utils::get_interrupt_parent $dma_ip "s2mm_introut"]
 		if { [llength $intr_info] } {
-			hsi::utils::add_new_dts_param $rx_chan_node "interrupts" $intr_info hexintlist
+			hsi::utils::add_new_dts_param $rx_chan_node "interrupts" $intr_info intlist
 		}
 	}
 	incr vdma_count

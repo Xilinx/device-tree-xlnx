@@ -43,7 +43,7 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 
 	set intr_info [get_intr_id $drv_handle "cdma_introut" ]
 	if { [llength $intr_info] } {
-		hsi::utils::add_new_dts_param $dma_channel "interrupts" $intr_info hexintlist
+		hsi::utils::add_new_dts_param $dma_channel "interrupts" $intr_info intlist
 	}
 	return $dma_channel
 }
