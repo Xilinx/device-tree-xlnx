@@ -90,7 +90,7 @@ proc add_cross_property args {
 				if {[regexp "(int|hex).*" $type match]} {
 					regsub -all {"} $value "" value
 				}
-				hsm::utils::add_new_property $dest_handle $dest_prop $type $value
+				hsi::utils::add_new_property $dest_handle $dest_prop $type $value
 				return 0
 			}
 		}
@@ -154,8 +154,8 @@ proc get_intr_id {drv_handle intr_port_name} {
 	set slave [get_cells $drv_handle]
 	set intr_info ""
 	foreach pin ${intr_port_name} {
-		set intc [::hsm::utils::get_interrupt_parent $drv_handle $pin]
-		set intr_id [::hsm::utils::get_interrupt_id $drv_handle $pin]
+		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+		set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 		if {[string match -nocase $intr_id "-1"]} {continue}
 		if {[string_is_empty $intc] == 1} {continue}
 
@@ -772,7 +772,7 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	# }
 	# TODO: sanity check is missing
 	dtg_debug "${dt_node} - ${prop} - ${value} - ${type}"
-	hsm::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
+	hsi::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
 }
 
 proc create_dt_tree_from_dts_file {} {
@@ -818,7 +818,7 @@ proc create_dt_tree_from_dts_file {} {
 			regsub -all "\{| |\t|;|\"" $line {} line
 			set line_data [split $line "="]
 			set value [lindex $line_data 1]
-			hsm::utils::add_new_dts_param "${cur_node}" "status" $value string
+			hsi::utils::add_new_dts_param "${cur_node}" "status" $value string
 		}
 		set status_regexp "compatible(|\\s+)="
 		set value ""
@@ -826,7 +826,7 @@ proc create_dt_tree_from_dts_file {} {
 			regsub -all "\{| |\t|;|\"" $line {} line
 			set line_data [split $line "="]
 			set value [lindex $line_data 1]
-			hsm::utils::add_new_dts_param "${cur_node}" "compatible" $value stringlist
+			hsi::utils::add_new_dts_param "${cur_node}" "compatible" $value stringlist
 		}
 	}
 }
@@ -1092,7 +1092,7 @@ proc set_drv_prop args {
 	# check if property exists if not create it
 	set list [get_drv_conf_prop_list $drv_handle]
 	if {[lsearch -glob ${list} ${prop_name}] < 0} {
-		hsm::utils::add_new_property $drv_handle $prop_name string "$value"
+		hsi::utils::add_new_property $drv_handle $prop_name string "$value"
 	}
 
 	if {[llength $args] >= 4} {
@@ -1176,8 +1176,8 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
-		set intc [::hsm::utils::get_interrupt_parent $drv_handle $pin]
-		set intr_id [::hsm::utils::get_interrupt_id $drv_handle $pin]
+		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+		set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 		if {[string match -nocase $intr_id "-1"]} {continue}
 		if {[string_is_empty $intc] == 1} {continue}
 
@@ -1411,7 +1411,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		# check if it has status property
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
 		if {$status_disabled} {
-			hsm::utils::add_new_dts_param "${rt_node}" "status" "okay" string
+			hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
 		}
 	} else {
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
@@ -1487,10 +1487,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 
 	set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 	if {![string match "&*" $bus_node]} {
-		hsm::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
-		hsm::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
-		hsm::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
-		hsm::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
+		hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
+		hsi::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
+		hsi::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
 	}
 	return $bus_node
 }
@@ -1516,10 +1516,10 @@ proc gen_root_node {drv_handle} {
 		}
 	}
 	set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-	hsm::utils::add_new_dts_param "${root_node}" "#address-cells" 1 int ""
-	hsm::utils::add_new_dts_param "${root_node}" "#size-cells" 1 int ""
-	hsm::utils::add_new_dts_param "${root_node}" model $model string ""
-	hsm::utils::add_new_dts_param "${root_node}" compatible $compatible string ""
+	hsi::utils::add_new_dts_param "${root_node}" "#address-cells" 1 int ""
+	hsi::utils::add_new_dts_param "${root_node}" "#size-cells" 1 int ""
+	hsi::utils::add_new_dts_param "${root_node}" model $model string ""
+	hsi::utils::add_new_dts_param "${root_node}" compatible $compatible string ""
 
 	return $root_node
 }
@@ -1549,8 +1549,8 @@ proc gen_cpu_nodes {drv_handle} {
 
 	set default_dts [set_drv_def_dts $processor]
 	set cpu_root_node [add_or_get_dt_node -n cpus -d ${default_dts} -p /]
-	hsm::utils::add_new_dts_param "${cpu_root_node}" "#address-cells" 1 int ""
-	hsm::utils::add_new_dts_param "${cpu_root_node}" "#size-cells" 0 int ""
+	hsi::utils::add_new_dts_param "${cpu_root_node}" "#address-cells" 1 int ""
+	hsi::utils::add_new_dts_param "${cpu_root_node}" "#size-cells" 0 int ""
 
 	set processor_type [get_property IP_NAME [get_cell ${processor}]]
 	set processor_list [eval "get_cells -filter { IP_TYPE == \"PROCESSOR\" && IP_NAME == \"${processor_type}\" }"]
@@ -1574,7 +1574,7 @@ proc gen_cpu_nodes {drv_handle} {
 	foreach cpu ${processor_list} {
 		set bus_label [get_property NODE_LABEL $bus_node]
 		set cpu_node [add_or_get_dt_node -n ${dev_type} -l ${cpu} -u ${cpu_no} -d ${default_dts} -p ${cpu_root_node}]
-		hsm::utils::add_new_dts_param "${cpu_node}" "bus-handle" $bus_label reference
+		hsi::utils::add_new_dts_param "${cpu_node}" "bus-handle" $bus_label reference
 		foreach drv_prop_name $drv_dt_prop_list {
 			add_driver_prop $processor $cpu_node ${drv_prop_name}
 		}
@@ -1585,11 +1585,11 @@ proc gen_cpu_nodes {drv_handle} {
 			}
 		}
 		if {$add_reg == 1} {
-			hsm::utils::add_new_dts_param "${cpu_node}" "reg" $cpu_no int ""
+			hsi::utils::add_new_dts_param "${cpu_node}" "reg" $cpu_no int ""
 		}
 		incr cpu_no
 	}
-	hsm::utils::add_new_dts_param "${cpu_root_node}" "#cpus" $cpu_no int ""
+	hsi::utils::add_new_dts_param "${cpu_root_node}" "#cpus" $cpu_no int ""
 	return $rt_node
 }
 
@@ -1611,8 +1611,8 @@ proc remove_all_tree {} {
 
 proc gen_mdio_node {drv_handle parent_node} {
 	set mdio_node [add_or_get_dt_node -l ${drv_handle}_mdio -n mdio -p $parent_node]
-	hsm::utils::add_new_dts_param "${mdio_node}" "#address-cells" 1 int ""
-	hsm::utils::add_new_dts_param "${mdio_node}" "#size-cells" 0 int ""
+	hsi::utils::add_new_dts_param "${mdio_node}" "#address-cells" 1 int ""
+	hsi::utils::add_new_dts_param "${mdio_node}" "#size-cells" 0 int ""
 	return $mdio_node
 }
 
@@ -1631,13 +1631,13 @@ proc add_memory_node {drv_handle} {
 	set unit_addr [get_baseaddr $drv_handle]
 	set memory_node [add_or_get_dt_node -n memory -p $parent_node]
 	set reg_value [get_property CONFIG.reg $drv_handle]
-	hsm::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
+	hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
 	# maybe hardcoded
 	if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
 		set dev_type memory
 	}
 	if {[string_is_empty $dev_type]} {set dev_type memory}
-	hsm::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
+	hsi::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
 
 	set_cur_working_dts $cur_dts
 	return $memory_node
@@ -1648,18 +1648,18 @@ proc gen_mb_ccf_subnode {drv_handle name freq reg} {
 	set default_dts [set_drv_def_dts $drv_handle]
 
 	set clk_node [add_or_get_dt_node -n clocks -p / -d ${default_dts}]
-	hsm::utils::add_new_dts_param "${clk_node}" "#address-cells" 1 int
-	hsm::utils::add_new_dts_param "${clk_node}" "#size-cells" 0 int
+	hsi::utils::add_new_dts_param "${clk_node}" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "${clk_node}" "#size-cells" 0 int
 
 	set clk_subnode_name "clk_${name}"
 	set clk_subnode [add_or_get_dt_node -l ${clk_subnode_name} -n ${clk_subnode_name} -u $reg -p ${clk_node} -d ${default_dts}]
 	# clk subnode data
-	hsm::utils::add_new_dts_param "${clk_subnode}" "compatible" "fixed-clock" stringlist
-	hsm::utils::add_new_dts_param "${clk_subnode}" "#clock-cells" 0 int
+	hsi::utils::add_new_dts_param "${clk_subnode}" "compatible" "fixed-clock" stringlist
+	hsi::utils::add_new_dts_param "${clk_subnode}" "#clock-cells" 0 int
 
-	hsm::utils::add_new_dts_param $clk_subnode "clock-output-names" $clk_subnode_name string
-	hsm::utils::add_new_dts_param $clk_subnode "reg" $reg int
-	hsm::utils::add_new_dts_param $clk_subnode "clock-frequency" $freq int
+	hsi::utils::add_new_dts_param $clk_subnode "clock-output-names" $clk_subnode_name string
+	hsi::utils::add_new_dts_param $clk_subnode "reg" $reg int
+	hsi::utils::add_new_dts_param $clk_subnode "clock-frequency" $freq int
 
 	set_cur_working_dts $cur_dts
 }
@@ -1688,7 +1688,7 @@ proc generate_mb_ccf_node {drv_handle} {
 				gen_mb_ccf_subnode $drv_handle bus_${bus_clk_cnt} $clk_freq [expr ${bus_clk_cnt} + 1]
 				# set bus clock frequency (current it is there)
 				set_property CONFIG.clock-frequency $clk_freq $drv_handle
-				hsm::utils::add_new_property $drv_handle "clocks" int &clk_bus_${bus_clk_cnt}
+				hsi::utils::add_new_property $drv_handle "clocks" int &clk_bus_${bus_clk_cnt}
 			}
 		}
 		set cpu_clk_freq [get_clock_frequency $proc_ip "CLK"]

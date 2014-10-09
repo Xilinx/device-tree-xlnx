@@ -20,7 +20,7 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
         set ip_check "True"
     }
 
-    set count [hsm::utils::get_os_parameter_value $var_name]
+    set count [hsi::utils::get_os_parameter_value $var_name]
     if {[llength $count] == 0} {
         if {[string match -nocase "True" $ip_check]} {
             set count 1
@@ -40,7 +40,7 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
 
     set_property $conf_prop $count $drv_handle
     incr count
-    ::hsm::utils::set_os_parameter_value $var_name $count
+    ::hsi::utils::set_os_parameter_value $var_name $count
 }
 
 proc gen_count_prop {drv_handle data_dict} {
@@ -58,7 +58,7 @@ proc gen_count_prop {drv_handle data_dict} {
 
         set irq_chk [dict get $data_dict $dev_type "irq_chk"]
         if {![string match -nocase "false" $irq_chk]} {
-            set irq_id [::hsm::utils::get_interrupt_id $slave $irq_chk]
+            set irq_id [::hsi::utils::get_interrupt_id $slave $irq_chk]
             if {[llength $irq_id] < 0} {
                 dtg_warning "Fail to located interrupt pin - $irq_chk. The $drv_conf is not set for $dev_type"
                 continue
@@ -114,7 +114,7 @@ proc bsp_drc {os_handle} {
 # If standalone purpose
 proc device_tree_drc {os_handle} {
     bsp_drc $os_handle
-    hsm::utils::add_new_child_node $os_handle "global_params"
+    hsi::utils::add_new_child_node $os_handle "global_params"
 }
 
 proc generate {lib_handle} {
@@ -159,17 +159,17 @@ proc update_chosen {os_handle} {
     #getting boot arguments
     set bootargs [get_property CONFIG.bootargs $os_handle]
     if {[llength $bootargs] == 0} {
-        set console [hsm::utils::get_os_parameter_value "console"]
+        set console [hsi::utils::get_os_parameter_value "console"]
         if {[llength $console]} {
             set bootargs "console=$console"
         }
     }
     if {[llength $bootargs]} {
-        hsm::utils::add_new_dts_param "${chosen_node}" "bootargs" $bootargs string
+        hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" $bootargs string
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
     set consoleip [ps_node_mapping $consoleip label]
-    hsm::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
+    hsi::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
 }
 
 proc update_alias {os_handle} {

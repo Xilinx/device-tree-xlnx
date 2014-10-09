@@ -15,12 +15,12 @@ proc gen_clocks_node {parent_node} {
     set clocks_child_name "clkc"
     set clkc_node [add_or_get_dt_node -l $clocks_child_name -n $clocks_child_name -u 100 -p $parent_node]
 
-    hsm::utils::add_new_dts_param "${clkc_node}" "fclk-enable" "0xf" int
+    hsi::utils::add_new_dts_param "${clkc_node}" "fclk-enable" "0xf" int
     set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells ps7_clockc_0]]
     if {[string_is_empty ${ps_clk_freq}]} {
         puts "WARNING: DTG failed to detect the ps-clk-frequency, Using default value - 33333333"
         set ps_clk_freq 33333333
     }
-    hsm::utils::add_new_dts_param "${clkc_node}" "ps-clk-frequency" ${ps_clk_freq} int
+    hsi::utils::add_new_dts_param "${clkc_node}" "ps-clk-frequency" ${ps_clk_freq} int
     return $clkc_node
 }

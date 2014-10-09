@@ -25,6 +25,6 @@ proc generate {drv_handle} {
 			append interrupts " " "$intr_info"
 		}
 	}
-	hsm::utils::add_new_property $drv_handle "interrupts" int $interrupts
-	hsm::utils::add_new_property $drv_handle "interrupt-names" stringlist $interrupt_names
+	hsi::utils::add_new_property $drv_handle "interrupts" int $interrupts
+	hsi::utils::add_new_property $drv_handle "interrupt-names" stringlist $interrupt_names
 }
