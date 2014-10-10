@@ -1749,3 +1749,10 @@ proc get_hsi_version {} {
 	set hsi_ver [lindex $hsi_ver_data 0].[lindex $hsi_ver_data 1]
 	return $hsi_ver
 }
+
+proc get_sw_proc_prop {prop_name} {
+	set sw_proc [get_sw_processor]
+	set proc_ip [get_cells $sw_proc]
+	set property_value [get_property $prop_name $proc_ip]
+	return $property_value
+}
