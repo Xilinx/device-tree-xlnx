@@ -1009,7 +1009,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	#   clocks = <&clkc 0>;
 	set proctype [get_property IP_NAME [get_cells [get_sw_processor]]]
 	# Assuming these device supports the clocks
-	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can"
+	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can"
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		set iptype [get_property IP_NAME [get_cells $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
