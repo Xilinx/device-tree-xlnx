@@ -1014,8 +1014,8 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 		set iptype [get_property IP_NAME [get_cells $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
-			hsi::utils::add_new_property $drv_handle "clock-names" stringlist "ref_clk"
-			hsi::utils::add_new_property $drv_handle "clocks" reference "clkc 0"
+			set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
+			set_drv_prop_if_empty $drv_handle "clocks" "clkc 0" reference
 		}
 	}
 }
