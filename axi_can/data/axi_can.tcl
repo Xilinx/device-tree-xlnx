@@ -15,7 +15,9 @@ proc generate {drv_handle} {
     switch $proc_type {
         "ps7_cortexa9" {
             # for 2014.4
-            set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_aclk" stringlist
+            # workaround for hsm can't generate the correct reference for multiple cells
+            set_drv_prop_if_empty $drv_handle "clocks" "clkc 0 &clkc 1" reference
+            set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
         } "microblaze" {}
         default {
             error "Unknown arch"
