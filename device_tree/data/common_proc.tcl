@@ -940,10 +940,11 @@ proc gen_ps7_mapping {} {
 }
 
 proc ps_node_mapping {ip_name prop} {
-	set unit_addr [get_ps_node_unit_addr $ip_name]
-	if {$unit_addr == -1} {return $ip_name}
-	set ps7_mapping [gen_ps7_mapping]
 	if {[is_ps_ip [get_drivers $ip_name]]} {
+		set unit_addr [get_ps_node_unit_addr $ip_name]
+		if {$unit_addr == -1} {return $ip_name}
+		set ps7_mapping [gen_ps7_mapping]
+
 		if {[catch {set tmp [dict get $ps7_mapping $unit_addr $prop]} msg]} {
 			continue
 		}
