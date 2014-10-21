@@ -169,6 +169,7 @@ proc update_chosen {os_handle} {
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
     set consoleip [ps_node_mapping $consoleip label]
+    if {[lsearch [get_drivers] $consoleip] < 0} {return -1}
     hsi::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
 }
 
