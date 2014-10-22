@@ -8,8 +8,8 @@ proc generate {drv_handle} {
             break
         }
     }
-    set_drv_conf_prop $drv_handle c_can_tx_dpth xlnx,can-tx-dpth hexint
-    set_drv_conf_prop $drv_handle c_can_rx_dpth xlnx,can-rx-dpth hexint
+    set_drv_conf_prop $drv_handle c_can_tx_dpth tx-fifo-depth hexint
+    set_drv_conf_prop $drv_handle c_can_rx_dpth rx-fifo-depth hexint
 
     set proc_type [get_sw_proc_prop IP_NAME]
     switch $proc_type {
