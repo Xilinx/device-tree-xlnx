@@ -1,5 +1,7 @@
 proc ns_to_cycle {drv_handle prop_name nand_cycle_time} {
-    return [expr [get_property CONFIG.$prop_name [get_cells $drv_handle]]/${nand_cycle_time} + 1]
+    set extra_cycle 1
+    if {${nand_cycle_time} == 1} { set extra_cycle 0}
+    return [expr [get_property CONFIG.$prop_name [get_cells $drv_handle]]/${nand_cycle_time} + ${extra_cycle}]
 }
 
 proc generate {drv_handle} {
@@ -19,7 +21,7 @@ proc generate {drv_handle} {
     switch -exact $hw_ver {
         "2014.2" {
              set nand_par_prefix "C_NAND_CYCLE_"
-             set nand_clk_freq 1
+             set nand_cycle_time 1
         } "2014.4" -
         default {
             set nand_par_prefix "NAND-CYCLE-"
