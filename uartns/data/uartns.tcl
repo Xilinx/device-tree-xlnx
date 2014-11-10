@@ -19,7 +19,7 @@ proc generate {drv_handle} {
         # driver only uses clock-frequency property
 
     } else {
-        set freq [xget_ip_clk_pin_freq $ip "$clock_port"]
+        set freq [hsi::utils::get_clk_pin_freq $ip "$clock_port"]
         set_property clock-frequency $freq $drv_handle
     }
 
