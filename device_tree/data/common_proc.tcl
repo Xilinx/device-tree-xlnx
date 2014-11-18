@@ -502,8 +502,10 @@ proc add_or_get_dt_node args {
 	}
 	set auto_ref 1
 	set auto_ref_parent 0
+	set force_create 0
 	while {[string match -* [lindex $args 0]]} {
 		switch -glob -- [lindex $args 0] {
+			-force {set force_create 1}
 			-disable_auto_ref {set auto_ref 0}
 			-auto_ref_parent {set auto_ref_parent 1}
 			-n* {set node_name [Pop args 1]}
@@ -620,7 +622,6 @@ proc add_or_get_dt_node args {
 			}
 		}
 	}
-
 	# if dt node in other target dts files
 	# create a reference node if required
 	set found_node 0
@@ -639,7 +640,7 @@ proc add_or_get_dt_node args {
 			}
 		}
 	}
-	if {$found_node == 1} {
+	if {$found_node == 1 && $force_create == 0} {
 		if {$auto_ref == 0} {
 			# return the object found on other dts files
 			set_cur_working_dts ${cur_working_dts}
