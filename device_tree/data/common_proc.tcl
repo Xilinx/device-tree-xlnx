@@ -1526,6 +1526,36 @@ proc gen_root_node {drv_handle} {
 	return $root_node
 }
 
+proc cortexa9_opp_gen {drv_handle} {
+	# generate opp overlay for cpu
+	if {[catch {set cpu_max_freq [get_property CONFIG.C_CPU_CLK_FREQ_HZ [get_cells $drv_handle]]} msg]} {
+		set cpu_max_freq ""
+	}
+	if {[string_is_empty ${cpu_max_freq}]} {
+		dtg_warning "DTG failed to detect the CPU clock frequency"
+		return -1
+	}
+	set cpu_max_freq [expr int([expr $cpu_max_freq/1000])]
+	set processor [get_sw_processor]
+	set default_dts [set_drv_def_dts $processor]
+	set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+
+	set cpu_root_node [add_or_get_dt_node -n cpus -d ${default_dts} -p $root_node]
+	set cpu_node [add_or_get_dt_node -n cpu -u 0 -d ${default_dts} -p ${cpu_root_node} -disable_auto_ref -force]
+
+	set tmp_opp $cpu_max_freq
+	set opp ""
+	set i 0
+	# do not generate opp for freq lower than 200MHz and use fix voltage
+	# 1000000uv
+	while {$tmp_opp >= 200000} {
+		append opp " " "$tmp_opp 1000000"
+		incr i
+		set tmp_opp [expr int([expr $cpu_max_freq / pow(2, $i)])]
+	}
+	hsi::utils::add_new_dts_param $cpu_node "operating-points" "$opp" intlist
+}
+
 # Q: common function for all processor or one for each driver lib
 proc gen_cpu_nodes {drv_handle} {
 	set ip_name [get_property IP_NAME [get_cell [get_sw_processor]]]
@@ -1533,6 +1563,7 @@ proc gen_cpu_nodes {drv_handle} {
 		"ps7_cortexa9" {
 			# skip node generation for static zynq-7000 dtsi
 			# TODO: this needs to be fixed to allow override
+			cortexa9_opp_gen $drv_handle
 			return 0
 		} "microblaze" {}
 		default {
