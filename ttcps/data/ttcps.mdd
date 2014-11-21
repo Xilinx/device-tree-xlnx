@@ -7,6 +7,4 @@ BEGIN driver ttcps
   OPTION driver_state = ACTIVE;
   OPTION NAME = ttcps;
 
-  DTGPARAM name = compatible, type = stringlist, default = "cdns,ttc"
-
 END driver

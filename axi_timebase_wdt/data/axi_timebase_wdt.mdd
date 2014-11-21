@@ -7,7 +7,7 @@ BEGIN driver axi_timebase_wdt
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_timebase_wdt;
 
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
+  DTGPARAM name = dev_type, default = watchdog , type = string;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-timebase-wdt-1.00.a";
 
 END driver

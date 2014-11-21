@@ -6,8 +6,5 @@ BEGIN driver slcrps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = slcrps;
-  DTGPARAM name = "#address-cells", default = 1, type = int;
-  DTGPARAM name = "#size-cells", default = 1 , type = int;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-slcr syscon";
-  DTGPARAM name = "ranges ";
+
 END driver

@@ -6,6 +6,5 @@ BEGIN driver ddrcps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ddrcps;
-  DTGPARAM name = compatible, default = "xlnx,zynq-ddrc-1.0", type = stringlist;
 
 END driver

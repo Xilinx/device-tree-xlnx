@@ -6,11 +6,12 @@ BEGIN driver emacps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = emacps;
-  DTGPARAM name = "#address-cells", default = 1, type = int;
-  DTGPARAM name = "#size-cells", default = 0, type = int ;
+  PARAMETER name = dev_type, default = ethernet, type = string;
+  PARAMETER name = system.dts, default = "local-mac-address", type = stringlist;
+
   DTGPARAM name = local-mac-address, default = "00 0a 35 00 00 00", type = bytelist
   DTGPARAM name = dtg.alias, type = string, default = ethernet;
   DTGPARAM name = phy-mode, default = gmii
   DTGPARAM name = "xlnx,ptp-enet-clock"
-  DTGPARAM name = "enet-reset", type = reference;
+
 END driver

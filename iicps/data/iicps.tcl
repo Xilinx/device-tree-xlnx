@@ -1,16 +1,11 @@
-proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
-    set ip [get_cells $drv_handle]
-    set value [get_property CONFIG.${reset_pram} $ip]
-    # workaround for reset not been selected
-    regsub -all "<Select>" $value "" value
-    if { [llength $value] } {
-        regsub -all "MIO( |)" $value "" value
-        if { $value != "-1" && [llength $value] !=0  } {
-            set_property CONFIG.${conf_prop} "ps7_gpio_0 $value 0" $drv_handle
+proc generate {drv_handle} {
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
         }
     }
-}
 
-proc generate {drv_handle} {
-    ps7_reset_handle $drv_handle C_I2C_RESET i2c-reset
+    ps7_reset_handle $drv_handle CONFIG.C_I2C_RESET CONFIG.i2c-reset
 }

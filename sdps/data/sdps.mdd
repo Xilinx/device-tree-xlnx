@@ -7,7 +7,5 @@ BEGIN driver sdps
   OPTION driver_state = ACTIVE;
   OPTION NAME = sdps;
   DTGPARAM name = clock-frequency , type = int ;
-  DTGPARAM name = compatible, type = stringlist, default = "arasan,sdhci-8.9a"
-  DTGPARAM name = clock-names, type = stringlist, default = "clk_xin clk_ahb"
 
 END driver

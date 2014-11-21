@@ -6,7 +6,8 @@ BEGIN driver axi_vdma
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_vdma;
-  DTGPARAM name = dtg.ip_params, default = "", type = stringlist;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-vdma";
+  PARAMETER name = dev_type, default = dma, type = string;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-vdma-1.00.a";
+  DTGPARAM name = "#dma-cells", type = int, default = 1;
 
 END driver

@@ -6,11 +6,12 @@ BEGIN driver emaclite
   OPTION driver_state = ACTIVE;
   OPTION NAME = emaclite;
   OPTION supported_os_types = (DTS);
-
+  PARAMETER name = system.dts, default = "local-mac-address", type = stringlist;
+  PARAMETER name = dev_type, default = ethernet, type = string;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,xps-ethernetlite-1.00.a";
   DTGPARAM name = device_type, type = string, default = network;
   DTGPARAM name = dtg.alias, type = string, default = ethernet;
   DTGPARAM name = local-mac-address, default = "00 0a 35 00 00 00", type = bytelist;
-  DTGPARAM name = phy-handle, type = reference;
+  DTGPARAM name = dtg.ip_params, type = boolean;
 
 END driver

@@ -1,12 +1,13 @@
-proc gen_mdio_node {drv_handle} {
-    set mdio_child_name "mdio"
-    set mdio [hsm::utils::add_new_child_node $drv_handle $mdio_child_name]
-    hsm::utils::add_new_property $mdio "#address-cells" int 1
-    hsm::utils::add_new_property  $mdio "#size-cells" int 0
-    return $mdio
-}
-
 proc generate {drv_handle} {
-    gen_mdio_node $drv_handle
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
+        }
+    }
+    update_eth_mac_addr $drv_handle
+    set node [gen_peripheral_nodes $drv_handle]
+    gen_mdio_node $drv_handle $node
 }
 

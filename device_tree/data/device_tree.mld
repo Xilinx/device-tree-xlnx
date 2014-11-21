@@ -9,7 +9,8 @@ OPTION OS_TYPE = DTS
 OPTION SUPPORTED_PERIPHERALS = (microblaze ps7_cortexa9);
 OPTION DESC = "Generate flat device tree";
 OPTION COMPILE_BSP = FALSE;
-OPTION VERSION = 2014.2;
+
+PARAMETER name = dtg_version, desc = "DTG version", default = "2014.4";
 
 PARAMETER name = bootargs, desc = "Booting arguments", type = string, default = "";
 
@@ -17,5 +18,7 @@ PARAMETER name = console_device, desc = "Instance name of IP core for boot conso
 
 PARAMETER name = periph_type_overrides, desc = "List of peripheral type overrides", type = string, default = "";
 PARAMETER name = main_memory, desc = "Name of Main Memory used with PetaLinux", type = peripheral_instance, range = (ps7_ddr, mpmc, mig_7series, axi_emc), default = none;
-PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.2" = 2014.2, "2014.3" = 2014.3), default = 2014.2;
+PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.4" = 2014.4), default = 2014.4;
+PARAMETER name = pcw_dts, desc = "Target dts filename for PCW configurations", type = string, default = system.dts;
+PARAMETER name = master_dts, desc = "Master dts filename", type = string, default = system.dts;
 END OS

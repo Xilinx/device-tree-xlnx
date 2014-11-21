@@ -6,7 +6,5 @@ BEGIN driver scuwdt
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = scuwdt;
-  DTGPARAM name = device_type, default = watchdog , type = string ;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-scuwdt-1.00.a";
 
 END driver

@@ -6,8 +6,5 @@ BEGIN driver wdtps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = wdtps;
-  DTGPARAM name = device_type, default = watchdog , type = string ;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,zynq-wdt-r1p2";
-  DTGPARAM name = "timeout-sec", type = int, default = 10;
 
 END driver
