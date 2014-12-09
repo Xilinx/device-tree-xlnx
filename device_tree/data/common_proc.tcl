@@ -781,9 +781,9 @@ proc create_dt_tree_from_dts_file {} {
 	set kernel_dtsi ""
 	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 	foreach i [get_sw_cores device_tree] {
-		set kernel_dtsi "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${zynq_7000_fname}"
+		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${zynq_7000_fname}"]
 		if {[file exists $kernel_dtsi]} {
-			foreach file [glob [get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/*] {
+			foreach file [glob [file normalize [get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/*]] {
 				# NOTE: ./ works only if we did not change our directory
 				file copy -force $file ./
 			}
