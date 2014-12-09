@@ -15,7 +15,6 @@ proc gen_clocks_node {parent_node} {
     set clocks_child_name "clkc"
     set clkc_node [add_or_get_dt_node -l $clocks_child_name -n $clocks_child_name -u 100 -p $parent_node]
 
-    hsi::utils::add_new_dts_param "${clkc_node}" "fclk-enable" "0xf" int
     if {[catch {set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells ps7_clockc_0]]} msg]} {
         set ps_clk_freq ""
     }
@@ -24,5 +23,26 @@ proc gen_clocks_node {parent_node} {
         set ps_clk_freq 33333333
     }
     hsi::utils::add_new_dts_param "${clkc_node}" "ps-clk-frequency" ${ps_clk_freq} int
+
+    set fclk_val "0"
+    set clk_pin_list [get_pins -of_objects [get_cells ps7_clockc_0] -filter {TYPE==CLK} -regexp FCLK[0-3]]
+    foreach clk_pin ${clk_pin_list} {
+        dtg_debug "clk_pin: $clk_pin"
+        set clk_net [get_nets -of_objects $clk_pin]
+        set connected_pin_names [get_pins -of_objects $clk_net]
+        foreach target_pin ${connected_pin_names} {
+            dtg_debug " target_pin: $target_pin"
+            set connected_ip [get_cells -of_objects $target_pin]
+            if {[is_pl_ip $connected_ip]} {
+                regsub -all {FCLK} $clk_pin {} fclk_pin
+                set fclk_val [expr [expr 1 << $fclk_pin] | $fclk_val]
+                dtg_debug "  PL IP: $connected_ip, CLK_PIN: $clk_pin, FCLK_PIN: $fclk_pin, FCLK_VAL: [format %x $fclk_val]"
+                # Here could be break
+            } elseif {![string match "ps7_clockc_0" $connected_ip]} {
+                dtg_debug "  PS IP: $connected_ip"
+            }
+        }
+    }
+    hsi::utils::add_new_dts_param "${clkc_node}" "fclk-enable" "0x[format %x $fclk_val]" int
     return $clkc_node
 }
