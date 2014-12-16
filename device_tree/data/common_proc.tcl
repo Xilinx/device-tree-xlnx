@@ -3,10 +3,9 @@
 #
 
 # global variables
-global def_string zynq_soc_dt_tree zynq_7000_fname
+global def_string zynq_soc_dt_tree
 set def_string "__def_none"
 set zynq_soc_dt_tree "dummy.dtsi"
-set zynq_7000_fname "zynq-7000.dtsi"
 
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
@@ -777,11 +776,11 @@ proc add_driver_prop {drv_handle dt_node prop} {
 }
 
 proc create_dt_tree_from_dts_file {} {
-	global def_string zynq_7000_fname
+	global def_string dtsi_fname
 	set kernel_dtsi ""
 	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 	foreach i [get_sw_cores device_tree] {
-		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${zynq_7000_fname}"]
+		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${dtsi_fname}"]
 		if {[file exists $kernel_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*]] {
 				# NOTE: ./ works only if we did not change our directory
@@ -1504,8 +1503,8 @@ proc gen_root_node {drv_handle} {
 	switch $ip_name {
 		"ps7_cortexa9" {
 			create_dt_tree_from_dts_file
-			global zynq_7000_fname
-			update_system_dts_include ${zynq_7000_fname}
+			global dtsi_fname
+			update_system_dts_include [file tail ${dtsi_fname}]
 			# no root_node required as zynq-7000.dtsi
 			return 0
 		}
