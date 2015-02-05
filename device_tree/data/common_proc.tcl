@@ -756,7 +756,7 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	# driver property to DT node
 	set value [get_property ${prop} $drv_handle]
 	if {[string_is_empty ${prop}] != 0} {
-		continue
+		return -1
 	}
 
 	regsub -all {CONFIG.} $prop {} prop
