@@ -11,7 +11,14 @@ proc generate {drv_handle} {
 
     #adding stream connectivity
     set eth_ip [get_cells $drv_handle]
-    set intf [get_intf_pins -of_objects $eth_ip "AXI_STR_RXD"]
+    # search for a valid bus interface name
+    # This is required to work with Vivado 2015.1 due to IP PIN naming change
+    foreach n "AXI_STR_RXD m_axis_rxd" {
+        set intf [get_intf_pins -of_objects $eth_ip ${n}]
+        if {[string_is_empty ${intf}] != 1} {
+            break
+        }
+    }
     if { [llength $intf] } {
         set intf_net [get_intf_nets -of_objects $intf ]
         if { [llength $intf_net]  } {
