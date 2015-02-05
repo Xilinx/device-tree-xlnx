@@ -766,12 +766,13 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	} else {
 		error "Unable to add the $prop property for $drv_handle due to missing valid type"
 	}
-	# CHK: skip if empty? when conf_prop is not referencelist
-	# if {[string_is_empty ${value}] == 1} {
-	# 	continue
-	# }
-	# TODO: sanity check is missing
 	dtg_debug "${dt_node} - ${prop} - ${value} - ${type}"
+
+	# only boolean allows empty string
+	if {[string_is_empty ${value}] == 1 && ![regexp {boolean*} ${type} matched]} {
+		error "Only boolean type can have empty value. Fail to add driver($drv_handle) property($prop) type($type) value($value)"
+	}
+	# TODO: sanity check is missing
 	hsi::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
 }
 
