@@ -179,6 +179,11 @@ proc get_intr_id {drv_handle intr_port_name} {
 			append intr_info " " $cur_intr_info
 		}
 	}
+
+	if {[string_is_empty $intr_info]} {
+		set intr_info -1
+	}
+
 	return $intr_info
 }
 
