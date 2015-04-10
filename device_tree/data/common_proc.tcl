@@ -775,7 +775,9 @@ proc add_driver_prop {drv_handle dt_node prop} {
 
 	# only boolean allows empty string
 	if {[string_is_empty ${value}] == 1 && ![regexp {boolean*} ${type} matched]} {
-		error "Only boolean type can have empty value. Fail to add driver($drv_handle) property($prop) type($type) value($value)"
+		dtg_warning "Only boolean type can have empty value. Fail to add driver($drv_handle) property($prop) type($type) value($value)"
+		dtg_warning "Please add the property manually"
+		return 1
 	}
 	# TODO: sanity check is missing
 	hsi::utils::add_new_dts_param "${dt_node}" "${prop}" "${value}" "${type}"
