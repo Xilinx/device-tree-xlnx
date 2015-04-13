@@ -22,7 +22,7 @@ proc generate {drv_handle} {
 	foreach irq ${intr_list} {
 		set intr_info [get_intr_id $drv_handle $irq]
 		if { [string match -nocase $intr_info "-1"] } {
-			error "ERROR:${drv_handle}: $irq port is not connected"
+			error "ERROR: ${drv_handle}: $irq port is not connected"
 		}
 		if { [string match -nocase $interrupt_names ""] } {
 			set interrupt_names "$irq"
