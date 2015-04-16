@@ -1721,7 +1721,13 @@ proc generate_mb_ccf_node {drv_handle} {
 	}
 }
 
-proc gen_mb_ccf_node {drv_handle pin} {
+proc gen_dev_ccf_binding args {
+	set drv_handle [lindex $args 0]
+	set pins [lindex $args 1]
+	set binding_list "clocks clock-frequency"
+	if {[llength $args] >= 3} {
+		set binding_list [lindex $args 2]
+	}
 	# list of ip should have the clocks property
 	global bus_clk_list
 
@@ -1732,7 +1738,7 @@ proc gen_mb_ccf_node {drv_handle pin} {
 		set clk_refs ""
 		set clk_names ""
 		set clk_freqs ""
-		foreach p $pin {
+		foreach p $pins {
 			set clk_freq [get_clock_frequency [get_cells $drv_handle] "$p"]
 			if {![string equal $clk_freq ""]} {
 				# FIXME: bus clk source count should based on the clock generator not based on clk freq diff
@@ -1747,9 +1753,15 @@ proc gen_mb_ccf_node {drv_handle pin} {
 				set clk_freqs [lappend clk_freqs "$clk_freq"]
 			}
 		}
-		hsi::utils::add_new_property $drv_handle "clocks" referencelist $clk_refs
-		hsi::utils::add_new_property $drv_handle "clock-names" stringlist $clk_names
-		set_property CONFIG.clock-frequency $clk_freqs $drv_handle
+		if {[lsearch $binding_list "clocks"] >= 0} {
+			hsi::utils::add_new_property $drv_handle "clocks" referencelist $clk_refs
+		}
+		if {[lsearch $binding_list "clock-names"] >= 0} {
+			hsi::utils::add_new_property $drv_handle "clock-names" stringlist $clk_names
+		}
+		if {[lsearch $binding_list "clock-frequency"] >= 0} {
+			hsi::utils::add_new_property $drv_handle "clock-frequency" hexintlist $clk_freqs
+		}
 	}
 }
 

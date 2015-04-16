@@ -16,5 +16,5 @@ proc generate {drv_handle} {
         set freq [get_property CLK_FREQ $clk]
         set_property clock-frequency "$freq" $drv_handle
     }
-    gen_mb_ccf_node $drv_handle "s_axi_aclk"
+    gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 }

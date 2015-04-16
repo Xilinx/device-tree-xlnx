@@ -28,5 +28,5 @@ proc generate {drv_handle} {
         hsi::utils::set_os_parameter_value "console" "ttyS0,115200"
     }
 
-    gen_mb_ccf_node $drv_handle "s_axi_aclk"
+    gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 }

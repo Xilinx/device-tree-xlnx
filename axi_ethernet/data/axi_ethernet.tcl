@@ -42,6 +42,6 @@ proc generate {drv_handle} {
     set node [gen_peripheral_nodes $drv_handle]
     set mdio_node [gen_mdio_node $drv_handle $node]
 
-    gen_mb_ccf_node $drv_handle "s_axi_aclk"
+    gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 }
 
