@@ -1,0 +1,12 @@
+OPTION psf_version = 3.0;
+
+BEGIN driver axi_clk_wiz
+
+  OPTION supported_peripherals = (clk_wiz);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = axi_clk_wiz;
+  #DTGPARAM name = dtg.ip_params, type = boolean;
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,clocking-wizard";
+  DTGPARAM name = clock-output-names, type = stringlist, default = "";
+END driver
