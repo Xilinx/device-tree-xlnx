@@ -67,6 +67,12 @@ proc generate {drv_handle} {
     }
     ps7_reset_handle $drv_handle CONFIG.C_ENET_RESET CONFIG.enet-reset
 
+    # only generate the mdio node if it has mdio
+    set has_mdio [get_property CONFIG.C_HAS_MDIO $slave]
+    if { $has_mdio == "0" } {
+        return 0
+    }
+
     # node must be created before child node
     set node [gen_peripheral_nodes $drv_handle]
     set mdio_node [gen_mdio_node $drv_handle $node]
