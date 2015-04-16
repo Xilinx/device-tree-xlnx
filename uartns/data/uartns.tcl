@@ -27,4 +27,6 @@ proc generate {drv_handle} {
     if { [string match -nocase $consoleip $ip] } {
         hsi::utils::set_os_parameter_value "console" "ttyS0,115200"
     }
+
+    gen_mb_ccf_node $drv_handle "s_axi_aclk"
 }

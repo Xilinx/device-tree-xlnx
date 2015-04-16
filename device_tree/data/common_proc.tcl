@@ -3,9 +3,10 @@
 #
 
 # global variables
-global def_string zynq_soc_dt_tree
+global def_string zynq_soc_dt_tree bus_clk_list
 set def_string "__def_none"
 set zynq_soc_dt_tree "dummy.dtsi"
+set bus_clk_list ""
 
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
@@ -1705,38 +1706,50 @@ proc gen_mb_ccf_subnode {drv_handle name freq reg} {
 }
 
 proc generate_mb_ccf_node {drv_handle} {
-	# list of ip should have the clocks property
-	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer axi_can can mdm"
+	global bus_clk_list
 
 	set sw_proc [get_sw_processor]
 	set proc_ip [get_cells $sw_proc]
 	set proctype [get_property IP_NAME $proc_ip]
 	if {[string match -nocase $proctype "microblaze"]} {
-		set bus_clk_list ""
-		set hwinst [get_property HW_INSTANCE $drv_handle]
-		set iptype [get_property IP_NAME [get_cells $hwinst]]
-		if {[lsearch $valid_ip_list $iptype] >= 0} {
-			# get bus clock frequency
-			set clk_freq [get_clock_frequency [get_cells $drv_handle] "S_AXI_ACLK"]
-			if {![string equal $clk_freq ""]} {
-				# FIXME: bus clk source count should based on the clock generator not based on clk freq diff
-				if {[lsearch $bus_clk_list $clk_freq] < 0} {
-					set bus_clk_list [lappend $bus_clk_list $clk_freq]
-				}
-				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
-				# create the node and assuming reg 0 is taken by cpu
-				gen_mb_ccf_subnode $drv_handle bus_${bus_clk_cnt} $clk_freq [expr ${bus_clk_cnt} + 1]
-				# set bus clock frequency (current it is there)
-				set_property CONFIG.clock-frequency $clk_freq $drv_handle
-				hsi::utils::add_new_property $drv_handle "clocks" int &clk_bus_${bus_clk_cnt}
-			}
-		}
 		set cpu_clk_freq [get_clock_frequency $proc_ip "CLK"]
 		# issue:
 		# - hardcoded reg number cpu clock node
 		# - assume clk_cpu for mb cpu
 		# - only applies to master mb cpu
 		gen_mb_ccf_subnode $sw_proc cpu $cpu_clk_freq 0
+	}
+}
+
+proc gen_mb_ccf_node {drv_handle pin} {
+	# list of ip should have the clocks property
+	global bus_clk_list
+
+	set sw_proc [get_sw_processor]
+	set proc_ip [get_cells $sw_proc]
+	set proctype [get_property IP_NAME $proc_ip]
+	if {[string match -nocase $proctype "microblaze"]} {
+		set clk_refs ""
+		set clk_names ""
+		set clk_freqs ""
+		foreach p $pin {
+			set clk_freq [get_clock_frequency [get_cells $drv_handle] "$p"]
+			if {![string equal $clk_freq ""]} {
+				# FIXME: bus clk source count should based on the clock generator not based on clk freq diff
+				if {[lsearch $bus_clk_list $clk_freq] < 0} {
+					set bus_clk_list [lappend bus_clk_list $clk_freq]
+				}
+				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+				# create the node and assuming reg 0 is taken by cpu
+				gen_mb_ccf_subnode $drv_handle bus_${bus_clk_cnt} $clk_freq [expr ${bus_clk_cnt} + 1]
+				set clk_refs [lappend clk_refs &clk_bus_${bus_clk_cnt}]
+				set clk_names [lappend clk_names "$p"]
+				set clk_freqs [lappend clk_freqs "$clk_freq"]
+			}
+		}
+		hsi::utils::add_new_property $drv_handle "clocks" referencelist $clk_refs
+		hsi::utils::add_new_property $drv_handle "clock-names" stringlist $clk_names
+		set_property CONFIG.clock-frequency $clk_freqs $drv_handle
 	}
 }
 

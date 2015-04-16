@@ -23,4 +23,6 @@ proc generate {drv_handle} {
             error "Unknown arch"
         }
     }
+
+    gen_mb_ccf_node $drv_handle "s_axi_aclk"
 }
