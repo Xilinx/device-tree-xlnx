@@ -8,4 +8,6 @@ proc generate {drv_handle} {
 			break
 		}
 	}
+
+	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "xlnx,num-ss-bits"
 }
