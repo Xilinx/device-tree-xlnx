@@ -39,7 +39,7 @@ proc gen_clocks_node {parent_node} {
     hsi::utils::add_new_dts_param "${clkc_node}" "ps-clk-frequency" ${ps_clk_freq} int
 
     set fclk_val "0"
-    set clk_pin_list [get_pins -of_objects [get_cells ps7_clockc_0] -filter {TYPE==CLK} -regexp FCLK[0-3]]
+    set clk_pin_list [get_pins [get_cells ps7_clockc_0] -regexp FCLK_CLK[0-3]]
     foreach clk_pin ${clk_pin_list} {
         dtg_debug "clk_pin: $clk_pin"
         set clk_net [get_nets -of_objects $clk_pin]
@@ -48,7 +48,7 @@ proc gen_clocks_node {parent_node} {
             dtg_debug " target_pin: $target_pin"
             set connected_ip [get_cells -of_objects $target_pin]
             if {[is_pl_ip $connected_ip]} {
-                regsub -all {FCLK} $clk_pin {} fclk_pin
+                regsub -all {FCLK_CLK} $clk_pin {} fclk_pin
                 set fclk_val [expr [expr 1 << $fclk_pin] | $fclk_val]
                 dtg_debug "  PL IP: $connected_ip, CLK_PIN: $clk_pin, FCLK_PIN: $fclk_pin, FCLK_VAL: [format %x $fclk_val]"
                 # Here could be break
