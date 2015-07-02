@@ -302,6 +302,9 @@ proc set_cur_working_dts {{dts_file ""}} {
 proc get_baseaddr {slave_ip {no_prefix ""}} {
 	# only returns the first addr
 	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
+	if { [string_is_empty $ip_mem_handle] } {
+		return -1
+	}
 	set addr [string tolower [get_property BASE_VALUE $ip_mem_handle]]
 	if {![string_is_empty $no_prefix]} {
 		regsub -all {^0x} $addr {} addr
@@ -1395,6 +1398,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set ip [get_cells $drv_handle]
 	# TODO: check if the base address is correct
 	set unit_addr [get_baseaddr ${ip} no_prefix]
+	if { [string equal $unit_addr "-1"] } {
+		return 0
+	}
 	set label $drv_handle
 	set dev_type [get_property CONFIG.dev_type $drv_handle]
 	if {[string_is_empty $dev_type] == 1} {
