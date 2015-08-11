@@ -92,8 +92,13 @@ proc add_cross_property args {
 	set dest_handle [lindex $args 2]
 	set dest_prop [lindex $args 3]
 	set ip [get_cells $src_handle]
+	set ipname [get_property IP_NAME $ip]
+
 	foreach conf_prop $src_prams {
 		set value [get_property ${conf_prop} $ip]
+		if {$ipname == "axi_ethernet"} {
+			set value [is_property_set $value]
+		}
 		if {[llength $value]} {
 			if {$value != "-1" && [llength $value] !=0} {
 				set type "hexint"
@@ -1291,9 +1296,28 @@ proc gen_compatible_property {drv_handle} {
 	set_drv_prop_if_empty $drv_handle compatible $comp_prop stringlist
 }
 
+proc is_property_set {value} {
+       if {[string compare -nocase $value "true"] == 0} {
+               return 1
+       }
+       return 0
+}
+
 proc ip2drv_prop {ip_name ip_prop_name} {
 	set drv_handle [get_ip_handler $ip_name]
 	set ip [get_cells $ip_name]
+	set emac [get_property IP_NAME $ip]
+
+	if { $emac == "axi_ethernet"} {
+		# remove CONFIG.
+		set prop [get_property $ip_prop_name [get_cells $ip_name]]
+		set drv_prop_name $ip_prop_name
+		regsub -all {CONFIG.} $drv_prop_name {xlnx,} drv_prop_name
+		regsub -all {_} $drv_prop_name {-} drv_prop_name
+		set drv_prop_name [string tolower $drv_prop_name]
+		add_cross_property $ip $ip_prop_name $drv_handle ${drv_prop_name} hexint
+		return
+	}
 
 	# remove CONFIG.C_
 	set drv_prop_name $ip_prop_name

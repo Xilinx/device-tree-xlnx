@@ -30,6 +30,11 @@ BEGIN driver axi_ethernet
   DTGPARAM name = compatible, type =stringlist, default = "xlnx,axi-ethernet-1.00.a";
   DTGPARAM name = device_type, type = string, default = network;
   DTGPARAM name = local-mac-address, default = "00 0a 35 00 00 00", type = bytelist;
+  DTGPARAM name = xlnx,txcsum, type = hex, default = 0x0;
+  DTGPARAM name = xlnx,rxcsum, type = hex, default = 0x0;
+  DTGPARAM name = xlnx,rxmem, type = hex, default = 0x8000;
+  DTGPARAM name = xlnx,phy-type, type = hex, default = 0x1;
+  DTGPARAM name = xlnx,phyaddr, type = hex, default = 0x0;
 
 END driver
 
