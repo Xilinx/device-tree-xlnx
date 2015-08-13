@@ -22,4 +22,5 @@ BEGIN driver spips
   OPTION NAME = spips;
   DTGPARAM name = num-cs , type = int, default = 1;
   DTGPARAM name = is-decoded-cs , type = int, default = 0;
+  DTGPARAM name = dtg.alias , default = spi;
 END driver

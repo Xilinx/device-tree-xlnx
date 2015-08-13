@@ -197,7 +197,19 @@ proc update_alias {os_handle} {
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set all_labels [get_all_dt_labels]
-    foreach drv_handle [get_drivers] {
+	set all_drivers [get_drivers]
+
+	# Search for ps_qspi, if it is there then interchange this with first driver
+	# because to have correct internal u-boot commands qspi has to be listed in aliases as the first for spi0
+	set pos [lsearch $all_drivers "ps7_qspi*"]
+	if { $pos >= 0 } {
+		set first_element [lindex $all_drivers 0]
+		set qspi_element [lindex $all_drivers $pos]
+		set all_drivers [lreplace $all_drivers 0 0 $qspi_element]
+		set all_drivers [lreplace $all_drivers $pos $pos $first_element]
+    }
+
+	foreach drv_handle $all_drivers {
         set tmp [list_property $drv_handle CONFIG.dtg.alias]
         if {[string_is_empty $tmp]} {
             continue
@@ -207,9 +219,11 @@ proc update_alias {os_handle} {
             set conf_name ${alias_str}${alias_count}
             set value [ps_node_mapping $drv_handle label]
             # TODO: need to check if the label already exists in the current system
-            if {[lsearch $all_labels $conf_name] >=0} {
-                continue
-            }
+			if {[lsearch $all_labels $conf_name] >=0} {
+				if {![string equal $alias_str "spi"]} {
+					continue
+				}
+			}
             set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
             hsi::utils::add_new_dts_param "${alias_node}" ${conf_name} ${value} aliasref
             hsi::utils::set_os_parameter_value alias_${alias_str}_count [expr $alias_count + 1]
