@@ -21,6 +21,7 @@ BEGIN driver axi_dma
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_dma;
   DTGPARAM name = dev_type, default = dma , type = string;
-  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma";
+  DTGPARAM name = compatible, type = stringlist, default = "xlnx,axi-dma-1.00.a";
+  DTGPARAM name = "#dma-cells", type = int, default = 1;
 
 END driver
