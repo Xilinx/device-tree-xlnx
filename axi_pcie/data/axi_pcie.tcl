@@ -61,14 +61,6 @@ proc generate {drv_handle} {
 		}
 	}
 
-	set axibar_num [axibar_num_workaround $drv_handle]
-	for {set x 0} {$x < $axibar_num} {incr x} {
-		set_drv_conf_prop $drv_handle [format "PCIEBAR2AXIBAR_%d" $x] [format "xlnx,pciebar2axibar-%d" $x]
-	}
-
-	set_drv_conf_prop $drv_handle "C_INCLUDE_RC" "xlnx,include-rc"
-	set_drv_conf_prop $drv_handle "C_DEVICE_NUM" "xlnx,device-num"
-	set_drv_conf_prop $drv_handle "C_PCIEBAR_NUM" "xlnx,pciebar-num"
 	set_pcie_reg $drv_handle
 	set_pcie_ranges $drv_handle
 }
