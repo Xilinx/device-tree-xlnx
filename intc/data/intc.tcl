@@ -26,7 +26,7 @@ proc generate {drv_handle} {
         }
     }
 
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set num_intr_inputs [hsi::utils::get_ip_param_value $ip C_NUM_INTR_INPUTS]
     set kind_of_intr [hsi::utils::get_ip_param_value $ip C_KIND_OF_INTR]
     # Pad to 32 bits - num_intr_inputs

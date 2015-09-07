@@ -64,7 +64,7 @@ proc set_drv_conf_prop args {
 	set drv_handle [lindex $args 0]
 	set pram [lindex $args 1]
 	set conf_prop [lindex $args 2]
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	set value [get_property CONFIG.${pram} $ip]
 	if {[llength $value] !=0} {
 		regsub -all "MIO( |)" $value "" value
@@ -91,7 +91,7 @@ proc add_cross_property args {
 	set src_prams [lindex $args 1]
 	set dest_handle [lindex $args 2]
 	set dest_prop [lindex $args 3]
-	set ip [get_cells $src_handle]
+	set ip [get_cells -hier $src_handle]
 	set ipname [get_property IP_NAME $ip]
 
 	foreach conf_prop $src_prams {
@@ -127,7 +127,7 @@ proc add_cross_property_to_dtnode args {
 	set src_prams [lindex $args 1]
 	set dest_node [lindex $args 2]
 	set dest_prop [lindex $args 3]
-	set ip [get_cells $src_handle]
+	set ip [get_cells -hier $src_handle]
 	foreach conf_prop $src_prams {
 		set value [get_property ${conf_prop} $ip]
 		if {[llength $value]} {
@@ -153,7 +153,7 @@ proc add_cross_property_to_dtnode args {
 }
 
 proc get_ip_property {drv_handle parameter} {
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	return [get_property ${parameter} $ip]
 }
 
@@ -175,7 +175,7 @@ proc is_it_in_pl {ip} {
 }
 
 proc get_intr_id {drv_handle intr_port_name} {
-	set slave [get_cells $drv_handle]
+	set slave [get_cells -hier $drv_handle]
 	set intr_info ""
 	foreach pin ${intr_port_name} {
 		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
@@ -306,7 +306,7 @@ proc set_cur_working_dts {{dts_file ""}} {
 
 proc get_baseaddr {slave_ip {no_prefix ""}} {
 	# only returns the first addr
-	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
+	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells -hier $slave_ip]] 0]
 	if { [string_is_empty $ip_mem_handle] } {
 		return -1
 	}
@@ -318,7 +318,7 @@ proc get_baseaddr {slave_ip {no_prefix ""}} {
 }
 
 proc get_highaddr {slave_ip {no_prefix ""}} {
-	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells $slave_ip]] 0]
+	set ip_mem_handle [lindex [hsi::utils::get_ip_mem_ranges [get_cells -hier $slave_ip]] 0]
 	set addr [string tolower [get_property HIGH_VALUE $ip_mem_handle]]
 	if {![string_is_empty $no_prefix]} {
 		regsub -all {^0x} $addr {} addr
@@ -718,8 +718,8 @@ proc is_pl_ip {ip_inst} {
 	# check if the IP is a soft IP (not PS7)
 	# return 1 if it is soft ip
 	# return 0 if not
-	set ip_obj [get_cells $ip_inst]
-	if {[llength [get_cells $ip_inst]] < 1} {
+	set ip_obj [get_cells -hier $ip_inst]
+	if {[llength [get_cells -hier $ip_inst]] < 1} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
@@ -733,8 +733,8 @@ proc is_ps_ip {ip_inst} {
 	# check if the IP is a soft IP (not PS7)
 	# return 1 if it is soft ip
 	# return 0 if not
-	set ip_obj [get_cells $ip_inst]
-	if {[llength [get_cells $ip_inst]] < 1} {
+	set ip_obj [get_cells -hier $ip_inst]
+	if {[llength [get_cells -hier $ip_inst]] < 1} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
@@ -747,7 +747,7 @@ proc is_ps_ip {ip_inst} {
 proc get_node_name {drv_handle} {
 	# FIXME: handle node that is not an ip
 	# what about it is a bus node
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	# node that is not a ip
 	if {[string_is_empty $ip]} {
 		error "$drv_handle is not a valid IP"
@@ -990,8 +990,8 @@ proc ps_node_mapping {ip_name prop} {
 }
 
 proc get_ps_node_unit_addr {ip_name {prop "label"}} {
-	set ip [get_cells $ip_name]
-	set ip_mem_handle [hsi::utils::get_ip_mem_ranges [get_cells $ip]]
+	set ip [get_cells -hier $ip_name]
+	set ip_mem_handle [hsi::utils::get_ip_mem_ranges [get_cells -hier $ip]]
 
 	# loop through the base addresses: workaround for intc
 	foreach handler ${ip_mem_handle} {
@@ -1044,11 +1044,11 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	# add dts binding for required nodes
 	#   clock-names = "ref_clk";
 	#   clocks = <&clkc 0>;
-	set proctype [get_property IP_NAME [get_cells [get_sw_processor]]]
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
 	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can"
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
-		set iptype [get_property IP_NAME [get_cells $drv_handle]]
+		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
 			set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
@@ -1058,8 +1058,8 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 }
 
 proc get_intr_type {intc_name ip_name port_name} {
-	set intc [get_cells $intc_name]
-	set ip [get_cells $ip_name]
+	set intc [get_cells -hier $intc_name]
+	set ip [get_cells -hier $ip_name]
 	if {[llength $intc] == 0 && [llength $ip] == 0} {
 		return -1
 	}
@@ -1104,7 +1104,7 @@ proc get_drv_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
 }
 
 proc get_ip_conf_prop_list {ip_name {def_pattern "CONFIG.*"}} {
-	set ip [get_cells $ip_name]
+	set ip [get_cells -hier $ip_name]
 	if {[catch {set rt [list_property -regexp $ip ${def_pattern}]} msg]} {
 		set rt ""
 	}
@@ -1168,7 +1168,7 @@ proc gen_mb_interrupt_property {cpu_handle {intr_port_name ""}} {
 		return 0
 	}
 
-	set slave [get_cells ${cpu_handle}]
+	set slave [get_cells -hier ${cpu_handle}]
 	set intc ""
 
 	if {[string_is_empty $intr_port_name]} {
@@ -1202,7 +1202,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		return 0
 	}
 
-	set slave [get_cells ${drv_handle}]
+	set slave [get_cells -hier ${drv_handle}]
 	set intr_id -1
 	set intc ""
 	set intr_info ""
@@ -1261,7 +1261,7 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 	}
 
 	set reg ""
-	set slave [get_cells ${drv_handle}]
+	set slave [get_cells -hier ${drv_handle}]
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
 	foreach mem_handle ${ip_mem_handles} {
 		set base [string tolower [get_property BASE_VALUE $mem_handle]]
@@ -1287,7 +1287,7 @@ proc gen_compatible_property {drv_handle} {
 	}
 
 	set reg ""
-	set slave [get_cells ${drv_handle}]
+	set slave [get_cells -hier ${drv_handle}]
 	set vlnv [split [get_property VLNV $slave] ":"]
 	set name [lindex $vlnv 2]
 	set ver [lindex $vlnv 3]
@@ -1305,12 +1305,12 @@ proc is_property_set {value} {
 
 proc ip2drv_prop {ip_name ip_prop_name} {
 	set drv_handle [get_ip_handler $ip_name]
-	set ip [get_cells $ip_name]
+	set ip [get_cells -hier $ip_name]
 	set emac [get_property IP_NAME $ip]
 
 	if { $emac == "axi_ethernet"} {
 		# remove CONFIG.
-		set prop [get_property $ip_prop_name [get_cells $ip_name]]
+		set prop [get_property $ip_prop_name [get_cells -hier $ip_name]]
 		set drv_prop_name $ip_prop_name
 		regsub -all {CONFIG.} $drv_prop_name {xlnx,} drv_prop_name
 		regsub -all {_} $drv_prop_name {-} drv_prop_name
@@ -1391,7 +1391,7 @@ proc default_parameters {ip_handle {dont_generate ""}} {
 proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 	set src_ip -1
 	set value -1
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	set value [get_property ${reset_pram} $ip]
 	# workaround for reset not been selected and show as "<Select>"
 	regsub -all "<Select>" $value "" value
@@ -1419,7 +1419,7 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 
 proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set status_enable_flow 0
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	# TODO: check if the base address is correct
 	set unit_addr [get_baseaddr ${ip} no_prefix]
 	if { [string equal $unit_addr "-1"] } {
@@ -1428,7 +1428,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set label $drv_handle
 	set dev_type [get_property CONFIG.dev_type $drv_handle]
 	if {[string_is_empty $dev_type] == 1} {
-		set dev_type [get_property IP_NAME [get_cell $ip]]
+		set dev_type [get_property IP_NAME [get_cell -hier $ip]]
 	}
 
 	# TODO: more ignore ip list?
@@ -1523,9 +1523,9 @@ proc detect_bus_name {ip_drv} {
 	# 	zynq: uses amba base zynq-7000.dtsi
 	#		pl ip creates amba_pl
 	# 	mb: detection is required (currently always call amba_pl)
-	set valid_buses [get_cells -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
+	set valid_buses [get_cells -hier -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
 
-	set proc_name [get_property IP_NAME [get_cell [get_sw_processor]]]
+	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
 	if {[string equal -nocase "ps7_cortexa9" $proc_name]} {
 		if {[is_pl_ip $ip_drv]} {
 			# create the parent_node for pl.dtsi
@@ -1557,7 +1557,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 proc gen_root_node {drv_handle} {
 	set default_dts [set_drv_def_dts $drv_handle]
 	# add compatible
-	set ip_name [get_property IP_NAME [get_cell ${drv_handle}]]
+	set ip_name [get_property IP_NAME [get_cell -hier ${drv_handle}]]
 	switch $ip_name {
 		"ps7_cortexa9" {
 			create_dt_tree_from_dts_file
@@ -1585,7 +1585,7 @@ proc gen_root_node {drv_handle} {
 
 proc cortexa9_opp_gen {drv_handle} {
 	# generate opp overlay for cpu
-	if {[catch {set cpu_max_freq [get_property CONFIG.C_CPU_CLK_FREQ_HZ [get_cells $drv_handle]]} msg]} {
+	if {[catch {set cpu_max_freq [get_property CONFIG.C_CPU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]} msg]} {
 		set cpu_max_freq ""
 	}
 	if {[string_is_empty ${cpu_max_freq}]} {
@@ -1615,7 +1615,7 @@ proc cortexa9_opp_gen {drv_handle} {
 
 # Q: common function for all processor or one for each driver lib
 proc gen_cpu_nodes {drv_handle} {
-	set ip_name [get_property IP_NAME [get_cell [get_sw_processor]]]
+	set ip_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
 	switch $ip_name {
 		"ps7_cortexa9" {
 			# skip node generation for static zynq-7000 dtsi
@@ -1642,8 +1642,8 @@ proc gen_cpu_nodes {drv_handle} {
 	hsi::utils::add_new_dts_param "${cpu_root_node}" "#address-cells" 1 int ""
 	hsi::utils::add_new_dts_param "${cpu_root_node}" "#size-cells" 0 int ""
 
-	set processor_type [get_property IP_NAME [get_cell ${processor}]]
-	set processor_list [eval "get_cells -filter { IP_TYPE == \"PROCESSOR\" && IP_NAME == \"${processor_type}\" }"]
+	set processor_type [get_property IP_NAME [get_cell -hier ${processor}]]
+	set processor_list [eval "get_cells -hier -filter { IP_TYPE == \"PROCESSOR\" && IP_NAME == \"${processor_type}\" }"]
 
 	set drv_dt_prop_list [get_driver_conf_list $processor]
 	set add_reg 0
@@ -1758,7 +1758,7 @@ proc generate_mb_ccf_node {drv_handle} {
 	global bus_clk_list
 
 	set sw_proc [get_sw_processor]
-	set proc_ip [get_cells $sw_proc]
+	set proc_ip [get_cells -hier $sw_proc]
 	set proctype [get_property IP_NAME $proc_ip]
 	if {[string match -nocase $proctype "microblaze"]} {
 		set cpu_clk_freq [get_clock_frequency $proc_ip "CLK"]
@@ -1781,14 +1781,14 @@ proc gen_dev_ccf_binding args {
 	global bus_clk_list
 
 	set sw_proc [get_sw_processor]
-	set proc_ip [get_cells $sw_proc]
+	set proc_ip [get_cells -hier $sw_proc]
 	set proctype [get_property IP_NAME $proc_ip]
 	if {[string match -nocase $proctype "microblaze"]} {
 		set clk_refs ""
 		set clk_names ""
 		set clk_freqs ""
 		foreach p $pins {
-			set clk_freq [get_clock_frequency [get_cells $drv_handle] "$p"]
+			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$p"]
 			if {![string equal $clk_freq ""]} {
 				# FIXME: bus clk source count should based on the clock generator not based on clk freq diff
 				if {[lsearch $bus_clk_list $clk_freq] < 0} {
@@ -1842,7 +1842,7 @@ proc get_os_dev_count {count_para {drv_handle ""} {os_para ""}} {
 	if {[string_is_empty $os_para] || [string_is_empty $drv_handle]} {
 		return $dev_count
 	}
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	set chosen_ip [hsi::utils::get_os_parameter_value "${os_para}"]
 	if {[string match -nocase "$ip" "$chosen_ip"]} {
 		hsi::utils::set_os_parameter_value $count_para 1
@@ -1866,7 +1866,7 @@ proc get_hsi_version {} {
 
 proc get_sw_proc_prop {prop_name} {
 	set sw_proc [get_sw_processor]
-	set proc_ip [get_cells $sw_proc]
+	set proc_ip [get_cells -hier $sw_proc]
 	set property_value [get_property $prop_name $proc_ip]
 	return $property_value
 }

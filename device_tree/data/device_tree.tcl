@@ -26,7 +26,7 @@ foreach i [get_sw_cores device_tree] {
 }
 
 proc get_ip_prop {drv_handle pram} {
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set value [get_property ${pram} $ip]
     return $value
 }
@@ -49,7 +49,7 @@ proc inc_os_prop {drv_handle os_conf_dev_var var_name conf_prop} {
     }
 
     if {[string match -nocase "True" $ip_check]} {
-        set ip [get_cells $drv_handle]
+        set ip [get_cells -hier $drv_handle]
         if {[string match -nocase $os_ip $ip]} {
             set ip_type [get_property IP_NAME $ip]
             set_property ${conf_prop} 0 $drv_handle
@@ -69,7 +69,7 @@ proc gen_count_prop {drv_handle data_dict} {
         set drv_conf [dict get $data_dict $dev_type "drv_conf"]
         set os_count_name [dict get $data_dict $dev_type "os_count_name"]
 
-        set slave [get_cells $drv_handle]
+        set slave [get_cells -hier $drv_handle]
         set iptype [get_property IP_NAME $slave]
         if {[lsearch $valid_ip_list $iptype] < 0} {
             continue

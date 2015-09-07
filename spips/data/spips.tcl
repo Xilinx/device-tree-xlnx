@@ -13,7 +13,7 @@
 #
 
 proc generate {drv_handle} {
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	# SPI PS only have chip select range 0 - 2
 	foreach n {0 1 2} {
 		set cs_en [get_property CONFIG.C_HAS_SS${n} $ip]

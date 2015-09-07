@@ -13,7 +13,7 @@
 #
 
 proc generate {drv_handle} {
-    set slave [get_cells $drv_handle]
+    set slave [get_cells -hier $drv_handle]
     set qspi_mode [hsi::utils::get_ip_param_value $slave "C_QSPI_MODE"]
     if { $qspi_mode == 2} {
         set is_dual 1

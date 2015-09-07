@@ -23,7 +23,7 @@ proc generate {drv_handle} {
 		}
 	}
 
-	set ip [get_cells $drv_handle]
+	set ip [get_cells -hier $drv_handle]
 	set speedgrade "([get_property SPEEDGRADE [get_hw_designs]])"
 	if {![string equal $speedgrade "()"]} {
 		hsi::utils::add_new_property $drv_handle "speed-grade" int $speedgrade

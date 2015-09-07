@@ -34,7 +34,7 @@ proc generate {drv_handle} {
 
 	set node [gen_peripheral_nodes $drv_handle]
 
-	set dma_ip [get_cells $drv_handle]
+	set dma_ip [get_cells -hier $drv_handle]
 	set cdma_count [hsi::utils::get_os_parameter_value "cdma_count"]
 	if { [llength $cdma_count] == 0 } {
 		set cdma_count 0
@@ -47,7 +47,7 @@ proc generate {drv_handle} {
 }
 
 proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
-	#set ip [get_cells $drv_handle]
+	#set ip [get_cells -hier $drv_handle]
 	set modellow [string tolower $mode]
 	set modeIndex [string index $mode 0]
 	#set node_name [format "dma-channel@%x" $addr]

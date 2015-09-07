@@ -24,7 +24,7 @@ proc generate {drv_handle} {
 	}
 
 	# the interrupt related setting is only required for AXI4 protocol only
-	set atg_mode [get_property "CONFIG.C_ATG_MODE" [get_cells $drv_handle]]
+	set atg_mode [get_property "CONFIG.C_ATG_MODE" [get_cells -hier $drv_handle]]
 	if { ![string match -nocase $atg_mode "AXI4"] } {
 		return 0
 	}

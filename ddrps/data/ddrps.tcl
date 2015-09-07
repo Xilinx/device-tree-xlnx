@@ -16,7 +16,7 @@
 proc gen_ps7_ddr_reg_property {drv_handle} {
     proc_called_by
     set reg ""
-    set slave [get_cells ${drv_handle}]
+    set slave [get_cells -hier ${drv_handle}]
     set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
     foreach mem_handle ${ip_mem_handles} {
         #set base [get_property BASE_VALUE $mem_handle]

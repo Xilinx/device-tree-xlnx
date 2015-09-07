@@ -24,7 +24,7 @@ proc generate {drv_handle} {
 	}
 
 	# get bus clock frequency
-	set clk_freq [get_clock_frequency [get_cells $drv_handle] "S_AXI_ACLK"]
+	set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "S_AXI_ACLK"]
 	if {![string equal $clk_freq ""]} {
 		set_property CONFIG.clock-frequency $clk_freq $drv_handle
 	}

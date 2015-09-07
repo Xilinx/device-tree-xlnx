@@ -29,7 +29,7 @@ proc gen_clocks_node {parent_node} {
     set clocks_child_name "clkc"
     set clkc_node [add_or_get_dt_node -l $clocks_child_name -n $clocks_child_name -u 100 -p $parent_node]
 
-    if {[catch {set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells ps7_clockc_0]]} msg]} {
+    if {[catch {set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells -hier ps7_clockc_0]]} msg]} {
         set ps_clk_freq ""
     }
     if {[string_is_empty ${ps_clk_freq}]} {
@@ -39,7 +39,7 @@ proc gen_clocks_node {parent_node} {
     hsi::utils::add_new_dts_param "${clkc_node}" "ps-clk-frequency" ${ps_clk_freq} int
 
     set fclk_val "0"
-    set clk_pin_list [get_pins [get_cells ps7_clockc_0] -regexp FCLK_CLK[0-3]]
+    set clk_pin_list [get_pins [get_cells -hier ps7_clockc_0] -regexp FCLK_CLK[0-3]]
     foreach clk_pin ${clk_pin_list} {
         dtg_debug "clk_pin: $clk_pin"
         set clk_net [get_nets -of_objects $clk_pin]

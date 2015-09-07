@@ -18,7 +18,7 @@
 #
 
 proc generate {drv_handle} {
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set count [hsi::utils::get_ip_param_value $ip "C_NUM_BANKS_MEM"]
     if { [llength $count] == 0 } {
         set count 1

@@ -28,7 +28,7 @@ proc generate {drv_handle} {
         }
     }
 
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set has_xin [hsi::utils::get_ip_param_value $ip C_HAS_EXTERNAL_XIN]
     set clock_port "S_AXI_ACLK"
     if { [string match -nocase "$has_xin" "1"] } {

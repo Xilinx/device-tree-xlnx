@@ -25,9 +25,9 @@ proc is_gmii2rgmii_conv_present {slave} {
     set phy_addr -1
     set ipconv 0
 
-    set ips [get_cells -filter {IP_NAME == "gmii_to_rgmii"}]
+    set ips [get_cells -hier -filter {IP_NAME == "gmii_to_rgmii"}]
     set ip_name [get_property NAME $slave]
-    set slave_pins [get_pins -of_objects [get_cells $slave]]
+    set slave_pins [get_pins -of_objects [get_cells -hier $slave]]
 
     foreach ip $ips {
         set ipconv2eth_pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "gmii_txd"]]]
@@ -71,7 +71,7 @@ proc generate {drv_handle} {
 
     update_eth_mac_addr $drv_handle
 
-    set slave [get_cells $drv_handle]
+    set slave [get_cells -hier $drv_handle]
     set phymode [hsi::utils::get_ip_param_value $slave "C_ETH_MODE"]
     if { $phymode == 0 } {
         set_property CONFIG.phy-mode "gmii" $drv_handle
@@ -79,7 +79,7 @@ proc generate {drv_handle} {
         set_property CONFIG.phy-mode "rgmii-id" $drv_handle
     }
 
-    set hwproc [get_cells [get_sw_processor]]
+    set hwproc [get_cells -hier [get_sw_processor]]
     if { [llength [get_sw_processor] ] && [llength $hwproc] } {
         set ps7_cortexa9_1x_clk [hsi::utils::get_ip_param_value $hwproc "C_CPU_1X_CLK_FREQ_HZ"]
         set_property CONFIG.xlnx,ptp-enet-clock "$ps7_cortexa9_1x_clk" $drv_handle

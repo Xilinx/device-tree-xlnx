@@ -20,7 +20,7 @@
 
 proc generate {drv_handle} {
      set count 32
-     set ip [get_cells $drv_handle]
+     set ip [get_cells -hier $drv_handle]
      set_property CONFIG.emio-gpio-width "[hsi::utils::get_ip_param_value $ip C_EMIO_GPIO_WIDTH]" $drv_handle
      set gpiomask [hsi::utils::get_ip_param_value $ip "C_MIO_GPIO_MASK"]
      set mask [expr {$gpiomask & 0xffffffff}]

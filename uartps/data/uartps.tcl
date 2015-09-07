@@ -25,7 +25,7 @@ proc generate {drv_handle} {
             break
         }
     }
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set consoleip [get_property CONFIG.console_device [get_os]]
     set port_number 0
     if {[string match -nocase "$ip" "$consoleip"] == 0} {

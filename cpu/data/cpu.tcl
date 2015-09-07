@@ -26,7 +26,7 @@ proc generate {drv_handle} {
         }
     }
 
-    set ip [get_cells $drv_handle]
+    set ip [get_cells -hier $drv_handle]
     set clk ""
     set clkhandle [get_pins -of_objects $ip "CLK"]
     if { [string compare -nocase $clkhandle ""] != 0 } {
