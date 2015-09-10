@@ -50,21 +50,24 @@ proc generate {drv_handle} {
         }
     }
 
-    set txcsum [get_property CONFIG.TXCSUM $eth_ip]
-    set txcsum [get_checksum $txcsum]
-    set rxcsum [get_property CONFIG.RXCSUM $eth_ip]
-    set rxcsum [get_checksum $rxcsum]
-    set phytype [get_property CONFIG.PHY_TYPE $eth_ip]
-    set phytype [get_phytype $phytype]
-    set phyaddr [get_property CONFIG.PHYADDR $eth_ip]
-    set phyaddr [::hsi::utils::convert_binary_to_decimal $phyaddr]
-    set rxmem [get_property CONFIG.RXMEM $eth_ip]
-    set rxmem [get_memrange $rxmem]
-    set_property xlnx,txcsum "$txcsum" $drv_handle
-    set_property xlnx,rxcsum "$rxcsum" $drv_handle
-    set_property xlnx,phy-type "$phytype" $drv_handle
-    set_property xlnx,phyaddr "$phyaddr" $drv_handle
-    set_property xlnx,rxmem "$rxmem" $drv_handle
+    set ip_name [get_property IP_NAME $eth_ip]
+    if {$ip_name == "axi_ethernet"} {
+	set txcsum [get_property CONFIG.TXCSUM $eth_ip]
+	set txcsum [get_checksum $txcsum]
+	set rxcsum [get_property CONFIG.RXCSUM $eth_ip]
+	set rxcsum [get_checksum $rxcsum]
+	set phytype [get_property CONFIG.PHY_TYPE $eth_ip]
+	set phytype [get_phytype $phytype]
+	set phyaddr [get_property CONFIG.PHYADDR $eth_ip]
+	set phyaddr [::hsi::utils::convert_binary_to_decimal $phyaddr]
+	set rxmem [get_property CONFIG.RXMEM $eth_ip]
+	set rxmem [get_memrange $rxmem]
+	set_property xlnx,txcsum "$txcsum" $drv_handle
+	set_property xlnx,rxcsum "$rxcsum" $drv_handle
+	set_property xlnx,phy-type "$phytype" $drv_handle
+	set_property xlnx,phyaddr "$phyaddr" $drv_handle
+	set_property xlnx,rxmem "$rxmem" $drv_handle
+    }
 
     #adding clock frequency
     set clk [get_pins -of_objects $eth_ip "S_AXI_ACLK"]
@@ -75,7 +78,9 @@ proc generate {drv_handle} {
 
     # node must be created before child node
     set node [gen_peripheral_nodes $drv_handle]
-    set hier_params [gen_hierip_params $drv_handle]
+    if {$ip_name == "axi_ethernet"} {
+	set hier_params [gen_hierip_params $drv_handle]
+    }
     set mdio_node [gen_mdio_node $drv_handle $node]
 
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
