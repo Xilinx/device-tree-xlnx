@@ -192,7 +192,30 @@ proc generate {drv_handle} {
     }
     set mdio_node [gen_mdio_node $drv_handle $node]
 
+
+    set phytype [get_property CONFIG.PHY_TYPE $eth_ip]
+    set_property phy-mode "$phytype" $drv_handle
+    if {$phytype == "SGMII" || $phytype == "1000BaseX"} {
+	  set phytype "sgmii"
+      set_property phy-mode "$phytype" $drv_handle
+	  set phynode [pcspma_phy_node $eth_ip]
+	  set phya [lindex $phynode 0]
+	  if { $phya != "-1"} {
+		set phy_name "[lindex $phynode 1]"
+	        set_drv_prop $drv_handle phy-handle "$phy_name" reference
+		gen_phy_node $mdio_node $phy_name $phya
+	  }
+    }
+
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+}
+
+proc pcspma_phy_node {slave} {
+	set phyaddr [get_property CONFIG.PHYADDR $slave]
+	set phyaddr [::hsi::utils::convert_binary_to_decimal $phyaddr]
+	set phymode "phy0"
+
+	return "$phyaddr $phymode"
 }
 
 proc get_checksum {value} {
@@ -264,4 +287,17 @@ proc deault_parameters {ip_handle {dont_generate ""}} {
                 }
         }
         return $valid_prop_names
+}
+
+proc gen_phy_node args {
+    set mdio_node [lindex $args 0]
+    set phy_name [lindex $args 1]
+    set phya [lindex $args 2]
+
+    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
+    hsi::utils::add_new_dts_param "${phy_node}" "reg" $phya int
+    hsi::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
+    hsi::utils::add_new_dts_param "${phy_node}" "compatible" "Xilinx PCS/PMA PHY" string
+
+    return $phy_node
 }
