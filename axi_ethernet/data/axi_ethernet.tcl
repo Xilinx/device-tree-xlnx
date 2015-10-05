@@ -279,6 +279,38 @@ proc deault_parameters {ip_handle {dont_generate ""}} {
 			"TXMEM" - \
 			"RXMEM" - \
 			"PHYADDR" - \
+			"C_BASEADDR" - \
+			"C_HIGHADDR" - \
+			"processor_mode" - \
+			"ENABLE_AVB" - \
+			"ENABLE_LVDS" - \
+			"Enable_1588_1step" - \
+			"Enable_1588" - \
+			"speed_1_2p5" - \
+			"lvdsclkrate" - \
+			"gtrefclkrate" - \
+			"drpclkrate" - \
+			"Enable_Pfc" - \
+			"Frame_Filter" - \
+			"MCAST_EXTEND" - \
+			"MDIO_BOARD_INTERFACE" - \
+			"Number_of_Table_Entries" - \
+			"PHYRST_BOARD_INTERFACE" - \
+			"RXVLAN_STRP" - \
+			"RXVLAN_TAG" - \
+			"RXVLAN_TRAN" - \
+			"TXVLAN_STRP" - \
+			"TXVLAN_TAG" - \
+			"TXVLAN_TRAN" - \
+			"SIMULATION_MODE" - \
+			"Statistics_Counters" - \
+			"Statistics_Reset" - \
+			"Statistics_Width" - \
+			"SupportLevel" - \
+			"TIMER_CLK_PERIOD" - \
+			"Timer_Format" - \
+			"SupportLevel" - \
+			"TransceiverControl" - \
 			"USE_BOARD_FLOW" - \
                         "HW_VER" { } \
                         default {
