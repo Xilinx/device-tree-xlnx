@@ -32,6 +32,9 @@ proc generate {drv_handle} {
     set eth_ip [get_cells -hier $drv_handle]
     # search for a valid bus interface name
     # This is required to work with Vivado 2015.1 due to IP PIN naming change
+    set hasbuf [get_property CONFIG.processor_mode $eth_ip]
+
+    if {$hasbuf == "true" || $hasbuf == ""} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
         if {[string_is_empty ${intf}] != 1} {
@@ -49,6 +52,106 @@ proc generate {drv_handle} {
             }
         }
     }
+   } else {
+    foreach n "AXI_STR_RXD m_axis_rx" {
+        set intf [get_intf_pins -of_objects $eth_ip ${n}]
+        if {[string_is_empty ${intf}] != 1} {
+            break
+        }
+    }
+
+    if { [llength $intf] } {
+        set intf_net [get_intf_nets -of_objects $intf ]
+        if { [llength $intf_net]  } {
+            set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
+            set connected_ip [get_cells -of_objects $target_intf]
+            set target_ipname [get_property IP_NAME [get_cells $connected_ip]]
+            set rxmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
+            if { $target_ipname == "axis_data_fifo"} {
+                set p2p_busifs_i [get_intf_pins -of_objects $connected_ip -filter "TYPE==INITIATOR"]
+                foreach p2p_busif $p2p_busifs_i {
+                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
+                        set conn_busif_handle [::hsi::utils::get_connected_intf $connected_ip $busif_name]
+                        set target_periph [get_cells -of_objects $conn_busif_handle]
+                        set target_periph_type [get_property IP_NAME $target_periph]
+                }
+	   }
+       }
+    }
+
+    if { $target_periph_type == "axis_clock_converter"} {
+	set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==TARGET || TYPE==MASTER"]
+	foreach p2p_busif $p2p_busifs_i {
+		set busif_name [string toupper [get_property NAME  $p2p_busif]]
+                set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
+                set target_periph [get_cells -of_objects $conn_busif_handle]
+                set target_periph_type [get_property IP_NAME $target_periph]
+		if { $target_periph_type == "axis_clock_converter"} {
+			set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
+			foreach p2p_busif $p2p_busifs_i {
+			       set busif_name [string toupper [get_property NAME  $p2p_busif]]
+			       set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
+		               set target_periph [get_cells -of_objects $conn_busif_handle]
+			       set target_periph_type [get_property IP_NAME $target_periph]
+			       if { $target_periph_type == "axis_subset_converter"} {
+					set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
+					foreach p2p_busif $p2p_busifs_i {
+					        set busif_name [string toupper [get_property NAME  $p2p_busif]]
+						set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
+			                        set target_periph [get_cells -of_objects $conn_busif_handle]
+					        set target_periph_type [get_property IP_NAME $target_periph]
+					}
+				}
+				if { $target_periph_type == "axis_subset_converter"} {
+					set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
+					foreach p2p_busif $p2p_busifs_i {
+			                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
+					        set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
+				                set connected_ip [get_cells -of_objects $conn_busif_handle]
+					}
+				}
+			  }
+		 }
+              }
+	}
+
+    foreach n "AXI_STR_RXD m_axis_tx_ts" {
+        set intf [get_intf_pins -of_objects $eth_ip ${n}]
+        if {[string_is_empty ${intf}] != 1} {
+            break
+        }
+    }
+
+    if { [llength $intf] } {
+        set intf_net [get_intf_nets -of_objects $intf ]
+        if { [llength $intf_net]  } {
+            set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
+            set connected_ip1 [get_cells -of_objects $target_intf]
+            set target_ipname [get_property IP_NAME [get_cells $connected_ip1]]
+            if { $target_ipname == "axis_dwidth_converter"} {
+                set p2p_busifs_i [get_intf_pins -of_objects $connected_ip1 -filter "YPE==TARGET || TYPE==MASTER"]
+                foreach p2p_busif $p2p_busifs_i {
+                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
+                        set conn_busif_handle [::hsi::utils::get_connected_intf $connected_ip1 $busif_name]
+                        set target_periph [get_cells -of_objects $conn_busif_handle]
+                        set target_periph_type [get_property IP_NAME $target_periph]
+                }
+	   }
+            if { $target_periph_type == "axis_clock_converter"} {
+                set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
+                foreach p2p_busif $p2p_busifs_i {
+                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
+                        set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
+                        set tx_tsip [get_cells -of_objects $conn_busif_handle]
+                }
+	   }
+	}
+    }
+      set_property axistream-connected "$connected_ip" $drv_handle
+      set_property axistream-control-connected "$connected_ip" $drv_handle
+      set_property axififo-connected "$tx_tsip" $drv_handle
+      set_property xlnx,rxmem "$rxmem" $drv_handle
+   }
 
     set ip_name [get_property IP_NAME $eth_ip]
     if {$ip_name == "axi_ethernet"} {
@@ -67,6 +170,12 @@ proc generate {drv_handle} {
 	set_property xlnx,phy-type "$phytype" $drv_handle
 	set_property xlnx,phyaddr "$phyaddr" $drv_handle
 	set_property xlnx,rxmem "$rxmem" $drv_handle
+    }
+
+
+    if { $hasbuf == "false"} {
+	    set ip_prop CONFIG.processor_mode
+	    add_cross_property $eth_ip $ip_prop $drv_handle "xlnx,eth-hasnobuf" boolean
     }
 
     #adding clock frequency

@@ -96,6 +96,9 @@ proc add_cross_property args {
 
 	foreach conf_prop $src_prams {
 		set value [get_property ${conf_prop} $ip]
+		if {$conf_prop == "CONFIG.processor_mode"} {
+			set value "true"
+		}
 		if {$ipname == "axi_ethernet"} {
 			set value [is_property_set $value]
 		}
