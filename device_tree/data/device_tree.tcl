@@ -93,7 +93,7 @@ proc gen_dev_conf {} {
     set data_dict {
         uart {
             os_device "CONFIG.console_device"
-            ip "axi_uartlite axi_uart16550 ps7_uart"
+            ip "axi_uartlite axi_uart16550 ps7_uart psu_uart"
             os_count_name "serial_count"
             drv_conf "CONFIG.port-number"
             irq_chk "false"
