@@ -42,13 +42,13 @@ proc generate {drv_handle} {
             set nand_cycle_time [expr "1000000000/[get_property CONFIG.C_NAND_CLK_FREQ_HZ [get_cells -hier $drv_handle]]"]
         }
     }
-
-    set_drv_prop $drv_handle "arm,nand-cycle-t0" [ns_to_cycle $drv_handle "${nand_par_prefix}T0" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t1" [ns_to_cycle $drv_handle "${nand_par_prefix}T1" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t2" [ns_to_cycle $drv_handle "${nand_par_prefix}T2" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t3" [ns_to_cycle $drv_handle "${nand_par_prefix}T3" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t4" [ns_to_cycle $drv_handle "${nand_par_prefix}T4" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t5" [ns_to_cycle $drv_handle "${nand_par_prefix}T5" $nand_cycle_time]
-    set_drv_prop $drv_handle "arm,nand-cycle-t6" [ns_to_cycle $drv_handle "${nand_par_prefix}T6" $nand_cycle_time]
-
+    if {![regexp -nocase "psu_nand*" $drv_handle match]} {
+	set_drv_prop $drv_handle "arm,nand-cycle-t0" [ns_to_cycle $drv_handle "${nand_par_prefix}T0" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t1" [ns_to_cycle $drv_handle "${nand_par_prefix}T1" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t2" [ns_to_cycle $drv_handle "${nand_par_prefix}T2" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t3" [ns_to_cycle $drv_handle "${nand_par_prefix}T3" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t4" [ns_to_cycle $drv_handle "${nand_par_prefix}T4" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t5" [ns_to_cycle $drv_handle "${nand_par_prefix}T5" $nand_cycle_time]
+	set_drv_prop $drv_handle "arm,nand-cycle-t6" [ns_to_cycle $drv_handle "${nand_par_prefix}T6" $nand_cycle_time]
+    }
 }
