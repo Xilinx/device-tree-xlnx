@@ -16,15 +16,36 @@
 proc gen_ps7_ddr_reg_property {drv_handle} {
     proc_called_by
     set reg ""
+    set psu_cortexa53 ""
     set slave [get_cells -hier ${drv_handle}]
     set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+
+    if {[string match -nocase $proctype "psu_cortexa53"]} {
+        set psu_cortexa53 "1"
+    }
     foreach mem_handle ${ip_mem_handles} {
         #set base [get_property BASE_VALUE $mem_handle]
         set base 0x0
         set high [get_property HIGH_VALUE $mem_handle]
-        set size [format 0x%x [expr {${high} - ${base} + 1}]]
+        set mem_size [format 0x%x [expr {${high} - ${base} + 1}]]
+        if {$psu_cortexa53 == 1} {
+                # check if size is crossing 4GB split the size to MSB and LSB
+                if {[regexp -nocase {([0-9a-f]{9})} "$mem_size" match]} {
+                        set size [format 0x%016x [expr {${high} - ${base} + 1}]]
+                        set low_size [string range $size 0 9]
+                        set high_size "0x[string range $size 10 17]"
+		        set size "$low_size $high_size"
+                } else {
+                        set size [format 0x%08x [expr {${high} - ${base} + 1}]]
+                }
+        }
         if {[string_is_empty $reg]} {
-            set reg "$base $size"
+                if {$psu_cortexa53 == 1} {
+		       set reg "0x0 $base $mem_size"
+                } else {
+	               set reg "$base $mem_size"
+                }
         } else {
             # ensure no duplication
             if {![regexp ".*${reg}.*" "$base $size" matched]} {
