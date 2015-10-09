@@ -201,6 +201,12 @@ proc update_alias {os_handle} {
 
 	# Search for ps_qspi, if it is there then interchange this with first driver
 	# because to have correct internal u-boot commands qspi has to be listed in aliases as the first for spi0
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+		set pos [lsearch $all_drivers "ps7_qspi*"]
+	} else {
+		set pos [lsearch $all_drivers "psu_qspi*"]
+	}
 	set pos [lsearch $all_drivers "ps7_qspi*"]
 	if { $pos >= 0 } {
 		set first_element [lindex $all_drivers 0]

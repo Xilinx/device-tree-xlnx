@@ -171,7 +171,7 @@ proc is_it_in_pl {ip} {
 		return -1
 	}
 	set ip_type [get_property IP_NAME $ip]
-	if {![regexp "ps7_*" "$ip_type" match]} {
+	if {![regexp "ps*" "$ip_type" match]} {
 		return 1
 	}
 	return -1
@@ -192,7 +192,7 @@ proc get_intr_id {drv_handle intr_port_name} {
 		}
 
 		set cur_intr_info ""
-		if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
+		if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"] || [string match "[get_property IP_NAME $intc]" "psu_acpu_gic"]} {
 			if {$intr_id > 32} {
 				set intr_id [expr $intr_id - 32]
 			}
@@ -401,7 +401,7 @@ proc update_dt_parent args {
 	}
 	set node [get_node_object $node $dts_file]
 	# Skip if node is a reference node (start with &) or amba
-	if {[regexp "^&.*" "$node" match] || [regexp "amba" "$node" match]} {
+	if {[regexp "^&.*" "$node" match] || [regexp "amba_apu" "$node" match] || [regexp "amba" "$node" match]} {
 		return $node
 	}
 
@@ -517,9 +517,9 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 		set old_label [get_property "NODE_LABEL" $node_obj]
 		set old_name [get_property "NODE_NAME" $node_obj]
 		set old_ua [get_property "UNIT_ADDRESS" $node_obj]
-		if {![string equal -nocase $node_label $old_label] || \
+		if {![string equal -nocase -length [string length $node_label] $node_label $old_label] || \
 			![string equal -nocase $node_ua $old_ua] || \
-			![string equal -nocase $node_name $old_name]} {
+			![string equal -nocase -length [string length $node_name] $node_name $old_name]} {
 			dtg_debug "dt_node_def_checking($node_obj): label: ${node_label} - ${old_label}, name: ${node_name} - ${old_name}, unit addr: ${node_ua} - ${old_ua}"
 			return 0
 		}
@@ -726,7 +726,7 @@ proc is_pl_ip {ip_inst} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {![regexp "ps[7]_*" "$ip_name" match]} {
+	if {![regexp "ps*" "$ip_name" match]} {
 		return 1
 	}
 	return 0
@@ -741,7 +741,7 @@ proc is_ps_ip {ip_inst} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {[regexp "ps[7]_*" "$ip_name" match]} {
+	if {[regexp "ps*" "$ip_name" match]} {
 		return 1
 	}
 	return 0
@@ -908,44 +908,98 @@ proc gen_ps7_mapping {} {
 	# TODO: check if it is target cpu is cortex a9
 
 	# TODO: remove def_ps7_mapping
-	set def_ps7_mapping [dict create]
-	dict set def_ps7_mapping f8891000 label pmu
-	dict set def_ps7_mapping f8007100 label adc
-	dict set def_ps7_mapping e0008000 label can0
-	dict set def_ps7_mapping e0009000 label can1
-	dict set def_ps7_mapping e000a000 label gpio0
-	dict set def_ps7_mapping e0004000 label i2c0
-	dict set def_ps7_mapping e0005000 label i2c1
-	dict set def_ps7_mapping f8f01000 label intc
-	dict set def_ps7_mapping f8f00100 label intc
-	dict set def_ps7_mapping f8f02000 label L2
-	dict set def_ps7_mapping f8006000 label memory-controller
-	dict set def_ps7_mapping f800c000 label ocmc
-	dict set def_ps7_mapping e0000000 label uart0
-	dict set def_ps7_mapping e0001000 label uart1
-	dict set def_ps7_mapping e0006000 label spi0
-	dict set def_ps7_mapping e0007000 label spi1
-	dict set def_ps7_mapping e000d000 label qspi
-	dict set def_ps7_mapping e000e000 label smcc
-	dict set def_ps7_mapping e1000000 label nand0
-	dict set def_ps7_mapping e2000000 label nor
-	dict set def_ps7_mapping e000b000 label gem0
-	dict set def_ps7_mapping e000c000 label gem1
-	dict set def_ps7_mapping e0100000 label sdhci0
-	dict set def_ps7_mapping e0101000 label sdhci1
-	dict set def_ps7_mapping f8000000 label slcr
-	dict set def_ps7_mapping f8003000 label dmac_s
-	dict set def_ps7_mapping f8007000 label devcfg
-	dict set def_ps7_mapping f8f00200 label global_timer
-	dict set def_ps7_mapping f8001000 label ttc0
-	dict set def_ps7_mapping f8002000 label ttc1
-	dict set def_ps7_mapping f8f00600 label scutimer
-	dict set def_ps7_mapping f8005000 label watchdog0
-	dict set def_ps7_mapping f8f00620 label scuwatchdog
-	dict set def_ps7_mapping e0002000 label usb0
-	dict set def_ps7_mapping e0003000 label usb1
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 
-	set ps7_mapping [dict create]
+	set def_ps_mapping [dict create]
+	if {[string match -nocase $proctype "psu_cortexa53"]} {
+		dict set def_ps_mapping f9010000 label gic
+		dict set def_ps_mapping ff060000 label can0
+		dict set def_ps_mapping ff070000 label can1
+		dict set def_ps_mapping fd500000 label gdma0
+		dict set def_ps_mapping fd510000 label gdma1
+		dict set def_ps_mapping fd520000 label gdma2
+		dict set def_ps_mapping fd530000 label gdma3
+		dict set def_ps_mapping fd540000 label gdma4
+		dict set def_ps_mapping fd550000 label gdma5
+		dict set def_ps_mapping fd560000 label gdma6
+		dict set def_ps_mapping fd570000 label gdma7
+		dict set def_ps_mapping fd4b0000 label gpu
+		dict set def_ps_mapping ffa80000 label adma0
+		dict set def_ps_mapping ffa90000 label adma0
+		dict set def_ps_mapping ffaa0000 label adma2
+		dict set def_ps_mapping ffab0000 label adma3
+		dict set def_ps_mapping ffac0000 label adma4
+		dict set def_ps_mapping ffad0000 label adma5
+		dict set def_ps_mapping ffae0000 label adma6
+		dict set def_ps_mapping ffaf0000 label adma7
+		dict set def_ps_mapping ff100000 label nand0
+		dict set def_ps_mapping ff0b0000 label gem0
+		dict set def_ps_mapping ff0c0000 label gem1
+		dict set def_ps_mapping ff0d0000 label gem2
+		dict set def_ps_mapping ff0e0000 label gem3
+		dict set def_ps_mapping ff0a0000 label gpio
+		dict set def_ps_mapping ff020000 label i2c0
+		dict set def_ps_mapping ff030000 label i2c1
+		dict set def_ps_mapping ff0f0000 label qspi
+		dict set def_ps_mapping ffa60000 label rtc
+		dict set def_ps_mapping fd0c0000 label sata
+		dict set def_ps_mapping ff160000 label sdhci0
+		dict set def_ps_mapping ff170000 label sdhci1
+		dict set def_ps_mapping fd800000 label smmu
+		dict set def_ps_mapping ff040000 label spi0
+		dict set def_ps_mapping ff050000 label spi1
+		dict set def_ps_mapping ff110000 label ttc0
+		dict set def_ps_mapping ff120000 label ttc1
+		dict set def_ps_mapping ff130000 label ttc2
+		dict set def_ps_mapping ff140000 label ttc3
+		dict set def_ps_mapping ff000000 label uart0
+		dict set def_ps_mapping ff010000 label uart1
+		dict set def_ps_mapping fe200000 label usb0
+		dict set def_ps_mapping fe300000 label usb1
+		dict set def_ps_mapping fd4d0000 label watchdog0
+		dict set def_ps_mapping 43c00000 label dp
+		dict set def_ps_mapping 43c0a000 label dpsub
+		dict set def_ps_mapping fd4c0000 label dpdma
+		dict set def_ps_mapping fd0e0000 label pcie
+	} else {
+		dict set def_ps_mapping f8891000 label pmu
+		dict set def_ps_mapping f8007100 label adc
+		dict set def_ps_mapping e0008000 label can0
+		dict set def_ps_mapping e0009000 label can1
+		dict set def_ps_mapping e000a000 label gpio0
+		dict set def_ps_mapping e0004000 label i2c0
+		dict set def_ps_mapping e0005000 label i2c1
+		dict set def_ps_mapping f8f01000 label intc
+		dict set def_ps_mapping f8f00100 label intc
+		dict set def_ps_mapping f8f02000 label L2
+		dict set def_ps_mapping f8006000 label memory-controller
+		dict set def_ps_mapping f800c000 label ocmc
+		dict set def_ps_mapping e0000000 label uart0
+		dict set def_ps_mapping e0001000 label uart1
+		dict set def_ps_mapping e0006000 label spi0
+		dict set def_ps_mapping e0007000 label spi1
+		dict set def_ps_mapping e000d000 label qspi
+		dict set def_ps_mapping e000e000 label smcc
+		dict set def_ps_mapping e1000000 label nand0
+		dict set def_ps_mapping e2000000 label nor
+		dict set def_ps_mapping e000b000 label gem0
+		dict set def_ps_mapping e000c000 label gem1
+		dict set def_ps_mapping e0100000 label sdhci0
+		dict set def_ps_mapping e0101000 label sdhci1
+		dict set def_ps_mapping f8000000 label slcr
+		dict set def_ps_mapping f8003000 label dmac_s
+		dict set def_ps_mapping f8007000 label devcfg
+		dict set def_ps_mapping f8f00200 label global_timer
+		dict set def_ps_mapping f8001000 label ttc0
+		dict set def_ps_mapping f8002000 label ttc1
+		dict set def_ps_mapping f8f00600 label scutimer
+		dict set def_ps_mapping f8005000 label watchdog0
+		dict set def_ps_mapping f8f00620 label scuwatchdog
+		dict set def_ps_mapping e0002000 label usb0
+		dict set def_ps_mapping e0003000 label usb1
+	}
+
+	set ps_mapping [dict create]
 	global zynq_soc_dt_tree
 	if {[lsearch [get_dt_trees] $zynq_soc_dt_tree] >= 0} {
 		# get nodes under bus
@@ -966,15 +1020,15 @@ proc gen_ps7_mapping {} {
 				[string_is_empty $unit_addr]} {
 				continue
 			}
-			dict set ps7_mapping $unit_addr label $node_label
-			dict set ps7_mapping $unit_addr name $node_name
-			dict set ps7_mapping $unit_addr status $status_prop
+			dict set ps_mapping $unit_addr label $node_label
+			dict set ps_mapping $unit_addr name $node_name
+			dict set ps_mapping $unit_addr status $status_prop
 		}
 	}
-	if {[string_is_empty $ps7_mapping]} {
-		return $def_ps7_mapping
+	if {[string_is_empty $ps_mapping]} {
+		return $def_ps_mapping
 	} else {
-		return $ps7_mapping
+		return $ps_mapping
 	}
 }
 
@@ -1050,7 +1104,8 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
 	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can"
-	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
+	if {[lsearch  -nocase $valid_proc_list $proctype] >= 0} {
 		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
@@ -1073,7 +1128,8 @@ proc get_intr_type {intc_name ip_name port_name} {
 		set sensitivity [get_property SENSITIVITY $intr_pin]
 	}
 	set intc_type [get_property IP_NAME $intc ]
-	if {[string match -nocase $intc_type "ps7_scugic"]} {
+	set valid_intc_list "ps7_scugic psu_acpu_gic"
+	if {[lsearch  -nocase $valid_intc_list $intc_type] >= 0} {
 		if {[string match -nocase $sensitivity "EDGE_FALLING"]} {
 				return 2;
 		} elseif {[string match -nocase $sensitivity "EDGE_RISING"]} {
@@ -1227,7 +1283,9 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		}
 
 		set cur_intr_info ""
-		if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"]} {
+		set valid_intc_list "ps7_scugic psu_acpu_gic"
+		set ip_name [get_property IP_NAME $intc]
+		if {[lsearch  -nocase $valid_intc_list $ip_name] >= 0} {
 			if {$intr_id > 32} {
 				set intr_id [expr $intr_id - 32]
 			}
@@ -1270,8 +1328,20 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 		set base [string tolower [get_property BASE_VALUE $mem_handle]]
 		set high [string tolower [get_property HIGH_VALUE $mem_handle]]
 		set size [format 0x%x [expr {${high} - ${base} + 1}]]
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string_is_empty $reg]} {
-			set reg "$base $size"
+			if {[string match -nocase $proctype "psu_cortexa53"]} {
+				# check if base address is 64bit and split it as MSB and LSB
+				if {[regexp -nocase {0x([0-9a-f]{8})([0-9a-f]{8})} "$base" match]} {
+					set low_base [string range $base 0 9]
+				        set high_base "0x[string range $base 10 17]"
+					set reg "$low_base $high_base $size"
+				} else {
+					set reg "0x0 $base $size"
+				}
+			} else {
+				set reg "$base $size"
+			}
 		} else {
 			# ensure no duplication
 			if {![regexp ".*${reg}.*" "$base $size" matched]} {
@@ -1529,7 +1599,8 @@ proc detect_bus_name {ip_drv} {
 	set valid_buses [get_cells -hier -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
 
 	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
-	if {[string equal -nocase "ps7_cortexa9" $proc_name]} {
+	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
+	if {[lsearch  -nocase $valid_proc_list $proc_name] >= 0} {
 		if {[is_pl_ip $ip_drv]} {
 			# create the parent_node for pl.dtsi
 			set default_dts [set_drv_def_dts $ip_drv]
@@ -1549,7 +1620,12 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 
 	set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 	if {![string match "&*" $bus_node]} {
-		hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
+		} else {
+			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+		}
 		hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
 		hsi::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
 		hsi::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
@@ -1567,6 +1643,13 @@ proc gen_root_node {drv_handle} {
 			global dtsi_fname
 			update_system_dts_include [file tail ${dtsi_fname}]
 			# no root_node required as zynq-7000.dtsi
+			return 0
+		}
+		"psu_cortexa53" {
+			create_dt_tree_from_dts_file
+			global dtsi_fname
+			update_system_dts_include [file tail ${dtsi_fname}]
+			# no root_node required as zynqmp.dtsi
 			return 0
 		}
 		"microblaze" {
@@ -1624,6 +1707,10 @@ proc gen_cpu_nodes {drv_handle} {
 			# skip node generation for static zynq-7000 dtsi
 			# TODO: this needs to be fixed to allow override
 			cortexa9_opp_gen $drv_handle
+			return 0
+		}
+		"psu_cortexa53" {
+			# skip node generation for static zynqmp dtsi
 			return 0
 		} "microblaze" {}
 		default {
