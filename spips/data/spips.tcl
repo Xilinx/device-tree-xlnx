@@ -14,6 +14,7 @@
 
 proc generate {drv_handle} {
 	set ip [get_cells -hier $drv_handle]
+	set cs-num 0
 	# SPI PS only have chip select range 0 - 2
 	foreach n {0 1 2} {
 		set cs_en [get_property CONFIG.C_HAS_SS${n} $ip]
@@ -21,7 +22,9 @@ proc generate {drv_handle} {
 			inc cs-num
 		}
 	}
-	set_property CONFIG.num-cs ${cs-num} $drv_handle
+	if {${cs-num} != 0} {
+		set_property CONFIG.num-cs ${cs-num} $drv_handle
+	}
 
 	# the is-decoded-cs property is hard coded as we do not know if the
 	# board has external decoder connected or not
