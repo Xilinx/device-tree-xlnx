@@ -1651,6 +1651,7 @@ proc gen_root_node {drv_handle} {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
 			update_system_dts_include [file tail ${dtsi_fname}]
+			update_system_dts_include [file tail "zynqmp-clk.dtsi"]
 			# no root_node required as zynqmp.dtsi
 			return 0
 		}
