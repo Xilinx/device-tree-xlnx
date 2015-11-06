@@ -62,6 +62,11 @@
 		method = "smc";
 	};
 
+	firmware {
+		compatible = "xlnx,zynqmp-pm";
+		method = "smc";
+	};
+
 	timer {
 		compatible = "arm,armv8-timer";
 		interrupt-parent = <&gic>;
@@ -381,6 +386,26 @@
 			#size-cells = <0>;
 		};
 
+		pcie: pcie@fd0e0000 {
+			compatible = "xlnx,nwl-pcie-2.11";
+			status = "disabled";
+			#address-cells = <3>;
+			#size-cells = <2>;
+			#interrupt-cells = <1>;
+			device_type = "pci";
+			interrupt-parent = <&gic>;
+			interrupts = < 0 118 4>,
+				     < 0 116 4>,
+				     < 0 115 4>,	/* MSI_1 [63...32] */
+				     < 0 114 4 >;	/* MSI_0 [31...0] */
+			interrupt-names = "misc", "intx", "msi_1", "msi_0";
+			reg = <0x0 0xfd0e0000 0x1000>,
+			      <0x0 0xfd480000 0x1000>,
+			      <0x0 0xe0000000 0x1000000>;
+			reg-names = "breg", "pcireg", "cfg";
+			ranges = <0x02000000 0x00000000 0xe1000000 0x00000000 0xe1000000 0 0x0f000000>;
+		};
+
 		qspi: spi@ff0f0000 {
 			compatible = "xlnx,zynqmp-qspi-1.0";
 			status = "disabled";
@@ -499,7 +524,7 @@
 		};
 
 		uart0: serial@ff000000 {
-			compatible = "cdns,uart-r1p8";
+			compatible = "cdns,uart-r1p12";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 21 4>;
@@ -508,7 +533,7 @@
 		};
 
 		uart1: serial@ff010000 {
-			compatible = "cdns,uart-r1p8";
+			compatible = "cdns,uart-r1p12";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 22 4>;
@@ -538,7 +563,7 @@
 			compatible = "cdns,wdt-r1p2";
 			status = "disabled";
 			interrupt-parent = <&gic>;
-			interrupts = <0 52 1>;
+			interrupts = <0 113 1>;
 			reg = <0x0 0xfd4d0000 0x1000>;
 			timeout-sec = <10>;
 		};
