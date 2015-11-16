@@ -22,8 +22,19 @@ proc set_pcie_ranges {drv_handle} {
 		set axi_baseaddr [get_ip_property $drv_handle [format "CONFIG.C_AXIBAR_%d" $x]]
 		set pcie_baseaddr [get_ip_property $drv_handle [format "CONFIG.C_AXIBAR2PCIEBAR_%d" $x]]
 		set axi_highaddr [get_ip_property $drv_handle [format "CONFIG.C_AXIBAR_HIGHADDR_%d" $x]]
-		set size [format 0x%X [expr $axi_highaddr -$axi_baseaddr + 1]]
-		set value "<$range_type $high_64bit $pcie_baseaddr $axi_baseaddr $high_64bit $size>"
+		set size [expr $axi_highaddr -$axi_baseaddr + 1]
+		# Check the size of pci memory region is 4GB or not,if
+		# yes then split the size to MSB and LSB.
+		if {[regexp -nocase {([0-9a-f]{9})} "$size" match]} {
+		       set size [format 0x%016x [expr $axi_highaddr -$axi_baseaddr + 1]]
+                       set low_size [string range $size 0 9]
+                       set high_size "0x[string range $size 10 17]"
+                       set size "$low_size $high_size"
+                } else {
+                       set size [format 0x%08x [expr $axi_highaddr - $axi_baseaddr + 1]]
+		       set size "$high_64bit $size"
+                }
+		set value "<$range_type $high_64bit $pcie_baseaddr $axi_baseaddr $size>"
 		if {[string match "" $ranges]} {
 			set ranges $value
 		} else {
