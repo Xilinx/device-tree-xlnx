@@ -214,6 +214,28 @@ proc update_alias {os_handle} {
 		set all_drivers [lreplace $all_drivers 0 0 $qspi_element]
 		set all_drivers [lreplace $all_drivers $pos $pos $first_element]
     }
+	# Update all_drivers list such that console device should be the first
+	# uart device in the list.
+	set console_ip [get_property CONFIG.console_device [get_os]]
+	foreach drv_handle $all_drivers {
+		set alias_str [get_property CONFIG.dtg.alias $drv_handle]
+		if {[string match -nocase $alias_str "serial"]} {
+			if {[string match $console_ip $drv_handle] == 0} {
+				# break the loop After swaping console device and uart device
+				# found in list
+				set consoleip_pos [lsearch $all_drivers $console_ip]
+				set first_occur_pos [lsearch $all_drivers $drv_handle]
+				set console_element [lindex $all_drivers $consoleip_pos]
+				set uart_element [lindex $all_drivers $first_occur_pos]
+				set all_drivers [lreplace $all_drivers $consoleip_pos $consoleip_pos $uart_element]
+				set all_drivers [lreplace $all_drivers $first_occur_pos $first_occur_pos $console_element]
+				break
+			} else {
+				# if the first uart device in the list is console device
+				break
+			}
+		}
+	}
 
 	foreach drv_handle $all_drivers {
         set tmp [list_property $drv_handle CONFIG.dtg.alias]
