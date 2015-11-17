@@ -36,8 +36,9 @@ proc generate {drv_handle} {
     # search for a valid bus interface name
     # This is required to work with Vivado 2015.1 due to IP PIN naming change
     set hasbuf [get_property CONFIG.processor_mode $eth_ip]
+    set ip_name [get_property IP_NAME $eth_ip]
 
-    if {$hasbuf == "true" || $hasbuf == ""} {
+    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet"} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
         if {[string_is_empty ${intf}] != 1} {
@@ -83,7 +84,6 @@ proc generate {drv_handle} {
       set_property xlnx,rxmem "$rxethmem" $drv_handle
    }
 
-    set ip_name [get_property IP_NAME $eth_ip]
     if {$ip_name == "axi_ethernet"} {
 	set txcsum [get_property CONFIG.TXCSUM $eth_ip]
 	set txcsum [get_checksum $txcsum]
@@ -135,6 +135,12 @@ proc generate {drv_handle} {
 	        set_drv_prop $drv_handle phy-handle "$phy_name" reference
 		gen_phy_node $mdio_node $phy_name $phya
 	  }
+    }
+    if {$ip_name == "axi_10g_ethernet"} {
+       set phytype [get_property CONFIG.base_kr $eth_ip]
+       set_property phy-mode "$phytype" $drv_handle
+       set compatstring "xlnx,ten-gig-eth-mac"
+       set_property compatible "$compatstring" $drv_handle
     }
 
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
