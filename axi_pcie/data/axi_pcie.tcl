@@ -74,4 +74,16 @@ proc generate {drv_handle} {
 
 	set_pcie_reg $drv_handle
 	set_pcie_ranges $drv_handle
+	set tab "\n\t\t\t\t\t"
+	set int_map "0 0 0 1 &pcie_intc 1>,$tab<0 0 0 2 &pcie_intc 2>,$tab<0 0 0 3 &pcie_intc 3>,\
+		$tab<0 0 0 4 &pcie_intc 4"
+	set_drv_prop $drv_handle interrupt-map-mask "0 0 0 7" intlist
+	set_drv_prop $drv_handle interrupt-map $int_map int
+	# Add Interrupt controller child node
+	set node [gen_peripheral_nodes $drv_handle]
+	set pcie_child_intc_node [add_or_get_dt_node -l "pcie_intc" -n interrupt-controller -p $node]
+	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "interrupt-controller" "" boolean
+	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#address-cells" 0 int
+	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#interrupt-cells" 1 int
+
 }
