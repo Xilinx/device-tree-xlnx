@@ -17,7 +17,10 @@
 # GNU General Public License for more details.
 #
 
+set rxethmem 0
+
 proc generate {drv_handle} {
+    global rxethmem
     foreach i [get_sw_cores device_tree] {
         set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
         if {[file exists $common_tcl_file]} {
@@ -61,59 +64,8 @@ proc generate {drv_handle} {
     }
 
     if { [llength $intf] } {
-        set intf_net [get_intf_nets -of_objects $intf ]
-        if { [llength $intf_net]  } {
-            set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
-            set connected_ip [get_cells -of_objects $target_intf]
-            set target_ipname [get_property IP_NAME [get_cells $connected_ip]]
-            set rxmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
-            if { $target_ipname == "axis_data_fifo"} {
-                set p2p_busifs_i [get_intf_pins -of_objects $connected_ip -filter "TYPE==INITIATOR"]
-                foreach p2p_busif $p2p_busifs_i {
-                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
-                        set conn_busif_handle [::hsi::utils::get_connected_intf $connected_ip $busif_name]
-                        set target_periph [get_cells -of_objects $conn_busif_handle]
-                        set target_periph_type [get_property IP_NAME $target_periph]
-                }
-	   }
-       }
+        set connected_ip [get_connectedip $intf]
     }
-
-    if { $target_periph_type == "axis_clock_converter"} {
-	set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==TARGET || TYPE==MASTER"]
-	foreach p2p_busif $p2p_busifs_i {
-		set busif_name [string toupper [get_property NAME  $p2p_busif]]
-                set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
-                set target_periph [get_cells -of_objects $conn_busif_handle]
-                set target_periph_type [get_property IP_NAME $target_periph]
-		if { $target_periph_type == "axis_clock_converter"} {
-			set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
-			foreach p2p_busif $p2p_busifs_i {
-			       set busif_name [string toupper [get_property NAME  $p2p_busif]]
-			       set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
-		               set target_periph [get_cells -of_objects $conn_busif_handle]
-			       set target_periph_type [get_property IP_NAME $target_periph]
-			       if { $target_periph_type == "axis_subset_converter"} {
-					set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
-					foreach p2p_busif $p2p_busifs_i {
-					        set busif_name [string toupper [get_property NAME  $p2p_busif]]
-						set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
-			                        set target_periph [get_cells -of_objects $conn_busif_handle]
-					        set target_periph_type [get_property IP_NAME $target_periph]
-					}
-				}
-				if { $target_periph_type == "axis_subset_converter"} {
-					set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
-					foreach p2p_busif $p2p_busifs_i {
-			                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
-					        set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
-				                set connected_ip [get_cells -of_objects $conn_busif_handle]
-					}
-				}
-			  }
-		 }
-              }
-	}
 
     foreach n "AXI_STR_RXD m_axis_tx_ts" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
@@ -123,34 +75,12 @@ proc generate {drv_handle} {
     }
 
     if { [llength $intf] } {
-        set intf_net [get_intf_nets -of_objects $intf ]
-        if { [llength $intf_net]  } {
-            set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
-            set connected_ip1 [get_cells -of_objects $target_intf]
-            set target_ipname [get_property IP_NAME [get_cells $connected_ip1]]
-            if { $target_ipname == "axis_dwidth_converter"} {
-                set p2p_busifs_i [get_intf_pins -of_objects $connected_ip1 -filter "YPE==TARGET || TYPE==MASTER"]
-                foreach p2p_busif $p2p_busifs_i {
-                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
-                        set conn_busif_handle [::hsi::utils::get_connected_intf $connected_ip1 $busif_name]
-                        set target_periph [get_cells -of_objects $conn_busif_handle]
-                        set target_periph_type [get_property IP_NAME $target_periph]
-                }
-	   }
-            if { $target_periph_type == "axis_clock_converter"} {
-                set p2p_busifs_i [get_intf_pins -of_objects $target_periph -filter "TYPE==INITIATOR || TYPE==MASTER"]
-                foreach p2p_busif $p2p_busifs_i {
-                        set busif_name [string toupper [get_property NAME  $p2p_busif]]
-                        set conn_busif_handle [::hsi::utils::get_connected_intf $target_periph $busif_name]
-                        set tx_tsip [get_cells -of_objects $conn_busif_handle]
-                }
-	   }
-	}
+        set tx_tsip [get_connectedip $intf]
     }
       set_property axistream-connected "$connected_ip" $drv_handle
       set_property axistream-control-connected "$connected_ip" $drv_handle
       set_property axififo-connected "$tx_tsip" $drv_handle
-      set_property xlnx,rxmem "$rxmem" $drv_handle
+      set_property xlnx,rxmem "$rxethmem" $drv_handle
    }
 
     set ip_name [get_property IP_NAME $eth_ip]
@@ -332,4 +262,62 @@ proc gen_phy_node args {
     hsi::utils::add_new_dts_param "${phy_node}" "compatible" "Xilinx PCS/PMA PHY" string
 
     return $phy_node
+}
+
+proc is_ethsupported_target {connected_ip} {
+   set connected_ipname [get_property IP_NAME $connected_ip]
+   if {$connected_ipname == "axi_dma" || $connected_ipname == "axi_fifo_mm_s"} {
+      return "true"
+   } else {
+      return "false"
+   }
+}
+
+proc get_targetip {ip} {
+   set p2p_busifs_i [get_intf_pins -of_objects $ip -filter "TYPE==INITIATOR || TYPE==MASTER"]
+   foreach p2p_busif $p2p_busifs_i {
+      set busif_name [string toupper [get_property NAME  $p2p_busif]]
+      set conn_busif_handle [::hsi::utils::get_connected_intf $ip $busif_name]
+      set target_periph [get_cells -of_objects $conn_busif_handle]
+   }
+   return $target_periph
+}
+
+proc get_connectedip {intf} {
+   global rxethmem
+   if { [llength $intf]} {
+      set intf_net [get_intf_nets -of_objects $intf ]
+      if { [llength $intf_net]  } {
+         set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
+         if { [llength $target_intf] } {
+            set connected_ip [get_cells -of_objects $target_intf]
+            set target_ipname [get_property IP_NAME $connected_ip]
+            if {$target_ipname == "axis_data_fifo"} {
+               set rxethmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
+            }
+         }
+         set target_ip [is_ethsupported_target $connected_ip]
+         if { $target_ip == "true"} {
+            return $connected_ip
+         } else {
+             set i 0
+             set retries 5
+             # When AXI Ethernet Configured in Non-Buf mode or In case of 10G MAC
+             # The Ethernet MAC won't directly got connected to fifo or dma
+             # We need to traverse through stream data fifo's and axi interconnects
+             # Inorder to find the target IP(AXI DMA or AXI FIFO)
+             while {$i < $retries} {
+                set target_periph [get_targetip $connected_ip]
+                set target_ip [is_ethsupported_target $target_periph]
+                if { $target_ip == "true"} {
+                  return $target_periph
+                }
+                set connected_ip $target_periph
+                incr i
+             }
+             set error "Couldn't find a valid target_ip Please cross check hw design"
+             return $error
+         }
+      }
+   }
 }
