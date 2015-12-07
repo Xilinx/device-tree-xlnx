@@ -1272,35 +1272,45 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
-		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
-		set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
-		if {[string match -nocase $intr_id "-1"]} {continue}
-		if {[string_is_empty $intc] == 1} {continue}
-
-		set intr_type [get_intr_type $intc $slave $pin]
-		if {[string match -nocase $intr_type "-1"]} {
+		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
+		if {[llength $connected_intc] == 0 } {
 			continue
 		}
+		set connected_intc_name [get_property IP_NAME $connected_intc]
+		set valid_gpio_list "ps7_gpio axi_gpio"
+		# check whether intc is gpio or other
+		if {[lsearch  -nocase $valid_gpio_list $connected_intc_name] >= 0} {
+			generate_gpio_intr_info $connected_intc $drv_handle $pin
+		} else {
+			set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+			set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
+			if {[string match -nocase $intr_id "-1"]} {continue}
+			if {[string_is_empty $intc] == 1} {continue}
 
-		set cur_intr_info ""
-		set valid_intc_list "ps7_scugic psu_acpu_gic"
-		set ip_name [get_property IP_NAME $intc]
-		if {[lsearch  -nocase $valid_intc_list $ip_name] >= 0} {
-			if {$intr_id > 32} {
-				set intr_id [expr $intr_id - 32]
+			set intr_type [get_intr_type $intc $slave $pin]
+			if {[string match -nocase $intr_type "-1"]} {
+				continue
 			}
-			set cur_intr_info "0 $intr_id $intr_type"
-		} else {
-			set cur_intr_info "$intr_id $intr_type"
-		}
 
-		if {[string_is_empty $intr_info]} {
-			set intr_info "$cur_intr_info"
-		} else {
-			append intr_info " " $cur_intr_info
+			set cur_intr_info ""
+			set valid_intc_list "ps7_scugic psu_acpu_gic"
+			set ip_name [get_property IP_NAME $intc]
+			if {[lsearch  -nocase $valid_intc_list $ip_name] >= 0} {
+				if {$intr_id > 32} {
+					set intr_id [expr $intr_id - 32]
+				}
+				set cur_intr_info "0 $intr_id $intr_type"
+			} else {
+				set cur_intr_info "$intr_id $intr_type"
+			}
+
+			if {[string_is_empty $intr_info]} {
+				set intr_info "$cur_intr_info"
+			} else {
+				append intr_info " " $cur_intr_info
+			}
 		}
 	}
-
 	if {[string_is_empty $intr_info]} {
 		return -1
 	}
@@ -1962,4 +1972,146 @@ proc get_sw_proc_prop {prop_name} {
 	set proc_ip [get_cells -hier $sw_proc]
 	set property_value [get_property $prop_name $proc_ip]
 	return $property_value
+}
+
+# Get the interrupt controller name, which the ip is connected
+proc get_intr_cntrl_name { periph_name intr_pin_name } {
+	lappend intr_cntrl
+	if { [llength $intr_pin_name] == 0 } {
+		return $intr_cntrl
+	}
+
+	if { [llength $periph_name] != 0 } {
+	# This is the case where IP pin is interrupting
+	set periph [::hsi::get_cells -hier -filter "NAME==$periph_name"]
+
+	if { [llength $periph] == 0 } {
+		return $intr_cntrl
+	}
+	set intr_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intr_pin_name"]
+	if { [llength $intr_pin] == 0 } {
+		return $intr_cntrl
+	}
+	set pin_dir [common::get_property DIRECTION $intr_pin]
+	if { [string match -nocase $pin_dir "I"] } {
+		return $intr_cntrl
+	}
+	} else {
+		# This is the case where External interrupt port is interrupting
+		set intr_pin [::hsi::get_ports $intr_pin_name]
+		if { [llength $intr_pin] == 0 } {
+			return $intr_cntrl
+		}
+		set pin_dir [common::get_property DIRECTION $intr_pin]
+		if { [string match -nocase $pin_dir "O"] } {
+			return $intr_cntrl
+		}
+	}
+
+	set intr_sink_pins [::hsi::utils::get_sink_pins $intr_pin]
+	if { [llength $intr_sink_pins] == 0 } {
+		return $intr_cntrl
+	}
+	set sink_periph [::hsi::get_cells -of_objects $intr_sink_pins]
+	if { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
+		lappend intr_cntrl $sink_periph
+	} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
+		# this the case where interrupt port is connected to XLConcat IP.
+		lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
+	} else {
+		lappend intr_cntrl $sink_periph
+	}
+	return $intr_cntrl
+}
+
+# Generate interrupt info for the ips which are using gpio
+# as interrupt.
+proc generate_gpio_intr_info {connected_intc drv_handle pin} {
+	set intr_info ""
+	global ps_gpio_pincount
+	if {[string_is_empty $connected_intc]} {
+		return -1
+	}
+	# Get the gpio channel number to which the ip is connected
+	set channel_nr [get_gpio_channel_nr $drv_handle $pin]
+	set slave [get_cells -hier ${drv_handle}]
+	set ip_name $connected_intc
+	set intr_type [get_intr_type $connected_intc $slave $pin]
+	if {[string match -nocase $intr_type "-1"]} {
+		return -1
+	}
+	set sinkpin [::hsi::utils::get_sink_pins [get_pins -of [get_cells -hier $drv_handle] -filter {TYPE==INTERRUPT}]]
+	set dual [get_property CONFIG.C_IS_DUAL $connected_intc]
+	regsub -all {[^0-9]} $sinkpin "" gpio_pin_count
+	if {[string match $channel_nr "0"]} {
+		# Check for ps7_gpio else check for axi_gpio
+		if {[string match $sinkpin "GPIO_I"]} {
+			set intr_info "$ps_gpio_pincount $intr_type"
+			expr ps_gpio_pincount 1
+		} elseif {[regexp "gpio_io_i" $sinkpin match]} {
+			set intr_info "0 $intr_type"
+		} else {
+			# if channel width is more than one
+			set intr_info "$gpio_pin_count $intr_type "
+		}
+	} else {
+		if {[string match $dual "1"]} {
+			# gpio channel 2 width is one
+			if {[regexp "gpio2_io_i" $sinkpin match]} {
+				set intr_info "32 $intr_type"
+			} else {
+				# if channel width is more than one
+				set intr_pin [::hsi::get_pins -of_objects $connected_intc -filter "NAME==$pin"]
+				set gpio_channel [::hsi::utils::get_sink_pins $intr_pin]
+				set intr_id [expr $gpio_pin_count + 32]
+				set intr_info "$intr_id $intr_type"
+			}
+		}
+	}
+	set intc $connected_intc
+	if {[string_is_empty $intr_info]} {
+		return -1
+	}
+	set_drv_prop $drv_handle interrupts $intr_info intlist
+	if {[string_is_empty $intc]} {
+		return -1
+	}
+	set intc [ps_node_mapping $intc label]
+	set_drv_prop $drv_handle interrupt-parent $intc reference
+}
+
+# Get the gpio channel number to which the ip is connected
+# if pin is gpio_io_* then channel is 1
+# if pin is gpio2_io_* then channel is 2
+proc get_gpio_channel_nr { periph_name intr_pin_name } {
+	lappend intr_cntrl
+	if { [llength $intr_pin_name] == 0 } {
+		return $intr_cntrl
+	}
+	if { [llength $periph_name] != 0 } {
+		set periph [::hsi::get_cells -hier -filter "NAME==$periph_name"]
+
+		if { [llength $periph] == 0 } {
+			return $intr_cntrl
+		}
+		set intr_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intr_pin_name"]
+		if { [llength $intr_pin] == 0 } {
+			return $intr_cntrl
+		}
+		set pin_dir [common::get_property DIRECTION $intr_pin]
+		if { [string match -nocase $pin_dir "I"] } {
+			return $intr_cntrl
+		}
+		set intr_sink_pins [::hsi::utils::get_sink_pins $intr_pin]
+		set sink_periph [::hsi::get_cells -of_objects $intr_sink_pins]
+		if { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
+			# this the case where interrupt port is connected to XLConcat IP.
+			return [get_gpio_channel_nr $sink_periph "dout"]
+		}
+		if {[regexp "gpio[2]_*" $intr_sink_pins match]} {
+			return 1
+		} else {
+			return 0
+		}
+	}
 }
