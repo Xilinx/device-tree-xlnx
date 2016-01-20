@@ -1709,7 +1709,9 @@ proc cortexa9_opp_gen {drv_handle} {
 		incr i
 		set tmp_opp [expr int([expr $cpu_max_freq / pow(2, $i)])]
 	}
-	hsi::utils::add_new_dts_param $cpu_node "operating-points" "$opp" intlist
+	if {![string_is_empty $opp]} {
+		hsi::utils::add_new_dts_param $cpu_node "operating-points" "$opp" intlist
+	}
 }
 
 # Q: common function for all processor or one for each driver lib
