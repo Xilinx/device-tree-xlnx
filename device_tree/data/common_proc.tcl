@@ -1109,8 +1109,19 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
-			set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
-			set_drv_prop_if_empty $drv_handle "clocks" "clkc 0" reference
+			# Keep the below logic, until we have clock frame work for ZynqMP
+			if {[string match -nocase $proctype "psu_cortexa53"] } {
+				set dts_file [current_dt_tree]
+				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+				set_drv_prop_if_empty $drv_handle "clocks" "misc_clk" reference
+				set misc_clk_node [add_or_get_dt_node -n "misc_clk" -l "misc_clk" -d ${dts_file} -p ${bus_node}]
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" 100000000 int
+			} else {
+				set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
+				set_drv_prop_if_empty $drv_handle "clocks" "clkc 0" reference
+			}
 		}
 	}
 }
