@@ -184,12 +184,13 @@ proc get_intr_id {drv_handle intr_port_name} {
 	foreach pin ${intr_port_name} {
 		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 		if {[string_is_empty $intc] == 1} {continue}
-
-		set intc [get_property IP_NAME $intc]
-		if {[llength $intc] > 1} {
-			foreach intr_cntr $intc {
-				if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
-					set intc $intr_cntr
+		if {[string match -nocase $proctype "psu_cortexa53"] } {
+			set intc [get_property IP_NAME $intc]
+			if {[llength $intc] > 1} {
+				foreach intr_cntr $intc {
+					if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
+						set intc $intr_cntr
+					}
 				}
 			}
 		}
