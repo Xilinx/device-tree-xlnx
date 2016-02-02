@@ -47,6 +47,7 @@ proc generate {drv_handle} {
     if { $axiethernetfound != 1 } {
         set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
         set_drv_conf_prop $drv_handle C_SG_INCLUDE_STSCNTRL_STRM xlnx,sg-include-stscntrl-strm boolean
+        set_drv_conf_prop $drv_handle c_enable_multi_channel xlnx,multichannel-dma boolean
 
         set baseaddr [get_baseaddr $dma_ip no_prefix]
         set tx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_MM2S]
@@ -90,6 +91,9 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
     # detection based on two property
     set datawidth_list "[format "CONFIG.C_%s_AXIS_%s_DATA_WIDTH" $modeIndex $mode] [format "CONFIG.C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode]"
     add_cross_property_to_dtnode $drv_handle $datawidth_list $dma_channel "xlnx,datawidth"
+
+    set num_channles [get_property CONFIG.c_num_mm2s_channels [get_cells $drv_handle]]
+    hsi::utils::add_new_dts_param $dma_channel "dma-channels" $num_channles hexint
 
     return $dma_channel
 }
