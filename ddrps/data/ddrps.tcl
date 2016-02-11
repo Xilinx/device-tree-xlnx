@@ -20,36 +20,32 @@ proc gen_ps7_ddr_reg_property {drv_handle} {
     set slave [get_cells -hier ${drv_handle}]
     set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-
-    if {[string match -nocase $proctype "psu_cortexa53"]} {
-        set psu_cortexa53 "1"
-    }
     foreach mem_handle ${ip_mem_handles} {
         #set base [get_property BASE_VALUE $mem_handle]
         set base 0x0
         set high [get_property HIGH_VALUE $mem_handle]
         set mem_size [format 0x%x [expr {${high} - ${base} + 1}]]
-        if {$psu_cortexa53 == 1} {
-                # check if size is crossing 4GB split the size to MSB and LSB
-                if {[regexp -nocase {([0-9a-f]{9})} "$mem_size" match]} {
-                        set size [format 0x%016x [expr {${high} - ${base} + 1}]]
-                        set low_size [string range $size 0 9]
-                        set high_size "0x[string range $size 10 17]"
-		        set size "$low_size $high_size"
-                } else {
-                        set size [format 0x%08x [expr {${high} - ${base} + 1}]]
-                }
-        }
+        if {[string match -nocase $proctype "psu_cortexa53"]} {
+		# Check if memory crossing 4GB map, then split 2GB below 32 bit limit
+		# and remaining above 32 bit limit
+		if { [expr {${mem_size} + ${base}}] >= [expr 0x100000000] } {
+			set low_mem_size [expr {0x80000000 - ${base}}]
+			set high_mem_size [expr {${mem_size} - ${low_mem_size}}]
+			set low_mem_size [format "0x%x" ${low_mem_size}]
+			set high_mem_size [get_high_mem_size $high_mem_size]
+			set regval "0x0 ${base} 0x0 $low_mem_size>, <0x8 0x00000000 $high_mem_size"
+		} else {
+			set regval "0x0 ${base} 0x0 ${mem_size}"
+		}
+        } else {
+		set regval "$base $mem_size"
+	}
         if {[string_is_empty $reg]} {
-                if {$psu_cortexa53 == 1} {
-		       set reg "0x0 $base $mem_size"
-                } else {
-	               set reg "$base $mem_size"
-                }
+		set reg $regval
         } else {
             # ensure no duplication
-            if {![regexp ".*${reg}.*" "$base $size" matched]} {
-                set reg "$reg $base $size"
+            if {![regexp ".*${reg}.*" "$regval" matched]} {
+                set reg "$regval"
             }
         }
     }
@@ -67,4 +63,22 @@ proc generate {drv_handle} {
     }
     gen_ps7_ddr_reg_property $drv_handle
     add_memory_node $drv_handle
+}
+
+proc get_high_mem_size {high_mem_size} {
+	set size "0x0 0x0"
+	set high_mem_size [format "0x%x" ${high_mem_size}]
+	if {[regexp -nocase {0x([0-9a-f]{9})} "$high_mem_size" match]} {
+		set temp $high_mem_size
+		set temp [string trimleft [string trimleft $temp 0] x]
+		set len [string length $temp]
+		set rem [expr {${len} - 8}]
+		set high_mem "0x[string range $temp $rem $len]"
+		set low_mem "0x[string range $temp 0 [expr {${rem} - 1}]]"
+		set low_mem [format 0x%08x $low_mem]
+		set size "$low_mem $high_mem"
+	} else {
+		set size "0x0 $high_mem_size"
+	}
+	return $size
 }

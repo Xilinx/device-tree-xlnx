@@ -1706,10 +1706,11 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
+			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 2 int
 		} else {
 			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
 		}
-		hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
 		hsi::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
 		hsi::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
 	}
