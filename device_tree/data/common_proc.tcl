@@ -1119,6 +1119,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	# add dts binding for required nodes
 	#   clock-names = "ref_clk";
 	#   clocks = <&clkc 0>;
+	global bus_clk_list
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
 	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can"
@@ -1131,11 +1132,25 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 			if {[string match -nocase $proctype "psu_cortexa53"] } {
 				set dts_file [current_dt_tree]
 				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-				set_drv_prop_if_empty $drv_handle "clocks" "misc_clk" reference
-				set misc_clk_node [add_or_get_dt_node -n "misc_clk" -l "misc_clk" -d ${dts_file} -p ${bus_node}]
-				hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
-				hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
-				hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" 100000000 int
+				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "s_axi_aclk"]
+				if {![string equal $clk_freq ""]} {
+					if {[lsearch $bus_clk_list $clk_freq] < 0} {
+						set bus_clk_list [lappend bus_clk_list $clk_freq]
+					}
+					set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+					# create the node and assuming reg 0 is taken by cpu
+					set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+					if {[string match -nocase $iptype "can"]} {
+						set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs &$clk_refs" reference
+					} else {
+						set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
+					}
+				}
 			} else {
 				set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
 				set_drv_prop_if_empty $drv_handle "clocks" "clkc 0" reference
