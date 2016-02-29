@@ -61,8 +61,10 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 	add_cross_property_to_dtnode $drv_handle "CONFIG.C_M_AXI_MAX_BURST_LEN" $dma_channel "xlnx,max-burst-len"
 
 	set intr_info [get_intr_id $drv_handle "cdma_introut" ]
-	if { [llength $intr_info] } {
+	if { [llength $intr_info] && ![string match -nocase $intr_info "-1"] } {
 		hsi::utils::add_new_dts_param $dma_channel "interrupts" $intr_info intlist
+	} else {
+		error "ERROR: ${drv_handle}: cdma_introut port is not connected"
 	}
 	return $dma_channel
 }
