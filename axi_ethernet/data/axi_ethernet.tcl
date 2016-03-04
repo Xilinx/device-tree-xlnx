@@ -123,9 +123,9 @@ proc generate {drv_handle} {
     set mdio_node [gen_mdio_node $drv_handle $node]
 
 
-    set phytype [get_property CONFIG.PHY_TYPE $eth_ip]
+    set phytype [string tolower [get_property CONFIG.PHY_TYPE $eth_ip]]
     set_property phy-mode "$phytype" $drv_handle
-    if {$phytype == "SGMII" || $phytype == "1000BaseX"} {
+    if {$phytype == "sgmii" || $phytype == "1000basex"} {
 	  set phytype "sgmii"
       set_property phy-mode "$phytype" $drv_handle
 	  set phynode [pcspma_phy_node $eth_ip]
@@ -137,7 +137,7 @@ proc generate {drv_handle} {
 	  }
     }
     if {$ip_name == "axi_10g_ethernet"} {
-       set phytype [get_property CONFIG.base_kr $eth_ip]
+       set phytype [string tolower [get_property CONFIG.base_kr $eth_ip]]
        set_property phy-mode "$phytype" $drv_handle
        set compatstring "xlnx,ten-gig-eth-mac"
        set_property compatible "$compatstring" $drv_handle
