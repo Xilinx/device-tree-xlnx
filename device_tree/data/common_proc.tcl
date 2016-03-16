@@ -2259,13 +2259,6 @@ proc get_ps8_interrupt_id { ip_name port_name } {
 	}
     }
 
-    set irqid [common::get_property IRQID $intr_pin]
-
-    if { [llength $irqid] != 0 && [is_interrupt $intc_type] } {
-        set irqid [split $irqid ":"]
-        return $irqid
-    }
-
     set intc_src_ports [::hsi::utils::get_interrupt_sources $intc_periph]
 
     #Special Handling for cascading case of axi_intc Interrupt controller
