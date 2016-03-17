@@ -22,8 +22,15 @@ proc generate {drv_handle} {
             break
         }
     }
-    set_drv_conf_prop $drv_handle c_can_tx_dpth tx-fifo-depth hexint
-    set_drv_conf_prop $drv_handle c_can_rx_dpth rx-fifo-depth hexint
+    set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
+    if {[string match -nocase $ip_name "canfd"]} {
+        hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-1.0"
+        set_drv_conf_prop $drv_handle NUM_OF_TX_BUF tx-fifo-depth hexint
+        set_drv_conf_prop $drv_handle NUM_OF_TX_BUF rx-fifo-depth hexint
+    } else {
+        set_drv_conf_prop $drv_handle c_can_tx_dpth tx-fifo-depth hexint
+        set_drv_conf_prop $drv_handle c_can_rx_dpth rx-fifo-depth hexint
+    }
 
     set proc_type [get_sw_proc_prop IP_NAME]
     switch $proc_type {
