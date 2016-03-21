@@ -195,7 +195,7 @@ proc get_intr_id {drv_handle intr_port_name} {
 			}
 		}
 		if {[string match -nocase $proctype "psu_cortexa53"] } {
-			set intr_id [get_ps8_interrupt_id $drv_handle $pin]
+			set intr_id [get_psu_interrupt_id $drv_handle $pin]
 		} else {
 			set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 		}
@@ -1340,7 +1340,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			}
 
 			if {[string match -nocase $proctype "psu_cortexa53"] } {
-				set intr_id [get_ps8_interrupt_id $drv_handle $pin]
+				set intr_id [get_psu_interrupt_id $drv_handle $pin]
 			} else {
 				set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 			}
@@ -2210,7 +2210,7 @@ proc is_interrupt { IP_NAME } {
 	return false;
 
 }
-proc get_ps8_interrupt_id { ip_name port_name } {
+proc get_psu_interrupt_id { ip_name port_name } {
     set ret -1
     set periph ""
     set intr_pin ""
