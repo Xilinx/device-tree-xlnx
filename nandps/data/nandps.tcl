@@ -13,9 +13,7 @@
 #
 
 proc ns_to_cycle {drv_handle prop_name nand_cycle_time} {
-    set extra_cycle 1
-    if {${nand_cycle_time} == 1} { set extra_cycle 0}
-    return [expr [get_property CONFIG.$prop_name [get_cells -hier $drv_handle]]/${nand_cycle_time} + ${extra_cycle}]
+    return [expr [get_property CONFIG.$prop_name [get_cells -hier $drv_handle]]/${nand_cycle_time}]
 }
 
 proc generate {drv_handle} {
