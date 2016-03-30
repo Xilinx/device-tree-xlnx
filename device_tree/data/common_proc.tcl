@@ -535,11 +535,14 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 		set old_label [get_property "NODE_LABEL" $node_obj]
 		set old_name [get_property "NODE_NAME" $node_obj]
 		set old_ua [get_property "UNIT_ADDRESS" $node_obj]
+		set config_prop [list_property -regexp $node_obj "CONFIG.*"]
 		if {![string equal -nocase -length [string length $node_label] $node_label $old_label] || \
 			![string equal -nocase $node_ua $old_ua] || \
 			![string equal -nocase -length [string length $node_name] $node_name $old_name]} {
-			dtg_debug "dt_node_def_checking($node_obj): label: ${node_label} - ${old_label}, name: ${node_name} - ${old_name}, unit addr: ${node_ua} - ${old_ua}"
-			return 0
+			if {[string compare -nocase $config_prop ""]} {
+				dtg_debug "dt_node_def_checking($node_obj): label: ${node_label} - ${old_label}, name: ${node_name} - ${old_name}, unit addr: ${node_ua} - ${old_ua}"
+				return 0
+			}
 		}
 	}
 	return 1
