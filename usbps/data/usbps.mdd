@@ -21,6 +21,5 @@ BEGIN driver usbps
   OPTION driver_state = ACTIVE;
   OPTION NAME = usbps;
   DTGPARAM name = dr_mode, default = host , type = string ;
-  DTGPARAM name = phy_type, default = ulpi, type = string;
 
 END driver
