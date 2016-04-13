@@ -149,7 +149,7 @@ proc generate {drv_handle} {
 proc pcspma_phy_node {slave} {
 	set phyaddr [get_property CONFIG.PHYADDR $slave]
 	set phyaddr [::hsi::utils::convert_binary_to_decimal $phyaddr]
-	set phymode "phy0"
+	set phymode "phy$phyaddr"
 
 	return "$phyaddr $phymode"
 }
