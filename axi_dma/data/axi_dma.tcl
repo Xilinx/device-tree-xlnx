@@ -44,6 +44,12 @@ proc generate {drv_handle} {
                 set axiethernetfound 1
         }
     }
+
+    if { $axiethernetfound } {
+	set compatstring "xlnx,eth-dma"
+        set_property compatible "$compatstring" $drv_handle
+    }
+
     if { $axiethernetfound != 1 } {
         set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
         set_drv_conf_prop $drv_handle C_SG_INCLUDE_STSCNTRL_STRM xlnx,sg-include-stscntrl-strm boolean
