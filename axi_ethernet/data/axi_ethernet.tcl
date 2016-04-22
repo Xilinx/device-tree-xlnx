@@ -300,7 +300,11 @@ proc get_connectedip {intf} {
             set target_ipname [get_property IP_NAME $connected_ip]
             if {$target_ipname == "axis_data_fifo"} {
                set rxethmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
-            }
+            } else {
+	       # In 10G MAC case if the rx_stream interface is not connected to
+	       # a Stream-fifo set the rxethmem value to a default jumbo MTU size
+	       set rxethmem 9600
+	    }
          }
          set target_ip [is_ethsupported_target $connected_ip]
          if { $target_ip == "true"} {
