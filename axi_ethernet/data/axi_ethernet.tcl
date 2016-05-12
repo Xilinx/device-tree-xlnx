@@ -21,6 +21,7 @@ set rxethmem 0
 
 proc generate {drv_handle} {
     global rxethmem
+    set rxethmem 0
     foreach i [get_sw_cores device_tree] {
         set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
         if {[file exists $common_tcl_file]} {
