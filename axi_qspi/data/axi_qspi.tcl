@@ -24,4 +24,8 @@ proc generate {drv_handle} {
 	}
 
 	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "xlnx,num-ss-bits"
+	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "num-cs"
+	set_drv_conf_prop $drv_handle "C_NUM_TRANSFER_BITS" "bits-per-word" int
+	set_drv_conf_prop $drv_handle "C_FIFO_DEPTH" "fifo-size" int
+	set_drv_conf_prop $drv_handle "C_SPI_MODE" "xlnx,spi-mode" int
 }
