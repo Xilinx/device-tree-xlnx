@@ -1032,6 +1032,9 @@ proc gen_ps7_mapping {} {
 				continue
 			}
 			set unit_addr [get_property UNIT_ADDRESS $node]
+			if {[string length $unit_addr] <= 1} {
+				set unit_addr ""
+			}
 			set node_name [get_property NODE_NAME $node]
 			set node_label [get_property NODE_LABEL $node]
 			if {[catch {set status_prop [get_property CONFIG.status $node]} msg]} {
