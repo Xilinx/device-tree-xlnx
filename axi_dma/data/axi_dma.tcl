@@ -67,6 +67,7 @@ proc generate {drv_handle} {
             } else {
 		    error "ERROR: ${drv_handle}: mm2s_introut port is not connected"
             }
+            add_dma_coherent_prop $drv_handle "M_AXI_MM2S"
         }
         set rx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_S2MM]
         if { $rx_chan ==1 } {
@@ -80,6 +81,7 @@ proc generate {drv_handle} {
             } else {
 		    error "ERROR: ${drv_handle}: s2mm_introut port is not connected"
             }
+            add_dma_coherent_prop $drv_handle "M_AXI_S2MM"
         }
     } else {
         set_drv_property $drv_handle axistream-connected "$connected_ip" reference
@@ -106,4 +108,31 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
     hsi::utils::add_new_dts_param $dma_channel "dma-channels" $num_channles hexint
 
     return $dma_channel
+}
+
+proc add_dma_coherent_prop {drv_handle intf} {
+    set ip_name [::hsi::get_cells -hier -filter "NAME==$drv_handle"]
+    set connectedip [hsi::utils::get_connected_stream_ip $drv_handle $intf]
+    set intrconnect [get_property IP_NAME [get_cells -hier $connectedip]]
+    set num_master [get_property CONFIG.NUM_MI $connectedip]
+    set done 0
+    # check whether dma connected to interconnect ip, loop until you get the
+    # port name ACP or HP
+    while {[string match -nocase $intrconnect "axi_interconnect"]} {
+        # loop over number of master interfaces
+        set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectedip] -filter {TYPE==MASTER}]
+        foreach interface ${master_intf} {
+            set intf_port [hsi::utils::get_connected_intf $connectedip $interface]
+            set intrconnect [hsi::utils::get_connected_stream_ip $connectedip $interface]
+            if {![string_is_empty $intf_port] && [string match -nocase $intf_port "S_AXI_ACP"]} {
+                hsi::utils::add_new_property $drv_handle "dma-coherent" boolean ""
+                # here dma connected to ACP port
+                set done 1
+                break;
+            }
+            if {$done} {
+                break
+            }
+        }
+    }
 }
