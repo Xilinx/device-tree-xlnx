@@ -78,7 +78,7 @@ proc generate {drv_handle} {
 
     if {[string_is_empty ${intf}] != 1} {
         set tx_tsip [get_connectedip $intf]
-        set_property axififo-connected "$tx_tsip" $drv_handle
+        set_drv_prop $drv_handle axififo-connected "$tx_tsip" reference
     }
       set_property axistream-connected "$connected_ip" $drv_handle
       set_property axistream-control-connected "$connected_ip" $drv_handle
