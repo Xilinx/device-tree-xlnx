@@ -65,7 +65,7 @@ proc generate {drv_handle} {
             if { [llength $intr_info] && ![string match -nocase $intr_info "-1"] } {
 		    hsi::utils::add_new_dts_param $tx_chan_node "interrupts" $intr_info intlist
             } else {
-		    error "ERROR: ${drv_handle}: mm2s_introut port is not connected"
+		    puts "WARNING: ${drv_handle}: mm2s_introut port is not connected"
             }
             add_dma_coherent_prop $drv_handle "M_AXI_MM2S"
         }
@@ -79,7 +79,7 @@ proc generate {drv_handle} {
             if { [llength $intr_info] && ![string match -nocase $intr_info "-1"] } {
 		    hsi::utils::add_new_dts_param $rx_chan_node "interrupts" $intr_info intlist
             } else {
-		    error "ERROR: ${drv_handle}: s2mm_introut port is not connected"
+		    puts "WARNING: ${drv_handle}: s2mm_introut port is not connected"
             }
             add_dma_coherent_prop $drv_handle "M_AXI_S2MM"
         }
