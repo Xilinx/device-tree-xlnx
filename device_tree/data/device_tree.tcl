@@ -151,6 +151,7 @@ proc generate {lib_handle} {
 proc post_generate {os_handle} {
     update_chosen $os_handle
     update_alias $os_handle
+    update_cpu_node $os_handle
     gen_dev_conf
     foreach drv_handle [get_drivers] {
         gen_peripheral_nodes $drv_handle
@@ -191,6 +192,37 @@ proc update_chosen {os_handle} {
     if {[lsearch [get_drivers] $consoleip] < 0} {return -1}
     hsi::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
     hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" $consoleip aliasref
+}
+
+proc update_cpu_node {os_handle} {
+    set default_dts [get_property CONFIG.master_dts [get_os]]
+    set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
+
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "psu_cortexa53"] } {
+        set current_proc "psu_cortexa53_"
+        set total_cores 4
+    } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
+        set current_proc "ps7_cortexa9_"
+        set total_cores 2
+    } else {
+        set current_proc ""
+    }
+
+    if {[string compare -nocase $current_proc ""] == 0} {
+        return
+    }
+    set cpu_node [add_or_get_dt_node -n "cpus" -d ${default_dts} -p ${system_root_node}]
+    #getting boot arguments
+    set proc_instance 0
+    for {set i 0} {$i < $total_cores} {incr i} {
+        set proc_name [lindex [get_cells -hier -filter {IP_TYPE==PROCESSOR}] $i]
+        if {[string match -nocase $proc_name "$current_proc$i"] } {
+            continue
+        } else {
+            hsi::utils::add_new_dts_param "${cpu_node}" "/delete-node/ cpu@$i" "" boolean
+        }
+    }
 }
 
 proc update_alias {os_handle} {
