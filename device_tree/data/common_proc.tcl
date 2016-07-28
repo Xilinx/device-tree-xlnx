@@ -1583,6 +1583,10 @@ proc ps7_reset_handle {drv_handle reset_pram conf_prop} {
 }
 
 proc gen_peripheral_nodes {drv_handle {node_only ""}} {
+	# Check if the peripheral is in Secure or Non-secure zone
+	if {[check_ip_trustzone_state $drv_handle] == 1} {
+		return
+	}
 	set status_enable_flow 0
 	set ip [get_cells -hier $drv_handle]
 	# TODO: check if the base address is correct
@@ -2311,4 +2315,17 @@ proc get_psu_interrupt_id { ip_name port_name } {
        incr $id
     }
     return $ret
+}
+
+proc check_ip_trustzone_state { drv_handle } {
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "psu_cortexa53"]} {
+        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $drv_handle]
+        set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+        # Don't generate status okay when the peripheral is in Secure Trustzone
+        if {[string match -nocase $state "Secure"]} {
+            return 1
+        }
+    }
+    return 0
 }
