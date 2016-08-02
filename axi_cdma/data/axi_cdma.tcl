@@ -44,6 +44,7 @@ proc generate {drv_handle} {
 	set tx_chan [add_dma_channel $drv_handle $node "axi-cdma" $baseaddr "MM2S" $cdma_count ]
 	incr cdma_count
 	hsi::utils::set_os_parameter_value "cdma_count" $cdma_count
+	generate_clk_nodes $drv_handle
 }
 
 proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
@@ -67,4 +68,42 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 		error "ERROR: ${drv_handle}: cdma_introut port is not connected"
 	}
 	return $dma_channel
+}
+
+proc generate_clk_nodes {drv_handle} {
+    set proc_type [get_sw_proc_prop IP_NAME]
+    switch $proc_type {
+        "ps7_cortexa9" {
+            set_drv_prop_if_empty $drv_handle "clocks" "clkc 15>, <&clkc 15" reference
+            set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+        } "psu_cortexa53" {
+            foreach i [get_sw_cores device_tree] {
+                set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+                if {[file exists $common_tcl_file]} {
+                    source $common_tcl_file
+                    break
+                }
+            }
+            set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "s_axi_lite_aclk"]
+            if {![string equal $clk_freq ""]} {
+                if {[lsearch $bus_clk_list $clk_freq] < 0} {
+                    set bus_clk_list [lappend bus_clk_list $clk_freq]
+                }
+            }
+            set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+            set dts_file [current_dt_tree]
+            set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+            set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+                -d ${dts_file} -p ${bus_node}]
+            set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+            set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs &$clk_refs" reference
+            set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+        } "microblaze" {
+            gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"
+            set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+        }
+        default {
+            error "Unknown arch"
+        }
+    }
 }

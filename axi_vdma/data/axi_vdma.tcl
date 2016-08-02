@@ -84,6 +84,7 @@ proc generate {drv_handle} {
 	}
 	incr vdma_count
 	hsi::utils::set_os_parameter_value "vdma_count" $vdma_count
+	generate_clk_nodes $drv_handle $tx_chan $rx_chan
 }
 
 proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
@@ -101,4 +102,78 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 	add_cross_property_to_dtnode $drv_handle [format "CONFIG.C_%s_GENLOCK_MODE" $mode] $dma_channel "xlnx,genlock-mode" boolean
 
 	return $dma_channel
+}
+
+proc generate_clk_nodes {drv_handle tx_chan rx_chan} {
+    set proc_type [get_sw_proc_prop IP_NAME]
+    set clocknames "s_axi_lite_aclk"
+    switch $proc_type {
+        "ps7_cortexa9" {
+        set clocks "clkc 15"
+            if { $tx_chan ==1 } {
+                append clocknames " " "m_axi_mm2s_aclk"
+                append clocknames " " "m_axi_mm2s_aclk"
+                append clocks "" ">, <&clkc 15"
+                append clocks "" ">, <&clkc 15"
+            }
+            if { $rx_chan ==1 } {
+                append clocknames " " "m_axi_s2mm_aclk"
+                append clocknames " " "m_axi_s2mm_aclk"
+                append clocks "" ">, <&clkc 15"
+                append clocks "" ">, <&clkc 15"
+            }
+            set_drv_prop_if_empty $drv_handle "clocks" $clocks reference
+            set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
+        } "psu_cortexa53" {
+            foreach i [get_sw_cores device_tree] {
+                set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+                if {[file exists $common_tcl_file]} {
+                    source $common_tcl_file
+                    break
+                }
+            }
+            set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "s_axi_lite_aclk"]
+            if {![string equal $clk_freq ""]} {
+                if {[lsearch $bus_clk_list $clk_freq] < 0} {
+                    set bus_clk_list [lappend bus_clk_list $clk_freq]
+                }
+            }
+            set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+            set dts_file [current_dt_tree]
+            set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+            set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+                -d ${dts_file} -p ${bus_node}]
+            # create the node and assuming reg 0 is taken by cpu
+            set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+            set clocks "$clk_refs"
+            if { $tx_chan ==1 } {
+                append clocknames " " "m_axi_mm2s_aclk"
+                append clocknames " " "m_axi_mm2s_aclk"
+                append clocks "" ">, <&$clk_refs"
+                append clocks "" ">, <&$clk_refs"
+            }
+            if { $rx_chan ==1 } {
+                append clocknames " " "m_axi_s2mm_aclk"
+                append clocknames " " "m_axi_s2mm_aclk"
+                append clocks "" ">, <&$clk_refs"
+                append clocks "" ">, <&$clk_refs"
+            }
+            set_drv_prop_if_empty $drv_handle "clocks" $clocks reference
+            set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
+        } "microblaze" {
+            if { $tx_chan ==1 } {
+                append clocknames " " "m_axi_mm2s_aclk"
+                append clocknames " " "m_axi_mm2s_aclk"
+            }
+            if { $rx_chan ==1 } {
+                append clocknames " " "m_axi_s2mm_aclk"
+                append clocknames " " "m_axi_s2mm_aclk"
+            }
+            gen_dev_ccf_binding $drv_handle "$clocknames"
+            set_drv_prop_if_empty $drv_handle "clock-names" "$clocknames" stringlist
+        }
+        default {
+            error "Unknown arch"
+        }
+    }
 }
