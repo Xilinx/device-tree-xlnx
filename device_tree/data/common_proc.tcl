@@ -1333,6 +1333,10 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			generate_gpio_intr_info $connected_intc $drv_handle $pin
 		} else {
 			set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+			if {[string_is_empty $intc] == 1} {
+				dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected\n\r"
+				continue
+			}
 			set ip_name $intc
 			if {[string match -nocase $proctype "psu_cortexa53"] } {
 				set intc [get_property IP_NAME $intc]
@@ -1351,7 +1355,6 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 			}
 			if {[string match -nocase $intr_id "-1"]} {continue}
-			if {[string_is_empty $intc] == 1} {continue}
 			set intr_type [get_intr_type $intc $slave $pin]
 			if {[string match -nocase $intr_type "-1"]} {
 				continue
