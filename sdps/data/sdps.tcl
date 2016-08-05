@@ -13,9 +13,17 @@
 #
 
 proc generate {drv_handle} {
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+            if {[file exists $common_tcl_file]} {
+                source $common_tcl_file
+                break
+            }
+    }
     set ip [get_cells -hier $drv_handle]
     set clk_freq [hsi::utils::get_ip_param_value $ip C_SDIO_CLK_FREQ_HZ]
     set_property CONFIG.clock-frequency "$clk_freq" $drv_handle
+    set_drv_conf_prop $drv_handle C_MIO_BANK bank hexint
 }
 
 
