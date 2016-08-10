@@ -266,7 +266,6 @@ proc gen_phy_node args {
     set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
     hsi::utils::add_new_dts_param "${phy_node}" "reg" $phya int
     hsi::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
-    hsi::utils::add_new_dts_param "${phy_node}" "compatible" "Xilinx PCS/PMA PHY" string
 
     return $phy_node
 }
