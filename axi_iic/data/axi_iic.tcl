@@ -13,4 +13,19 @@
 #
 
 proc generate {drv_handle} {
+    foreach i [get_sw_cores device_tree] {
+        set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+        if {[file exists $common_tcl_file]} {
+            source $common_tcl_file
+            break
+        }
+    }
+
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "microblaze"] } {
+        gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+    } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
+        set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
+        set_drv_prop_if_empty $drv_handle "clocks" "clkc 15" reference
+    }
 }
