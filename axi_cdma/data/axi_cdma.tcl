@@ -31,6 +31,7 @@ proc generate {drv_handle} {
 	set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
 	set_drv_conf_prop $drv_handle C_NUM_FSTORES xlnx,num-fstores
 	set_drv_conf_prop $drv_handle C_USE_FSYNC xlnx,flush-fsync
+	set_drv_conf_prop $drv_handle C_ADDR_WIDTH xlnx,addrwidth
 
 	set node [gen_peripheral_nodes $drv_handle]
 

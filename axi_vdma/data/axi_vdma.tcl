@@ -55,6 +55,7 @@ proc generate {drv_handle} {
 	set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
 	set_drv_conf_prop $drv_handle C_NUM_FSTORES xlnx,num-fstores
 	set_drv_conf_prop $drv_handle C_USE_FSYNC xlnx,flush-fsync
+	set_drv_conf_prop $drv_handle c_addr_width xlnx,addrwidth
 
 	set baseaddr [get_baseaddr $dma_ip no_prefix]
 	set tx_chan [hsi::utils::get_ip_param_value $dma_ip C_INCLUDE_MM2S]
