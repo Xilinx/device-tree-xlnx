@@ -23,7 +23,7 @@ proc generate {drv_handle} {
     set ip [get_cells -hier $drv_handle]
     set clk_freq [hsi::utils::get_ip_param_value $ip C_SDIO_CLK_FREQ_HZ]
     set_property CONFIG.clock-frequency "$clk_freq" $drv_handle
-    set_drv_conf_prop $drv_handle C_MIO_BANK bank hexint
+    set_drv_conf_prop $drv_handle C_MIO_BANK xlnx,mio_bank hexint
 }
 
 
