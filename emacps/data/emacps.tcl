@@ -75,6 +75,8 @@ proc generate {drv_handle} {
     set phymode [hsi::utils::get_ip_param_value $slave "C_ETH_MODE"]
     if { $phymode == 0 } {
         set_property CONFIG.phy-mode "gmii" $drv_handle
+    } elseif { $phymode == 2 } {
+        set_property CONFIG.phy-mode "sgmii" $drv_handle
     } else {
         set_property CONFIG.phy-mode "rgmii-id" $drv_handle
     }
