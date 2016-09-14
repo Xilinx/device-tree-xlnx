@@ -2321,10 +2321,13 @@ proc check_ip_trustzone_state { drv_handle } {
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"]} {
         set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $drv_handle]
-        set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
-        # Don't generate status okay when the peripheral is in Secure Trustzone
-        if {[string match -nocase $state "Secure"]} {
-            return 1
+        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+        if {[lsearch -nocase $avail_param "TRUSTZONE"] >= 0} {
+            set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+            # Don't generate status okay when the peripheral is in Secure Trustzone
+            if {[string match -nocase $state "Secure"]} {
+                return 1
+            }
         }
     }
     return 0
