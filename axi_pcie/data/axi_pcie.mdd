@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver axi_pcie
 
-  OPTION supported_peripherals = (axi_pcie);
+  OPTION supported_peripherals = (axi_pcie axi_pcie3);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_pcie;
