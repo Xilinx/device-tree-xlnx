@@ -1324,6 +1324,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
 		if {[llength $connected_intc] == 0 } {
+			dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected to any interrupt controller\n\r"
 			continue
 		}
 		set connected_intc_name [get_property IP_NAME $connected_intc]
@@ -2106,8 +2107,6 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
 			# this the case where interrupt port is connected to XLConcat IP.
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
-		} else {
-			lappend intr_cntrl $sink_periph
 		}
 		if {[llength $intr_cntrl] > 1} {
 				foreach intc $intr_cntrl {
