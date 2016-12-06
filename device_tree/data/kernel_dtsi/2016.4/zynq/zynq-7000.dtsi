@@ -99,10 +99,10 @@
 		gpio0: gpio@e000a000 {
 			compatible = "xlnx,zynq-gpio-1.0";
 			#gpio-cells = <2>;
-			#interrupt-cells = <2>;
 			clocks = <&clkc 42>;
 			gpio-controller;
 			interrupt-controller;
+			#interrupt-cells = <2>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 20 4>;
 			reg = <0xe000a000 0x1000>;
@@ -330,10 +330,10 @@
 			interrupt-names = "abort", "dma0", "dma1", "dma2", "dma3",
 				"dma4", "dma5", "dma6", "dma7";
 			interrupts = <0 13 4>,
-					<0 14 4>, <0 15 4>,
-					<0 16 4>, <0 17 4>,
-					<0 40 4>, <0 41 4>,
-					<0 42 4>, <0 43 4>;
+			             <0 14 4>, <0 15 4>,
+			             <0 16 4>, <0 17 4>,
+			             <0 40 4>, <0 41 4>,
+			             <0 42 4>, <0 43 4>;
 			#dma-cells = <1>;
 			#dma-channels = <8>;
 			#dma-requests = <4>;
@@ -342,12 +342,12 @@
 		};
 
 		devcfg: devcfg@f8007000 {
-			clock-names = "ref_clk", "fclk0", "fclk1", "fclk2", "fclk3";
-			clocks = <&clkc 12>, <&clkc 15>, <&clkc 16>, <&clkc 17>, <&clkc 18>;
 			compatible = "xlnx,zynq-devcfg-1.0";
 			interrupt-parent = <&intc>;
 			interrupts = <0 8 4>;
 			reg = <0xf8007000 0x100>;
+			clocks = <&clkc 12>, <&clkc 15>, <&clkc 16>, <&clkc 17>, <&clkc 18>;
+			clock-names = "ref_clk", "fclk0", "fclk1", "fclk2", "fclk3";
 			syscon = <&slcr>;
 		};
 
