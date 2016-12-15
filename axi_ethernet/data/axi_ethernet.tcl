@@ -103,8 +103,18 @@ proc generate {drv_handle} {
 	set_property xlnx,rxmem "$rxmem" $drv_handle
     }
 
+    set is_nobuf 0
+    if {$ip_name == "axi_ethernet"} {
+        set avail_param [list_property [get_cells -hier $drv_handle]]
+        if {[lsearch -nocase $avail_param "CONFIG.speed_1_2p5"] >= 0} {
+            if {[get_property CONFIG.speed_1_2p5 [get_cells -hier $drv_handle]] == "2p5G"} {
+                set is_nobuf 1
+                set_property compatible "xlnx,axi-2_5-gig-ethernet-1.0" $drv_handle
+            }
+        }
+    }
 
-    if { $hasbuf == "false"} {
+    if { $hasbuf == "false" && $is_nobuf == 0} {
 	    set ip_prop CONFIG.processor_mode
 	    add_cross_property $eth_ip $ip_prop $drv_handle "xlnx,eth-hasnobuf" boolean
     }
