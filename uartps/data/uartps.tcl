@@ -38,7 +38,15 @@ proc generate {drv_handle} {
         set port_number $serial_count
     } else {
         #adding os console property if this is console ip
-        hsi::utils::set_os_parameter_value "console" "ttyPS0,115200"
+        set avail_param [list_property [get_cells -hier $drv_handle]]
+        # This check is needed because BAUDRATE parameter for psuart is available from
+        # 2017.1 onwards
+        if {[lsearch -nocase $avail_param "CONFIG.C_BAUDRATE"] >= 0} {
+            set baud [get_property CONFIG.C_BAUDRATE [get_cells -hier $drv_handle]]
+        } else {
+            set baud "115200"
+        }
+        hsi::utils::set_os_parameter_value "console" "ttyPS0,$baud"
     }
     set_property CONFIG.port-number $port_number $drv_handle
 }
