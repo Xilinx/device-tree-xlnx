@@ -45,8 +45,10 @@ proc generate {drv_handle} {
         }
     }
 
-    if { $axiethernetfound } {
-	set compatstring "xlnx,eth-dma"
+    set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
+
+    if { $axiethernetfound || $is_xxv == 1} {
+        set compatstring "xlnx,eth-dma"
         set_property compatible "$compatstring" $drv_handle
     }
     set tx_chan 0
@@ -214,5 +216,33 @@ proc generate_clk_nodes {drv_handle axiethernetfound tx_chan rx_chan} {
         default {
             error "Unknown arch"
         }
+    }
+}
+
+proc get_connected_ip {drv_handle dma_pin} {
+    # Check whether dma is connected to 10G/25G MAC
+    # currently we are handling only data fifo
+    set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $drv_handle] $dma_pin]
+    set valid_eth_list "xxv_ethernet axi_ethernet axi_10g_ethernet"
+    if {[string_is_empty ${intf}]} {
+        return 0
+    }
+    set connected_ip [::hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] $intf]
+
+    if {[string_is_empty ${connected_ip}]} {
+        return 0
+    }
+    set iptype [get_property IP_NAME [get_cells -hier $connected_ip]]
+    if {[string match -nocase $iptype "axis_data_fifo"] } {
+        # here dma connected to data fifo
+        set dma_pin "M_AXIS"
+        get_connected_ip $connected_ip $dma_pin
+    } elseif {[lsearch -nocase $valid_eth_list $iptype] >= 0 } {
+        # dma connected to 10G/25G MAC, 1G or 10G
+        return 1
+    } else {
+        # dma connected via interconnects
+        set dma_pin "M_AXIS"
+        get_connected_ip $connected_ip $dma_pin
     }
 }
