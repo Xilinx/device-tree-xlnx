@@ -323,13 +323,14 @@ proc update_chosen {os_handle} {
         }
     }
     if {[llength $bootargs]} {
-        hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" $bootargs string
+	hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "${bootargs}\ earlyprintk" string
     }
     set consoleip [get_property CONFIG.console_device $os_handle]
     set consoleip [ps_node_mapping $consoleip label]
-    if {[lsearch [get_drivers] $consoleip] < 0} {return -1}
     hsi::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
-    hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" $consoleip aliasref
+    set index [string first "," $console]
+    set baud [string range $console [expr $index + 1] [string length $console]]
+    hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" "serial0:${baud}" string
 }
 
 proc update_cpu_node {os_handle} {
