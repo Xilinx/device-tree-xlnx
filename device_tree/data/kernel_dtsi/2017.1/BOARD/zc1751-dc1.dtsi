@@ -1,0 +1,44 @@
+&gem3 {
+	phy-handle = <&phy0>;
+	phy0: phy@0 {
+		reg = <0>;
+	};
+};
+
+&i2c1 {
+	eeprom@54 {
+		compatible = "at,24c64"; /* 24AA64 */
+		reg = <0x55>;
+	};
+};
+
+/* eMMC */
+&sdhci0 {
+	bus-width = <8>;
+};
+
+/* SD1 with level shifter */
+&sdhci1 {
+	no-1-8-v;       /* for 1.0 silicon */
+};
+
+&sata {
+	ceva,p0-cominit-params = /bits/ 8 <0x1B 0x4D 0x18 0x28>;
+	ceva,p0-comwake-params = /bits/ 8 <0x06 0x19 0x08 0x0E>;
+	ceva,p0-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
+	ceva,p0-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
+
+	ceva,p1-cominit-params = /bits/ 8 <0x1B 0x4D 0x18 0x28>;
+	ceva,p1-comwake-params = /bits/ 8 <0x06 0x19 0x08 0x0E>;
+	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
+	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
+
+};
+
+&amba {
+	u-boot,dm-pre-reloc;
+};
+
+&uart0 {
+	u-boot,dm-pre-reloc;
+};

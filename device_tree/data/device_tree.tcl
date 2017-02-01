@@ -136,6 +136,139 @@ proc device_tree_drc {os_handle} {
     hsi::utils::add_new_child_node $os_handle "global_params"
 }
 
+proc extract_dts_name {override value} {
+    set idx [lsearch -exact $override $value]
+    set var [lreplace $override $idx $idx]
+    return $var
+}
+
+proc gen_sata_laneinfo {} {
+
+	foreach ip [get_cells] {
+		set slane 0
+		set freq {}
+		set ip_type [get_property IP_TYPE [get_cells $ip]]
+		if {$ip_type eq ""} {
+			set ps $ip
+		}
+	}
+
+	set param0 "/bits/ 8 <0x18 0x40 0x18 0x28>"
+	set param1 "/bits/ 8 <0x06 0x14 0x08 0x0E>"
+	set param2 "/bits/ 8 <0x13 0x08 0x4A 0x06>"
+	set param3 "/bits/ 16 <0x96A4 0x3FFC>"
+
+	set param4 "/bits/ 8 <0x1B 0x4D 0x18 0x28>"
+	set param5 "/bits/ 8 <0x06 0x19 0x08 0x0E>"
+	set param6 " /bits/ 8 <0x13 0x08 0x4A 0x06>"
+	set param7 "/bits/ 16 <0x96A4 0x3FFC>"
+
+	set param_list "ceva,p%d-cominit-params ceva,p%d-comwake-params ceva,p%d-burst-params ceva,p%d-retry-params"
+	while {$slane < 2} {
+		if {[get_property CONFIG.PSU__SATA__LANE$slane\__ENABLE [get_cells $ps]] == 1} {
+			set gt_lane [get_property CONFIG.PSU__SATA__LANE$slane\__IO [get_cells $ps]]
+			regexp [0-9] $gt_lane gt_lane
+			lappend freq [get_property CONFIG.PSU__SATA__REF_CLK_FREQ [get_cells $ps]]
+		} else {
+			lappend freq 0
+			}
+		incr slane
+	}
+
+	foreach {i j} $freq {
+		set i [expr {$i ? $i : $j}]
+		set j [expr {$j ? $j : $i}]
+	}
+
+	lset freq 0 $i
+	lset freq 1 $j
+	set dts_file [current_dt_tree]
+	set sata_node [add_or_get_dt_node -n sata -l sata d $dts_file -p /]
+
+	set slane 0
+	set count 0
+	while {$slane < 2} {
+		set f [lindex $freq $slane]
+		puts "f is $f"
+		if {$f != 0} {
+			while {$count < 4} {
+				set val_name [format [lindex $param_list $count] $slane]
+				switch $count {
+					"0" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param0 string
+					}
+					"1" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param1 string
+					}
+					"2" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param2 string
+					}
+					"3" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param3 string
+					}
+					"4" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param4 string
+					}
+					"5" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param5 string
+					}
+					"6" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param6 string
+					}
+					"7" {
+					hsi::utils::add_new_dts_param $sata_node $val_name $param7 string
+					}
+				}
+			incr count
+			}
+		}
+	incr slane
+	}
+}
+
+proc gen_board_info {} {
+    # periph_type_overrides = {BOARD KC705 full/lite} or {BOARD ZYNQ} or {BOARD ZC1751 ES2/ES1}
+    set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+    if {[string match $overrides ""]} {
+		return
+    }
+    foreach i [get_sw_cores device_tree] {
+    foreach override $overrides {
+	if {[lindex $override 0] == "BOARD"} {
+		set first_element [lindex $override 0]
+		set dts_name [string tolower [lindex $override 1]]
+		if {[string match -nocase $dts_name "template"]} {
+			return
+		}
+		if {[llength $dts_name] == 0} {
+			return
+		}
+		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/BOARD"]
+		if {[file exists $kernel_dtsi]} {
+			foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*/*]] {
+				set dtsi_name "$dts_name.dtsi"
+                                # NOTE: ./ works only if we did not change our directory
+				if {[regexp $dtsi_name $file match]} {
+					file copy -force $file ./
+					update_system_dts_include [file tail $file]
+				}
+                        }
+                    set default_dts [get_property CONFIG.master_dts [get_os]]
+		    set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+		    set valid_axi_list "kc705-full kc705-lite ac701-full ac701-lite"
+		    set valid_no_axi_list "kcu105 zc702 zc706 zc1751-dc1 zc1751-dc2 zedboard"
+		    if {[lsearch -nocase $valid_axi_list $dts_name] >= 0 || [string match -nocase $dts_name "kcu705"]} {
+			hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 1" reference
+		    }
+		} else {
+		     puts "File not found\n\r"
+		}
+        }
+    }
+  }
+}
+
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
@@ -145,6 +278,11 @@ proc generate {lib_handle} {
         gen_compatible_property $drv_handle
         gen_drv_prop_from_ip $drv_handle
         gen_interrupt_property $drv_handle
+    }
+    gen_board_info
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "psu_cortexa53"] } {
+	gen_sata_laneinfo
     }
 }
 

@@ -1,0 +1,57 @@
+&gem0 {
+        phy-handle = <&phy0>;
+        ps7_ethernet_0_mdio: mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                phy0: phy@0 {
+                        device_type = "ethernet-phy";
+                        reg = <0>;
+                } ;
+        } ;
+};
+
+&usb0 {
+        dr_mode = "otg";
+        usb-phy = <&usb_phy0>;
+} ;
+
+/{
+        usb_phy0: usb_phy@0 {
+                compatible = "ulpi-phy";
+                #phy-cells = <0>;
+                reg = <0xe0002000 0x1000>;
+                view-port = <0x0170>;
+                drv-vbus;
+        };
+};
+
+&qspi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        flash0: flash@0 {
+                compatible = "micron,m25p80";
+                reg = <0x0>;
+                #address-cells = <1>;
+                #size-cells = <1>;
+                spi-max-frequency = <50000000>;
+                partition@0x00000000 {
+                        label = "boot";
+                        reg = <0x00000000 0x00500000>;
+                };
+                partition@0x00500000 {
+                        label = "bootenv";
+                        reg = <0x00500000 0x00020000>;
+                };
+                partition@0x00520000 {
+                        label = "kernel";
+                        reg = <0x00520000 0x00a80000>;
+                };
+                partition@0x00fa0000 {
+                        label = "spare";
+                        reg = <0x00fa0000 0x00000000>;
+                };
+        };
+};
+&flash0 {
+        compatible = "spansion,s25fl256s1";
+};
