@@ -49,4 +49,8 @@ proc generate {drv_handle} {
         hsi::utils::set_os_parameter_value "console" "ttyPS0,$baud"
     }
     set_property CONFIG.port-number $port_number $drv_handle
+    set uboot_prop [get_property IP_NAME [get_cells -hier $drv_handle]]
+    if {[string match -nocase $uboot_prop "psu_uart"]} {
+        set_drv_prop $drv_handle "u-boot,dm-pre-reloc" "" boolean
+    }
 }
