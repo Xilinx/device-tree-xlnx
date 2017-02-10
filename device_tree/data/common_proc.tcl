@@ -1664,6 +1664,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	# generate mb ccf node
 	generate_mb_ccf_node $drv_handle
 
+	generate_cci_node $drv_handle $rt_node
 	set dts_file_list ""
 	if {[catch {set rt [report_property -return_string -regexp $drv_handle "CONFIG.*\\.dts(i|)"]} msg]} {
 		set rt ""
@@ -2340,4 +2341,14 @@ proc check_ip_trustzone_state { drv_handle } {
         }
     }
     return 0
+}
+
+proc generate_cci_node { drv_handle rt_node} {
+	set avail_param [list_property [get_cells -hier $drv_handle]]
+	if {[lsearch -nocase $avail_param "CONFIG.IS_CACHE_COHERENT"] >= 0} {
+		set cci_enable [get_property CONFIG.IS_CACHE_COHERENT [get_cells -hier $drv_handle]]
+		if {[string match -nocase $cci_enable "1"]} {
+			hsi::utils::add_new_dts_param $rt_node "dma-coherent" "" boolean
+		}
+	}
 }
