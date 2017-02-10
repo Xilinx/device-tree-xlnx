@@ -49,6 +49,7 @@ proc generate_dp_param {drv_handle} {
 					set_drv_prop $drv_handle phy-names "$lan_name" stringlist
 					set_drv_prop $drv_handle phys "$lan_phy_type" reference
 				}
+				set_drv_prop $drv_handle xlnx,max-lanes 1 int
 			} elseif {[string match -nocase $mode "Dual"]} {
 				set tab "\n\t\t"
 				if {[string match -nocase $lan_sel "Lower"]} {
@@ -64,6 +65,7 @@ proc generate_dp_param {drv_handle} {
 					set phy_ids "$lan0_phy_type>,${tab}<&$lan1_phy_type"
 					set_drv_prop $drv_handle phys "$phy_ids" reference
 				}
+				set_drv_prop $drv_handle xlnx,max-lanes 2 int
 			}
 		}
 	}
