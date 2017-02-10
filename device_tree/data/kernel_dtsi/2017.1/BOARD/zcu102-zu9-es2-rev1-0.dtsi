@@ -1,5 +1,4 @@
 &gem3 {
-	status = "okay";
 	phy-mode = "rgmii-id";
 	phy-handle = <&phy0>;
 	phy0: phy@c {

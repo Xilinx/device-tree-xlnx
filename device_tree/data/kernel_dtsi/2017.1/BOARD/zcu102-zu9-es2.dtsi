@@ -1,4 +1,5 @@
 &gem3 {
+	phy-mode = "rgmii-id";
 	phy-handle = <&phy0>;
 	phy0: phy@c {
 		reg = <0xc>;
