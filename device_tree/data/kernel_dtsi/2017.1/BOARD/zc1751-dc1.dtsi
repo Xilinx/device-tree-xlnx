@@ -34,11 +34,3 @@
 	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
 
 };
-
-&amba {
-	u-boot,dm-pre-reloc;
-};
-
-&uart0 {
-	u-boot,dm-pre-reloc;
-};

@@ -76,15 +76,3 @@
 		};
 	};
 };
-
-&amba {
-	u-boot,dm-pre-reloc;
-};
-
-&uart0 {
-	u-boot,dm-pre-reloc;
-};
-
-&uart1 {
-	u-boot,dm-pre-reloc;
-};

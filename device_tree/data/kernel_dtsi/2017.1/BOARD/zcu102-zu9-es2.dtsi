@@ -1,17 +1,3 @@
-
-&amba {
-	u-boot,dm-pre-reloc;
-};
-
-
-&uart0 {
-	u-boot,dm-pre-reloc;
-};
-
-&uart1 {
-	u-boot,dm-pre-reloc;
-};
-
 &gem3 {
 	phy-handle = <&phy0>;
 	phy0: phy@c {
