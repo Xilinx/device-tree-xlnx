@@ -1715,6 +1715,9 @@ proc detect_bus_name {ip_drv} {
 			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 			return "amba_pl"
 		}
+		if {[string match -nocase $ip_drv "psu_acpu_gic"]} {
+			return "amba_apu"
+		}
 		return "amba"
 	}
 
@@ -1726,7 +1729,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 	dtg_debug "bus_name: $bus_name"
 	dtg_debug "bus_label: $bus_name"
 
-	set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
+	set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -u 0 -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 	if {![string match "&*" $bus_node]} {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
