@@ -2121,6 +2121,8 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
 			# this the case where interrupt port is connected to XLConcat IP.
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
+		} elseif {[string match -nocase [common::get_property IP_NAME $sink_periph] "xlslice"]} {
+			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Dout"]
 		}
 		if {[llength $intr_cntrl] > 1} {
 				foreach intc $intr_cntrl {
