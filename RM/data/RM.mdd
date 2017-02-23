@@ -1,0 +1,27 @@
+#
+# (C) Copyright 2017 Xilinx, Inc.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+
+OPTION psf_version = 3.0;
+
+BEGIN driver RM
+  OPTION supported_peripherals = (RM);
+  OPTION supported_os_types = (DTS);
+  OPTION driver_state = ACTIVE;
+  OPTION NAME = RM;
+  PARAMETER name = dev_type, default = fpga_region, type = string;
+  DTGPARAM name = compatible, default = "fpga-region", type = stringlist;
+  DTGPARAM name = "#address-cells", default = 1, type = int;
+  DTGPARAM name = "#size-cells", default = 1, type = int;
+  DTGPARAM name = ranges, type = boolean;
+END driver
