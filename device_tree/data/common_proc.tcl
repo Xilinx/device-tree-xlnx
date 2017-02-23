@@ -2298,6 +2298,12 @@ proc get_psu_interrupt_id { ip_name port_name } {
     set i $cascade_id
     set found 0
     foreach intc_src_port $intc_src_ports {
+	# Check whether externel port is interrupting not peripheral
+        # like externel[7:0] port to gic
+        set pin_dir [common::get_property DIRECTION $intc_src_port]
+        if { [string match -nocase $pin_dir "I"] } {
+                continue
+        }
         if { [llength $intc_src_port] == 0 } {
             incr i
             continue
