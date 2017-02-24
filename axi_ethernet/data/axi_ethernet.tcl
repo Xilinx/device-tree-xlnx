@@ -290,11 +290,33 @@ proc is_ethsupported_target {connected_ip} {
 }
 
 proc get_targetip {ip} {
+   if {[string_is_empty $ip] != 0} {
+       return
+   }
    set p2p_busifs_i [get_intf_pins -of_objects $ip -filter "TYPE==INITIATOR || TYPE==MASTER"]
+   set target_periph ""
    foreach p2p_busif $p2p_busifs_i {
       set busif_name [string toupper [get_property NAME  $p2p_busif]]
       set conn_busif_handle [::hsi::utils::get_connected_intf $ip $busif_name]
+      if {[string_is_empty $conn_busif_handle] != 0} {
+          continue
+      }
       set target_periph [get_cells -of_objects $conn_busif_handle]
+      set cell_name [get_cells -hier $target_periph]
+      set target_name [get_property IP_NAME [get_cells $target_periph]]
+      if {$target_name == "axis_data_fifo"} {
+          #set target_periph [get_cells -of_objects $conn_busif_handle]
+          set intf [get_intf_pins -of_objects $cell_name "M_AXIS"]
+          set intf_net [get_intf_nets -of_objects $intf]
+          set intf_pins [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET"]
+          foreach intf $intf_pins {
+              set target_intf [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" $intf]
+              set connected_ip [get_cells -of_objects $target_intf]
+              if {![string_is_empty $connected_ip] && [is_ethsupported_target $connected_ip] == "true"} {
+                  return $connected_ip
+              }
+          }
+      }
    }
    return $target_periph
 }
@@ -327,16 +349,18 @@ proc get_connectedip {intf} {
              # We need to traverse through stream data fifo's and axi interconnects
              # Inorder to find the target IP(AXI DMA or AXI FIFO)
              while {$i < $retries} {
+                set target_ip "false"
                 set target_periph [get_targetip $connected_ip]
-                set target_ip [is_ethsupported_target $target_periph]
+                if {[string_is_empty $target_periph] == 0} {
+                    set target_ip [is_ethsupported_target $target_periph]
+                }
                 if { $target_ip == "true"} {
                   return $target_periph
                 }
                 set connected_ip $target_periph
                 incr i
              }
-             set error "Couldn't find a valid target_ip Please cross check hw design"
-             return $error
+             error "Couldn't find a valid target_ip Please cross check hw design"
          }
       }
    }
