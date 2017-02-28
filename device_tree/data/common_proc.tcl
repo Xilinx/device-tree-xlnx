@@ -1138,10 +1138,16 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
 			# Keep the below logic, until we have clock frame work for ZynqMP
+			if {[string match -nocase $iptype "can"]} {
+				set clks "can_clk s_axi_aclk"
+			} else {
+				set clks "s_axi_aclk"
+			}
+			foreach pin $clks {
 			if {[string match -nocase $proctype "psu_cortexa53"] } {
 				set dts_file [current_dt_tree]
 				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "s_axi_aclk"]
+				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] $pin]
 				if {![string equal $clk_freq ""]} {
 					if {[lsearch $bus_clk_list $clk_freq] < 0} {
 						set bus_clk_list [lappend bus_clk_list $clk_freq]
@@ -1155,7 +1161,9 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
 					if {[string match -nocase $iptype "can"]} {
-						set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs &$clk_refs" reference
+						set clocks [lindex $clk_refs 0]
+						append clocks ">, <&[lindex $clk_refs 1]"
+						set_drv_prop $drv_handle "clocks" "$clocks" reference
 					} else {
 						set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
 					}
@@ -1163,6 +1171,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 			} else {
 				set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
 				set_drv_prop_if_empty $drv_handle "clocks" "clkc 0" reference
+			}
 			}
 		}
 	}

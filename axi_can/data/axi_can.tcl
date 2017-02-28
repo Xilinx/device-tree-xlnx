@@ -41,11 +41,11 @@ proc generate {drv_handle} {
             set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
         } "psu_cortexa53" {
             set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
-        } "microblaze" {}
+        } "microblaze" {
+            gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+	}
         default {
             error "Unknown arch"
         }
     }
-
-    gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 }
