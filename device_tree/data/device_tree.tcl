@@ -316,21 +316,22 @@ proc update_chosen {os_handle} {
 
     #getting boot arguments
     set bootargs [get_property CONFIG.bootargs $os_handle]
-    if {[llength $bootargs] == 0} {
-        set console [hsi::utils::get_os_parameter_value "console"]
-        if {[llength $console]} {
-            set bootargs "console=$console"
-        }
-    }
+    set console [hsi::utils::get_os_parameter_value "console"]
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[llength $bootargs]} {
-	hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "${bootargs}\ earlyprintk" string
+        append bootargs " earlycon"
+    } else {
+	set bootargs "earlycon"
     }
+    if {[string match -nocase $proctype "psu_cortexa53"] } {
+           append bootargs " clk_ignore_unused"
+    }
+    hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
     set consoleip [get_property CONFIG.console_device $os_handle]
     set consoleip [ps_node_mapping $consoleip label]
-    hsi::utils::add_new_dts_param "${chosen_node}" "linux,stdout-path" $consoleip aliasref
     set index [string first "," $console]
     set baud [string range $console [expr $index + 1] [string length $console]]
-    hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" "serial0:${baud}" string
+    hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" "serial0:${baud}n8" string
 }
 
 proc update_cpu_node {os_handle} {
