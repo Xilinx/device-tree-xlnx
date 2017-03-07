@@ -304,14 +304,33 @@ proc get_targetip {ip} {
       set target_periph [get_cells -of_objects $conn_busif_handle]
       set cell_name [get_cells -hier $target_periph]
       set target_name [get_property IP_NAME [get_cells $target_periph]]
-      if {$target_name == "axis_data_fifo"} {
+      if {$target_name == "axis_data_fifo" || $target_name == "Ethernet_filter"} {
           #set target_periph [get_cells -of_objects $conn_busif_handle]
-          set intf [get_intf_pins -of_objects $cell_name "M_AXIS"]
+          set master_slaves [get_intf_pins -of [get_cells -hier $cell_name]]
+          if {[llength $master_slaves] == 0} {
+              return
+          }
+          set master_intf ""
+          foreach periph_intf $master_slaves {
+              set prop [get_property TYPE $periph_intf]
+              if {$prop == "INITIATOR"} {
+                  set master_intf $periph_intf
+              }
+          }
+          if {[llength $master_intf] == 0} {
+              return
+          }
+          set intf [get_intf_pins -of_objects $cell_name $master_intf]
           set intf_net [get_intf_nets -of_objects $intf]
           set intf_pins [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET"]
           foreach intf $intf_pins {
               set target_intf [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" $intf]
               set connected_ip [get_cells -of_objects $target_intf]
+              set cell [get_cells -hier $connected_ip]
+              set target_name [get_property IP_NAME [get_cells -hier $cell]]
+              if {$target_name == "axis_data_fifo"} {
+                  return [get_targetip $connected_ip]
+              }
               if {![string_is_empty $connected_ip] && [is_ethsupported_target $connected_ip] == "true"} {
                   return $connected_ip
               }
