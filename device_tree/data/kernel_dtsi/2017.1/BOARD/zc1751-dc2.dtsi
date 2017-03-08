@@ -33,6 +33,7 @@
 };
 
 &gem2 {
+	phy-handle = <&phy0>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem2_default>;
 	phy0: phy@5 {
@@ -40,6 +41,7 @@
 		ti,rx-internal-delay = <0x8>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <0x1>;
+		ti,rxctrl-strap-worka;
 	};
 };
 

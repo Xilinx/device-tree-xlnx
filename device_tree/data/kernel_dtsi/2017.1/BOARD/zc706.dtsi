@@ -1,7 +1,7 @@
 / {
 	compatible = "xlnx,zynq-zc706", "xlnx,zynq-7000";
 
-	usb_phy0: phy0 {
+	usb_phy0: phy0@e0002000 {
 		compatible = "ulpi-phy";
 		#phy-cells = <0>;
 		reg = <0xe0002000 0x1000>;
@@ -21,6 +21,7 @@
 
 	ethernet_phy: ethernet-phy@7 {
 		reg = <7>;
+		device_type = "ethernet-phy";
 	};
 };
 
@@ -276,11 +277,13 @@
 };
 
 &sdhci0 {
+	u-boot,dm-pre-reloc;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci0_default>;
 };
 
 &uart1 {
+	u-boot,dm-pre-reloc;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1_default>;
 };
