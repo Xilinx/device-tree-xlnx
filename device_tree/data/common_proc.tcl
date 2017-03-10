@@ -1131,7 +1131,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	global bus_clk_list
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
-	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can axi_iic xadc_wiz"
+	set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_ethernet axi_ethernet_buffer can axi_iic xadc_wiz vcu"
 	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
 	if {[lsearch  -nocase $valid_proc_list $proctype] >= 0} {
 		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
@@ -1140,6 +1140,8 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 			# Keep the below logic, until we have clock frame work for ZynqMP
 			if {[string match -nocase $iptype "can"]} {
 				set clks "can_clk s_axi_aclk"
+			} elseif {[string match -nocase $iptype "vcu"]} {
+				set clks "pll_ref_clk s_axi_lite_aclk"
 			} else {
 				set clks "s_axi_aclk"
 			}
@@ -1160,7 +1162,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
-					if {[string match -nocase $iptype "can"]} {
+					if {[string match -nocase $iptype "can"] || [string match -nocase $iptype "vcu"]} {
 						set clocks [lindex $clk_refs 0]
 						append clocks ">, <&[lindex $clk_refs 1]"
 						set_drv_prop $drv_handle "clocks" "$clocks" reference
