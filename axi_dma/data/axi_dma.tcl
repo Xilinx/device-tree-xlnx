@@ -90,6 +90,8 @@ proc generate {drv_handle} {
     } else {
         set_drv_property $drv_handle axistream-connected "$connected_ip" reference
         set_drv_property $drv_handle axistream-control-connected "$connected_ip" reference
+	set ip_prop CONFIG.c_include_mm2s_dre
+	add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
     incr dma_count
     hsi::utils::set_os_parameter_value "dma_count" $dma_count
