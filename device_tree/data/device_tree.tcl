@@ -189,7 +189,6 @@ proc gen_sata_laneinfo {} {
 	set count 0
 	while {$slane < 2} {
 		set f [lindex $freq $slane]
-		puts "f is $f"
 		if {$f != 0} {
 			while {$count < 4} {
 				set val_name [format [lindex $param_list $count] $slane]
