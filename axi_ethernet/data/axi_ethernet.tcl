@@ -39,7 +39,7 @@ proc generate {drv_handle} {
     set hasbuf [get_property CONFIG.processor_mode $eth_ip]
     set ip_name [get_property IP_NAME $eth_ip]
 
-    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac"} {
+    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet"} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
         if {[string_is_empty ${intf}] != 1} {
@@ -65,6 +65,15 @@ proc generate {drv_handle} {
         if {[string_is_empty ${intf}] != 1} {
             break
         }
+    }
+
+    if {$ip_name == "xxv_ethernet"} {
+    	foreach n "AXI_STR_RXD axis_rx_0" {
+           set intf [get_intf_pins -of_objects $eth_ip ${n}]
+           if {[string_is_empty ${intf}] != 1} {
+               break
+          }
+       }
     }
 
     if { [llength $intf] } {
@@ -155,6 +164,12 @@ proc generate {drv_handle} {
        set phytype [string tolower [get_property CONFIG.base_kr $eth_ip]]
        set_property phy-mode "$phytype" $drv_handle
        set compatstring "xlnx,ten-gig-eth-mac"
+       set_property compatible "$compatstring" $drv_handle
+    }
+    if {$ip_name == "xxv_ethernet"} {
+       set phytype [string tolower [get_property CONFIG.BASE_R_KR $eth_ip]]
+       set_property phy-mode "$phytype" $drv_handle
+       set compatstring "xlnx,xxv-ethernet-1.0"
        set_property compatible "$compatstring" $drv_handle
     }
 
