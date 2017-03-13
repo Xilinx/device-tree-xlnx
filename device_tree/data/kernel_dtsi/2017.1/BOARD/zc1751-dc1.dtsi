@@ -1,3 +1,8 @@
+/ {
+	model = "ZynqMP zc1751-xm015-dc1 RevA";
+	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
+};
+
 /* fpd_dma clk 667MHz, lpd_dma 500MHz */
 &fpd_dma_chan1 {
 	xlnx,include-sg; /* for testing purpose */
@@ -24,6 +29,7 @@
 };
 
 &gem3 {
+	phy-handle = <&phy0>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem3_default>;
 	phy0: phy@0 {
@@ -49,14 +55,32 @@
 	};
 };
 
-/* eMMC */
-&sdhci0 {
-	bus-width = <8>;
-};
-
-/* SD1 with level shifter */
-&sdhci1 {
-	no-1-8-v;       /* for 1.0 silicon */
+&qspi {
+	flash@0 {
+		compatible = "m25p80"; /* Micron MT25QU512ABB8ESF */
+		#address-cells = <1>;
+		#size-cells = <1>;
+		reg = <0x0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <4>;
+		spi-max-frequency = <108000000>; /* Based on DC1 spec */
+		partition@qspi-fsbl-uboot { /* for testing purpose */
+			label = "qspi-fsbl-uboot";
+			reg = <0x0 0x100000>;
+		};
+		partition@qspi-linux { /* for testing purpose */
+			label = "qspi-linux";
+			reg = <0x100000 0x500000>;
+		};
+		partition@qspi-device-tree { /* for testing purpose */
+			label = "qspi-device-tree";
+			reg = <0x600000 0x20000>;
+		};
+		partition@qspi-rootfs { /* for testing purpose */
+			label = "qspi-rootfs";
+			reg = <0x620000 0x5E0000>;
+		};
+	};
 };
 
 &sata {
@@ -69,6 +93,8 @@
 	ceva,p1-comwake-params = /bits/ 8 <0x06 0x19 0x08 0x0E>;
 	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
 	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
+	phy-names = "sata-phy";
+	phys = <&lane3 1 1 3 150000000>;
 };
 
 /* eMMC */

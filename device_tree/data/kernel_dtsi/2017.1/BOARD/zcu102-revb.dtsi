@@ -1,4 +1,5 @@
 / {
+	model = "ZynqMP ZCU102 RevB";
 	compatible = "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
 
 	gpio-keys {
@@ -64,7 +65,7 @@
 		ti,rx-internal-delay = <0x8>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <0x1>;
-		ti,rxctrl-strap-wrka;
+		ti,rxctrl-strap-worka;
 	};
 };
 

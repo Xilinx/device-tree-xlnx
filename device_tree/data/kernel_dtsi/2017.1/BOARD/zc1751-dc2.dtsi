@@ -1,3 +1,8 @@
+/ {
+	model = "ZynqMP zc1751-xm016-dc2 RevA";
+	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
+};
+
 &can0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_can0_default>;
@@ -10,6 +15,7 @@
 
 /* fpd_dma clk 667MHz, lpd_dma 500MHz */
 &fpd_dma_chan1 {
+	xlnx,include-sg; /* for testing purpose */
 	xlnx,overfetch; /* for testing purpose */
 	xlnx,ratectrl = <0>; /* for testing purpose */
 	xlnx,src-issue = <31>;
