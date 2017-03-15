@@ -545,14 +545,6 @@
 	phys = <&lane2 4 0 2 26000000>;
 };
 
-&xilinx_drm {
-	clocks = <&si570_1>;
-};
-
-&xlnx_dp_sub {
-	xlnx,vid-clk-pl;
-};
-
 &pinctrl0 {
 	status = "okay";
 	pinctrl_i2c0_default: i2c0-default {
