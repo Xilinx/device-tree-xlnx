@@ -1661,6 +1661,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		# check if it has status property
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
 		if {$status_disabled} {
+			if {[string match -nocase $ip_type "psu_smmu_gpv"]} {
+				return
+			}
 			hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
 		}
 	} else {
