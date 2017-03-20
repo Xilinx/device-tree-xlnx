@@ -410,7 +410,7 @@ proc update_alias {os_handle} {
 
 	foreach drv_handle $all_drivers {
             if {[check_ip_trustzone_state $drv_handle] == 1} {
-                return
+                continue
             }
         set tmp [list_property $drv_handle CONFIG.dtg.alias]
         if {[string_is_empty $tmp]} {
