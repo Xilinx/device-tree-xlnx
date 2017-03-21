@@ -18,7 +18,7 @@ BEGIN driver ams
 
   OPTION supported_peripherals = (psu_ams);
   OPTION supported_os_types = (DTS);
-  OPTION driver_state = DEPRECATED;
+  OPTION driver_state = ACTIVE;
   OPTION NAME = ams;
 
 END driver
