@@ -107,7 +107,7 @@ proc generate {drv_handle} {
         gen_phy_node $mdio_node $phy_name $phya
     }
     set is_pcspma [get_cells -hier -filter {IP_NAME == gig_ethernet_pcs_pma}]
-    if {[string_is_empty ${is_pcspma}] && $phymode == 2} {
+    if {![string_is_empty ${is_pcspma}] && $phymode == 2} {
         # if eth mode is sgmii and no external pcs/pma found
         hsi::utils::add_new_property $drv_handle "is-internal-pcspma" boolean ""
     }
