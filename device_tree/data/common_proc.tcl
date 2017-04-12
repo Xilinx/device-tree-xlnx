@@ -2378,6 +2378,12 @@ proc generate_cci_node { drv_handle rt_node} {
 	set avail_param [list_property [get_cells -hier $drv_handle]]
 	if {[lsearch -nocase $avail_param "CONFIG.IS_CACHE_COHERENT"] >= 0} {
 		set cci_enable [get_property CONFIG.IS_CACHE_COHERENT [get_cells -hier $drv_handle]]
+		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+		set nodma_coherent_list "psu_sata"
+		if {[lsearch $nodma_coherent_list $iptype] >= 0} {
+			#CR 974156, as per 2017.1 PCW update
+			return
+		}
 		if {[string match -nocase $cci_enable "1"]} {
 			hsi::utils::add_new_dts_param $rt_node "dma-coherent" "" boolean
 		}
