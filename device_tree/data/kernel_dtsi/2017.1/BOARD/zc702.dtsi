@@ -42,13 +42,6 @@
 	};
 };
 
-&amba {
-	ocm: sram@fffc0000 {
-		compatible = "mmio-sram";
-		reg = <0xfffc0000 0x10000>;
-	};
-};
-
 &can0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_can0_default>;
