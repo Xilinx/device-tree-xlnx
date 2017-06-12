@@ -16,6 +16,15 @@
 		};
 	};
 
+	iio-hwmon {
+		compatible = "iio-hwmon";
+		io-channels = <&xilinx_ams 0>, <&xilinx_ams 1>, <&xilinx_ams 2>,
+			      <&xilinx_ams 3>, <&xilinx_ams 4>, <&xilinx_ams 5>,
+			      <&xilinx_ams 6>, <&xilinx_ams 7>, <&xilinx_ams 8>,
+			      <&xilinx_ams 9>, <&xilinx_ams 10>,
+			      <&xilinx_ams 11>, <&xilinx_ams 12>;
+	};
+
 	leds {
 		compatible = "gpio-leds";
 		ds2 {
@@ -41,12 +50,18 @@
 		ds5 {
 			label = "ds5";
 			gpios = <&gpio 17 0>;
+			linux,default-trigger = "bluetooth-power";
 		};
 
 		/* FIXME this is not correct - used fixed-regulator for it */
 		vbus_det { /* U5 USB5744  VBUS detection via MIO25 */
 			label = "vbus_det";
 			gpios = <&gpio 25 0>;
+			default-state = "on";
+		};
+		bt_power {
+			label = "bt_power";
+			gpios = <&gpio 8 0>;
 			default-state = "on";
 		};
 	};
@@ -75,32 +90,6 @@
 	sdio_pwrseq: sdio_pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&gpio 7 1>; /* WIFI_EN */
-	};
-
-	kim { /* Bluetooth driver for connection */
-		compatible = "kim";
-		status = "okay";
-		/*
-		 * FIXME: The following is complete CRAP since
-		 * the vendor driver doesn't follow the gpio
-		 * binding. Passing in a magic Linux gpio number
-		 * here until we fix the vendor driver.
-		 */
-		/* FIXME BT_EN*/
-		/* nshutdown_gpio = <&gpio 8 0>; */
-		nshutdown_gpio = <346>; /* 338 base + MIO8 */
-		dev_name = "/dev/ttyPS1"; /* MIO2/3 */
-		flow_cntrl = <1>;
-		baud_rate = <3000000>;
-	};
-	/*
-	 * CONFIG_BT_WILINK - depends on
-	 * btwilink: add minimal device tree support
-	 * commit b3ef820a9310743d62cf50341f529ca17319dd77
-	 */
-	btwilink { /* Bluetooth driver itself */
-		status = "okay";
-		compatible = "btwilink";
 	};
 };
 
