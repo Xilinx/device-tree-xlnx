@@ -268,6 +268,26 @@ proc gen_board_info {} {
   }
 }
 
+proc gen_zynqmp_ccf_clk {} {
+	set default_dts [get_property CONFIG.pcw_dts [get_os]]
+	set ccf_node [add_or_get_dt_node -n "&pss_ref_clk" -d $default_dts]
+	set periph_list [get_cells -hier]
+	foreach periph $periph_list {
+		set zynq_ultra_ps [get_property IP_NAME $periph]
+		if {[string match -nocase $zynq_ultra_ps "zynq_ultra_ps_e"] } {
+			set avail_param [list_property [get_cells -hier $periph]]
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__PSS_REF_CLK__FREQMHZ"] >= 0} {
+				set freq [get_property CONFIG.PSU__PSS_REF_CLK__FREQMHZ [get_cells -hier $periph]]
+				set value [split $freq "."]
+				if {![string match -nocase [lindex $value 0] "33"]} {
+					hsi::utils::add_new_dts_param "${ccf_node}" "clock-frequency" "${freq}000000" int
+				}
+			}
+		}
+	}
+
+}
+
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
@@ -282,6 +302,7 @@ proc generate {lib_handle} {
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"] } {
 	gen_sata_laneinfo
+	gen_zynqmp_ccf_clk
     }
 }
 
