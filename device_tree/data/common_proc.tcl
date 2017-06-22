@@ -22,7 +22,9 @@
 #
 
 # global variables
-global def_string zynq_soc_dt_tree bus_clk_list
+global def_string zynq_soc_dt_tree bus_clk_list pl_ps_irq1 pl_ps_irq0
+set pl_ps_irq1 0
+set pl_ps_irq0 0
 set def_string "__def_none"
 set zynq_soc_dt_tree "dummy.dtsi"
 set bus_clk_list ""
@@ -1331,23 +1333,37 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set intr_info ""
 
 	if {[string_is_empty $intr_port_name]} {
-		set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
+		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
+			set val [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
+			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT&&DIRECTION==O}]
+		} else {
+			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
+		}
 	}
 
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
 		if {[llength $connected_intc] == 0 } {
-			dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected to any interrupt controller\n\r"
+			if {![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
+				dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected to any interrupt controller\n\r"
+			}
 			continue
 		}
 		set connected_intc_name [get_property IP_NAME $connected_intc]
 		set valid_gpio_list "ps7_gpio axi_gpio"
+		set valid_cascade_proc "ps7_cortexa9 psu_cortexa53"
 		# check whether intc is gpio or other
 		if {[lsearch  -nocase $valid_gpio_list $connected_intc_name] >= 0} {
 			generate_gpio_intr_info $connected_intc $drv_handle $pin
 		} else {
 			set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+			if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0 } {
+				set pins [::hsi::get_pins -of_objects [::hsi::get_cells -hier -filter "NAME==$drv_handle"] -filter "NAME==irq"]
+				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pins]
+			} else {
+				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+			}
 			if {[string_is_empty $intc] == 1} {
 				dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected\n\r"
 				continue
@@ -1362,14 +1378,27 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 						}
 					}
 				}
+				if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa53"] && [string match -nocase $intc "axi_intc"] } {
+					set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+				}
 			}
 
 			if {[string match -nocase $proctype "psu_cortexa53"] } {
-				set intr_id [get_psu_interrupt_id $drv_handle $pin]
+				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] } {
+					set intr_id [get_psu_interrupt_id $drv_handle "irq"]
+				} else {
+					set intr_id [get_psu_interrupt_id $drv_handle $pin]
+				}
 			} else {
-				set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
+				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "ps7_cortexa9"]} {
+					set intr_id [::hsi::utils::get_interrupt_id $drv_handle "irq"]
+				} else {
+					set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
+				}
 			}
-			if {[string match -nocase $intr_id "-1"]} {continue}
+			if {[string match -nocase $intr_id "-1"] && ![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
+				continue
+			}
 			set intr_type [get_intr_type $intc $slave $pin]
 			if {[string match -nocase $intr_type "-1"]} {
 				continue
@@ -1384,8 +1413,11 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 						set intr_id [expr $intr_id - 32]
 					}
 					set cur_intr_info "0 $intr_id $intr_type"
+				} elseif {[string match "[get_property IP_NAME $intc]" "axi_intc"] } {
+					set cur_intr_info "$intr_id $intr_type"
 				}
 			} elseif {[string match -nocase $intc "psu_acpu_gic"]} {
+
 			    set cur_intr_info "0 $intr_id $intr_type"
 			} else {
 				set cur_intr_info "$intr_id $intr_type"
@@ -2114,6 +2146,31 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_pin] == 0 } {
 		return $intr_cntrl
 	}
+	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53"
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if { [string match -nocase [common::get_property IP_NAME $periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0 } {
+		set sinks [::hsi::utils::get_sink_pins $intr_pin]
+		foreach intr_sink ${sinks} {
+			set sink_periph [::hsi::get_cells -of_objects $intr_sink]
+			if { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "axi_intc"] } {
+				# this the case where interrupt port is connected to axi_intc.
+				lappend intr_cntrl [get_intr_cntrl_name $sink_periph "irq"]
+			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
+				# this the case where interrupt port is connected to XLConcat IP.
+				lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
+			} elseif { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
+				lappend intr_cntrl $sink_periph
+			}
+			if {[llength $intr_cntrl] > 1} {
+				foreach intc $intr_cntrl {
+					if { [::hsi::utils::is_ip_interrupting_current_proc $intc] } {
+						set intr_cntrl $intc
+					}
+				}
+			}
+		}
+		return $intr_cntrl
+	}
 	set pin_dir [common::get_property DIRECTION $intr_pin]
 	if { [string match -nocase $pin_dir "I"] } {
 		return $intr_cntrl
@@ -2134,10 +2191,15 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_sink_pins] == 0 } {
 		return $intr_cntrl
 	}
+	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53"
 	foreach intr_sink ${intr_sink_pins} {
 		set sink_periph [::hsi::get_cells -of_objects $intr_sink]
 		if { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
-			lappend intr_cntrl $sink_periph
+			if { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0} {
+				lappend intr_cntrl [get_intr_cntrl_name $sink_periph "irq"]
+			} else {
+				lappend intr_cntrl $sink_periph
+			}
 		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
 			# this the case where interrupt port is connected to XLConcat IP.
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
@@ -2151,6 +2213,10 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 					}
 				}
 		}
+	}
+	set val [string trim $intr_cntrl \{\}]
+	if {[llength $val] == 0} {
+		return
 	}
 	return $intr_cntrl
 }
@@ -2266,6 +2332,8 @@ proc get_psu_interrupt_id { ip_name port_name } {
         return $ret
     }
 
+    global pl_ps_irq1
+    global pl_ps_irq0
     if { [llength $ip_name] != 0 } {
         #This is the case where IP pin is interrupting
         set periph [::hsi::get_cells -hier -filter "NAME==$ip_name"]
@@ -2292,7 +2360,14 @@ proc get_psu_interrupt_id { ip_name port_name } {
         }
     }
 
-    set intc_periph [::hsi::utils::get_connected_intr_cntrl $ip_name $port_name]
+    set intc_periph [::hsi::utils::get_interrupt_parent $ip_name $port_name]
+    if {[llength $intc_periph] > 1} {
+        foreach intr_cntr $intc_periph {
+            if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
+                set intc_periph $intr_cntr
+            }
+        }
+    }
     if { [llength $intc_periph]  ==  0 } {
         return $ret
     }
@@ -2300,20 +2375,17 @@ proc get_psu_interrupt_id { ip_name port_name } {
     set intc_type [common::get_property IP_NAME $intc_periph]
     #set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[llength $intc_type] > 1} {
-	foreach intr_cntr $intc_type {
-		if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
-			set intc_type $intr_cntr
-		}
-	}
+        foreach intr_cntr $intc_type {
+            if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
+                set intc_type $intr_cntr
+            }
+        }
     }
 
     set intc_src_ports [::hsi::utils::get_interrupt_sources $intc_periph]
 
     #Special Handling for cascading case of axi_intc Interrupt controller
     set cascade_id 0
-    if { [string match -nocase "$intc_type" "axi_intc"] } {
-        set cascade_id [::hsi::__internal::get_intc_cascade_id_offset $intc_periph]
-    }
 
     set i $cascade_id
     set found 0
@@ -2344,17 +2416,64 @@ proc get_psu_interrupt_id { ip_name port_name } {
         }
         set i [expr $i + $intr_width]
     }
+    set intr_list_irq0 [list 89 90 91 92 93 94 95 96]
+    set intr_list_irq1 [list 104 105 106 107 108 109 110 111]
+    set sink_pins [::hsi::utils::get_sink_pins $intr_pin]
+    if { [llength $sink_pins] == 0 } {
+        return
+    }
+    set concat_block 0
+    foreach sink_pin $sink_pins {
+        set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+        set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
+        # check for direct connection or concat block connected
+        if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
+            set number [regexp -all -inline -- {[0-9]+} $sink_pin]
+            set dout "dout"
+            set concat_block 1
+            set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
+            set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
+            foreach pin $sink_pins {
+                set sink_pin $pin
+            }
+        }
+        # generate irq id for IRQ1_F2P
+        if { [string compare -nocase "$sink_pin" "IRQ1_F2P"] == 0 } {
+            if {$found == 1} {
+                set irqval $pl_ps_irq1
+                set pl_ps_irq1 [expr $pl_ps_irq1 + 1]
+                if {$concat_block == "0"} {
+                    return [lindex $intr_list_irq1 $irqval]
+                } else {
+                    set ret [expr 104 + $number]
+                    return $ret
+                }
+            }
+        } elseif { [string compare -nocase "$sink_pin" "IRQ0_F2P"] == 0 } {
+            # generate irq id for IRQ0_F2P
+            if {$found == 1} {
+                set irqval $pl_ps_irq0
+                set pl_ps_irq0 [expr $pl_ps_irq0 + 1]
+                if {$concat_block == "0"} {
+                    return [lindex $intr_list_irq0 $irqval]
+                } else {
+                    set ret [expr 89 + $number]
+                    return $ret
+                }
+             }
+        } else {
 
-    if { $found == 1 && [is_interrupt $intc_type] } {
-	set intr_list [list 89 90 91 92 93 94 95 96 104 105 106 107 108 109 110 111]
-	      return [lindex $intr_list $ret]
+            set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+            set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
+            if {[string match -nocase $connected_ip "axi_intc"] } {
+                set sink_pin [::hsi::get_pins -of_objects $periph -filter {TYPE==INTERRUPT && DIRECTION==O}]
+            }
+           set port_width [::hsi::utils::get_port_width $sink_pin]
+            set id $ret
+            return $ret
+        }
     }
-    set port_width [get_port_width $intr_pin]
-    set id $ret
-    for {set i 1 } { $i < $port_width } { incr i } {
-       lappend ret [expr $id + 1]
-       incr $id
-    }
+
     return $ret
 }
 
