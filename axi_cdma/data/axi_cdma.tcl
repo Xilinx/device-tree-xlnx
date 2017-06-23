@@ -66,7 +66,7 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 	if { [llength $intr_info] && ![string match -nocase $intr_info "-1"] } {
 		hsi::utils::add_new_dts_param $dma_channel "interrupts" $intr_info intlist
 	} else {
-		error "ERROR: ${drv_handle}: cdma_introut port is not connected"
+		dtg_warning "ERROR: ${drv_handle}: cdma_introut port is not connected"
 	}
 	return $dma_channel
 }

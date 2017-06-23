@@ -398,7 +398,7 @@ proc get_connectedip {intf} {
                 set connected_ip $target_periph
                 incr i
              }
-             error "Couldn't find a valid target_ip Please cross check hw design"
+             dtg_warning "Couldn't find a valid target_ip Please cross check hw design"
          }
       }
    }
