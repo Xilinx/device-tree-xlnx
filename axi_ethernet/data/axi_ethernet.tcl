@@ -91,11 +91,14 @@ proc generate {drv_handle} {
         set tx_tsip [get_connectedip $intf]
         set_drv_prop $drv_handle axififo-connected "$tx_tsip" reference
     }
+    if {![string_is_empty $connected_ip]} {
       set_property axistream-connected "$connected_ip" $drv_handle
       set_property axistream-control-connected "$connected_ip" $drv_handle
+      add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
+    }
       set_property xlnx,rxmem "$rxethmem" $drv_handle
       set ip_prop CONFIG.c_include_mm2s_dre
-      add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
+
    }
 
     if {$ip_name == "axi_ethernet"} {
@@ -362,6 +365,7 @@ proc get_targetip {ip} {
 proc get_connectedip {intf} {
    global rxethmem
    if { [llength $intf]} {
+      set connected_ip ""
       set intf_net [get_intf_nets -of_objects $intf ]
       if { [llength $intf_net]  } {
          set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
@@ -376,6 +380,9 @@ proc get_connectedip {intf} {
 	       set rxethmem 9600
 	    }
          }
+	if {[string_is_empty $connected_ip]} {
+		return ""
+	}
          set target_ip [is_ethsupported_target $connected_ip]
          if { $target_ip == "true"} {
             return $connected_ip
