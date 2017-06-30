@@ -39,5 +39,6 @@ proc generate {drv_handle} {
         }
     }
 
+    set_drv_conf_prop $drv_handle C_BAUDRATE current-speed int
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 }

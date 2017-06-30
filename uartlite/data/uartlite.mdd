@@ -24,7 +24,6 @@ BEGIN driver uartlite
   DTGPARAM name = dtg.ip_params, type = boolean;
   DTGPARAM name = dtg.alias, type = string, default = serial;
   DTGPARAM name = port-number, type = int, default = 0;
-  DTGPARAM name = current-speed, type = int, default = 115200;
   DTGPARAM name = compatible, type = stringlist,  default = "xlnx,xps-uartlite-1.00.a";
   DTGPARAM name = device_type, type = string, default = serial;
 
