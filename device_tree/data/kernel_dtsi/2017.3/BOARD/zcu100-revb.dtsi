@@ -93,6 +93,11 @@
 	};
 };
 
+&pmufw {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pmu_default>;
+};
+
 &i2c1 {
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
@@ -319,6 +324,20 @@
 
 		conf {
 			groups = "gpio0_4_grp", "gpio0_5_grp";
+			slew-rate = <1>;
+			io-standard = <1>;
+		};
+	};
+
+	pinctrl_pmu_default: pmu-default {
+		mux {
+			groups = "pmu0_8_grp";
+			function = "pmu0";
+		};
+
+		conf {
+			groups = "pmu0_8_grp";
+			bias-pull-up;
 			slew-rate = <1>;
 			io-standard = <1>;
 		};
