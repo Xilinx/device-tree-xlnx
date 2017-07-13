@@ -545,6 +545,9 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 		set old_name [get_property "NODE_NAME" $node_obj]
 		set old_ua [get_property "UNIT_ADDRESS" $node_obj]
 		set config_prop [list_property -regexp $node_obj "CONFIG.*"]
+		if {[string_is_empty $old_ua]} {
+			return 1
+		}
 		if {![string equal -nocase -length [string length $node_label] $node_label $old_label] || \
 			![string equal -nocase $node_ua $old_ua] || \
 			![string equal -nocase -length [string length $node_name] $node_name $old_name]} {
