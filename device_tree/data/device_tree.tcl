@@ -409,6 +409,7 @@ proc update_alias {os_handle} {
 	# Update all_drivers list such that console device should be the first
 	# uart device in the list.
 	set console_ip [get_property CONFIG.console_device [get_os]]
+	set dt_overlay [get_property CONFIG.DT_Overlay [get_os]]
 	foreach drv_handle $all_drivers {
 		set alias_str [get_property CONFIG.dtg.alias $drv_handle]
 		if {[string match -nocase $alias_str "serial"]} {
@@ -430,6 +431,9 @@ proc update_alias {os_handle} {
 	}
 
 	foreach drv_handle $all_drivers {
+            if {[is_pl_ip $drv_handle] && $dt_overlay} {
+                continue
+            }
             if {[check_ip_trustzone_state $drv_handle] == 1} {
                 continue
             }

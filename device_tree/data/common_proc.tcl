@@ -516,6 +516,7 @@ proc set_drv_def_dts {drv_handle} {
 	# optional dts control by adding the following line in mdd file
 	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
 	set default_dts [get_property CONFIG.def_dts $drv_handle]
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {[string_is_empty $default_dts]} {
 		if {[is_pl_ip $drv_handle]} {
 			set default_dts "pl.dtsi"
@@ -525,7 +526,30 @@ proc set_drv_def_dts {drv_handle} {
 		}
 	}
 	set default_dts [set_cur_working_dts $default_dts]
-	update_system_dts_include $default_dts
+	if {[is_pl_ip $drv_handle] && $dt_overlay} {
+		set master_dts_obj [get_dt_trees ${default_dts}]
+		set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
+		set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+		set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${default_dts} -p ${root_node}]
+		set pl_file $default_dts
+		set targets "fpga_full"
+		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		set child_name "__overlay__"
+		set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
+			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
+		} else {
+			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 1 int
+		}
+		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "design_1_wrapper.bit.bin" string
+
+	} else {
+		update_system_dts_include $default_dts
+	}
+
 	return $default_dts
 }
 
@@ -1782,24 +1806,34 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 	dtg_debug "bus_name: $bus_name"
 	dtg_debug "bus_label: $bus_name"
 
-	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-	if {[string match -nocase $proctype "psu_cortexa53"]} {
-		set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -u 0 -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {[is_pl_ip $ip_drv] && $dt_overlay} {
+		set root_node [add_or_get_dt_node -n / -d ${dts_file}]
+		set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
+		set targets "amba"
+		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		set child_name "__overlay__"
+		set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
 	} else {
-		set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
-	}
-
-	if {![string match "&*" $bus_node]} {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
-			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
-			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 2 int
+			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -u 0 -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 		} else {
-			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
+			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 		}
-		hsi::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
-		hsi::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
+
+		if {![string match "&*" $bus_node]} {
+			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+			if {[string match -nocase $proctype "psu_cortexa53"]} {
+				hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
+				hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 2 int
+			} else {
+				hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
+			}
+			hsi::utils::add_new_dts_param "${bus_node}" "compatible" "simple-bus" stringlist
+			hsi::utils::add_new_dts_param "${bus_node}" "ranges" "" boolean
+		}
 	}
 	return $bus_node
 }

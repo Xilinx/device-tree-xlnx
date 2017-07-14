@@ -31,6 +31,8 @@ OPTION COMPILE_BSP = FALSE;
 
 PARAMETER name = dtg_version, desc = "DTG version", default = "2014.4";
 
+PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type = bool, default = false;
+
 PARAMETER name = bootargs, desc = "Booting arguments", type = string, default = "";
 
 PARAMETER name = console_device, desc = "Instance name of IP core for boot console (e.g. RS232_Uart_1, not xps_uart16550)", type = peripheral_instance, range = (axi_uart16550, axi_uartlite, ps7_uart, psu_uart), default = none;
