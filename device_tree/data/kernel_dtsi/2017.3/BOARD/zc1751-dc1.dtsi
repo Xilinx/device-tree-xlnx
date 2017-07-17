@@ -108,7 +108,6 @@
 &sdhci1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
-	no-1-8-v;       /* for 1.0 silicon */
 };
 
 &uart0 {
