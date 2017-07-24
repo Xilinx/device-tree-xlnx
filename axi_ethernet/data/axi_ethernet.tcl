@@ -94,11 +94,10 @@ proc generate {drv_handle} {
     if {![string_is_empty $connected_ip]} {
       set_property axistream-connected "$connected_ip" $drv_handle
       set_property axistream-control-connected "$connected_ip" $drv_handle
+      set ip_prop CONFIG.c_include_mm2s_dre
       add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
       set_property xlnx,rxmem "$rxethmem" $drv_handle
-      set ip_prop CONFIG.c_include_mm2s_dre
-
    }
 
     if {$ip_name == "axi_ethernet"} {
