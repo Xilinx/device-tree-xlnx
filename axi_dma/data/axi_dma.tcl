@@ -53,7 +53,7 @@ proc generate {drv_handle} {
     }
     set tx_chan 0
     set rx_chan 0
-    if { $axiethernetfound != 1 } {
+    if { $axiethernetfound != 1 && $is_xxv != 1} {
         set_drv_conf_prop $drv_handle C_INCLUDE_SG xlnx,include-sg boolean
         set_drv_conf_prop $drv_handle C_SG_INCLUDE_STSCNTRL_STRM xlnx,sg-include-stscntrl-strm boolean
         set_drv_conf_prop $drv_handle c_enable_multi_channel xlnx,multichannel-dma boolean
