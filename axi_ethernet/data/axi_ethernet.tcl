@@ -51,13 +51,26 @@ proc generate {drv_handle} {
         if { [llength $intf_net]  } {
             set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
             if { [llength $target_intf] } {
-                set connected_ip [get_cells -of_objects $target_intf]
+                set connected_ip [get_connectedip $intf]
                 set_property axistream-connected "$connected_ip" $drv_handle
                 set_property axistream-control-connected "$connected_ip" $drv_handle
 		set ip_prop CONFIG.c_include_mm2s_dre
 		add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
+                set ip_prop CONFIG.Enable_1588
+                add_cross_property $eth_ip $ip_prop $drv_handle "xlnx,eth-hasptp" boolean
             }
         }
+    }
+    foreach n "AXI_STR_RXD m_axis_tx_ts" {
+        set intf [get_intf_pins -of_objects $eth_ip ${n}]
+        if {[string_is_empty ${intf}] != 1} {
+            break
+        }
+    }
+
+    if {[string_is_empty ${intf}] != 1} {
+        set tx_tsip [get_connectedip $intf]
+        set_drv_prop $drv_handle axififo-connected "$tx_tsip" reference
     }
    } else {
     foreach n "AXI_STR_RXD m_axis_rx" {
@@ -173,6 +186,46 @@ proc generate {drv_handle} {
        set_property phy-mode "$phytype" $drv_handle
        set compatstring "xlnx,xxv-ethernet-1.0"
        set_property compatible "$compatstring" $drv_handle
+    }
+    set ips [get_cells $drv_handle]
+    foreach ip [get_drivers] {
+        if {[string compare -nocase $ip $connected_ip] == 0} {
+            set target_handle $ip
+        }
+    }
+
+    if {![string_is_empty $connected_ip]} {
+        set connected_ipname [get_property IP_NAME $connected_ip]
+        if {$connected_ipname == "axi_mcdma"} {
+            set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
+            set_property xlnx,num-queues $num_queues $drv_handle
+            set id 1
+            for {set i 2} {$i <= $num_queues} {incr i} {
+                set i [format "%x" $i]
+                append id "\""
+                append id ",\"" $i
+                set i [expr 0x$i]
+            }
+            set_property xlnx,channel-ids $id $drv_handle
+            set intr_val [get_property CONFIG.interrupts $target_handle]
+            set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
+            if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
+                set intr_val1 [get_property CONFIG.interrupts $drv_handle]
+                lappend intr_val1 $intr_val
+            }
+            set default_dts [get_property CONFIG.pcw_dts [get_os]]
+            set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
+            if {![string_is_empty $intr_parent]} {
+                if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
+                    regsub -all "\{||\t" $intr_val1 {} intr_val1
+                    regsub -all "\}||\t" $intr_val1 {} intr_val1
+                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
+                } else {
+                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
+                }
+                hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
+            }
+        }
     }
 
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
@@ -303,7 +356,7 @@ proc gen_phy_node args {
 
 proc is_ethsupported_target {connected_ip} {
    set connected_ipname [get_property IP_NAME $connected_ip]
-   if {$connected_ipname == "axi_dma" || $connected_ipname == "axi_fifo_mm_s"} {
+   if {$connected_ipname == "axi_dma" || $connected_ipname == "axi_fifo_mm_s" || $connected_ipname == "axi_mcdma"} {
       return "true"
    } else {
       return "false"
