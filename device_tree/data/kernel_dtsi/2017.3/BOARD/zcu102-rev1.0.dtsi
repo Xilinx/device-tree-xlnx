@@ -1,6 +1,6 @@
 / {
-	model = "ZynqMP ZCU102 RevA";
-	compatible = "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
+	model = "ZynqMP ZCU102 Rev1.0";
+	compatible = "xlnx,zynqmp-zcu102-rev1.0", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -57,11 +57,11 @@
 };
 
 &gem3 {
-	phy-handle = <&phy0>;
+	phy-handle = <&phyc>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem3_default>;
-	phy0: phy@21 {
-		reg = <21>;
+	phyc: phy@c {
+		reg = <0xc>;
 		ti,rx-internal-delay = <0x8>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <0x1>;
@@ -284,14 +284,13 @@
 				compatible = "max15303";
 				reg = <0x1a>;
 			};
+			max15303@1b { /* u8 */
+				compatible = "max15303";
+				reg = <0x1b>;
+			};
 			max15303@1d { /* u18 */
 				compatible = "max15303";
 				reg = <0x1d>;
-			};
-			max15303@20 { /* u8 */
-				compatible = "max15303";
-				status = "disabled"; /* unreachable */
-				reg = <0x20>;
 			};
 
 /*			drivers/hwmon/pmbus/Kconfig:86:   be called max20751.
@@ -339,7 +338,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			 * 512B - 768B address 0x56
 			 * 768B - 1024B address 0x57
 			 */
-			eeprom@54 { /* u23 */
+			eeprom: eeprom@54 { /* u23 */
 				compatible = "at,24c08";
 				reg = <0x54>;
 			};
@@ -471,6 +470,27 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			reg = <7>;
 			/* SEP 0 */
 		};
+	};
+};
+
+&eeprom  {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	board_sn: board_sn@0 {
+		reg = <0x0 0x14>;
+	};
+
+	eth_mac: eth_mac@20 {
+		reg = <0x20 0x6>;
+	};
+
+	board_name: board_name@d0 {
+		reg = <0xd0 0x6>;
+	};
+
+	board_revision: board_revision@e0 {
+		reg = <0xe0 0x3>;
 	};
 };
 
@@ -785,6 +805,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 &sdhci1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
+	no-1-8-v;	/* for 1.0 silicon */
 };
 
 &uart0 {
