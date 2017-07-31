@@ -410,6 +410,10 @@ proc update_alias {os_handle} {
 	# Update all_drivers list such that console device should be the first
 	# uart device in the list.
 	set console_ip [get_property CONFIG.console_device [get_os]]
+	set valid_console [lsearch $all_drivers $console_ip]
+	if { $valid_console < 0 } {
+		error "Trying to assign a console::$console_ip which doesn't exists !!!"
+	}
 	set dt_overlay [get_property CONFIG.DT_Overlay [get_os]]
 	foreach drv_handle $all_drivers {
 		set alias_str [get_property CONFIG.dtg.alias $drv_handle]
