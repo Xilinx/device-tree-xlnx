@@ -88,8 +88,6 @@ proc generate {drv_handle} {
             add_dma_coherent_prop $drv_handle "M_AXI_S2MM"
         }
     } else {
-        set_drv_property $drv_handle axistream-connected "$connected_ip" reference
-        set_drv_property $drv_handle axistream-control-connected "$connected_ip" reference
 	set ip_prop CONFIG.c_include_mm2s_dre
 	add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
@@ -185,6 +183,9 @@ proc generate_clk_nodes {drv_handle axiethernetfound tx_chan rx_chan} {
             set bus_node [add_or_get_bus_node $drv_handle $dts_file]
             set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
                 -d ${dts_file} -p ${bus_node}]
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
             # create the node and assuming reg 0 is taken by cpu
             set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
             set clocks "$clk_refs"
