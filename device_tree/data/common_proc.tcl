@@ -123,6 +123,11 @@ proc add_cross_property args {
 				if {[regexp "(int|hex).*" $type match]} {
 					regsub -all {"} $value "" value
 				}
+				set ipname [get_property IP_NAME [get_cells -hier $ip]]
+				if {[string match -nocase $ipname "axi_mcdma"] && [string match -nocase $dest_prop "xlnx,include-sg"] } {
+					set type "boolean"
+					set value ""
+				}
 				hsi::utils::add_new_property $dest_handle $dest_prop $type $value
 				return 0
 			}
