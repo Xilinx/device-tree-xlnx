@@ -137,7 +137,6 @@ proc generate {drv_handle} {
 	}
 	set_pcie_reg $drv_handle
 	set_pcie_ranges $drv_handle
-	set tab "\n\t\t\t\t\t"
 	set_drv_prop $drv_handle interrupt-map-mask "0 0 0 7" intlist
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "microblaze"] } {
@@ -147,8 +146,8 @@ proc generate {drv_handle} {
 	set node [gen_peripheral_nodes $drv_handle]
 	set pcieintc_cnt [get_os_dev_count "pci_intc_cnt"]
 	set pcie_child_intc_node [add_or_get_dt_node -l "pcie_intc_${pcieintc_cnt}" -n interrupt-controller -p $node]
-	set int_map "0 0 0 1 &pcie_intc_${pcieintc_cnt} 1>,$tab<0 0 0 2 &pcie_intc_${pcieintc_cnt} 2>,$tab<0 0 0 3 &pcie_intc_${pcieintc_cnt} 3>,\
-		$tab<0 0 0 4 &pcie_intc_${pcieintc_cnt} 4"
+	set int_map "0 0 0 1 &pcie_intc_${pcieintc_cnt} 1>, <0 0 0 2 &pcie_intc_${pcieintc_cnt} 2>, <0 0 0 3 &pcie_intc_${pcieintc_cnt} 3>,\
+		 <0 0 0 4 &pcie_intc_${pcieintc_cnt} 4"
 	set_drv_prop $drv_handle interrupt-map $int_map int
 	incr pcieintc_cnt
 	hsi::utils::set_os_parameter_value "pci_intc_cnt" $pcieintc_cnt
