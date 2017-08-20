@@ -2015,6 +2015,11 @@ proc add_memory_node {drv_handle} {
 	set master_dts_obj [get_dt_trees ${master_dts}]
 	set_cur_working_dts $master_dts
 
+	set main_memory  [get_property CONFIG.main_memory [get_os]]
+	if {![string match -nocase $main_memory $drv_handle]} {
+		return
+	}
+
 	# assuming single memory region
 	#  - single memory region
 	#  - / node is created
