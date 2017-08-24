@@ -20,6 +20,5 @@ BEGIN driver usbps
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = usbps;
-  DTGPARAM name = dr_mode, default = host , type = string ;
 
 END driver
