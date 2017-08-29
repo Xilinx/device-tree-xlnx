@@ -21,7 +21,6 @@ BEGIN driver emacps
   OPTION driver_state = ACTIVE;
   OPTION NAME = emacps;
   PARAMETER name = dev_type, default = ethernet, type = string;
-  PARAMETER name = system.dts, default = "local-mac-address", type = stringlist;
 
   DTGPARAM name = local-mac-address, default = "00 0a 35 00 00 00", type = bytelist
   DTGPARAM name = dtg.alias, type = string, default = ethernet;

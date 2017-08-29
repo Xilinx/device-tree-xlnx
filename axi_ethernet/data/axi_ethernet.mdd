@@ -21,7 +21,6 @@ BEGIN driver axi_ethernet
   OPTION NAME = axi_ethernet;
   OPTION supported_os_types = (DTS);
   PARAMETER name = dev_type, default = ethernet, type = string;
-  PARAMETER name = system.dts, default = "local-mac-address", type = stringlist;
   DTGPARAM name = dtg.ip_params, type = boolean;
   DTGPARAM name = dtg.alias , type = reference, default = ethernet;
   DTGPARAM name = axistream-connected , type = reference;
