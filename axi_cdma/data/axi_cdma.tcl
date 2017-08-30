@@ -96,6 +96,9 @@ proc generate_clk_nodes {drv_handle} {
             set bus_node [add_or_get_bus_node $drv_handle $dts_file]
             set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
                 -d ${dts_file} -p ${bus_node}]
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+	     hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
             set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
             set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs &$clk_refs" reference
             set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
