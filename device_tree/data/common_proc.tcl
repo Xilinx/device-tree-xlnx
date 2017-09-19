@@ -2249,9 +2249,9 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlconcat"] } {
 			# this the case where interrupt port is connected to XLConcat IP.
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
-		} elseif {[string match -nocase [common::get_property IP_NAME $sink_periph] "xlslice"]} {
+		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "xlslice"]} {
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Dout"]
-		} elseif {[string match -nocase [common::get_property IP_NAME $sink_periph] "util_reduced_logic"]} {
+		} elseif {[llength $sink_periph] &&  [string match -nocase [common::get_property IP_NAME $sink_periph] "util_reduced_logic"]} {
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Res"]
 		}
 		if {[llength $intr_cntrl] > 1} {
@@ -2513,6 +2513,9 @@ proc get_psu_interrupt_id { ip_name port_name } {
     set concat_block 0
     foreach sink_pin $sink_pins {
         set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+	if {[llength $sink_periph] == 0 } {
+		break
+	}
         set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
         # check for direct connection or concat block connected
         if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
@@ -2575,11 +2578,16 @@ proc get_psu_interrupt_id { ip_name port_name } {
         } else {
 
             set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+	    if {[llength $sink_periph] == 0 } {
+		break
+	    }
             set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
             if {[string match -nocase $connected_ip "axi_intc"] } {
                 set sink_pin [::hsi::get_pins -of_objects $periph -filter {TYPE==INTERRUPT && DIRECTION==O}]
             }
-           set port_width [::hsi::utils::get_port_width $sink_pin]
+	    foreach pin $sink_pin {
+		set port_width [::hsi::utils::get_port_width $pin]
+	   }
             set id $ret
             return $ret
         }
