@@ -23,4 +23,5 @@ BEGIN driver axi_clk_wiz
   #DTGPARAM name = dtg.ip_params, type = boolean;
   DTGPARAM name = compatible, type = stringlist, default = "xlnx,clocking-wizard";
   DTGPARAM name = clock-output-names, type = stringlist, default = "";
+  DTGPARAM name = "#clock-cells", type = int, default = 1;
 END driver

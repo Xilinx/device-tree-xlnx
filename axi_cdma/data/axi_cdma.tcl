@@ -45,7 +45,21 @@ proc generate {drv_handle} {
 	set tx_chan [add_dma_channel $drv_handle $node "axi-cdma" $baseaddr "MM2S" $cdma_count ]
 	incr cdma_count
 	hsi::utils::set_os_parameter_value "cdma_count" $cdma_count
-	generate_clk_nodes $drv_handle
+	set proc_type [get_sw_proc_prop IP_NAME]
+	switch $proc_type {
+		"psu_cortexa53" {
+			update_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
+		} "ps7_cortexa9" {
+			set_drv_prop_if_empty $drv_handle "clocks" "clkc 15>, <&clkc 15" reference
+			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+		} "microblaze"  {
+			gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"
+			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+		}
+		default {
+			error "Unknown arch"
+		}
+	}
 }
 
 proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {

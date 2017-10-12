@@ -40,7 +40,7 @@ proc generate {drv_handle} {
             set_drv_prop_if_empty $drv_handle "clocks" "clkc 0 &clkc 1" reference
             set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
         } "psu_cortexa53" {
-            set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
+             update_clk_node $drv_handle "can_clk s_axi_aclk"
         } "microblaze" {
             gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 	}

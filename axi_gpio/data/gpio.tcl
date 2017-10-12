@@ -28,4 +28,8 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "#interrupt-cells" 2 int ""
 		hsi::utils::add_new_property $drv_handle "interrupt-controller" boolean ""
 	}
+	set proc_type [get_sw_proc_prop IP_NAME]
+	if {[string match -nocase $proc_type "psu_cortexa53"]} {
+		update_clk_node $drv_handle "s_axi_aclk"
+	}
 }

@@ -65,7 +65,10 @@ proc generate {drv_handle} {
     hsi::utils::add_new_dts_param "${decoder_node}" "reg" $decoder_reg int
     hsi::utils::add_new_dts_param "${decoder_node}" "interrupts" $intr_val int
     hsi::utils::add_new_dts_param "${decoder_node}" "interrupt-parent" $intr_parent reference
-  
+    set proc_type [get_sw_proc_prop IP_NAME]
+    if {[string match -nocase $proc_type "psu_cortexa53"]} {
+       update_clk_node $drv_handle "pll_ref_clk s_axi_lite_aclk"
+    }
 }
 
 proc get_ipdetails {drv_handle arg} {
