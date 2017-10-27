@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver mig_7series
 
-  OPTION supported_peripherals = (mig_7series ddr4);
+  OPTION supported_peripherals = (mig_7series ddr4 ddr3);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = mig_7series;
