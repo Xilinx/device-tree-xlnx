@@ -1380,7 +1380,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
-		if {[llength $connected_intc] == 0 } {
+		if {[llength $connected_intc] == 0 || [string match $connected_intc "{}"] } {
 			if {![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 				dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected to any interrupt controller\n\r"
 			}
