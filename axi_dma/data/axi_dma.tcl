@@ -16,8 +16,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
+set connected_ip 0
 
 proc generate {drv_handle} {
+    global connected_ip
     # try to source the common tcl procs
     # assuming the order of return is based on repo priority
     foreach i [get_sw_cores device_tree] {
@@ -228,6 +230,7 @@ proc generate_clk_nodes {drv_handle axiethernetfound tx_chan rx_chan} {
 }
 
 proc get_connected_ip {drv_handle dma_pin} {
+    global connected_ip
     # Check whether dma is connected to 10G/25G MAC
     # currently we are handling only data fifo
     set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $drv_handle] $dma_pin]
