@@ -2034,20 +2034,28 @@ proc add_memory_node {drv_handle} {
 	#  - / node is created
 	#  - reg property is generated
 	# CHECK node naming
-	set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
-	set unit_addr [get_baseaddr $drv_handle]
-	set memory_node [add_or_get_dt_node -n memory -p $parent_node]
-	set reg_value [get_property CONFIG.reg $drv_handle]
-	hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
-	# maybe hardcoded
-	if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
-		set dev_type memory
+	set ddr_ip ""
+	set main_memory  [get_property CONFIG.main_memory [get_os]]
+	if {![string match -nocase $main_memory "none"]} {
+		set ddr_ip [get_property IP_NAME [get_cells -hier $main_memory]]
 	}
-	if {[string_is_empty $dev_type]} {set dev_type memory}
-	hsi::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
+	set ddr_list "psu_ddr ps7_ddr axi_emc mig_7series"
+	if {[lsearch -nocase $ddr_list $ddr_ip] >= 0} {
+		set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
+		set unit_addr [get_baseaddr $drv_handle]
+		set memory_node [add_or_get_dt_node -n memory -p $parent_node]
+		set reg_value [get_property CONFIG.reg $drv_handle]
+		hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
+		# maybe hardcoded
+		if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
+			set dev_type memory
+		}
+		if {[string_is_empty $dev_type]} {set dev_type memory}
+		hsi::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
 
-	set_cur_working_dts $cur_dts
-	return $memory_node
+		set_cur_working_dts $cur_dts
+		return $memory_node
+	}
 }
 
 proc gen_mb_ccf_subnode {drv_handle name freq reg} {
