@@ -477,11 +477,23 @@ proc remove_main_memory_node {} {
     if {[string_is_empty $main_memory]} {
         return 0
     }
+
     # in theory it will not del the ps ddr as it snot been generated
     set mc_obj [get_node_object $main_memory "" ""]
     if {[string_is_empty $mc_obj]} {
         return 0
     }
+	set all_drivers [get_drivers]
+	foreach drv_handle $all_drivers {
+		set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+		if {[string match -nocase $ip "ddr4"]} {
+			set slave [get_cells -hier ${drv_handle}]
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
+			if {[llength $ip_mem_handles] > 1} {
+				return
+			}
+		}
+	}
     set cur_dts [current_dt_tree]
     foreach dts_file [get_dt_tree] {
         set dts_nodes [get_all_tree_nodes $dts_file]

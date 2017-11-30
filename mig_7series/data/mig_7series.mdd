@@ -20,7 +20,5 @@ BEGIN driver mig_7series
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = mig_7series;
-  PARAMETER name = dev_type, default = "memory-controller", type = string;
-  DTGPARAM name = device_type, default = memory, type = string;
 
 END driver
