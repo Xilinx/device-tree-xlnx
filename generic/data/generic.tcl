@@ -13,4 +13,22 @@
 #
 
 proc generate {drv_handle} {
+	foreach i [get_sw_cores device_tree] {
+		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+		if {[file exists $common_tcl_file]} {
+			source $common_tcl_file
+			break
+		}
+	}
+
+	set hsi_version [get_hsi_version]
+	set ver [split $hsi_version "."]
+	set value [lindex $ver 0]
+	if {$value >= 2018} {
+		set generic_node [gen_peripheral_nodes $drv_handle]
+		set last [string last "@" $generic_node]
+		if {$last != -1} {
+			hsi::utils::add_new_dts_param "${generic_node}" "/* This is a place holder node for a custom IP, user may need to update the entries */" "" comment
+		}
+	}
 }
