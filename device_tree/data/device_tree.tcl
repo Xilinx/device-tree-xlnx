@@ -377,6 +377,11 @@ proc update_cpu_node {os_handle} {
     set proc_instance 0
     for {set i 0} {$i < $total_cores} {incr i} {
         set proc_name [lindex [get_cells -hier -filter {IP_TYPE==PROCESSOR}] $i]
+        if {[llength $proc_name] == 0} {
+            set cpu_node [add_or_get_dt_node -n "cpus" -d ${default_dts} -p ${system_root_node}]
+            hsi::utils::add_new_dts_param "${cpu_node}" "/delete-node/ cpu@$i" "" boolean
+            continue
+        }
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $proc_name]] "microblaze"]} {
 		return
 	}
