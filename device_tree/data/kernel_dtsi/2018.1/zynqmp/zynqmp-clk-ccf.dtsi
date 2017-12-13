@@ -5,10 +5,7 @@
  *
  * Michal Simek <michal.simek@xilinx.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
+ * SPDX-License-Identifier:      GPL-2.0+
  */
 
 / {
@@ -193,23 +190,23 @@
 };
 
 &gem0 {
-	clocks = <&clkc 45>, <&clkc 45>, <&clkc 49>;
-	clock-names = "pclk", "tx_clk", "hclk";
+	clocks = <&clkc 31>, <&clkc 49>, <&clkc 45>, <&clkc 49>, <&clkc 44>;
+	clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 };
 
 &gem1 {
-	clocks = <&clkc 46>, <&clkc 46>, <&clkc 50>;
-	clock-names = "pclk", "tx_clk", "hclk";
+	clocks = <&clkc 31>, <&clkc 50>, <&clkc 46>, <&clkc 50>, <&clkc 44>;
+	clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 };
 
 &gem2 {
-	clocks = <&clkc 47>, <&clkc 47>, <&clkc 51>;
-	clock-names = "pclk", "tx_clk", "hclk";
+	clocks = <&clkc 31>, <&clkc 51>, <&clkc 47>, <&clkc 51>, <&clkc 44>;
+	clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 };
 
 &gem3 {
-	clocks = <&clkc 31>, <&clkc 52>, <&clkc 48>, <&clkc 52>;
-	clock-names = "pclk", "hclk", "tx_clk", "rx_clk";
+	clocks = <&clkc 31>, <&clkc 52>, <&clkc 48>, <&clkc 52>, <&clkc 44>;
+	clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 };
 
 &gpio {

@@ -9,8 +9,9 @@
  */
 
 / {
-	model = "ZynqMP ZCU104 RevA";
-	compatible = "xlnx,zynqmp-zcu104-revA", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
+	model = "ZynqMP ZCU104 RevC";
+	compatible = "xlnx,zynqmp-zcu104-revC", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
+
 };
 
 &can1 {
@@ -32,12 +33,30 @@
 };
 
 &i2c1 {
-	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 16 0>;
 	sda-gpios = <&gpio 17 0>;
+
+	tca6416_u97: gpio@21 {
+		compatible = "ti,tca6416";
+		reg = <0x21>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		/*
+		  * IRQ not connected
+		  * Lines:
+		  * 0 - IRPS5401_ALERT_B
+		  * 1 - HDMI_8T49N241_INT_ALM
+		  * 2 - MAX6643_OT_B
+		  * 3 - MAX6643_FANFAIL_B
+		  * 5 - IIC_MUX_RESET_B
+		  * 6 - GEM3_EXP_RESET_B
+		  * 7 - FMC_LPC_PRSNT_M2C_B
+		  * 4, 10 - 17 - not connected
+		  */
+	};
 
 	/* Another connection to this bus via PL i2c via PCA9306 - u45 */
 	i2cswitch@74 { /* u34 */
@@ -95,25 +114,6 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			/* FIXME Npt detected */
-			tca6416_u97: gpio@21 { /* FIXME enable it by i2c mw 21 6 0 */
-				compatible = "ti,tca6416";
-				reg = <0x21>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				/*
-				 * IRQ not connected
-				 * Lines:
-				 * 0 - IRPS5401_ALERT_B
-				 * 1 - HDMI_8T49N241_INT_ALM
-				 * 2 - MAX6643_OT_B
-				 * 3 - MAX6643_FANFAIL_B
-				 * 5 - IIC_MUX_RESET_B
-				 * 6 - GEM3_EXP_RESET_B
-				 * 7 - FMC_LPC_PRSNT_M2C_B
-				 * 4, 10 - 17 - not connected
-				 */
-			};
 		};
 
 		i2c@5 { /* i2c mw 74 0 10 */ /* FMC_LPC */
@@ -331,7 +331,6 @@
 };
 
 &qspi {
-	status = "okay";
 	flash@0 {
 		compatible = "m25p80"; /* n25q512a 128MiB */
 		#address-cells = <1>;
@@ -375,9 +374,10 @@
 
 /* SD1 with level shifter */
 &sdhci1 {
+	no-1-8-v;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
-	no-1-8-v;
+	xlnx,mio_bank = <1>;
 	disable-wp;
 };
 
@@ -404,3 +404,4 @@
 	phys = <&lane2 4 0 2 26000000>;
 	maximum-speed = "super-speed";
 };
+
