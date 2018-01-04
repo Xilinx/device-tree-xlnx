@@ -96,20 +96,23 @@ proc generate {drv_handle} {
 
     # node must be created before child node
     set node [gen_peripheral_nodes $drv_handle]
-    set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
-    set avail_param [list_property [get_cells -hier $zynq_periph]]
-    if {[lsearch -nocase $avail_param "CONFIG.PSU__GEM__TSU__ENABLE"] >= 0} {
-        set val [get_property CONFIG.PSU__GEM__TSU__ENABLE [get_cells -hier $zynq_periph]]
-        if {$val == 1} {
-            set default_dts [get_property CONFIG.pcw_dts [get_os]]
-            set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-            set tsu_node [add_or_get_dt_node -n "tsu_ext_clk" -l "tsu_ext_clk" -d $default_dts -p $root_node]
-            hsi::utils::add_new_dts_param "${tsu_node}" "compatible" "fixed-clock" stringlist
-            hsi::utils::add_new_dts_param "${tsu_node}" "#clock-cells" 0 int
-            set tsu-clk-freq [get_property CONFIG.C_ENET_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
-            hsi::utils::add_new_dts_param "${tsu_node}" "tsu-clk-freq" ${tsu-clk-freq} int
-            set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
-            set_drv_prop_if_empty $drv_handle "clocks" "clkc 31>, <&clkc 52>, <&clkc 48>, <&clkc 52>, <&tsu_ext_clk" reference
+    set proc_type [get_sw_proc_prop IP_NAME]
+    if {[string match -nocase $proc_type "psu_cortexa53"] } {
+        set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
+        set avail_param [list_property [get_cells -hier $zynq_periph]]
+        if {[lsearch -nocase $avail_param "CONFIG.PSU__GEM__TSU__ENABLE"] >= 0} {
+            set val [get_property CONFIG.PSU__GEM__TSU__ENABLE [get_cells -hier $zynq_periph]]
+            if {$val == 1} {
+                set default_dts [get_property CONFIG.pcw_dts [get_os]]
+                set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+                set tsu_node [add_or_get_dt_node -n "tsu_ext_clk" -l "tsu_ext_clk" -d $default_dts -p $root_node]
+                hsi::utils::add_new_dts_param "${tsu_node}" "compatible" "fixed-clock" stringlist
+                hsi::utils::add_new_dts_param "${tsu_node}" "#clock-cells" 0 int
+                set tsu-clk-freq [get_property CONFIG.C_ENET_TSU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
+                hsi::utils::add_new_dts_param "${tsu_node}" "tsu-clk-freq" ${tsu-clk-freq} int
+                set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
+                set_drv_prop_if_empty $drv_handle "clocks" "clkc 31>, <&clkc 52>, <&clkc 48>, <&clkc 52>, <&tsu_ext_clk" reference
+            }
         }
     }
 
