@@ -209,6 +209,8 @@ proc generate {drv_handle} {
             set_property xlnx,channel-ids $id $drv_handle
             set intr_val [get_property CONFIG.interrupts $target_handle]
             set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
+            set int_names  [get_property CONFIG.interrupt-names $target_handle]
+            append intr_names " " "$int_names"
             if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
                 set intr_val1 [get_property CONFIG.interrupts $drv_handle]
                 lappend intr_val1 $intr_val
@@ -224,6 +226,7 @@ proc generate {drv_handle} {
                     hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
                 }
                 hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
+                hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
             }
         }
     }

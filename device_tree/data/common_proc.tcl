@@ -1464,6 +1464,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				append intr_info " " $cur_intr_info
 			}
 		}
+			append intr_names " " "$pin"
 	}
 	if {[string_is_empty $intr_info]} {
 		return -1
@@ -1478,6 +1479,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		set intc "gic"
 	}
 	set_drv_prop $drv_handle interrupt-parent $intc reference
+	set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
 }
 
 proc gen_reg_property {drv_handle {skip_ps_check ""}} {
