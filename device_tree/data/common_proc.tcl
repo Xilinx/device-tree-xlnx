@@ -2609,9 +2609,13 @@ proc get_psu_interrupt_id { ip_name port_name } {
             if {[string match -nocase $connected_ip "axi_intc"] } {
                 set sink_pin [::hsi::get_pins -of_objects $periph -filter {TYPE==INTERRUPT && DIRECTION==O}]
             }
-	    foreach pin $sink_pin {
-		set port_width [::hsi::utils::get_port_width $pin]
-	   }
+            if {[llength $sink_pin] == 1} {
+                set port_width [::hsi::utils::get_port_width $sink_pin]
+            } else {
+	            foreach pin $sink_pin {
+                            set port_width [::hsi::utils::get_port_width $pin]
+	            }
+            }
             set id $ret
             return $ret
         }
