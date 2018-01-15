@@ -428,7 +428,13 @@ proc get_connectedip {intf} {
             set connected_ip [get_cells -of_objects $target_intf]
             set target_ipname [get_property IP_NAME $connected_ip]
             if {$target_ipname == "axis_data_fifo"} {
+               set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $connected_ip]
+               if {[string_is_empty $fifo_width_bytes]} {
+                   set fifo_width_bytes 1
+               }
                set rxethmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
+               # FIFO can be other than 8 bits, and we need the rxmem in bytes
+               set rxethmem [expr $rxethmem * $fifo_width_bytes]
             } else {
 	       # In 10G MAC case if the rx_stream interface is not connected to
 	       # a Stream-fifo set the rxethmem value to a default jumbo MTU size
