@@ -53,8 +53,9 @@ proc generate {drv_handle} {
                  update_clk_node $drv_handle "s_axi_aclk"
             } "microblaze"   {
                  gen_dev_ccf_binding $drv_handle "s_axi_aclk"
-            }
-            default {
+            } "ps7_cortexa9" {
+                 update_zynq_clk_node $drv_handle "s_axi_aclk"
+            } default {
                  error "Unknown arch"
             }
     }

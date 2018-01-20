@@ -25,8 +25,7 @@ proc generate {drv_handle} {
     if {[string match -nocase $proctype "microblaze"] } {
         gen_dev_ccf_binding $drv_handle "s_axi_aclk"
     } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
-        set_drv_prop_if_empty $drv_handle "clock-names" "ref_clk" stringlist
-        set_drv_prop_if_empty $drv_handle "clocks" "clkc 15" reference
+	update_zynq_clk_node $drv_handle "s_axi_aclk"
     } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
 	update_clk_node $drv_handle "s_axi_aclk"
     }

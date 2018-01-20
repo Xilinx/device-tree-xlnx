@@ -1217,6 +1217,237 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	}
 }
 
+proc update_zynq_clk_node args {
+	set drv_handle [lindex $args 0]
+	set clk_pins [lindex $args 1]
+	set clkname_len [lindex $args 2]
+	set is_clk_wiz 0
+	set clocks ""
+	set bus_clk_list ""
+	set axi 0
+
+	foreach clk $clk_pins {
+		set ip [get_cells -hier $drv_handle]
+		set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip $clk]]]
+		set clk_list1 "clk_out*"
+		set fclk_clk ""
+		set clkout ""
+		foreach pin $pins {
+			if {[regexp $clk_list1 $pin match]} {
+				set clkout $pin
+				set is_clk_wiz 1
+			}
+		}
+		if {[llength $clkout]} {
+			set number [regexp -all -inline -- {[0-9]+} $clkout]
+			set periph [::hsi::get_cells -of_objects $clkout]
+			set clkk_pins [::hsi::get_pins -of_objects $periph]
+			set clk_wiz [get_pins -of_objects [get_cells $periph] -filter TYPE==clk]
+			set axi_clk "s_axi_aclk"
+			foreach clk1 $clk_wiz {
+				if {[regexp $axi_clk $clk1 match]} {
+					set axi 1
+				}
+			}
+
+			if {[string match -nocase $axi "0"]} {
+				dtg_warning "no s_axi_aclk for clockwizard"
+				set pins [get_pins -of_objects [get_cells $periph] -filter TYPE==clk]
+				set clk_list "FCLK_CLK*"
+				set clk_fclk ""
+				set num ""
+				foreach clk_wiz_pin $pins {
+					set clk_wiz_pins [get_pins -of_objects [get_nets -of_objects $clk_wiz_pin]]
+					foreach pin $clk_wiz_pins {
+						if {[regexp $clk_list $pin match]} {
+							set clk_fclk $pin
+						}
+					}
+				}
+				if {[llength $clk_fclk]} {
+					set num [regexp -all -inline -- {[0-9]+} $clk_fclk]
+				}
+				set dts_file "pl.dtsi"
+				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
+				set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+				if {![string equal $clk_freq ""]} {
+					if {[lsearch $bus_clk_list $clk_freq] < 0} {
+						set bus_clk_list [lappend bus_clk_list $clk_freq]
+					}
+					set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+					set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+					if {[string match -nocase $iptype "canfd"] || [string match -nocase $iptype "vcu"]} {
+						set clocks [lindex $clk_refs 0]
+						append clocks ">, <&[lindex $clk_refs 1]"
+						set_drv_prop $drv_handle "clocks" "$clocks" reference
+					} elseif {[string match -nocase $iptype "axi_dma"] } {
+						switch $clkname_len {
+							"1" {
+								set clocks [lindex $clk_refs 0]
+								set_drv_prop $drv_handle "clocks" "$clocks" reference
+							}
+							"2" {
+								set clocks [lindex $clk_refs 0]
+								append clocks ">, <&[lindex $clk_refs 1]"
+								set_drv_prop $drv_handle "clocks" "$clocks" reference
+							}
+							"3" {
+								set clocks [lindex $clk_refs 0]
+								append clocks ">, <&[lindex $clk_refs 1]>, <&[lindex $clk_refs 2]"
+								set_drv_prop $drv_handle "clocks" "$clocks" reference
+							}
+							"4" {
+								set clocks [lindex $clk_refs 0]
+								append clocks ">, <&[lindex $clk_refs 1]>, <&[lindex $clk_refs 2]>, <&[lindex $clk_refs 3]"
+								set_drv_prop $drv_handle "clocks" "$clocks" reference
+							}
+						}
+					} else {
+						set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
+					}
+					append clocknames " " "$clk_pins"
+					set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
+				}
+			}
+
+			if {[string match -nocase $periph "clk_wiz_1"] && [string match -nocase $axi "1"]} {
+				switch $number {
+					"0" {
+						set peri "clk_wiz_1 0"
+						set clocks [lappend clocks $peri]
+					}
+					"1" {
+						set peri "clk_wiz_1 1"
+						set clocks [lappend clocks $peri]
+					}
+					"2" {
+						set peri "clk_wiz_1 2"
+						set clocks [lappend clocks $peri]
+					}
+					"3" {
+						set peri "clk_wiz_1 3"
+						set clocks [lappend clocks $peri]
+					}
+					"4" {
+						set peri "clk_wiz_1 4"
+						set clocks [lappend clocks $peri]
+					}
+					"5" {
+						set peri "clk_wiz_1 5"
+						set clocks [lappend clocks $peri]
+					}
+					"6" {
+						set peri "clk_wiz_1 6"
+						set clocks [lappend clocks $peri]
+					}
+					"7" {
+						set peri "clk_wiz_1 7"
+						set clocks [lappend clocks $peri]
+					}
+				}
+			}
+			if {[string match -nocase $periph "clk_wiz_0"] && [string match -nocase $axi "1"]} {
+				switch $number {
+					"0" {
+						set peri "clk_wiz_0 0"
+						set clocks [lappend clocks $peri]
+					}
+					"1" {
+						set peri "clk_wiz_0 1"
+						set clocks [lappend clocks $peri]
+					}
+					"2" {
+						set peri "clk_wiz_0 2"
+						set clocks [lappend clocks $peri]
+					}
+					"3" {
+						set peri "clk_wiz_0 3"
+						set clocks [lappend clocks $peri]
+					}
+					"4" {
+						set peri "clk_wiz_0 4"
+						set clocks [lappend clocks $peri]
+					}
+					"5" {
+						set peri "clk_wiz_0 5"
+						set clocks [lappend clocks $peri]
+					}
+					"6" {
+						set peri "clk_wiz_0 6"
+						set clocks [lappend clocks $peri]
+					}
+					"7" {
+						set peri "clk_wiz_0 7"
+						set clocks [lappend clocks $peri]
+					}
+				}
+			}
+
+	}
+
+		set clk_fclk_list "FCLK_CLK*"
+		foreach pin $pins {
+			if {[regexp $clk_fclk_list $pin match]} {
+				set fclk_clk $pin
+			}
+		}
+		switch $fclk_clk {
+			"FCLK_CLK0" {
+					set fclk_clk0 "clkc 15"
+					set clocks [lappend clocks $fclk_clk0]
+			}
+			"FCLK_CLK1" {
+					set fclk_clk1 "clkc 16"
+					set clocks [lappend clocks $fclk_clk1]
+			}
+			"FCLK_CLK2" {
+					set fclk_clk2 "clkc 17"
+					set clocks [lappend clocks $fclk_clk2]
+			}
+			"FCLK_CLK3" {
+					set fclk_clk3 "clkc 18"
+					set clocks [lappend clocks $fclk_clk3]
+			}
+			default {
+					dtg_warning "not supported fclk_clk:$fclk_clk"
+			}
+		}
+		if {[string match -nocase $is_clk_wiz "0"] || [string match -nocase $axi "1"]} {
+			append clocknames " " "$clk_pins"
+			set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
+		}
+	}
+		if {[string match -nocase $is_clk_wiz "0"] || [string match -nocase $axi "1"]} {
+			set len [llength $clocks]
+			switch $len {
+				"1" {
+					set clk_refs [lindex $clocks 0]
+					set_drv_prop $drv_handle "clocks" "$clk_refs" reference
+				}
+				"2" {
+					set clk_refs [lindex $clocks 0]
+					append clk_refs ">, <&[lindex $clocks 1]"
+					set_drv_prop $drv_handle "clocks" "$clk_refs" reference
+				}
+				"3" {
+					set clk_refs [lindex $clocks 0]
+					append clk_refs ">, <&[lindex $clocks 1]>, <&[lindex $clocks 2]"
+					set_drv_prop $drv_handle "clocks" "$clk_refs" reference
+				}
+				"4" {
+					set clk_refs [lindex $clocks 0]
+					append clk_refs ">, <&[lindex $clocks 1]>, <&[lindex $clocks 2]>, <&[lindex $clocks 3]"
+					set_drv_prop $drv_handle "clocks" "$clk_refs" reference
+				}
+			}
+		}
+}
 
 proc update_clk_node args {
 	set drv_handle [lindex $args 0]

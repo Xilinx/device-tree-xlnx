@@ -29,4 +29,10 @@ proc generate {drv_handle} {
 		regsub -all {\-} $ip_conf {_} ip_conf
 		set_drv_conf_prop $drv_handle ${ip_conf} xlnx,${p} hexint
 	}
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "psu_cortexa53"] } {
+		update_clk_node $drv_handle "s_axi_aclk"
+	} elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
+		update_zynq_clk_node $drv_handle "s_axi_aclk"
+	}
 }

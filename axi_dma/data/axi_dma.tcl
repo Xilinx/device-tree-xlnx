@@ -114,7 +114,9 @@ proc generate {drv_handle} {
     set clkname_len [llength $clocknames]
     if {[string match -nocase $proc_type "psu_cortexa53"]} {
         update_clk_node $drv_handle $clocknames $clkname_len
-    } else {
+    } elseif {[string match -nocase $proc_type "ps7_cortexa9"]} {
+        update_zynq_clk_node $drv_handle $clocknames $clkname_len
+    } elseif {[string match -nocase $proc_type "microblaze"]} {
         generate_clk_nodes $drv_handle $axiethernetfound $tx_chan $rx_chan
     }
 
@@ -167,43 +169,18 @@ proc add_dma_coherent_prop {drv_handle intf} {
 }
 
 proc generate_clk_nodes {drv_handle axiethernetfound tx_chan rx_chan} {
-    set proc_type [get_sw_proc_prop IP_NAME]
-    set clocknames "s_axi_lite_aclk"
-
-    switch $proc_type {
-        "ps7_cortexa9" {
-            set clocks "clkc 15"
-            if { $axiethernetfound != 1 } {
-                append clocknames " " "m_axi_sg_aclk"
-                append clocks "" ">, <&clkc 15"
-            }
-            if { $tx_chan ==1 } {
-                append clocknames " " "m_axi_mm2s_aclk"
-                append clocks "" ">, <&clkc 15"
-            }
-            if { $rx_chan ==1 } {
-                append clocknames " " "m_axi_s2mm_aclk"
-                append clocks "" ">, <&clkc 15"
-            }
-            set_drv_prop_if_empty $drv_handle "clocks" $clocks reference
-            set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
-        } "microblaze" {
-            if { $axiethernetfound != 1 } {
-                append clocknames " " "m_axi_sg_aclk"
-            }
-            if { $tx_chan ==1 } {
-                append clocknames " " "m_axi_mm2s_aclk"
-            }
-            if { $rx_chan ==1 } {
-                append clocknames " " "m_axi_s2mm_aclk"
-            }
-            gen_dev_ccf_binding $drv_handle "$clocknames"
-            set_drv_prop_if_empty $drv_handle "clock-names" "$clocknames" stringlist
-        }
-        default {
-            error "Unknown arch"
-        }
-    }
+	set clocknames "s_axi_lite_aclk"
+	if { $axiethernetfound != 1 } {
+		append clocknames " " "m_axi_sg_aclk"
+	}
+	if { $tx_chan ==1 } {
+		append clocknames " " "m_axi_mm2s_aclk"
+	}
+	if { $rx_chan ==1 } {
+		append clocknames " " "m_axi_s2mm_aclk"
+	}
+	gen_dev_ccf_binding $drv_handle "$clocknames"
+	set_drv_prop_if_empty $drv_handle "clock-names" "$clocknames" stringlist
 }
 
 proc get_connected_ip {drv_handle dma_pin} {

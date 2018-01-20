@@ -29,7 +29,15 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_property $drv_handle "interrupt-controller" boolean ""
 	}
 	set proc_type [get_sw_proc_prop IP_NAME]
-	if {[string match -nocase $proc_type "psu_cortexa53"]} {
-		update_clk_node $drv_handle "s_axi_aclk"
+	switch $proc_type {
+		"psu_cortexa53" {
+			update_clk_node $drv_handle "s_axi_aclk"
+		} "microblaze"   {
+			gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+		} "ps7_cortexa9" {
+			update_zynq_clk_node $drv_handle "s_axi_aclk"
+		} default {
+			error "Unknown arch"
+		}
 	}
 }

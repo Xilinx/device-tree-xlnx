@@ -50,8 +50,7 @@ proc generate {drv_handle} {
 		"psu_cortexa53" {
 			update_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
 		} "ps7_cortexa9" {
-			set_drv_prop_if_empty $drv_handle "clocks" "clkc 15>, <&clkc 15" reference
-			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+			update_zynq_clk_wiz_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
 		} "microblaze"  {
 			gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"
 			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist

@@ -35,10 +35,7 @@ proc generate {drv_handle} {
     set proc_type [get_sw_proc_prop IP_NAME]
     switch $proc_type {
         "ps7_cortexa9" {
-            # for 2014.4
-            # workaround for hsm can't generate the correct reference for multiple cells
-            set_drv_prop_if_empty $drv_handle "clocks" "clkc 0 &clkc 1" reference
-            set_drv_prop_if_empty $drv_handle "clock-names" "can_clk s_axi_aclk" stringlist
+             update_zynq_clk_node $drv_handle "can_clk s_axi_aclk"
         } "psu_cortexa53" {
              update_clk_node $drv_handle "can_clk s_axi_aclk"
         } "microblaze" {
