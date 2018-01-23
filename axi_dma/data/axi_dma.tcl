@@ -91,7 +91,7 @@ proc generate {drv_handle} {
         }
     } else {
 	set proc_type [get_sw_proc_prop IP_NAME]
-	if {[string match -nocase $proc_type "ps7_cortexa9"] || [string match -nocase "microblaze"] } {
+	if {[string match -nocase $proc_type "ps7_cortexa9"] || [string match -nocase $proc_type "microblaze"] } {
 		set_drv_property $drv_handle axistream-connected "$connected_ip" reference
 		set_drv_property $drv_handle axistream-control-connected "$connected_ip" reference
 	}
