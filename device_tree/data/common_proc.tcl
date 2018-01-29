@@ -2505,6 +2505,19 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		set bus_node ""
 		# check if it has status property
 		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+		if {[string match -nocase $rt_node "&dwc3_0"]} {
+			set proc_type [get_sw_proc_prop IP_NAME]
+				if {[string match -nocase $proc_type "psu_cortexa53"] } {
+					set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
+					set avail_param [list_property [get_cells -hier $zynq_periph]]
+					if {[lsearch -nocase $avail_param "CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE"] >= 0} {
+						set val [get_property CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
+						if {$val == 0} {
+							 hsi::utils::add_new_dts_param "${rt_node}" "maximum-speed" "high-speed" stringlist
+						}
+					}
+				}
+		}
 		if {$status_disabled} {
 			if {[string match -nocase $ip_type "psu_smmu_gpv"]} {
 				return
