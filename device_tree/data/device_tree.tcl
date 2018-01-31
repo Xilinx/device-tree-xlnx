@@ -349,10 +349,12 @@ proc update_chosen {os_handle} {
     }
     hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
     set consoleip [get_property CONFIG.console_device $os_handle]
-    set consoleip [ps_node_mapping $consoleip label]
-    set index [string first "," $console]
-    set baud [string range $console [expr $index + 1] [string length $console]]
-    hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" "serial0:${baud}n8" string
+    if {![string match -nocase $consoleip "none"]} {
+         set consoleip [ps_node_mapping $consoleip label]
+         set index [string first "," $console]
+         set baud [string range $console [expr $index + 1] [string length $console]]
+         hsi::utils::add_new_dts_param "${chosen_node}" "stdout-path" "serial0:${baud}n8" string
+   }
 }
 
 proc update_cpu_node {os_handle} {
@@ -418,9 +420,11 @@ proc update_alias {os_handle} {
 	# Update all_drivers list such that console device should be the first
 	# uart device in the list.
 	set console_ip [get_property CONFIG.console_device [get_os]]
-	set valid_console [lsearch $all_drivers $console_ip]
-	if { $valid_console < 0 } {
-		error "Trying to assign a console::$console_ip which doesn't exists !!!"
+	if {![string match -nocase $console_ip "none"]} {
+		set valid_console [lsearch $all_drivers $console_ip]
+		if { $valid_console < 0 } {
+			error "Trying to assign a console::$console_ip which doesn't exists !!!"
+		}
 	}
 	set dt_overlay [get_property CONFIG.DT_Overlay [get_os]]
 	foreach drv_handle $all_drivers {
