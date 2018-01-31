@@ -119,7 +119,12 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 	set dma_channel [add_or_get_dt_node -n "dma-channel" -u $addr -p $parent_node]
 	hsi::utils::add_new_dts_param $dma_channel "compatible" [format "xlnx,%s-%s-channel" $xdma $modellow] stringlist
 	hsi::utils::add_new_dts_param $dma_channel "xlnx,device-id" $devid hexint
-
+	if {[string match -nocase $mode "S2MM"]} {
+		set vert_flip  [hsi::utils::get_ip_param_value $ip C_ENABLE_VERT_FLIP]
+		if {$vert_flip == 1} {
+			hsi::utils::add_new_dts_param $dma_channel "xlnx,enable-vert-flip" "" boolean
+		}
+	}
 	add_cross_property_to_dtnode $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
 	# detection based on two property
 	set datawidth_list "[format "CONFIG.C_%s_AXIS_%s_DATA_WIDTH" $modeIndex $mode] [format "CONFIG.C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode]"
