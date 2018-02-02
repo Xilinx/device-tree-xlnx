@@ -69,6 +69,8 @@ proc generate {drv_handle} {
     if {[string match -nocase $proc_type "psu_cortexa53"]} {
        update_clk_node $drv_handle "pll_ref_clk s_axi_lite_aclk"
     }
+    set clknames "pll_ref aclk"
+    overwrite_clknames $clknames $drv_handle
 }
 
 proc get_ipdetails {drv_handle arg} {

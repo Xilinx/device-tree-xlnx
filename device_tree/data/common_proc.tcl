@@ -1217,6 +1217,10 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	}
 }
 
+proc overwrite_clknames {clknames drv_handle} {
+	set_drv_prop $drv_handle "clock-names" $clknames stringlist
+}
+
 proc update_zynq_clk_node args {
 	set drv_handle [lindex $args 0]
 	set clk_pins [lindex $args 1]
