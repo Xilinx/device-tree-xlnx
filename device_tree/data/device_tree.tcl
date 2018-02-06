@@ -184,6 +184,9 @@ proc gen_sata_laneinfo {} {
 	lset freq 1 $j
 	set dts_file [current_dt_tree]
 	set sata_node [add_or_get_dt_node -n sata -l sata d $dts_file -p /]
+	set hsi_version [get_hsi_version]
+	set ver [split $hsi_version "."]
+	set version [lindex $ver 0]
 
 	set slane 0
 	set count 0
@@ -191,31 +194,34 @@ proc gen_sata_laneinfo {} {
 		set f [lindex $freq $slane]
 		if {$f != 0} {
 			while {$count < 4} {
+				if {$version < 2018} {
+					dtg_warning "quotes to be removed or use 2018.1 version for $sata_node params param0..param7"
+				}
 				set val_name [format [lindex $param_list $count] $slane]
 				switch $count {
 					"0" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param0 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param0 noformating
 					}
 					"1" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param1 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param1 noformating
 					}
 					"2" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param2 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param2 noformating
 					}
 					"3" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param3 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param3 noformating
 					}
 					"4" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param4 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param4 noformating
 					}
 					"5" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param5 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param5 noformating
 					}
 					"6" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param6 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param6 noformating
 					}
 					"7" {
-					hsi::utils::add_new_dts_param $sata_node $val_name $param7 string
+					hsi::utils::add_new_dts_param $sata_node $val_name $param7 noformating
 					}
 				}
 			incr count

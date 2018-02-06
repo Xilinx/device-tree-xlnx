@@ -193,12 +193,19 @@ proc generate {drv_handle} {
             set target_handle $ip
         }
     }
-
+    set hsi_version [get_hsi_version]
+    set ver [split $hsi_version "."]
+    set version [lindex $ver 0]
     if {![string_is_empty $connected_ip]} {
         set connected_ipname [get_property IP_NAME $connected_ip]
         if {$connected_ipname == "axi_mcdma"} {
             set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
-            set_property xlnx,num-queues $num_queues $drv_handle
+            set inhex [format %x $num_queues]
+            append numqueues "/bits/ $num_queues <0x$inhex>"
+            hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
+            if {$version < 2018} {
+                dtg_warning "quotes to be removed or use 2018.1 version for $node param xlnx,num-queues"
+            }
             set id 1
             for {set i 2} {$i <= $num_queues} {incr i} {
                 set i [format "%x" $i]
