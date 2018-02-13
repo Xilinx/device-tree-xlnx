@@ -22,7 +22,4 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-	# work around for CR#979016
-	set_drv_prop $drv_handle interrupts "0 89 4" intlist
-	set_drv_prop $drv_handle interrupt-parent "gic" reference
 }
