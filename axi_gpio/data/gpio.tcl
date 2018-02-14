@@ -34,6 +34,7 @@ proc generate {drv_handle} {
 			update_clk_node $drv_handle "s_axi_aclk"
 		} "microblaze"   {
 			gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_aclk" stringlist
 		} "ps7_cortexa9" {
 			update_zynq_clk_node $drv_handle "s_axi_aclk"
 		} default {
