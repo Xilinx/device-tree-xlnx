@@ -231,6 +231,29 @@ proc gen_sata_laneinfo {} {
 	}
 }
 
+proc gen_ext_axi_interface {}  {
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "psu_cortexa53"]} {
+		set ext_axi_intf [get_mem_ranges -of_objects [get_cells psu_cortexa53_0] -filter {INSTANCE ==""}]
+		set hsi_version [get_hsi_version]
+		set ver [split $hsi_version "."]
+		set version [lindex $ver 0]
+		foreach drv_handle $ext_axi_intf {
+			set base [string tolower [get_property BASE_VALUE $drv_handle]]
+			set high [string tolower [get_property HIGH_VALUE $drv_handle]]
+			set size [format 0x%x [expr {${high} - ${base} + 1}]]
+			set default_dts pl.dtsi
+			set bus_node "amba_pl"
+			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $bus_node]
+			set reg "0x0 $base 0x0 $size"
+			hsi::utils::add_new_dts_param $ext_int_node "reg" "$reg" intlist
+			if {$version >= 2018} {
+				hsi::utils::add_new_dts_param "${ext_int_node}" "/* This is a external AXI interface, user may need to update the entries */" "" comment
+			}
+		}
+	}
+}
+
 proc gen_board_info {} {
     # periph_type_overrides = {BOARD KC705 full/lite} or {BOARD ZYNQ} or {BOARD ZC1751 ES2/ES1}
     set overrides [get_property CONFIG.periph_type_overrides [get_os]]
@@ -311,6 +334,7 @@ proc generate {lib_handle} {
 	gen_sata_laneinfo
 	gen_zynqmp_ccf_clk
     }
+    gen_ext_axi_interface
 }
 
 proc post_generate {os_handle} {
