@@ -66,19 +66,19 @@ proc update_clk_wiz_node args {
 
 		switch $clkk {
 			"pl_clk0" {
-					set pl_clk0 "clkc 71"
+					set pl_clk0 "clk 71"
 					set clocks [lappend clocks $pl_clk0]
 				}
 			"pl_clk1" {
-					set pl_clk1 "clkc 72"
+					set pl_clk1 "clk 72"
 					set clocks [lappend clocks $pl_clk1]
 				}
 			"pl_clk2" {
-					set pl_clk2 "clkc 73"
+					set pl_clk2 "clk 73"
 					set clocks [lappend clocks $pl_clk2]
 				}
 			"pl_clk3" {
-					set pl_clk3 "clkc 74"
+					set pl_clk3 "clk 74"
 					set clocks [lappend clocks $pl_clk3]
 				}
 			default  {
