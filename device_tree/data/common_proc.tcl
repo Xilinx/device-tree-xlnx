@@ -1984,6 +1984,9 @@ proc get_intr_type {intc_name ip_name port_name} {
 	if {[llength $intc] == 0 && [llength $ip] == 0} {
 		return -1
 	}
+	if {[llength $intc] == 0} {
+		return -1
+	}
 	set intr_pin [get_pins -of_objects $ip $port_name]
 	set sensitivity ""
 	if {[llength $intr_pin] >= 1} {
