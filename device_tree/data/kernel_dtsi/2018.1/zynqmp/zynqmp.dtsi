@@ -940,7 +940,7 @@
 		};
 
 		pinctrl0: pinctrl@ff180000 {
-			compatible = "xlnx,pinctrl-zynqmp";
+			compatible = "xlnx,zynqmp-pinctrl";
 			status = "disabled";
 			reg = <0x0 0xff180000 0x0 0x1000>;
 		};
