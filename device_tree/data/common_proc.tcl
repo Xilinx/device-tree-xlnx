@@ -2532,7 +2532,11 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 			hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
 		}
 	} else {
-		set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+		if {[string match -nocase $ip_type "tsn_endpoint_ethernet_mac"]} {
+			set rt_node [add_or_get_dt_node -n tsn_endpoint_ip_0 -l tsn_endpoint_ip_0 -d ${default_dts} -p $bus_node -auto_ref_parent]
+		} else {
+			set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u ${unit_addr} -d ${default_dts} -p $bus_node -auto_ref_parent]
+		}
 	}
 
 	if {![string_is_empty $node_only]} {
