@@ -2297,7 +2297,11 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 			} else {
 				# ensure no duplication
 				if {![regexp ".*${reg}.*" "$base $size" matched]} {
-					set reg "$reg $base $size"
+					if {[string match -nocase $proctype "psu_cortexa53"]} {
+						set reg "$reg 0x0 $base 0x0 $size"
+					} else {
+						set reg "$reg $base $size"
+					}
 				}
 			}
 		}
