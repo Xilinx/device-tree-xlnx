@@ -311,7 +311,3 @@
 	phy-names = "usb3-phy";
 	phys = <&lane2 4 0 2 26000000>;
 };
-
-&xlnx_dp_sub {
-	xlnx,vid-clk-pl;
-};
