@@ -27,10 +27,19 @@ proc generate {drv_handle} {
 	set eth_ip [get_cells -hier $drv_handle]
 	set ip_name [get_property IP_NAME $eth_ip]
 
-	set stream_connected ""
 	set end_point_ip ""
+	set end1 ""
 	set connectrx_ip ""
+	set connecttx_ip ""
 	set connected_ip [hsi::utils::get_connected_stream_ip $eth_ip "tx_axis_be"]
+	if {[llength $connected_ip] != 0} {
+		set end1_ip [hsi::utils::get_connected_stream_ip $connected_ip "S00_AXIS"]
+		if {[llength $end1_ip] != 0} {
+			set end1 [lappend end1 $end1_ip]
+		} else {
+			set connecttx_ip [lappend connecttx_ip $connected_ip]
+		}
+	}
 	set connect_ip [hsi::utils::get_connected_stream_ip $eth_ip "rx_axis_be"]
 	if {[llength $connect_ip] != 0} {
 		set end_ip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
@@ -40,11 +49,16 @@ proc generate {drv_handle} {
 			set connectrx_ip [lappend connectrx_ip $connect_ip]
 		}
 	}
-	if {[llength $connected_ip] != 0} {
-		set stream_connected [lappend stream_connected $connected_ip]
-	}
 
 	set connected_ip [hsi::utils::get_connected_stream_ip $eth_ip "tx_axis_res"]
+	if {[llength $connected_ip] != 0} {
+		set end1_ip [hsi::utils::get_connected_stream_ip $connected_ip "S00_AXIS"]
+		if {[llength $end1_ip] != 0} {
+			set end1 [lappend end1 $end1_ip]
+		} else {
+			set connecttx_ip [lappend connecttx_ip $connected_ip]
+		}
+	}
 	set connect_ip [hsi::utils::get_connected_stream_ip $eth_ip "rx_axis_res"]
 	if {[llength $connect_ip] != 0} {
 		set end_ip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
@@ -54,11 +68,16 @@ proc generate {drv_handle} {
 			set connectrx_ip [lappend connectrx_ip $connect_ip]
 		}
 	}
-	if {[llength $connected_ip] != 0} {
-		set stream_connected [lappend stream_connected $connected_ip]
-	}
 
 	set connected_ip [hsi::utils::get_connected_stream_ip $eth_ip "tx_axis_st"]
+	if {[llength $connected_ip] != 0} {
+		set end1_ip [hsi::utils::get_connected_stream_ip $connected_ip "S00_AXIS"]
+		if {[llength $end1_ip] != 0} {
+			set end1 [lappend end1 $end1_ip]
+		} else {
+			set connecttx_ip [lappend connecttx_ip $connected_ip]
+		}
+	}
 	set connect_ip [hsi::utils::get_connected_stream_ip $eth_ip "rx_axis_st"]
 	if {[llength $connect_ip] != 0} {
 		set end_ip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
@@ -67,9 +86,6 @@ proc generate {drv_handle} {
 		} else {
 			set connectrx_ip [lappend connectrx_ip $connect_ip]
 		}
-	}
-	if {[llength $connected_ip] != 0} {
-		set stream_connected [lappend stream_connected $connected_ip]
 	}
 
 	set baseaddr [get_baseaddr $eth_ip no_prefix]
@@ -115,13 +131,13 @@ proc generate {drv_handle} {
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac0_size [get_property CONFIG.TEMAC_1_SIZE $eth_ip]
-			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $stream_connected $end_point_ip $numqueues $freq $intr_parent $mac0intr $eth_ip $connectrx_ip
+			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $end1 $end_point_ip $numqueues $freq $intr_parent $mac0intr $eth_ip $connectrx_ip $connecttx_ip
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
 			set tmac1_offset [get_property CONFIG.TEMAC_2_OFFSET $eth_ip]
 			set tmac1_size [get_property CONFIG.TEMAC_2_SIZE $eth_ip]
 			set addr_off [format %08x [expr 0x$baseaddr + $tmac1_offset]]
-			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $stream_connected $end_point_ip $node $drv_handle $proc_type $freq $eth_ip $mac1intr $connectrx_ip
+			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $end1 $end_point_ip $node $drv_handle $proc_type $freq $eth_ip $mac1intr $connectrx_ip $connecttx_ip
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
 			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
@@ -223,7 +239,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-queues" $numqueues noformating
 }
 
-proc gen_mac0_node {periph addr size parent_node proc_type drv_handle stream_connected end_point_ip numqueues freq intr_parent mac0intr eth_ip connectrx_ip} {
+proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_point_ip numqueues freq intr_parent mac0intr eth_ip connectrx_ip connecttx_ip} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l tsn_emac_0 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsnreg "0x$addr $size"
@@ -269,23 +285,53 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle stream_con
 			gen_phy_node $mdionode $phy_name $phya
 		}
 	}
-	set len [llength $stream_connected]
+	set len [llength $end1]
 	switch $len {
 		"1" {
-			set ref_id [lindex $stream_connected 0]
+			set ref_id [lindex $end1 0]
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 		"2" {
-			set ref_id [lindex $stream_connected 0]
-			append ref_id ">, <&[lindex $stream_connected 1]"
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 		"3" {
-			set ref_id [lindex $stream_connected 0]
-			append ref_id ">, <&[lindex $stream_connected 1]>, <&[lindex $stream_connected 2]"
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]>, <&[lindex $end1 2]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 	}
+	set len3 [llength $connecttx_ip]
+	switch $len3 {
+		"1" {
+			set ref_id [lindex $connecttx_ip 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]>, <&[lindex $connecttx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+	}
+	if {$len && $len3} {
+		if {$len == 1} {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]>, <&[lindex $connecttx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		if {$len == 2} {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]>, <&[lindex $connecttx_ip 0]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+	}
+
 	set len1 [llength $end_point_ip]
 	switch $len1 {
 		"1" {
@@ -322,7 +368,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle stream_con
 	}
 }
 
-proc gen_mac1_node {periph addr size numqueues intr_parent stream_connected end_point_ip parent_node drv_handle proc_type freq eth_ip mac1intr connectrx_ip} {
+proc gen_mac1_node {periph addr size numqueues intr_parent end1 end_point_ip parent_node drv_handle proc_type freq eth_ip mac1intr connectrx_ip connecttx_ip} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l tsn_emac_1 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsn_reg "0x$addr $size"
@@ -371,20 +417,20 @@ proc gen_mac1_node {periph addr size numqueues intr_parent stream_connected end_
 			gen_phy_node $mdionode $phy_name $phya
 		}
 	}
-	set len [llength $stream_connected]
+	set len [llength $end1]
 	switch $len {
 		"1" {
-			set ref_id [lindex $stream_connected 0]
+			set ref_id [lindex $end1 0]
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 		"2" {
-			set ref_id [lindex $stream_connected 0]
-			append ref_id ">, <&[lindex $stream_connected 1]"
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 		"3" {
-			set ref_id [lindex $stream_connected 0]
-			append ref_id ">, <&[lindex $stream_connected 1]>, <&[lindex $stream_connected 2]"
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]>, <&[lindex $end1 2]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 	}
@@ -420,6 +466,23 @@ proc gen_mac1_node {periph addr size numqueues intr_parent stream_connected end_
 			set ref_id [lindex $connectrx_ip 0]
 			append ref_id ">, <&[lindex $connectrx_ip 1]>, <&[lindex $connectrx_ip 2]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+	}
+	set len3 [llength $connecttx_ip]
+	switch $len3 {
+		"1" {
+			set ref_id [lindex $connecttx_ip 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]>, <&[lindex $connecttx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
 		}
 	}
 }
