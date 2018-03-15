@@ -3332,7 +3332,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
     foreach sink_pin $sink_pins {
         set sink_periph [::hsi::get_cells -of_objects $sink_pin]
 	if {[llength $sink_periph] == 0 } {
-		break
+		continue
 	}
         set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
         # check for direct connection or concat block connected
