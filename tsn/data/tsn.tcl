@@ -49,6 +49,25 @@ proc generate {drv_handle} {
 			set connectrx_ip [lappend connectrx_ip $connect_ip]
 		}
 	}
+	foreach ip [get_drivers] {
+		if {[string compare -nocase $ip $end_ip] == 0} {
+			set target_handle $ip
+		}
+	}
+	set connectedrx_ipname [get_property IP_NAME $end_ip]
+	set id 1
+	if {$connectedrx_ipname == "axi_mcdma"} {
+		set num_queues [get_property CONFIG.c_num_s2mm_channels $end_ip]
+		for {set i 2} {$i <= $num_queues} {incr i} {
+			set i [format "%x" $i]
+			append id "\""
+			append id ",\"" $i
+			set i [expr 0x$i]
+		}
+		set int1 [get_property CONFIG.interrupts $target_handle]
+		set int2 [get_property CONFIG.interrupt-parent $target_handle]
+		set int3  [get_property CONFIG.interrupt-names $target_handle]
+	}
 
 	set connected_ip [hsi::utils::get_connected_stream_ip $eth_ip "tx_axis_res"]
 	if {[llength $connected_ip] != 0} {
@@ -131,7 +150,7 @@ proc generate {drv_handle} {
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac0_size [get_property CONFIG.TEMAC_1_SIZE $eth_ip]
-			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $end1 $end_point_ip $numqueues $freq $intr_parent $mac0intr $eth_ip $connectrx_ip $connecttx_ip
+			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $end1 $end_point_ip $numqueues $freq $intr_parent $mac0intr $eth_ip $connectrx_ip $connecttx_ip $int3 $int1 $id
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
 			set tmac1_offset [get_property CONFIG.TEMAC_2_OFFSET $eth_ip]
@@ -239,7 +258,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-queues" $numqueues noformating
 }
 
-proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_point_ip numqueues freq intr_parent mac0intr eth_ip connectrx_ip connecttx_ip} {
+proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_point_ip numqueues freq intr_parent mac0intr eth_ip connectrx_ip connecttx_ip int3 int1 id} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l tsn_emac_0 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsnreg "0x$addr $size"
@@ -265,6 +284,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_p
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,channel-ids" $id string
 	set intr_len [llength $mac0intr]
 	for {set i 0} {$i < $intr_len} {incr i} {
 		lappend intr [lindex $mac0intr $i]
@@ -272,6 +292,12 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_p
 	}
 	regsub -all "\{||\t" $intr_num {} intr_num
 	regsub -all "\}||\t" $intr_num {} intr_num
+	foreach intr $int3 {
+		lappend mac0intr $intr
+	}
+	foreach int $int1 {
+		lappend intr_num $int
+	}
 	hsi::utils::add_new_dts_param $tsn_mac_node "interrupts" $intr_num intlist
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-parent" $intr_parent reference
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-names" $mac0intr stringlist
