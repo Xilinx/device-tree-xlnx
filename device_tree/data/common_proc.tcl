@@ -1823,7 +1823,13 @@ proc update_clk_node args {
 			hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
 			hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 			hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
-			set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
+			if {[string match -nocase $iptype "vcu"]} {
+				set clocks [lindex $clk_refs 0]
+				append clocks ">, <&[lindex $clk_refs 1]"
+				set_drv_prop $drv_handle "clocks" "$clocks" reference
+			} else {
+				set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
+			}
 			append clocknames " " "$clk_pins"
 			set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
 			}
@@ -1831,6 +1837,7 @@ proc update_clk_node args {
 	}
 
 		if {[string match -nocase $is_clk_wiz "0"] || [string match -nocase $axi "1"]} {
+			if {[string match -nocase $is_pl_clk "1"]} {
 			set len [llength $clocks]
 			switch $len {
 				"1" {
@@ -1858,6 +1865,7 @@ proc update_clk_node args {
 					set_drv_prop $drv_handle "clocks" "$clk_refs" reference
 				}
 			}
+		}
 		}
 		if {[string match -nocase $is_pl_clk "1"]} {
 			set len [llength $clocks]
