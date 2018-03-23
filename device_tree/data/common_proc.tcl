@@ -567,7 +567,9 @@ proc dt_node_def_checking {node_label node_name node_ua node_obj} {
 	if {[string equal -nocase $node_ua $def_string]} {
 		set node_ua ""
 	}
-
+	if {[string match -nocase "data_source" $node_label]} {
+		return 1
+	}
 	# ignore reference node as it does not have label and unit_addr
 	if {![regexp "^&.*" "$node_obj" match]} {
 		set old_label [get_property "NODE_LABEL" $node_obj]
@@ -2466,7 +2468,6 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	if {[string_is_empty $dev_type] == 1} {
 		set dev_type [get_property IP_NAME [get_cell -hier $ip]]
 	}
-
 	# TODO: more ignore ip list?
 	set ip_type [get_property IP_NAME $ip]
 	set ignore_list "lmb_bram_if_cntlr"
