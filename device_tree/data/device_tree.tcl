@@ -189,9 +189,9 @@ proc gen_sata_laneinfo {} {
 	set version [lindex $ver 0]
 
 	set slane 0
-	set count 0
 	while {$slane < 2} {
 		set f [lindex $freq $slane]
+		set count 0
 		if {$f != 0} {
 			while {$count < 4} {
 				if {$version < 2018} {
