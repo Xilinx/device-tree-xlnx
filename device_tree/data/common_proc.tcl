@@ -204,6 +204,9 @@ proc get_intr_id {drv_handle intr_port_name} {
 					}
 				}
 			}
+			if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa53"] && [string match -nocase $intc "axi_intc"] } {
+				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
+			}
 		}
 		if {[string match -nocase $proctype "psu_cortexa53"] } {
 			set intr_id [get_psu_interrupt_id $drv_handle $pin]
