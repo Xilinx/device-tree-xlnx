@@ -310,6 +310,7 @@ proc gen_zynqmp_ccf_clk {} {
 				if {[string match -nocase $freq "33.333"]} {
 					return
 				} else {
+					dtg_warning "Frequency $freq used instead of 33.333"
 					hsi::utils::add_new_dts_param "${ccf_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
