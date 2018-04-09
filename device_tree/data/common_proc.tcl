@@ -3347,6 +3347,14 @@ proc get_psu_interrupt_id { ip_name port_name } {
             set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
             foreach pin $sink_pins {
                 set sink_pin $pin
+                if {[string match -nocase $sink_pin "IRQ0_F2P"]} {
+                     set sink_pin "IRQ0_F2P"
+                     break
+                }
+                if {[string match -nocase $sink_pin "IRQ1_F2P"]} {
+                     set sink_pin "IRQ1_F2P"
+                     break
+                }
             }
         }
         # check for ORgate
