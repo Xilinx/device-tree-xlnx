@@ -2529,10 +2529,41 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 				if {[string match -nocase $proc_type "psu_cortexa53"] } {
 					set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
 					set avail_param [list_property [get_cells -hier $zynq_periph]]
-					if {[lsearch -nocase $avail_param "CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE"] >= 0} {
-						set val [get_property CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
-						if {$val == 0} {
-							 hsi::utils::add_new_dts_param "${rt_node}" "maximum-speed" "high-speed" stringlist
+					if {[lsearch -nocase $avail_param "CONFIG.PSU__USB0__PERIPHERAL__ENABLE"] >= 0} {
+						set value [get_property CONFIG.PSU__USB0__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
+						if {$value == 1} {
+							if {[lsearch -nocase $avail_param "CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE"] >= 0} {
+								set val [get_property CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
+								if {$val == 0} {
+									hsi::utils::add_new_dts_param "${rt_node}" "maximum-speed" "high-speed" stringlist
+									hsi::utils::add_new_dts_param "${rt_node}" "snps,dis_u2_susphy_quirk" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "snps,dis_u3_susphy_quirk" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "/delete-property/ phy-names" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "/delete-property/ phys" "" boolean
+								}
+							}
+						}
+					}
+				}
+		}
+		if {[string match -nocase $rt_node "&dwc3_1"]} {
+			set proc_type [get_sw_proc_prop IP_NAME]
+				if {[string match -nocase $proc_type "psu_cortexa53"] } {
+					set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
+					set avail_param [list_property [get_cells -hier $zynq_periph]]
+					if {[lsearch -nocase $avail_param "CONFIG.PSU__USB1__PERIPHERAL__ENABLE"] >= 0} {
+						set value [get_property CONFIG.PSU__USB1__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
+						if {$value == 1} {
+							if {[lsearch -nocase $avail_param "CONFIG.PSU__USB3_1__PERIPHERAL__ENABLE"] >= 0} {
+								set val [get_property CONFIG.PSU__USB3_1__PERIPHERAL__ENABLE [get_cells -hier $zynq_periph]]
+								if {$val == 0} {
+									hsi::utils::add_new_dts_param "${rt_node}" "maximum-speed" "high-speed" stringlist
+									hsi::utils::add_new_dts_param "${rt_node}" "snps,dis_u2_susphy_quirk" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "snps,dis_u3_susphy_quirk" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "/delete-property/ phy-names" "" boolean
+									hsi::utils::add_new_dts_param "${rt_node}" "/delete-property/ phys" "" boolean
+								}
+							}
 						}
 					}
 				}
