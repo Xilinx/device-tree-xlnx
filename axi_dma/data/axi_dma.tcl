@@ -153,6 +153,9 @@ proc add_dma_coherent_prop {drv_handle intf} {
     while {[string match -nocase $intrconnect "axi_interconnect"]} {
         # loop over number of master interfaces
         set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectedip] -filter {TYPE==MASTER}]
+        if {[llength $master_intf] == 0} {
+                break
+        }
         foreach interface ${master_intf} {
             set intf_port [hsi::utils::get_connected_intf $connectedip $interface]
             set intrconnect [hsi::utils::get_connected_stream_ip $connectedip $interface]
