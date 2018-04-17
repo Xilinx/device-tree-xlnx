@@ -1,3 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Xilinx ZynqMP ZCU102 RevB
+ *
+ * (C) Copyright 2016 - 2018, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
 / {
 	model = "ZynqMP ZCU102 RevB";
 	compatible = "xlnx,zynqmp-zcu102-revB", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
@@ -107,7 +116,7 @@
 		 */
 	};
 
-	i2cswitch@75 { /* u60 */
+	i2c-mux@75 { /* u60 */
 		compatible = "nxp,pca9544";
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -220,51 +229,51 @@
 			reg = <2>;
 			/* MAXIM_PMBUS - 00 */
 			max15301@a { /* u46 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0xa>;
 			};
 			max15303@b { /* u4 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0xb>;
 			};
 			max15303@10 { /* u13 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x10>;
 			};
 			max15301@13 { /* u47 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0x13>;
 			};
 			max15303@14 { /* u7 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x14>;
 			};
 			max15303@15 { /* u6 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x15>;
 			};
 			max15303@16 { /* u10 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x16>;
 			};
 			max15303@17 { /* u9 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x17>;
 			};
 			max15301@18 { /* u63 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0x18>;
 			};
 			max15303@1a { /* u49 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1a>;
 			};
 			max15303@1b { /* u8 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1b>;
 			};
 			max15303@1d { /* u18 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1d>;
 			};
 
@@ -272,11 +281,11 @@
 drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 */
 			max20751@72 { /* u95 FIXME - not detected */
-				compatible = "max20751";
+				compatible = "maxim,max20751";
 				reg = <0x72>;
 			};
 			max20751@73 { /* u96 FIXME - not detected */
-				compatible = "max20751";
+				compatible = "maxim,max20751";
 				reg = <0x73>;
 			};
 		};
@@ -296,7 +305,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 	/* FIXME PL i2c via PCA9306 - u45 */
 	/* FIXME MSP430 - u41 - not detected */
-	i2cswitch@74 { /* u34 */
+	i2c-mux@74 { /* u34 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -371,7 +380,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 		/* 5 - 7 unconnected */
 	};
 
-	i2cswitch@75 {
+	i2c-mux@75 {
 		compatible = "nxp,pca9548"; /* u135 */
 		#address-cells = <1>;
 		#size-cells = <0>;

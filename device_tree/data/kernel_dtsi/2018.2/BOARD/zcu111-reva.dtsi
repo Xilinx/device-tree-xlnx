@@ -1,12 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * dts file for Xilinx ZynqMP ZCU111
  *
- * (C) Copyright 2017, Xilinx, Inc.
+ * (C) Copyright 2017 - 2018, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
+
 / {
 	model = "ZynqMP ZCU111 RevA";
 	compatible = "xlnx,zynqmp-zcu111-revA", "xlnx,zynqmp-zcu111", "xlnx,zynqmp";
@@ -83,12 +83,12 @@
 		 */
 	};
 
-	i2cswitch@75 { /* u23 */
+	i2c-mux@75 { /* u23 */
 		compatible = "nxp,pca9544";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x75>;
-		i2c@0 { /* i2c mw 75 0 1 */
+		i2c@0 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
@@ -171,11 +171,11 @@
 			reg = <1>;
 			/* NC */
 		};
-		i2c@2 { /* i2c mw 75 0 4 */
+		i2c@2 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			irps5401_43: irps54012@43 { /* IRPS5401 - u53 check these   */
+			irps5401_43: irps54012@43 { /* IRPS5401 - u53 check these */
 				#clock-cells = <0>;
 				compatible = "infineon,irps5401";
 				reg = <0x43>;
@@ -197,7 +197,7 @@
 			/* J19 header too */
 
 		};
-		i2c@3 { /* i2c mw 75 0 8 */
+		i2c@3 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
@@ -213,12 +213,12 @@
 	scl-gpios = <&gpio 16 0>;
 	sda-gpios = <&gpio 17 0>;
 
-	i2cswitch@74 { /* u26 */
+	i2c-mux@74 { /* u26 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x74>;
-		i2c@0 { /* i2c mw 74 0 1 */
+		i2c@0 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
@@ -231,25 +231,25 @@
 			 * 768B - 1024B address 0x57
 			 */
 			eeprom: eeprom@54 { /* u88 */
-				compatible = "at,24c08";
+				compatible = "atmel,24c08";
 				reg = <0x54>;
 			};
 		};
-		i2c@1 { /* i2c mw 74 0 2 */
+		i2c@1 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			si5341: clock-generator1@36 { /* SI5341 - u46 */
+			si5341: clock-generator@36 { /* SI5341 - u46 */
 				compatible = "si5341";
 				reg = <0x36>;
 			};
 
 		};
-		i2c@2 { /* i2c mw 74 0 4 */
+		i2c@2 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			si570_1: clock-generator2@5d { /* USER SI570 - u47 */
+			si570_1: clock-generator@5d { /* USER SI570 - u47 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
 				reg = <0x5d>;
@@ -258,11 +258,11 @@
 				clock-frequency = <300000000>;
 			};
 		};
-		i2c@3 { /* i2c mw 74 0 8 */
+		i2c@3 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			si570_2: clock-generator3@5d { /* USER MGT SI570 - u49 */
+			si570_2: clock-generator@5d { /* USER MGT SI570 - u49 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
 				reg = <0x5d>;
@@ -271,16 +271,16 @@
 				clock-frequency = <148500000>;
 			};
 		};
-		i2c@4 { /* i2c mw 74 0 10 */
+		i2c@4 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			si5328: clock-generator4@69 { /* SI5328 - u48 */
+			si5328: clock-generator@69 { /* SI5328 - u48 */
 				compatible = "silabs,si5328";
 				reg = <0x69>;
 			};
 		};
-		i2c@5 { /* i2c mw 74 0 11 */
+		i2c@5 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <5>;
@@ -297,7 +297,7 @@
 					 */
 				};
 		};
-		i2c@6 { /* i2c mw 74 0 11 */
+		i2c@6 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <6>;
@@ -306,7 +306,7 @@
 		/* 7 NC */
 	};
 
-	i2cswitch@75 {
+	i2c-mux@75 {
 		compatible = "nxp,pca9548"; /* u27 */
 		#address-cells = <1>;
 		#size-cells = <0>;

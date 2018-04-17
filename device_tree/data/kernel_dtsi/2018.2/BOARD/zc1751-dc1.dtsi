@@ -1,3 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Xilinx ZynqMP zc1751-xm015-dc1
+ *
+ * (C) Copyright 2015 - 2018, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
 / {
 	model = "ZynqMP zc1751-xm015-dc1 RevA";
 	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
@@ -24,8 +33,8 @@
 	scl-gpios = <&gpio 36 0>;
 	sda-gpios = <&gpio 37 0>;
 
-	eeprom@55 {
-		compatible = "at,24c64"; /* 24AA64 */
+	eeprom: eeprom@55 {
+		compatible = "atmel,24c64"; /* 24AA64 */
 		reg = <0x55>;
 	};
 };

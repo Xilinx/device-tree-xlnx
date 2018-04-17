@@ -81,7 +81,7 @@
 
 &i2c0 {
 	clock-frequency = <100000>;
-	i2cswitch@75 { /* u11 */
+	i2c-mux@75 { /* u11 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;

@@ -1,11 +1,10 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * dts file for Xilinx ZynqMP ZCU104
  *
- * (C) Copyright 2017, Xilinx, Inc.
+ * (C) Copyright 2017 - 2018, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 / {
@@ -40,12 +39,12 @@
 	sda-gpios = <&gpio 17 0>;
 
 	/* Another connection to this bus via PL i2c via PCA9306 - u45 */
-	i2cswitch@74 { /* u34 */
+	i2c-mux@74 { /* u34 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x74>;
-		i2c@0 { /* i2c mw 74 0 1 */
+		i2c@0 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
@@ -57,25 +56,25 @@
 			 * 512B - 768B address 0x56
 			 * 768B - 1024B address 0x57
 			 */
-			eeprom@54 { /* u23 */
-				compatible = "at,24c08";
+			eeprom: eeprom@54 { /* u23 */
+				compatible = "atmel,24c08";
 				reg = <0x54>;
 				#address-cells = <1>;
 				#size-cells = <1>;
 			};
 		};
 
-		i2c@1 { /* i2c mw 74 0 2 */
+		i2c@1 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			clock_8t49n287: 8t49n287@6c { /* 8T49N287 - u182 */
+			clock_8t49n287: clock-generator@6c { /* 8T49N287 - u182 */
 				compatible = "idt,8t49n287";
 				reg = <0x6c>;
 			};
 		};
 
-		i2c@2 { /* i2c mw 74 0 4 */
+		i2c@2 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
@@ -91,12 +90,11 @@
 			};
 		};
 
-		i2c@4 { /* i2c mw 74 0 8 */
+		i2c@4 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			/* FIXME Npt detected */
-			tca6416_u97: gpio@21 { /* FIXME enable it by i2c mw 21 6 0 */
+			tca6416_u97: gpio@21 {
 				compatible = "ti,tca6416";
 				reg = <0x21>;
 				gpio-controller;
@@ -116,13 +114,13 @@
 			};
 		};
 
-		i2c@5 { /* i2c mw 74 0 10 */ /* FMC_LPC */
+		i2c@5 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <5>;
 		};
 
-		i2c@7 { /* i2c mw 74 0 14 */ /* DDR4_SODIMM */
+		i2c@7 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <7>;

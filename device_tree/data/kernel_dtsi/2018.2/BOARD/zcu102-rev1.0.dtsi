@@ -1,3 +1,11 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Xilinx ZynqMP ZCU102 Rev1.0
+ * (C) Copyright 2016 - 2018, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
 / {
 	model = "ZynqMP ZCU102 Rev1.0";
 	compatible = "xlnx,zynqmp-zcu102-rev1.0", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
@@ -107,7 +115,7 @@
 		 */
 	};
 
-	i2cswitch@75 { /* u60 */
+	i2c-mux@75 { /* u60 */
 		compatible = "nxp,pca9544";
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -296,7 +304,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 	/* FIXME PL i2c via PCA9306 - u45 */
 	/* FIXME MSP430 - u41 - not detected */
-	i2cswitch@74 { /* u34 */
+	i2c-mux@74 { /* u34 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -371,7 +379,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 		/* 5 - 7 unconnected */
 	};
 
-	i2cswitch@75 {
+	i2c-mux@75 {
 		compatible = "nxp,pca9548"; /* u135 */
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -452,19 +460,19 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 	#address-cells = <1>;
 	#size-cells = <1>;
 
-	board_sn: board_sn@0 {
+	board_sn: board-sn@0 {
 		reg = <0x0 0x14>;
 	};
 
-	eth_mac: eth_mac@20 {
+	eth_mac: eth-mac@20 {
 		reg = <0x20 0x6>;
 	};
 
-	board_name: board_name@d0 {
+	board_name: board-name@d0 {
 		reg = <0xd0 0x6>;
 	};
 
-	board_revision: board_revision@e0 {
+	board_revision: board-revision@e0 {
 		reg = <0xe0 0x3>;
 	};
 };
