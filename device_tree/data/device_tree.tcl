@@ -441,7 +441,6 @@ proc update_alias {os_handle} {
 	} else {
 		set pos [lsearch $all_drivers "psu_qspi*"]
 	}
-	set pos [lsearch $all_drivers "ps7_qspi*"]
 	if { $pos >= 0 } {
 		set first_element [lindex $all_drivers 0]
 		set qspi_element [lindex $all_drivers $pos]
