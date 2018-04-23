@@ -44,6 +44,10 @@ proc set_pcie_ranges {drv_handle} {
                        set size [format 0x%08x [expr $axi_highaddr - $axi_baseaddr + 1]]
 		       set size "$high_64bit $size"
                 }
+		if {[regexp -nocase {([0-9a-f]{9})} "$axi_baseaddr" match] || [regexp -nocase {([0-9a-f]{9})} "$axi_highaddr" match]} {
+			set range_type 0x43000000
+		}
+
 		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 			if {[regexp -nocase {([0-9a-f]{9})} "$pcie_baseaddr" match]} {
 				set temp $pcie_baseaddr
@@ -68,9 +72,6 @@ proc set_pcie_ranges {drv_handle} {
 				set axi_baseaddr "$low_base $high_base"
 			} else {
 				set axi_baseaddr "0x0 $axi_baseaddr"
-			}
-			if {$x == 1} {
-				set range_type 0x43000000
 			}
 			set value "<$range_type $pcie_baseaddr $axi_baseaddr $size>"
 		} else {
