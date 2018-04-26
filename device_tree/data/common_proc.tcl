@@ -1812,6 +1812,7 @@ proc update_clk_node args {
 		}
 		if {[string match -nocase $is_clk_wiz "0"] && [string match -nocase $is_pl_clk "0"]} {
 			set dts_file "pl.dtsi"
+			incr vcu_clk_count
 			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
 			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 			set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
@@ -1828,8 +1829,12 @@ proc update_clk_node args {
 			hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
 			if {[string match -nocase $iptype "vcu"]} {
 				set clocks [lindex $clk_refs 0]
+				if {$vcu_clk_count == 2} {
+					set_drv_prop $drv_handle "clocks" "$clocks" reference
+				} elseif {$vcu_clk_count == 3} {
 				append clocks ">, <&[lindex $clk_refs 1]"
 				set_drv_prop $drv_handle "clocks" "$clocks" reference
+				}
 			} else {
 				set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
 			}
