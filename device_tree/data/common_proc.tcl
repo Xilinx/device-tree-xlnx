@@ -1775,8 +1775,9 @@ proc update_clk_node args {
 		set clklist "pl_clk*"
 		foreach pin $pins {
 			if {[regexp $clklist $pin match]} {
-				set pl_clk $pin
-				set is_pl_clk 1
+				# Force fixed clocks
+				#set pl_clk $pin
+				#set is_pl_clk 1
 				if {[string match -nocase $iptype "axi_dma"]} {
 					incr dma_pl_clk_count
 				}
@@ -1800,14 +1801,14 @@ proc update_clk_node args {
 					set clocks [lappend clocks $pl_clk3]
 			}
 			default {
-					dtg_warning "not supported pl_clk:$pl_clk"
+					#dtg_warning "not supported pl_clk:$pl_clk"
 			}
 		}
 		if {[string match -nocase $is_clk_wiz "0"] || [string match -nocase $axi "1"]} {
 			append clocknames " " "$clk_pins"
 			set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
 		}
-		if {[string match -nocase $is_clk_wiz "0"] && [string match -nocase $is_pl_clk "0"]} {
+		if {[string match -nocase $is_clk_wiz "0"]} {
 			set dts_file "pl.dtsi"
 			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
 			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
