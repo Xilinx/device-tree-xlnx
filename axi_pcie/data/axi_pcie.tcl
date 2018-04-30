@@ -155,5 +155,6 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "interrupt-controller" "" boolean
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#address-cells" 0 int
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#interrupt-cells" 1 int
-
+	set intr_names "misc msi0 msi1"
+	set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
 }
