@@ -69,7 +69,9 @@ proc generate_dp_param {drv_handle} {
 			}
 		}
 	}
-	set dp_list "zynqmp_dp_snd_pcm0 zynqmp_dp_snd_pcm1 zynqmp_dp_snd_card0 zynqmp_dp_snd_codec0"
+	# Not available upstream yet
+	#set dp_list "zynqmp_dp_snd_pcm0 zynqmp_dp_snd_pcm1 zynqmp_dp_snd_card0 zynqmp_dp_snd_codec0"
+	set dp_list ""
 	set dts_file [get_property CONFIG.pcw_dts [get_os]]
 	foreach dp_name ${dp_list} {
 		set dp_node [add_or_get_dt_node -n "&${dp_name}" -d $dts_file]
