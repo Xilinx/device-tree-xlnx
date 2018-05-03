@@ -36,4 +36,12 @@ proc generate {drv_handle} {
 	}
 	set_drv_property $drv_handle xlnx,sdfec-op-mode $sdfec_op_mode string
 	set_drv_property $drv_handle xlnx,sdfec-code $sdfec_code string
+	set sdfec_dout_words [get_property CONFIG.C_S_DOUT_WORDS_MODE [get_cells -hier $drv_handle]]
+	set sdfec_dout_width [get_property CONFIG.DOUT_Lanes [get_cells -hier $drv_handle]]
+	set sdfec_din_words [get_property CONFIG.C_S_DIN_WORDS_MODE [get_cells -hier $drv_handle]]
+	set sdfec_din_width [get_property CONFIG.DIN_Lanes [get_cells -hier $drv_handle]]
+	set_drv_property $drv_handle xlnx,sdfec-dout-words $sdfec_dout_words int
+	set_drv_property $drv_handle xlnx,sdfec-dout-width $sdfec_dout_width int
+	set_drv_property $drv_handle xlnx,sdfec-din-words  $sdfec_din_words int
+	set_drv_property $drv_handle xlnx,sdfec-din-width  $sdfec_din_width int
 }
