@@ -2178,6 +2178,10 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 			set val [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT&&DIRECTION==O}]
+			set single [get_property CONFIG.C_IRQ_CONNECTION [get_cells -hier $slave]]
+			if {$single == 0} {
+				dtg_warning "The axi_intc Interrupt Output connection is Bus. Change it to Single"
+			}
 		} else {
 			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 		}
