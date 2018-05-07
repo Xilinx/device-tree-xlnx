@@ -3398,6 +3398,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
         # like externel[7:0] port to gic
         set pin_dir [common::get_property DIRECTION $intc_src_port]
         if { [string match -nocase $pin_dir "I"] } {
+		incr i
                 continue
         }
         if { [llength $intc_src_port] == 0 } {
