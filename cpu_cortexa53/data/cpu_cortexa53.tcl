@@ -14,8 +14,12 @@
 
 proc generate {drv_handle} {
 	global dtsi_fname
-	set dtsi_fname "zynqmp/zynqmp.dtsi"
-
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase "$mainline_ker" "v4.17"]} {
+		set dtsi_fname "zynqmp/zynqmp.dtsi"
+	} else {
+		set dtsi_fname "zynqmp/zynqmp.dtsi"
+	}
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
 		if {[file exists $common_tcl_file]} {

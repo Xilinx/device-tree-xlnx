@@ -20,10 +20,13 @@ proc generate {drv_handle} {
             break
         }
     }
-    set ams_list "ams_ps ams_pl"
-    set dts_file [get_property CONFIG.pcw_dts [get_os]]
-    foreach ams_name ${ams_list} {
-        set ams_node [add_or_get_dt_node -n "&${ams_name}" -d $dts_file]
-        hsi::utils::add_new_dts_param "${ams_node}" "status" "okay" string
+    set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+    if {[string match -nocase $mainline_ker "none"]} {
+          set ams_list "ams_ps ams_pl"
+          set dts_file [get_property CONFIG.pcw_dts [get_os]]
+          foreach ams_name ${ams_list} {
+              set ams_node [add_or_get_dt_node -n "&${ams_name}" -d $dts_file]
+              hsi::utils::add_new_dts_param "${ams_node}" "status" "okay" string
+          }
     }
 }

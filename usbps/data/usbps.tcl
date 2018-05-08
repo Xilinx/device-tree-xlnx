@@ -27,8 +27,11 @@ proc generate {drv_handle} {
     if {[string match -nocase $proctype "ps7_cortexa9"] } {
         set_drv_prop $drv_handle phy_type ulpi string
     } else {
-        set index [string index $drv_handle end]
-        set rt_node [add_or_get_dt_node -n usb -l usb$index -d $default_dts -auto_ref_parent]
-        hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "none"]} {
+             set index [string index $drv_handle end]
+             set rt_node [add_or_get_dt_node -n usb -l usb$index -d $default_dts -auto_ref_parent]
+             hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
+        }
     }
 }

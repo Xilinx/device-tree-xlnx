@@ -45,19 +45,24 @@ proc generate {drv_handle} {
 	set tx_chan [add_dma_channel $drv_handle $node "axi-cdma" $baseaddr "MM2S" $cdma_count ]
 	incr cdma_count
 	hsi::utils::set_os_parameter_value "cdma_count" $cdma_count
-	set proc_type [get_sw_proc_prop IP_NAME]
-	switch $proc_type {
-		"psu_cortexa53" {
-			update_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
-		} "ps7_cortexa9" {
-			update_zynq_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
-		} "microblaze"  {
-			gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"
-			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "none"]} {
+		set proc_type [get_sw_proc_prop IP_NAME]
+		switch $proc_type {
+			"psu_cortexa53" {
+				update_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
+			} "ps7_cortexa9" {
+				update_zynq_clk_node $drv_handle "s_axi_lite_aclk m_axi_aclk"
+			} "microblaze"  {
+				gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"
+				set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
+			}
+			default {
+				error "Unknown arch"
+			}
 		}
-		default {
-			error "Unknown arch"
-		}
+	} else {
+		generate_clk_nodes $drv_handle
 	}
 }
 
@@ -113,7 +118,7 @@ proc generate_clk_nodes {drv_handle} {
 	     hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 	     hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
             set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
-            set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs &$clk_refs" reference
+            set_drv_prop_if_empty $drv_handle "clocks" "$clk_refs>, <&$clk_refs" reference
             set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_lite_aclk m_axi_aclk" stringlist
         } "microblaze" {
             gen_dev_ccf_binding $drv_handle "s_axi_lite_aclk m_axi_aclk"

@@ -884,27 +884,48 @@ proc add_driver_prop {drv_handle dt_node prop} {
 proc create_dt_tree_from_dts_file {} {
 	global def_string dtsi_fname
 	set kernel_dtsi ""
+	set mainline_dtsi ""
 	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
-	foreach i [get_sw_cores device_tree] {
-		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${dtsi_fname}"]
-		if {[file exists $kernel_dtsi]} {
-			foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*]] {
-				# NOTE: ./ works only if we did not change our directory
-				file copy -force $file ./
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "v4.17"]} {
+		foreach i [get_sw_cores device_tree] {
+			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/v4.17/${dtsi_fname}"]
+			if {[file exists $mainline_dtsi]} {
+				foreach file [glob [file normalize [file dirname ${mainline_dtsi}]/*]] {
+					# NOTE: ./ works only if we did not change our directory
+					file copy -force $file ./
+				}
+				break
 			}
-			break
 		}
-	}
+	} else {
+		foreach i [get_sw_cores device_tree] {
+			set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/${dtsi_fname}"]
+			if {[file exists $kernel_dtsi]} {
+				foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*]] {
+					# NOTE: ./ works only if we did not change our directory
+					file copy -force $file ./
+				}
+				break
+			}
+		}
 
-	if {![file exists $kernel_dtsi] || [string_is_empty $kernel_dtsi]} {
-		error "Unable to find the dts file $kernel_dtsi"
+		if {![file exists $kernel_dtsi] || [string_is_empty $kernel_dtsi]} {
+			error "Unable to find the dts file $kernel_dtsi"
+		}
 	}
 
 	global zynq_soc_dt_tree
 	set default_dts [create_dt_tree -dts_file $zynq_soc_dt_tree]
-	set fp [open $kernel_dtsi r]
-	set file_data [read $fp]
-	set data [split $file_data "\n"]
+	if {[string match -nocase $mainline_ker "v4.17"]} {
+		set fp [open $mainline_dtsi r]
+		set file_data [read $fp]
+		set data [split $file_data "\n"]
+	} else {
+		set fp [open $kernel_dtsi r]
+		set file_data [read $fp]
+		set data [split $file_data "\n"]
+	}
 
 	set node_level -1
 	foreach line $data {
@@ -1174,14 +1195,19 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	global bus_clk_list
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
-	set valid_ip_list "axi_ethernet axi_ethernet_buffer xadc_wiz"
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "v4.17"]} {
+		set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_gpio axi_traffic_gen axi_ethernet axi_ethernet_buffer can canfd axi_iic xadc_wiz vcu"
+	} else {
+		set valid_ip_list "axi_ethernet axi_ethernet_buffer xadc_wiz"
+	}
 	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
 	if {[lsearch  -nocase $valid_proc_list $proctype] >= 0} {
 		set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 		if {[lsearch $valid_ip_list $iptype] >= 0} {
 			# FIXME: this is hardcoded - maybe dynamic detection
 			# Keep the below logic, until we have clock frame work for ZynqMP
-			if {[string match -nocase $iptype "can"]} {
+			if {[string match -nocase $iptype "can"] || [string match -nocase $iptype "canfd"]} {
 				set clks "can_clk s_axi_aclk"
 			} elseif {[string match -nocase $iptype "vcu"]} {
 				set clks "pll_ref_clk s_axi_lite_aclk"
@@ -1205,12 +1231,14 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
-					if {[string match -nocase $iptype "can"] || [string match -nocase $iptype "vcu"]} {
+					if {[string match -nocase $iptype "can"] || [string match -nocase $iptype "vcu"] || [string match -nocase $iptype "canfd"]} {
 						set clocks [lindex $clk_refs 0]
 						append clocks ">, <&[lindex $clk_refs 1]"
 						set_drv_prop $drv_handle "clocks" "$clocks" reference
+						set_drv_prop_if_empty $drv_handle "clock-names" "$clks" stringlist
 					} else {
 						set_drv_prop_if_empty $drv_handle "clocks" $clk_refs reference
+						set_drv_prop_if_empty $drv_handle "clock-names" "$clks" stringlist
 					}
 				}
 			} else {
@@ -1500,6 +1528,10 @@ proc update_clk_node args {
 	set axi 0
 	set is_clk_wiz 0
 	set is_pl_clk 0
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "v4.17"]} {
+		return
+	}
 	set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 	if {[string match -nocase $iptype "vcu"] || [string match -nocase $iptype "can"] || [string match -nocase $iptype "canfd"] || [string match -nocase $iptype "axi_cdma"]} {
 		set vcu_clk_count [hsi::utils::get_os_parameter_value "vcu_clk_count"]
@@ -2735,6 +2767,12 @@ proc gen_root_node {drv_handle} {
 		"psu_cortexa53" {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
+			set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+			if {[string match -nocase $mainline_ker "v4.17"]} {
+				update_system_dts_include [file tail ${dtsi_fname}]
+				update_system_dts_include [file tail "zynqmp-clk.dtsi"]
+				return 0
+			}
 			update_system_dts_include [file tail ${dtsi_fname}]
 			update_system_dts_include [file tail "zynqmp-clk-ccf.dtsi"]
 			# no root_node required as zynqmp.dtsi

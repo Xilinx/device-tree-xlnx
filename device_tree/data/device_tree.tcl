@@ -295,25 +295,41 @@ proc gen_board_info {} {
 			return
 		}
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
-		set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/BOARD"]
-		if {[file exists $kernel_dtsi]} {
-			foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*/*]] {
-				set dtsi_name "$dts_name.dtsi"
-                                # NOTE: ./ works only if we did not change our directory
-				if {[regexp $dtsi_name $file match]} {
-					file copy -force $file ./
-					update_system_dts_include [file tail $file]
+		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+		if {[string match -nocase $mainline_ker "v4.17"]} {
+			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${mainline_ker}/board"]
+			if {[file exists $mainline_dtsi]} {
+				foreach file [glob [file normalize [file dirname ${mainline_dtsi}]/board/*]] {
+					set dtsi_name "$dts_name.dtsi"
+					# NOTE: ./ works only if we did not change our directory
+					if {[regexp $dtsi_name $file match]} {
+						file copy -force $file ./
+						update_system_dts_include [file tail $file]
+					}
 				}
-                        }
-                    set default_dts [get_property CONFIG.master_dts [get_os]]
-		    set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-		    set valid_axi_list "kc705-full kc705-lite ac701-full ac701-lite"
-		    set valid_no_axi_list "kcu105 zc702 zc706 zc1751-dc1 zc1751-dc2 zedboard"
-		    if {[lsearch -nocase $valid_axi_list $dts_name] >= 0 || [string match -nocase $dts_name "kcu705"]} {
-			hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 1" reference
-		    }
+			}
 		} else {
-		     puts "File not found\n\r"
+			set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/BOARD"]
+			if {[file exists $kernel_dtsi]} {
+				foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/BOARD/*]] {
+					set dtsi_name "$dts_name.dtsi"
+					puts "file:$file"
+					# NOTE: ./ works only if we did not change our directory
+					if {[regexp $dtsi_name $file match]} {
+						file copy -force $file ./
+						update_system_dts_include [file tail $file]
+					}
+				}
+				set default_dts [get_property CONFIG.master_dts [get_os]]
+				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+				set valid_axi_list "kc705-full kc705-lite ac701-full ac701-lite"
+				set valid_no_axi_list "kcu105 zc702 zc706 zc1751-dc1 zc1751-dc2 zedboard"
+				if {[lsearch -nocase $valid_axi_list $dts_name] >= 0 || [string match -nocase $dts_name "kcu705"]} {
+					hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 1" reference
+				}
+			} else {
+				puts "File not found\n\r"
+			}
 		}
         }
     }
@@ -355,8 +371,11 @@ proc generate {lib_handle} {
     gen_board_info
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"] } {
-	gen_sata_laneinfo
-	gen_zynqmp_ccf_clk
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $mainline_ker "none"]} {
+		gen_sata_laneinfo
+		gen_zynqmp_ccf_clk
+	}
     }
     gen_ext_axi_interface
 }
@@ -451,6 +470,10 @@ proc update_cpu_node {os_handle} {
 }
 
 proc update_alias {os_handle} {
+    set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+    if {[string match -nocase $mainline_ker "v4.17"]} {
+         return
+    }
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set all_labels [get_all_dt_labels]
