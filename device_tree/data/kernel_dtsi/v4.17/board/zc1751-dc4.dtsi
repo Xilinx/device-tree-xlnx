@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Xilinx ZynqMP zc1751-xm018-dc4
+ *
+ * (C) Copyright 2015 - 2018, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+/ {
+	model = "ZynqMP zc1751-xm018-dc4";
+	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
+
+	aliases {
+		ethernet0 = &gem0;
+		ethernet1 = &gem1;
+		ethernet2 = &gem2;
+		ethernet3 = &gem3;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+	};
+};
+
+&gem0 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy0>;
+	ethernet_phy0: ethernet-phy@0 { /* Marvell 88e1512 */
+		reg = <0>;
+	};
+	ethernet_phy7: ethernet-phy@7 { /* Vitesse VSC8211 */
+		reg = <7>;
+	};
+	ethernet_phy3: ethernet-phy@3 { /* Realtek RTL8211DN */
+		reg = <3>;
+	};
+	ethernet_phy8: ethernet-phy@8 { /* Vitesse VSC8211 */
+		reg = <8>;
+	};
+};
+
+&gem1 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy7>;
+};
+
+&gem2 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy3>;
+};
+
+&gem3 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy8>;
+};
+
+&i2c0 {
+	clock-frequency = <400000>;
+	status = "okay";
+};
+
+&i2c1 {
+	clock-frequency = <400000>;
+	status = "okay";
+};
+
