@@ -20,21 +20,16 @@ proc generate {drv_handle} {
 			break
 		}
 	}
+	set compatible [get_ipdetails $drv_handle]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ldpc_decode [get_property CONFIG.LDPC_Decode [get_cells -hier $drv_handle]]
 	set ldpc_encode [get_property CONFIG.LDPC_Encode [get_cells -hier $drv_handle]]
 	set turbo_decode [get_property CONFIG.Turbo_Decode [get_cells -hier $drv_handle]]
 	if {[string match -nocase $turbo_decode "true"]} {
 		set sdfec_code "turbo"
-		set sdfec_op_mode "decode"
 	} else {
 		set sdfec_code "ldpc"
-		if {[string match -nocase $ldpc_encode "true"]} {
-			set sdfec_op_mode "encode"
-		} else {
-			set sdfec_op_mode "decode"
-		}
 	}
-	set_drv_property $drv_handle xlnx,sdfec-op-mode $sdfec_op_mode string
 	set_drv_property $drv_handle xlnx,sdfec-code $sdfec_code string
 	set sdfec_dout_words [get_property CONFIG.C_S_DOUT_WORDS_MODE [get_cells -hier $drv_handle]]
 	set sdfec_dout_width [get_property CONFIG.DOUT_Lanes [get_cells -hier $drv_handle]]
@@ -44,4 +39,14 @@ proc generate {drv_handle} {
 	set_drv_property $drv_handle xlnx,sdfec-dout-width $sdfec_dout_width int
 	set_drv_property $drv_handle xlnx,sdfec-din-words  $sdfec_din_words int
 	set_drv_property $drv_handle xlnx,sdfec-din-width  $sdfec_din_width int
+}
+
+proc get_ipdetails {drv_handle} {
+	set slave [get_cells -hier ${drv_handle}]
+	set vlnv [split [get_property VLNV $slave] ":"]
+	set name [lindex $vlnv 2]
+	set ver [lindex $vlnv 3]
+	set comp_prop "xlnx,${name}-${ver}"
+	regsub -all {_} $comp_prop {-} comp_prop
+	return $comp_prop
 }
