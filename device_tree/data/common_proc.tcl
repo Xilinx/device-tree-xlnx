@@ -2321,7 +2321,14 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		set intc "gic"
 	}
 	set_drv_prop $drv_handle interrupt-parent $intc reference
-	set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
+		set msi_rx_pin_en [get_property CONFIG.msi_rx_pin_en [get_cells -hier $drv_handle]]
+		if {[string match -nocase $msi_rx_pin_en "true"]} {
+			set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
+		}
+	} else {
+		set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
+	}
 }
 
 proc gen_reg_property {drv_handle {skip_ps_check ""}} {

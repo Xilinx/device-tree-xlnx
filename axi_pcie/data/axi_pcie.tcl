@@ -135,6 +135,7 @@ proc generate {drv_handle} {
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,xdma-host-3.00"
+		set msi_rx_pin_en [get_property CONFIG.msi_rx_pin_en [get_cells -hier $drv_handle]]
 	}
 	set_pcie_reg $drv_handle
 	set_pcie_ranges $drv_handle
@@ -155,6 +156,8 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "interrupt-controller" "" boolean
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#address-cells" 0 int
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#interrupt-cells" 1 int
-	set intr_names "misc msi0 msi1"
-	set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
+	if {[string match -nocase $msi_rx_pin_en "true"]} {
+		set intr_names "misc msi0 msi1"
+		set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
+	}
 }
