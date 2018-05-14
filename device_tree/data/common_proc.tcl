@@ -525,6 +525,10 @@ proc set_drv_def_dts {drv_handle} {
 	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
 	set default_dts [get_property CONFIG.def_dts $drv_handle]
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return
+	}
 	if {[string_is_empty $default_dts]} {
 		if {[is_pl_ip $drv_handle]} {
 			set default_dts "pl.dtsi"
@@ -861,7 +865,10 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	if {[string_is_empty ${prop}] != 0} {
 		return -1
 	}
-
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return
+	}
 	regsub -all {CONFIG.} $prop {} prop
 	set conf_prop [lindex [get_comp_params ${prop} $drv_handle] 0 ]
 	if {[string_is_empty ${conf_prop}] == 0} {
@@ -1262,7 +1269,10 @@ proc update_zynq_clk_node args {
 	set clocks ""
 	set bus_clk_list ""
 	set axi 0
-
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
 	foreach clk $clk_pins {
 		set ip [get_cells -hier $drv_handle]
 		set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip $clk]]]
@@ -1528,6 +1538,10 @@ proc update_clk_node args {
 	set axi 0
 	set is_clk_wiz 0
 	set is_pl_clk 0
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 	if {[string match -nocase $mainline_ker "v4.17"]} {
 		return
@@ -2206,6 +2220,10 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set intc ""
 	set intr_info ""
 
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
 	if {[string_is_empty $intr_port_name]} {
 		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 			set val [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
@@ -2539,6 +2557,10 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	if {[check_ip_trustzone_state $drv_handle] == 1} {
 		return
 	}
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
 	set status_enable_flow 0
 	set ip [get_cells -hier $drv_handle]
 	# TODO: check if the base address is correct
@@ -2706,6 +2728,10 @@ proc detect_bus_name {ip_drv} {
 
 	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
 	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $ip_drv] && $remove_pl} {
+		return 0
+	}
 	if {[lsearch  -nocase $valid_proc_list $proc_name] >= 0} {
 		if {[is_pl_ip $ip_drv]} {
 			# create the parent_node for pl.dtsi
@@ -2728,6 +2754,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 	dtg_debug "bus_label: $bus_name"
 
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $ip_drv] && $remove_pl} {
+		return 0
+	}
 	if {[is_pl_ip $ip_drv] && $dt_overlay} {
 		set root_node [add_or_get_dt_node -n / -d ${dts_file}]
 		set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
@@ -2925,6 +2955,10 @@ proc remove_all_tree {} {
 }
 
 proc gen_mdio_node {drv_handle parent_node} {
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return
+	}
 	set mdio_node [add_or_get_dt_node -l ${drv_handle}_mdio -n mdio -p $parent_node]
 	hsi::utils::add_new_dts_param "${mdio_node}" "#address-cells" 1 int ""
 	hsi::utils::add_new_dts_param "${mdio_node}" "#size-cells" 0 int ""

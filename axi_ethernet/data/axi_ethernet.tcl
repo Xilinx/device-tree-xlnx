@@ -29,6 +29,10 @@ proc generate {drv_handle} {
             break
         }
     }
+    set remove_pl [get_property CONFIG.remove_pl [get_os]]
+    if {[is_pl_ip $drv_handle] && $remove_pl} {
+              return 0
+    }
 
     update_eth_mac_addr $drv_handle
 

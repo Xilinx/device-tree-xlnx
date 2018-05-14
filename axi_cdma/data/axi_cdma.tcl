@@ -34,6 +34,9 @@ proc generate {drv_handle} {
 	set_drv_conf_prop $drv_handle C_ADDR_WIDTH xlnx,addrwidth
 
 	set node [gen_peripheral_nodes $drv_handle]
+	if {$node == 0} {
+		return
+	}
 
 	set dma_ip [get_cells -hier $drv_handle]
 	set cdma_count [hsi::utils::get_os_parameter_value "cdma_count"]

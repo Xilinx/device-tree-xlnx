@@ -31,6 +31,9 @@ proc generate {drv_handle} {
     }
 
     set node [gen_peripheral_nodes $drv_handle]
+    if {$node == 0} {
+           return
+    }
 
     set dma_ip [get_cells -hier $drv_handle]
     set dma_count [hsi::utils::get_os_parameter_value "dma_count"]

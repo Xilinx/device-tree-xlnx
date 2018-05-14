@@ -20,6 +20,10 @@ proc generate {drv_handle} {
             break
         }
     }
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
 	set ddr_ip ""
 	set slave [get_cells -hier ${drv_handle}]
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]

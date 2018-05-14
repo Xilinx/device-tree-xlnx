@@ -21,6 +21,9 @@ proc generate {drv_handle} {
 	}
 	set proc_type [get_sw_proc_prop IP_NAME]
 	set node [gen_peripheral_nodes $drv_handle]
+	if {$node == 0} {
+		return
+	}
 	set eth_ip [get_cells -hier $drv_handle]
 	set ip_name [get_property IP_NAME $eth_ip]
 

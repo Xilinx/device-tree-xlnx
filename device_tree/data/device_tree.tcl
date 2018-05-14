@@ -143,6 +143,10 @@ proc extract_dts_name {override value} {
 }
 
 proc gen_sata_laneinfo {} {
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {$remove_pl} {
+		return 0
+	}
 
 	foreach ip [get_cells] {
 		set slane 0
@@ -232,6 +236,10 @@ proc gen_sata_laneinfo {} {
 }
 
 proc gen_ext_axi_interface {}  {
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {$remove_pl} {
+		return 0
+	}
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "psu_cortexa53"]} {
 		set ext_axi_intf [get_mem_ranges -of_objects [get_cells psu_cortexa53_0] -filter {INSTANCE ==""}]
@@ -503,7 +511,11 @@ proc update_alias {os_handle} {
 		}
 	}
 	set dt_overlay [get_property CONFIG.DT_Overlay [get_os]]
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	foreach drv_handle $all_drivers {
+		if {[is_pl_ip $drv_handle] && $remove_pl} {
+			continue
+		}
 		set alias_str [get_property CONFIG.dtg.alias $drv_handle]
 		if {[string match -nocase $alias_str "serial"]} {
 			if {[string match $console_ip $drv_handle] == 0} {
@@ -525,6 +537,9 @@ proc update_alias {os_handle} {
 
 	foreach drv_handle $all_drivers {
             if {[is_pl_ip $drv_handle] && $dt_overlay} {
+                continue
+            }
+            if {[is_pl_ip $drv_handle] && $remove_pl} {
                 continue
             }
             if {[check_ip_trustzone_state $drv_handle] == 1} {

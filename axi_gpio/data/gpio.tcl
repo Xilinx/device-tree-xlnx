@@ -25,7 +25,9 @@ proc generate {drv_handle} {
 	set intr_present [get_property CONFIG.C_INTERRUPT_PRESENT [get_cells -hier $drv_handle]]
 	if {[string match $intr_present "1"]} {
 		set node [gen_peripheral_nodes $drv_handle]
-		hsi::utils::add_new_dts_param "${node}" "#interrupt-cells" 2 int ""
+		if {$node != 0} {
+			hsi::utils::add_new_dts_param "${node}" "#interrupt-cells" 2 int ""
+		}
 		hsi::utils::add_new_property $drv_handle "interrupt-controller" boolean ""
 	}
 	set proc_type [get_sw_proc_prop IP_NAME]

@@ -132,6 +132,10 @@ proc generate {drv_handle} {
 			break
 		}
 	}
+	set node [gen_peripheral_nodes $drv_handle]
+	if {$node == 0} {
+		return
+	}
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,xdma-host-3.00"
@@ -145,7 +149,6 @@ proc generate {drv_handle} {
 		set_drv_prop $drv_handle bus-range "0x0 0xff" hexint
 	}
 	# Add Interrupt controller child node
-	set node [gen_peripheral_nodes $drv_handle]
 	set pcieintc_cnt [get_os_dev_count "pci_intc_cnt"]
 	set pcie_child_intc_node [add_or_get_dt_node -l "pcie_intc_${pcieintc_cnt}" -n interrupt-controller -p $node]
 	set int_map "0 0 0 1 &pcie_intc_${pcieintc_cnt} 1>, <0 0 0 2 &pcie_intc_${pcieintc_cnt} 2>, <0 0 0 3 &pcie_intc_${pcieintc_cnt} 3>,\

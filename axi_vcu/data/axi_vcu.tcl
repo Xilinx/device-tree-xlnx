@@ -24,6 +24,9 @@ proc generate {drv_handle} {
     }
     # Generate properties required for vcu node
     set node [gen_peripheral_nodes $drv_handle]
+    if {$node == 0} {
+           return
+    }
     hsi::utils::add_new_dts_param "${node}" "#address-cells" 2 int
     hsi::utils::add_new_dts_param "${node}" "#size-cells" 2 int
     set tab "\n\t\t\t\t"
