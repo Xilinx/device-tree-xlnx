@@ -1942,32 +1942,56 @@ proc update_clk_node args {
 
 				}
 				"1" {
-					set clk_pins "m_axi_s2mm_aclk"
-                                        foreach clk $clk_pins {
-                                                set dts_file "pl.dtsi"
-                                                set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-                                                set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
-                                                set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
-                                                if {![string equal $clk_freq ""]} {
-                                                        if {[lsearch $bus_clk_list $clk_freq] < 0} {
-                                                                set bus_clk_list [lappend bus_clk_list $clk_freq]
-                                                }
-                                                set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
-                                                set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
-                                                        -d ${dts_file} -p ${bus_node}]
-                                                set clkrefs [lappend clkrefs misc_clk_${bus_clk_cnt}]
-                                                hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
-                                                hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
-                                                hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
-                                                set clk [lindex $clocks 0]
-                                                append clk ">, <&[lindex $clocks 1]>, <&[lindex $clocks 2]>, <&[lindex $clkrefs 0]"
-                                                set_drv_prop $drv_handle "clocks" "$clk" reference
-                                                }
-                                        }
-
+					if {$clkname_len == 2} {
+					set clk_pins "m_axi_sg_aclk"
+					foreach clk $clk_pins {
+						set dts_file "pl.dtsi"
+						set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+						set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
+						set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+						if {![string equal $clk_freq ""]} {
+							if {[lsearch $bus_clk_list $clk_freq] < 0} {
+								set bus_clk_list [lappend bus_clk_list $clk_freq]
+						}
+						set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+						set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+							-d ${dts_file} -p ${bus_node}]
+						set clkrefs [lappend clkrefs misc_clk_${bus_clk_cnt}]
+						hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+						hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+						hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+						set clk [lindex $clocks 0]
+						append clk ">, <&[lindex $clkrefs 0]"
+						set_drv_prop $drv_handle "clocks" "$clk" reference
+						}
+					}
+					} else {
+						set clk_pins "m_axi_s2mm_aclk"
+						foreach clk $clk_pins {
+							set dts_file "pl.dtsi"
+							set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+							set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
+							set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+							if {![string equal $clk_freq ""]} {
+								if {[lsearch $bus_clk_list $clk_freq] < 0} {
+									set bus_clk_list [lappend bus_clk_list $clk_freq]
+							}
+							set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+							set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+								-d ${dts_file} -p ${bus_node}]
+							set clkrefs [lappend clkrefs misc_clk_${bus_clk_cnt}]
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+							set clk [lindex $clocks 0]
+							append clk ">, <&[lindex $clocks 1]>, <&[lindex $clocks 2]>, <&[lindex $clkrefs 0]"
+							set_drv_prop $drv_handle "clocks" "$clk" reference
+							}
+						}
+					}
                                 }
 				"3" {
-					set clk_pins "m_axi_sg_aclk m_axi_mm2s_aclk m_axi_s2mm_aclk"
+					set clk_pins "s_axi_lite_aclk m_axi_sg_aclk m_axi_mm2s_aclk m_axi_s2mm_aclk"
 						foreach clk $clk_pins {
 						set dts_file "pl.dtsi"
 						set bus_node [add_or_get_bus_node $drv_handle $dts_file]
@@ -1984,7 +2008,7 @@ proc update_clk_node args {
 						hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
 						hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 						hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
-                                                set clk [lindex $clocks 0]
+                                                set clk [lindex $clkrefs 0]
 						append clk ">, <&[lindex $clkrefs 0]>, <&[lindex $clkrefs 1]>, <&[lindex $clkrefs 2]"
 						set_drv_prop $drv_handle "clocks" "$clk" reference
 						}
