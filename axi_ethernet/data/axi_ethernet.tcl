@@ -201,7 +201,7 @@ proc generate {drv_handle} {
         if {$connected_ipname == "axi_mcdma"} {
             set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
             set inhex [format %x $num_queues]
-            append numqueues "/bits/ $num_queues <0x$inhex>"
+            append numqueues "/bits/ 16 <0x$inhex>"
             hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
             if {$version < 2018} {
                 dtg_warning "quotes to be removed or use 2018.1 version for $node param xlnx,num-queues"
