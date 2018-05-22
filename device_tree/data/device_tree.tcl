@@ -307,26 +307,35 @@ proc gen_board_info {} {
 		if {[string match -nocase $mainline_ker "v4.17"]} {
 			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${mainline_ker}/board"]
 			if {[file exists $mainline_dtsi]} {
+				set mainline_board_file 0
 				foreach file [glob [file normalize [file dirname ${mainline_dtsi}]/board/*]] {
 					set dtsi_name "$dts_name.dtsi"
 					# NOTE: ./ works only if we did not change our directory
 					if {[regexp $dtsi_name $file match]} {
 						file copy -force $file ./
 						update_system_dts_include [file tail $file]
+						set mainline_board_file 1
 					}
+				}
+				if {$mainline_board_file == 0} {
+					error "Error:$dtsi_name board file is not present in DTG. Please add a vaild board."
 				}
 			}
 		} else {
 			set kernel_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/BOARD"]
 			if {[file exists $kernel_dtsi]} {
+				set valid_board_file 0
 				foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/BOARD/*]] {
 					set dtsi_name "$dts_name.dtsi"
-					puts "file:$file"
 					# NOTE: ./ works only if we did not change our directory
 					if {[regexp $dtsi_name $file match]} {
 						file copy -force $file ./
 						update_system_dts_include [file tail $file]
+						set valid_board_file 1
 					}
+				}
+				if {$valid_board_file == 0} {
+					error "Error:$dtsi_name board file is not present in DTG. Please add a valid board."
 				}
 				set default_dts [get_property CONFIG.master_dts [get_os]]
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
