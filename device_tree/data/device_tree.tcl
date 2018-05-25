@@ -244,8 +244,31 @@ proc gen_ext_axi_interface {}  {
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			set default_dts pl.dtsi
 			set bus_node "amba_pl"
+			if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+				set temp $base
+				set temp [string trimleft [string trimleft $temp 0] x]
+				set len [string length $temp]
+				set rem [expr {${len} - 8}]
+				set high_base "0x[string range $temp $rem $len]"
+				set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+				set low_base [format 0x%08x $low_base]
+				if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+					set temp $size
+					set temp [string trimleft [string trimleft $temp 0] x]
+					set len [string length $temp]
+					set rem [expr {${len} - 8}]
+					set high_size "0x[string range $temp $rem $len]"
+					set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+					set low_size [format 0x%08x $low_size]
+					set reg "$low_base $high_base $low_size $high_size"
+				} else {
+					set reg "$low_base $high_base 0x0 $size"
+				}
+			} else {
+				set reg "0x0 $base 0x0 $size"
+			}
+			regsub -all {^0x} $base {} base
 			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $bus_node]
-			set reg "0x0 $base 0x0 $size"
 			hsi::utils::add_new_dts_param $ext_int_node "reg" "$reg" intlist
 			if {$version >= 2018} {
 				hsi::utils::add_new_dts_param "${ext_int_node}" "/* This is a external AXI interface, user may need to update the entries */" "" comment
