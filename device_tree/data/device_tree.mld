@@ -35,7 +35,7 @@ PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type =
 
 PARAMETER name = remove_pl, desc = "Remove PL Support", type = bool, default = false;
 
-PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, ("v4.17" = v4.17), default = none;
+PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, values = ("none" = none, "v4.17" = v4.17), default = none;
 
 PARAMETER name = bootargs, desc = "Booting arguments", type = string, default = "";
 
