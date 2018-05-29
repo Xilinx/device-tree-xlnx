@@ -18,13 +18,24 @@
 #
 
 proc generate {drv_handle} {
-    set ip [get_cells -hier $drv_handle]
-    set count [hsi::utils::get_ip_param_value $ip "C_NUM_BANKS_MEM"]
-    if { [llength $count] == 0 } {
-        set count 1
-    }
-    for {set x 0} { $x < $count} {incr x} {
-        set datawidth [hsi::utils::get_ip_param_value $ip [format "C_MEM%d_WIDTH" $x]]
-        set_property bank-width "[expr ($datawidth/8)]" $drv_handle
-    }
+	foreach i [get_sw_cores device_tree] {
+		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
+		if {[file exists $common_tcl_file]} {
+			source $common_tcl_file
+			break
+		}
+	}
+
+	set ip [get_cells -hier $drv_handle]
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "cfi-flash"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
+	set count [hsi::utils::get_ip_param_value $ip "C_NUM_BANKS_MEM"]
+	if { [llength $count] == 0 } {
+		set count 1
+	}
+	for {set x 0} { $x < $count} {incr x} {
+		set datawidth [hsi::utils::get_ip_param_value $ip [format "C_MEM%d_WIDTH" $x]]
+		set_property bank-width "[expr ($datawidth/8)]" $drv_handle
+	}
 }

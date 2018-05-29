@@ -22,7 +22,9 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,axi-perf-monitor"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set check_list "enable-profile enable-trace num-monitor-slots enable-event-count enable-event-log have-sampled-metric-cnt num-of-counters metric-count-width metrics-sample-count-width global-count-width metric-count-scale"
 	foreach p ${check_list} {
 		set ip_conf [string toupper "c_${p}"]

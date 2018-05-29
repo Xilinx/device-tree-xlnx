@@ -136,6 +136,9 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,axi-pcie-host-1.00.a"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,xdma-host-3.00"

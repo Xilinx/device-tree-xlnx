@@ -20,6 +20,9 @@ proc generate {drv_handle} {
             break
         }
     }
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,xps-ethernetlite-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     update_eth_mac_addr $drv_handle
     set node [gen_peripheral_nodes $drv_handle]
     gen_mdio_node $drv_handle $node

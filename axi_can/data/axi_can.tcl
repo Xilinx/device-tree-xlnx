@@ -22,6 +22,9 @@ proc generate {drv_handle} {
             break
         }
     }
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,axi-can-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
     if {[string match -nocase $ip_name "canfd"]} {
         hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-1.0"

@@ -1261,6 +1261,17 @@ proc overwrite_clknames {clknames drv_handle} {
 	set_drv_prop $drv_handle "clock-names" $clknames stringlist
 }
 
+proc get_comp_str {drv_handle} {
+	set slave [get_cells -hier ${drv_handle}]
+	set vlnv [split [get_property VLNV $slave] ":"]
+	set ver [lindex $vlnv 3]
+	set name [lindex $vlnv 2]
+	set ver [lindex $vlnv 3]
+	set comp_prop "xlnx,${name}-${ver}"
+	regsub -all {_} $comp_prop {-} comp_prop
+	return $comp_prop
+}
+
 proc update_zynq_clk_node args {
 	set drv_handle [lindex $args 0]
 	set clk_pins [lindex $args 1]

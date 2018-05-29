@@ -20,7 +20,9 @@ proc generate {drv_handle} {
             break
         }
     }
-
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,xps-iic-2.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "microblaze"] } {
         gen_dev_ccf_binding $drv_handle "s_axi_aclk"

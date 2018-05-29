@@ -22,7 +22,9 @@ proc generate {drv_handle} {
             break
         }
     }
-
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,xps-timer-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     #adding clock frequency
     set ip [get_cells -hier $drv_handle]
     set clk [get_pins -of_objects $ip "S_AXI_ACLK"]

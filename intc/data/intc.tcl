@@ -25,7 +25,9 @@ proc generate {drv_handle} {
             break
         }
     }
-
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,xps-intc-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set ip [get_cells -hier $drv_handle]
     set num_intr_inputs [hsi::utils::get_ip_param_value $ip C_NUM_INTR_INPUTS]
     set kind_of_intr [hsi::utils::get_ip_param_value $ip C_KIND_OF_INTR]

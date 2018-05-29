@@ -22,7 +22,9 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,xps-timebase-wdt-1.00.a"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	# get bus clock frequency
 	set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "S_AXI_ACLK"]
 	if {![string equal $clk_freq ""]} {

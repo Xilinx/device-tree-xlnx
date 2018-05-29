@@ -22,7 +22,9 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,xps-spi-2.00.a"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "xlnx,num-ss-bits"
 	set_drv_conf_prop $drv_handle "C_NUM_SS_BITS" "num-cs"
 	set_drv_conf_prop $drv_handle "C_NUM_TRANSFER_BITS" "bits-per-word" int

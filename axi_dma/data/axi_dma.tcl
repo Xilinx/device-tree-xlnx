@@ -34,7 +34,9 @@ proc generate {drv_handle} {
     if {$node == 0} {
            return
     }
-
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,axi-dma-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set dma_ip [get_cells -hier $drv_handle]
     set dma_count [hsi::utils::get_os_parameter_value "dma_count"]
     if { [llength $dma_count] == 0 } {
@@ -152,6 +154,9 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 proc add_dma_coherent_prop {drv_handle intf} {
     set ip_name [::hsi::get_cells -hier -filter "NAME==$drv_handle"]
     set connectedip [hsi::utils::get_connected_stream_ip $drv_handle $intf]
+    if {[llength $connectedip] == 0} {
+          return
+    }
     set intrconnect [get_property IP_NAME [get_cells -hier $connectedip]]
     set num_master [get_property CONFIG.NUM_MI $connectedip]
     set done 0

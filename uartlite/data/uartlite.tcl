@@ -27,7 +27,9 @@ proc generate {drv_handle} {
             break
         }
     }
-
+    set compatible [get_comp_str $drv_handle]
+    set compatible [append compatible " " "xlnx,xps-uartlite-1.00.a"]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set ip [get_cells -hier $drv_handle]
     set consoleip [get_property CONFIG.console_device [get_os]]
     if { [string match -nocase $consoleip $ip] } {

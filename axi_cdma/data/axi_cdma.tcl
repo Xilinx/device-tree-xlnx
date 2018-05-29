@@ -37,7 +37,9 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
-
+        set compatible [get_comp_str $drv_handle]
+        set compatible [append compatible " " "xlnx,axi-cdma-1.00.a"]
+        set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set dma_ip [get_cells -hier $drv_handle]
 	set cdma_count [hsi::utils::get_os_parameter_value "cdma_count"]
 	if { [llength $cdma_count] == 0 } {

@@ -29,7 +29,9 @@ proc gen_xadc_driver_prop {drv_handle} {
 	gen_drv_prop_from_ip $drv_handle
 	gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 
-	hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,axi-xadc-1.00.a"
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,axi-xadc-1.00.a"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set adc_ip [get_cells -hier $drv_handle]
 	set has_dma [get_property CONFIG.C_HAS_EXTERNAL_MUX $adc_ip]
 	if {$has_dma == 0} {

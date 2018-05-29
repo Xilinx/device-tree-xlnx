@@ -20,6 +20,9 @@ proc generate {drv_handle} {
 			break
 		}
 	}
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,usb2-device-4.00.a"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	set include_dma [get_property CONFIG.C_INCLUDE_DMA $ip]
 	if { $include_dma eq "1"} {

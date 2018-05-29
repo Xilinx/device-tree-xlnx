@@ -22,7 +22,9 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,clocking-wizard"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "ps7_cortexa9"] } {

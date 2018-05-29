@@ -20,7 +20,8 @@ proc generate {drv_handle} {
 			break
 		}
 	}
-	set compatible [get_ipdetails $drv_handle]
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,fec-engine"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ldpc_decode [get_property CONFIG.LDPC_Decode [get_cells -hier $drv_handle]]
 	set ldpc_encode [get_property CONFIG.LDPC_Encode [get_cells -hier $drv_handle]]
@@ -39,14 +40,4 @@ proc generate {drv_handle} {
 	set_drv_property $drv_handle xlnx,sdfec-dout-width $sdfec_dout_width int
 	set_drv_property $drv_handle xlnx,sdfec-din-words  $sdfec_din_words int
 	set_drv_property $drv_handle xlnx,sdfec-din-width  $sdfec_din_width int
-}
-
-proc get_ipdetails {drv_handle} {
-	set slave [get_cells -hier ${drv_handle}]
-	set vlnv [split [get_property VLNV $slave] ":"]
-	set name [lindex $vlnv 2]
-	set ver [lindex $vlnv 3]
-	set comp_prop "xlnx,${name}-${ver}"
-	regsub -all {_} $comp_prop {-} comp_prop
-	return $comp_prop
 }
