@@ -2810,6 +2810,22 @@ proc detect_bus_name {ip_drv} {
 	return "amba_pl"
 }
 
+proc get_afi_val {val} {
+	set afival ""
+	switch $val {
+		"128" {
+			set afival 0
+		} "64" {
+			set afival 1
+		} "32" {
+			set afival 2
+		} default {
+			dtg_warning "invalid value:$val"
+		}
+	}
+	return $afival
+}
+
 proc add_or_get_bus_node {ip_drv dts_file} {
 	set bus_name [detect_bus_name $ip_drv]
 	dtg_debug "bus_name: $bus_name"
@@ -2820,13 +2836,146 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 	if {[is_pl_ip $ip_drv] && $remove_pl} {
 		return 0
 	}
+	if {$dt_overlay && [string match -nocase $dts_file "pl.dtsi"]} {
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
+			set avail_param [list_property [get_cells -hier $zynq_periph]]
+			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
+			set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
+			set targets "amba"
+			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+			set child_name "__overlay__"
+			set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+			set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -p $bus_node]
+			hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+			set config_afi " "
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP0_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi "0 $afival>, <1 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP1_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP1_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <2 $afival>, <3 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP2_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP2_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <4 $afival>, <5 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP3_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP3_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <6 $afival>, <7 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP4_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP4_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <8 $afival>, <9 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP5_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP5_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <10 $afival>, <11 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP6_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_SAXIGP6_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <12 $afival>, <13 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP0_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_MAXIGP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <14 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP1_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_MAXIGP1_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				set afival [get_afi_val $val]
+				append config_afi " <14 $afival>,"
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP2_DATA_WIDTH"] >= 0} {
+				set val [get_property CONFIG.C_MAXIGP2_DATA_WIDTH [get_cells -hier $zynq_periph]]
+				switch $val {
+					"128" {
+						set afival 0x200
+					} "64" {
+						set afival 0x100
+					} "32" {
+						set afival 0x000
+					} default {
+						dtg_warning "invalid value:$val"
+					}
+				}
+				append config_afi " <15 $afival"
+			}
+			hsi::utils::add_new_dts_param "${afi_node}" "config-afi" "$config_afi" int
+			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK0_BUF"] >= 0} {
+				set val [get_property CONFIG.C_PL_CLK0_BUF [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "true"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking0" -l "clocking0" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 71" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 71" reference
+					set freq [get_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
+					set val [expr $freq * 1000000]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK1_BUF"] >= 0} {
+				set val [get_property CONFIG.C_PL_CLK1_BUF [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "true"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking1" -l "clocking1" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 72" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 72" reference
+					set freq [get_property CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
+					set val [expr $freq * 1000000]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK2_BUF"] >= 0} {
+				set val [get_property CONFIG.C_PL_CLK2_BUF [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "true"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking2" -l "clocking2" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 73" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 73" reference
+					set freq [get_property CONFIG.PSU__CRL_APB__PL2_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
+					set val [expr $freq * 1000000]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK3_BUF"] >= 0} {
+				set val [get_property CONFIG.C_PL_CLK3_BUF [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "true"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking3" -l "clocking3" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 74" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 74" reference
+					set freq [get_property CONFIG.PSU__CRL_APB__PL3_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
+					set val [expr $freq * 1000000]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+				}
+			}
+		}
+	}
 	if {[is_pl_ip $ip_drv] && $dt_overlay} {
 		set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-		set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
+		set fpga_node [add_or_get_dt_node -n "fragment@2" -d [get_dt_tree ${dts_file}] -p ${root_node}]
 		set targets "amba"
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		set child_name "__overlay__"
-		set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+		set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
 	} else {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
