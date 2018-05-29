@@ -556,7 +556,8 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 1 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 1 int
 		}
-		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "design_1_wrapper.bit.bin" string
+		set hw_name [get_property NAME [get_hw_designs]]
+		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bit.bin" string
 
 	} else {
 		update_system_dts_include $default_dts
