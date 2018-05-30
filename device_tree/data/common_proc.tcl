@@ -550,6 +550,32 @@ proc set_drv_def_dts {drv_handle} {
 		set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
+			set avail_param [list_property [get_cells -hier $zynq_periph]]
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__USE__FABRIC__RST"] >= 0} {
+				set val [get_property CONFIG.PSU__USE__FABRIC__RST [get_cells -hier $zynq_periph]]
+				if {$val == 1} {
+					if {[lsearch -nocase $avail_param "CONFIG.C_NUM_FABRIC_RESETS"] >= 0} {
+						set val [get_property CONFIG.C_NUM_FABRIC_RESETS [get_cells -hier $zynq_periph]]
+						switch $val {
+							"1" {
+								set resets "rst 116"
+							} "2" {
+								set resets "rst 116>,<&rst 117"
+							} "3" {
+								set resets "rst 116>, <&rst 117>, <&rst 118"
+							} "4" {
+								set resets "rst 116>, <&rst 117>, <&rst 118>, <&rst 119"
+							}
+						}
+						if {$val != 0} {
+							hsi::utils::add_new_dts_param "${child_node}" "resets" "$resets" reference
+						}
+					}
+				}
+			}
+		}
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
 		} else {
