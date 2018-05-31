@@ -2947,8 +2947,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 71" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
-					set val [expr $freq * 1000000]
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
 			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK1_BUF"] >= 0} {
@@ -2961,8 +2960,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 72" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
-					set val [expr $freq * 1000000]
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
 			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK2_BUF"] >= 0} {
@@ -2975,8 +2973,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 73" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL2_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
-					set val [expr $freq * 1000000]
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
 			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK3_BUF"] >= 0} {
@@ -2989,8 +2986,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 74" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL3_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
-					set val [expr $freq * 1000000]
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" "$val" int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
 		}
