@@ -185,14 +185,16 @@ proc generate {drv_handle} {
     if {$ip_name == "axi_10g_ethernet"} {
        set phytype [string tolower [get_property CONFIG.base_kr $eth_ip]]
        set_property phy-mode "$phytype" $drv_handle
-       set compatstring "xlnx,ten-gig-eth-mac"
-       set_property compatible "$compatstring" $drv_handle
+       set compatible [get_comp_str $drv_handle]
+       set compatible [append compatible " " "xlnx,ten-gig-eth-mac"]
+       set_property compatible "$compatible" $drv_handle
     }
     if {$ip_name == "xxv_ethernet"} {
        set phytype [string tolower [get_property CONFIG.BASE_R_KR $eth_ip]]
        set_property phy-mode "$phytype" $drv_handle
-       set compatstring "xlnx,xxv-ethernet-1.0"
-       set_property compatible "$compatstring" $drv_handle
+       set compatible [get_comp_str $drv_handle]
+       set compatible [append compatible " " "xlnx,xxv-ethernet-1.0"]
+       set_property compatible "$compatible" $drv_handle
     }
     set ips [get_cells $drv_handle]
     foreach ip [get_drivers] {
