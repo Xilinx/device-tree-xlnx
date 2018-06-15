@@ -31,6 +31,14 @@ proc is_gmii2rgmii_conv_present {slave} {
 
     foreach ip $ips {
         set ipconv2eth_pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "gmii_txd"]]]
+        if {[regexp -nocase {(enet[0-3])} "$ipconv2eth_pins" match]} {
+                set number [regexp -all -inline -- {[0-3]+} $ipconv2eth_pins]
+                if {[string match -nocase $slave "psu_ethernet_$number"] || [string match -nocase $slave "ps7_ethernet_$number"]} {
+                        set ipconv $ip
+                        set phy_addr [get_property "CONFIG.C_PHYADDR" $ipconv]
+                        break
+               }
+        }
         foreach gmii_pin ${ipconv2eth_pins} {
             # check if it is connected to the slave IP
             if { [lsearch ${slave_pins} $gmii_pin] >= 0 } {
@@ -51,13 +59,16 @@ proc gen_phy_node args {
     set phy_name [lindex $args 1]
     set phya [lindex $args 2]
 
-    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
-    hsi::utils::add_new_dts_param "${phy_node}" "reg" $phya int
+    set phy_node [add_or_get_dt_node -l phy0 -n phy -u 0 -p $mdio_node]
+    hsi::utils::add_new_dts_param "${phy_node}" "reg" 0 int
     hsi::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
     if {[llength $args] >= 4} {
         hsi::utils::add_new_dts_param "${phy_node}" "compatible" [lindex $args 3] stringlist
     }
-    return $phy_node
+    set rgmii_node [add_or_get_dt_node -l $phy_name -n $phy_name -u $phya -p $mdio_node]
+    hsi::utils::add_new_dts_param "${rgmii_node}" "reg" $phya int
+    hsi::utils::add_new_dts_param "${rgmii_node}" "compatible" "xlnx,gmii-to-rgmii-1.0" string
+    hsi::utils::add_new_dts_param "${rgmii_node}" "phy-handle" phy0 reference
 }
 
 proc generate {drv_handle} {
@@ -121,7 +132,7 @@ proc generate {drv_handle} {
     set phya [lindex $conv_data 0]
     if { $phya != "-1" } {
         set phy_name "[lindex $conv_data 1]"
-        set_drv_prop $drv_handle gmii2rgmii-phy-handle "$phy_name" reference
+        set_drv_prop $drv_handle phy-handle "phy0" reference
         set mdio_node [gen_mdio_node $drv_handle $node]
         gen_phy_node $mdio_node $phy_name $phya
     }
