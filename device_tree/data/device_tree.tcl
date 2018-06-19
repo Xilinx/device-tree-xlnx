@@ -356,7 +356,7 @@ proc generate {lib_handle} {
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"] } {
 	gen_sata_laneinfo
-	gen_zynqmp_ccf_clk
+	#gen_zynqmp_ccf_clk
     }
     gen_ext_axi_interface
 }
