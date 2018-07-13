@@ -34,6 +34,7 @@ proc generate {drv_handle} {
               return 0
     }
 
+    set node [gen_peripheral_nodes $drv_handle]
     update_eth_mac_addr $drv_handle
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,axi-ethernet-1.00.a"]
@@ -45,7 +46,22 @@ proc generate {drv_handle} {
     # This is required to work with Vivado 2015.1 due to IP PIN naming change
     set hasbuf [get_property CONFIG.processor_mode $eth_ip]
     set ip_name [get_property IP_NAME $eth_ip]
-
+    set num_cores 1
+    if {$ip_name == "xxv_ethernet"} {
+        set ip_mem_handles [hsi::utils::get_ip_mem_ranges [get_cells -hier $drv_handle]]
+        set num 0
+        generate_reg_property $node $ip_mem_handles $num
+        set num_cores [get_property CONFIG.NUM_OF_CORES [get_cells -hier $drv_handle]]
+    }
+    for {set core 0} {$core < $num_cores} {incr core} {
+          if {$ip_name == "xxv_ethernet"  && $core != 0} {
+               set dts_file [current_dt_tree]
+               set bus_node "amba_pl"
+               set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
+               regsub -all {^0x} $base_addr {} base_addr
+               set eth_node [add_or_get_dt_node -n "ethernet" -l "xxv_ethernet_$core" -u $base_addr -d $dts_file -p $bus_node]
+               generate_reg_property $eth_node $ip_mem_handles $core
+          }
     if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet"} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
@@ -118,6 +134,18 @@ proc generate {drv_handle} {
       add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
       set_property xlnx,rxmem "$rxethmem" $drv_handle
+      if {$ip_name == "xxv_ethernet"  && $core != 0} {
+          set intf [get_intf_pins -of_objects $eth_ip "axis_rx_${core}"]
+          if {[llength $intf]} {
+                set connected_ip [get_connectedip $intf]
+                if {![string_is_empty $connected_ip]} {
+                      hsi::utils::add_new_dts_param $eth_node "axistream-connected" "$connected_ip" reference
+                      hsi::utils::add_new_dts_param $eth_node "axistream-control-connected" "$connected_ip" reference
+                }
+                hsi::utils::add_new_dts_param $eth_node "xlnx,include-dre" "" boolean
+                hsi::utils::add_new_dts_param $eth_node "xlnx,rxmem" "$rxethmem" hex
+         }
+      }
    }
 
     if {$ip_name == "axi_ethernet"} {
@@ -159,6 +187,9 @@ proc generate {drv_handle} {
     if {[llength $clk] } {
         set freq [get_property CLK_FREQ $clk]
         set_property clock-frequency "$freq" $drv_handle
+        if {$ip_name == "xxv_ethernet"} {
+             hsi::utils::add_new_dts_param $eth_node "clock-frequency" "$freq" int
+        }
     }
 
     # node must be created before child node
@@ -182,6 +213,11 @@ proc generate {drv_handle} {
 		gen_phy_node $mdio_node $phy_name $phya
 	  }
     }
+    if {$ip_name == "xxv_ethernet" && $core != 0} {
+        set mdionode [add_or_get_dt_node -l xxv_ethernet_${core}_mdio -n mdio -p $eth_node]
+        hsi::utils::add_new_dts_param "${mdionode}" "#address-cells" 1 int ""
+        hsi::utils::add_new_dts_param "${mdionode}" "#size-cells" 0 int ""
+    }
     if {$ip_name == "axi_10g_ethernet"} {
        set phytype [string tolower [get_property CONFIG.base_kr $eth_ip]]
        set_property phy-mode "$phytype" $drv_handle
@@ -195,6 +231,10 @@ proc generate {drv_handle} {
        set compatible [get_comp_str $drv_handle]
        set compatible [append compatible " " "xlnx,xxv-ethernet-1.0"]
        set_property compatible "$compatible" $drv_handle
+       if { $core!= 0} {
+           hsi::utils::add_new_dts_param $eth_node "compatible" $compatible stringlist
+           hsi::utils::add_new_dts_param $eth_node "phy-mode" $phytype string
+       }
     }
     set ips [get_cells $drv_handle]
     foreach ip [get_drivers] {
@@ -223,6 +263,10 @@ proc generate {drv_handle} {
                 set i [expr 0x$i]
             }
             set_property xlnx,channel-ids $id $drv_handle
+            if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+                  hsi::utils::add_new_dts_param $eth_node "xlnx,num-queues" $numqueues noformating
+                  hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id intlist
+            }
             set intr_val [get_property CONFIG.interrupts $target_handle]
             set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
             set int_names  [get_property CONFIG.interrupt-names $target_handle]
@@ -243,11 +287,19 @@ proc generate {drv_handle} {
                 }
                 hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
                 hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
+                if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+                     hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
+                     hsi::utils::add_new_dts_param "${eth_node}" "interrupt-parent" $intr_parent reference
+                     hsi::utils::add_new_dts_param "${eth_node}" "interrupt-names" $intr_names stringlist
+                }
             }
         }
     }
-
+    if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+              gen_drv_prop_eth_ip $drv_handle $eth_node
+    }
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
+ }
 }
 
 proc pcspma_phy_node {slave} {
@@ -486,4 +538,74 @@ proc get_connectedip {intf} {
          }
       }
    }
+}
+
+proc generate_reg_property {node ip_mem_handles num} {
+       if {[llength $ip_mem_handles] == 0} {
+                 return
+       }
+       set base [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $num]]]
+       set high [string tolower [get_property HIGH_VALUE [lindex $ip_mem_handles $num]]]
+       set size [format 0x%x [expr {${high} - ${base} + 1}]]
+
+       set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+       if {[string match -nocase $proctype "psu_cortexa53"]} {
+            if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+                      set temp $base
+                      set temp [string trimleft [string trimleft $temp 0] x]
+                      set len [string length $temp]
+                      set rem [expr {${len} - 8}]
+                      set high_base "0x[string range $temp $rem $len]"
+                      set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+                      set low_base [format 0x%08x $low_base]
+                      if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+                               set temp $size
+                               set temp [string trimleft [string trimleft $temp 0] x]
+                               set len [string length $temp]
+                               set rem [expr {${len} - 8}]
+                               set high_size "0x[string range $temp $rem $len]"
+                               set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+                               set low_size [format 0x%08x $low_size]
+                               set reg "$low_base $high_base $low_size $high_size"
+                      } else {
+                              set reg "$low_base $high_base 0x0 $size"
+                      }
+            } else {
+                    set reg "0x0 $base 0x0 $size"
+            }
+       } else {
+               set reg "$base $size"
+       }
+       hsi::utils::add_new_dts_param "${node}" "reg" $reg inthexlist
+}
+
+proc gen_drv_prop_eth_ip {drv_handle ipname} {
+        set prop_name_list [default_parameters $drv_handle]
+        foreach prop_name ${prop_name_list} {
+             ip2_prop $ipname $prop_name $drv_handle
+        }
+}
+
+proc ip2_prop {ip_name ip_prop_name drv_handle} {
+        set drv_prop_name $ip_prop_name
+        regsub -all {CONFIG.C_} $drv_prop_name {xlnx,} drv_prop_name
+        regsub -all {_} $drv_prop_name {-} drv_prop_name
+        set drv_prop_name [string tolower $drv_prop_name]
+        set value [get_property ${ip_prop_name} [get_cells -hier $drv_handle]]
+        if {[llength $value]} {
+               if {$value != "-1" && [llength $value] !=0} {
+                     set type "hex"
+                     if {[string equal -nocase $type "boolean"]} {
+                             if {[expr $value < 1]} {
+                                    return 0
+                             }
+                             set value ""
+                     }
+                     if {[regexp "(int|hex).*" $type match]} {
+                             regsub -all {"} $value "" value
+                     }
+                     hsi::utils::add_new_dts_param "$ip_name" "$drv_prop_name" $value $type
+                     return 0
+               }
+        }
 }
