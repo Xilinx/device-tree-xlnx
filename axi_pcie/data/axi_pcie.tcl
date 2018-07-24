@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 #
 
-proc set_pcie_ranges {drv_handle} {
+proc set_pcie_ranges {drv_handle proctype} {
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		set axibar_num [get_ip_property $drv_handle "CONFIG.axibar_num"]
 	} else {
@@ -71,7 +71,11 @@ proc set_pcie_ranges {drv_handle} {
 				set low_base [format 0x%08x $low_base]
 				set axi_baseaddr "$low_base $high_base"
 			} else {
-				set axi_baseaddr "0x0 $axi_baseaddr"
+				if {[string match -nocase $proctype "microblaze"] } {
+					set axi_baseaddr "$axi_baseaddr"
+				} else {
+					set axi_baseaddr "0x0 $axi_baseaddr"
+				}
 			}
 			set value "<$range_type $pcie_baseaddr $axi_baseaddr $size>"
 		} else {
@@ -86,7 +90,7 @@ proc set_pcie_ranges {drv_handle} {
 	set_property CONFIG.ranges $ranges $drv_handle
 }
 
-proc set_pcie_reg {drv_handle} {
+proc set_pcie_reg {drv_handle proctype} {
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		set baseaddr [get_ip_property $drv_handle CONFIG.baseaddr]
 		set highaddr [get_ip_property $drv_handle CONFIG.highaddr]
@@ -101,7 +105,11 @@ proc set_pcie_reg {drv_handle} {
 			set low_base [format 0x%08x $low_base]
 			set reg "$low_base $high_base 0x0 $size"
 		} else {
-			set reg "0x0 $baseaddr 0x0 $size"
+			if {[string match -nocase $proctype "microblaze"] } {
+				set reg "$baseaddr $size"
+			} else {
+				set reg "0x0 $baseaddr 0x0 $size"
+			}
 		}
 		set_property CONFIG.reg $reg $drv_handle
 	} else {
@@ -148,10 +156,10 @@ proc generate {drv_handle} {
 			set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
 		}
 	}
-	set_pcie_reg $drv_handle
-	set_pcie_ranges $drv_handle
-	set_drv_prop $drv_handle interrupt-map-mask "0 0 0 7" intlist
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	set_pcie_reg $drv_handle $proctype
+	set_pcie_ranges $drv_handle $proctype
+	set_drv_prop $drv_handle interrupt-map-mask "0 0 0 7" intlist
 	if {[string match -nocase $proctype "microblaze"] } {
 		set_drv_prop $drv_handle bus-range "0x0 0xff" hexint
 	}
