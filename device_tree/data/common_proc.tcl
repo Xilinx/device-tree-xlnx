@@ -2853,6 +2853,20 @@ proc get_afi_val {val} {
 	return $afival
 }
 
+proc get_axi_datawidth {val} {
+	set data_width ""
+	switch $val {
+		"32" {
+			set data_width 1
+		} "64" {
+			set data_width 0
+		} default {
+			dtg_warning "invalid data_width:$val"
+		}
+	}
+	return $data_width
+}
+
 proc add_or_get_bus_node {ip_drv dts_file} {
 	set bus_name [detect_bus_name $ip_drv]
 	dtg_debug "bus_name: $bus_name"
@@ -2987,6 +3001,176 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 74" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL3_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+		}
+		if {[string match -nocase $proctype "ps7_cortexa9"]} {
+			set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
+			set avail_param [list_property [get_cells -hier $zynq_periph]]
+			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
+			set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
+			set targets "amba"
+			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+			set child_name "__overlay__"
+			set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+			if {[lsearch -nocase $avail_param "CONFIG.C_USE_S_AXI_HP0"] >= 0} {
+				set val [get_property CONFIG.C_USE_S_AXI_HP0 [get_cells -hier $zynq_periph]]
+				if {$val == 1} {
+					set afi0 [get_cells -hier -filter {NAME == "ps7_afi_0"}]
+					set afi0_param [list_property [get_cells -hier $afi0]]
+					if {[lsearch -nocase $afi0_param "CONFIG.C_S_AXI_BASEADDR"] >= 0} {
+						set base_addr [get_property CONFIG.C_S_AXI_BASEADDR [get_cells -hier $afi0]]
+					}
+					if {[lsearch -nocase $afi0_param "CONFIG.C_S_AXI_HIGHADDR"] >= 0} {
+						set high_addr [get_property CONFIG.C_S_AXI_HIGHADDR [get_cells -hier $afi0]]
+					}
+					set size [format 0x%x [expr {${high_addr} - ${base_addr} + 1}]]
+					set reg "$base_addr $size"
+					regsub -all {^0x} $base_addr {} addr
+					set addr [string tolower $addr]
+					set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -u $addr -p $bus_node]
+					hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+					hsi::utils::add_new_dts_param "${afi_node}" "#address-cells" "1" int
+					hsi::utils::add_new_dts_param "${afi_node}" "#size-cells" "0" int
+					hsi::utils::add_new_dts_param "${afi_node}" "reg" "$reg" intlist
+					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP0_DATA_WIDTH"] >= 0} {
+						set val [get_property CONFIG.C_S_AXI_HP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
+						set bus_width [get_axi_datawidth $val]
+						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+					}
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_USE_S_AXI_HP1"] >= 0} {
+				set val [get_property CONFIG.C_USE_S_AXI_HP1 [get_cells -hier $zynq_periph]]
+				if {$val == 1} {
+					set afi1 [get_cells -hier -filter {NAME == "ps7_afi_1"}]
+					set afi1_param [list_property [get_cells -hier $afi1]]
+					if {[lsearch -nocase $afi1_param "CONFIG.C_S_AXI_BASEADDR"] >= 0} {
+						set base_addr [get_property CONFIG.C_S_AXI_BASEADDR [get_cells -hier $afi1]]
+					}
+					if {[lsearch -nocase $afi1_param "CONFIG.C_S_AXI_HIGHADDR"] >= 0} {
+						set high_addr [get_property CONFIG.C_S_AXI_HIGHADDR [get_cells -hier $afi1]]
+					}
+					set size [format 0x%x [expr {${high_addr} - ${base_addr} + 1}]]
+					set reg "$base_addr $size"
+					regsub -all {^0x} $base_addr {} addr
+					set addr [string tolower $addr]
+					set afi_node [add_or_get_dt_node -n "afi1" -l "afi1" -u $addr -p $bus_node]
+					hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+					hsi::utils::add_new_dts_param "${afi_node}" "#address-cells" "1" int
+					hsi::utils::add_new_dts_param "${afi_node}" "#size-cells" "0" int
+					hsi::utils::add_new_dts_param "${afi_node}" "reg" "$reg" intlist
+					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP1_DATA_WIDTH"] >= 0} {
+						set val [get_property CONFIG.C_S_AXI_HP1_DATA_WIDTH [get_cells -hier $zynq_periph]]
+						set bus_width [get_axi_datawidth $val]
+						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+					}
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_USE_S_AXI_HP2"] >= 0} {
+				set val [get_property CONFIG.C_USE_S_AXI_HP2 [get_cells -hier $zynq_periph]]
+				if {$val == 1} {
+					set afi2 [get_cells -hier -filter {NAME == "ps7_afi_2"}]
+					set afi2_param [list_property [get_cells -hier $afi2]]
+					if {[lsearch -nocase $afi2_param "CONFIG.C_S_AXI_BASEADDR"] >= 0} {
+						set base_addr [get_property CONFIG.C_S_AXI_BASEADDR [get_cells -hier $afi2]]
+					}
+					if {[lsearch -nocase $afi2_param "CONFIG.C_S_AXI_HIGHADDR"] >= 0} {
+						set high_addr [get_property CONFIG.C_S_AXI_HIGHADDR [get_cells -hier $afi2]]
+					}
+					set size [format 0x%x [expr {${high_addr} - ${base_addr} + 1}]]
+					set reg "$base_addr $size"
+					regsub -all {^0x} $base_addr {} addr
+					set addr [string tolower $addr]
+					set afi_node [add_or_get_dt_node -n "afi2" -l "afi2" -u $addr -p $bus_node]
+					hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+					hsi::utils::add_new_dts_param "${afi_node}" "#address-cells" "1" int
+					hsi::utils::add_new_dts_param "${afi_node}" "#size-cells" "0" int
+					hsi::utils::add_new_dts_param "${afi_node}" "reg" "$reg" intlist
+					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP2_DATA_WIDTH"] >= 0} {
+						set val [get_property CONFIG.C_S_AXI_HP2_DATA_WIDTH [get_cells -hier $zynq_periph]]
+						set bus_width [get_axi_datawidth $val]
+						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+					}
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.C_USE_S_AXI_HP3"] >= 0} {
+				set val [get_property CONFIG.C_USE_S_AXI_HP3 [get_cells -hier $zynq_periph]]
+				if {$val == 1} {
+					set afi3 [get_cells -hier -filter {NAME == "ps7_afi_3"}]
+					set afi3_param [list_property [get_cells -hier $afi3]]
+					if {[lsearch -nocase $afi3_param "CONFIG.C_S_AXI_BASEADDR"] >= 0} {
+						set base_addr [get_property CONFIG.C_S_AXI_BASEADDR [get_cells -hier $afi2]]
+					}
+					if {[lsearch -nocase $afi3_param "CONFIG.C_S_AXI_HIGHADDR"] >= 0} {
+						set high_addr [get_property CONFIG.C_S_AXI_HIGHADDR [get_cells -hier $afi2]]
+					}
+					set size [format 0x%x [expr {${high_addr} - ${base_addr} + 1}]]
+					set reg "$base_addr $size"
+					regsub -all {^0x} $base_addr {} addr
+					set addr [string tolower $addr]
+					set afi_node [add_or_get_dt_node -n "afi3" -l "afi3" -u $addr -p $bus_node]
+					hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+					hsi::utils::add_new_dts_param "${afi_node}" "#address-cells" "1" int
+					hsi::utils::add_new_dts_param "${afi_node}" "#size-cells" "0" int
+					hsi::utils::add_new_dts_param "${afi_node}" "reg" "$reg" intlist
+					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP3_DATA_WIDTH"] >= 0} {
+						set val [get_property CONFIG.C_S_AXI_HP3_DATA_WIDTH [get_cells -hier $zynq_periph]]
+						set bus_width [get_axi_datawidth $val]
+						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+					}
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PCW_FPGA_FCLK0_ENABLE"] >= 0} {
+				set val [get_property CONFIG.PCW_FPGA_FCLK0_ENABLE [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "1"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking0" -l "clocking0" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clkc 15" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clkc 15" reference
+					set freq [get_property CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ [get_cells -hier $zynq_periph]]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PCW_FPGA_FCLK1_ENABLE"] >= 0} {
+				set val [get_property CONFIG.PCW_FPGA_FCLK1_ENABLE [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "1"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking1" -l "clocking1" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clkc 16" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clkc 16" reference
+					set freq [get_property CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ [get_cells -hier $zynq_periph]]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PCW_FPGA_FCLK2_ENABLE"] >= 0} {
+				set val [get_property CONFIG.PCW_FPGA_FCLK2_ENABLE [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "1"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking2" -l "clocking2" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clkc 17" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clkc 17" reference
+					set freq [get_property CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ [get_cells -hier $zynq_periph]]
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PCW_FPGA_FCLK3_ENABLE"] >= 0} {
+				set val [get_property CONFIG.PCW_FPGA_FCLK3_ENABLE [get_cells -hier $zynq_periph]]
+				if {[string match -nocase $val "1"]} {
+					set clocking_node [add_or_get_dt_node -n "clocking3" -l "clocking3" -p $bus_node]
+					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clkc 18" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
+					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clkc 18" reference
+					set freq [get_property CONFIG.PCW_FPGA3_PERIPHERAL_FREQMHZ [get_cells -hier $zynq_periph]]
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
