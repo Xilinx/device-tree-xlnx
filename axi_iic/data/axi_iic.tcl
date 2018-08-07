@@ -26,9 +26,5 @@ proc generate {drv_handle} {
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "microblaze"] } {
         gen_dev_ccf_binding $drv_handle "s_axi_aclk"
-    } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
-	update_zynq_clk_node $drv_handle "s_axi_aclk"
-    } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
-	update_clk_node $drv_handle "s_axi_aclk"
     }
 }

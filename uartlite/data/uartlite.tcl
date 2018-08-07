@@ -44,14 +44,8 @@ proc generate {drv_handle} {
     set_drv_conf_prop $drv_handle C_BAUDRATE current-speed int
     set proc_type [get_sw_proc_prop IP_NAME]
     switch $proc_type {
-            "psu_cortexa53" {
-                 update_clk_node $drv_handle "s_axi_aclk"
-            } "microblaze"   {
+             "microblaze"   {
                  gen_dev_ccf_binding $drv_handle "s_axi_aclk"
-            } "ps7_cortexa9" {
-		update_zynq_clk_node $drv_handle "s_axi_aclk"
-            } default {
-                 error "Unknown arch"
-            }
+	      }
     }
 }

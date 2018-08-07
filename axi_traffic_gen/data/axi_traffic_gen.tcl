@@ -50,10 +50,4 @@ proc generate {drv_handle} {
 	}
 	hsi::utils::add_new_property $drv_handle "interrupts" int $interrupts
 	hsi::utils::add_new_property $drv_handle "interrupt-names" stringlist $interrupt_names
-	set proc_type [get_sw_proc_prop IP_NAME]
-	if {[string match -nocase $proc_type "psu_cortexa53"]} {
-		update_clk_node $drv_handle "s_axi_aclk"
-	} elseif {[string match -nocase $proc_type "ps7_cortexa9"]} {
-		update_zynq_clk_node $drv_handle "s_axi_aclk"
-	}
 }

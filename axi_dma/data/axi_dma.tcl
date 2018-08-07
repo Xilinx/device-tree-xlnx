@@ -109,22 +109,7 @@ proc generate {drv_handle} {
     set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
     if {[string match -nocase $mainline_ker "none"]} {
           set proc_type [get_sw_proc_prop IP_NAME]
-          set clocknames "s_axi_lite_aclk"
-          if { $axiethernetfound != 1 } {
-	     append clocknames " " "m_axi_sg_aclk"
-          }
-          if { $tx_chan ==1 } {
-             append clocknames " " "m_axi_mm2s_aclk"
-          }
-          if { $rx_chan ==1 } {
-             append clocknames " " "m_axi_s2mm_aclk"
-          }
-          set clkname_len [llength $clocknames]
-          if {[string match -nocase $proc_type "psu_cortexa53"]} {
-               update_clk_node $drv_handle $clocknames $clkname_len
-          } elseif {[string match -nocase $proc_type "ps7_cortexa9"]} {
-               update_zynq_clk_node $drv_handle $clocknames $clkname_len
-          } elseif {[string match -nocase $proc_type "microblaze"]} {
+          if {[string match -nocase $proc_type "microblaze"]} {
                 generate_clk_nodes $drv_handle $axiethernetfound $tx_chan $rx_chan
           }
     } else {

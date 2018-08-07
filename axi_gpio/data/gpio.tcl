@@ -35,15 +35,9 @@ proc generate {drv_handle} {
 	}
 	set proc_type [get_sw_proc_prop IP_NAME]
 	switch $proc_type {
-		"psu_cortexa53" {
-			update_clk_node $drv_handle "s_axi_aclk"
-		} "microblaze"   {
+		"microblaze"   {
 			gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_aclk" stringlist
-		} "ps7_cortexa9" {
-			update_zynq_clk_node $drv_handle "s_axi_aclk"
-		} default {
-			error "Unknown arch"
 		}
 	}
 }

@@ -102,18 +102,10 @@ proc generate {drv_handle} {
 			append clocknames " " "m_axi_s2mm_aclk"
 			append clocknames " " "m_axi_s2mm_aclk"
 		}
-		set clkname_len [llength $clocknames]
 		switch $proc_type {
-			"psu_cortexa53" {
-				update_clk_node $drv_handle $clocknames $clkname_len
-			} "ps7_cortexa9" {
-				update_zynq_clk_node $drv_handle $clocknames $clkname_len
-			} "microblaze"  {
+			"microblaze"  {
 				gen_dev_ccf_binding $drv_handle "$clocknames"
 				set_drv_prop_if_empty $drv_handle "clock-names" "$clocknames" stringlist
-			}
-			default {
-				error "Unknown arch"
 			}
 		}
 	} else {

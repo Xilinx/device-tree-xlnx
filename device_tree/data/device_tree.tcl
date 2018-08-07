@@ -384,6 +384,7 @@ proc generate {lib_handle} {
         gen_compatible_property $drv_handle
         gen_drv_prop_from_ip $drv_handle
         gen_interrupt_property $drv_handle
+        gen_clk_property $drv_handle
     }
     gen_board_info
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
