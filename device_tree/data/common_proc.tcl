@@ -1305,6 +1305,9 @@ proc gen_clk_property {drv_handle} {
 	set clocknames ""
 
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "microblaze"]} {
+		return
+	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 	if {[string match -nocase $ip "vcu"]} {
