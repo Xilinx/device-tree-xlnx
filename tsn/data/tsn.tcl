@@ -256,6 +256,9 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 	hsi::utils::add_new_dts_param "${ep_node}" "compatible" "xlnx,tsn-ep" string
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,num-queues" $numqueues noformating
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,channel-ids" $id string
+	set mac_addr "00 0A 35 00 01 10"
+	hsi::utils::add_new_dts_param $ep_node "local-mac-address" ${mac_addr} bytelist
+	hsi::utils::add_new_dts_param "$ep_node" "xlnx,eth-hasnobuf" "" boolean
 
 	set len [llength $end1]
 	switch $len {
