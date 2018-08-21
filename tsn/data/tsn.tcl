@@ -166,7 +166,7 @@ proc generate {drv_handle} {
 			set switch_addr [format %08x [expr 0x$baseaddr + $switch_offset]]
 			set switch_size [format %08x [expr $high_addr - 0x$switch_addr]]
 			set switch_size [format %08x [expr 0x${switch_size} + 1]]
-			gen_switch_node $periph $switch_addr $switch_size $numqueues $node $drv_handle $proc_type
+			gen_switch_node $periph $switch_addr $switch_size $numqueues $node $drv_handle $proc_type $eth_ip
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_endpoint_block_0" $periph]} {
 			set ep_offset [get_property CONFIG.EP_SCHEDULER_OFFSET $eth_ip]
@@ -247,8 +247,10 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,num-queues" $numqueues noformating
 }
 
-proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_type} {
+proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_type eth_ip} {
 	set switch_node [add_or_get_dt_node -n "tsn_switch" -l epswitch -u $addr -p $parent_node]
+	set hwaddr_learn [get_property CONFIG.EN_HW_ADDR_LEARNING $eth_ip]
+	set mgmt_tag [get_property CONFIG.EN_INBAND_MGMT_TAG $eth_ip]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set switch_reg "0x$addr 0x$size"
 	} else {
@@ -257,6 +259,12 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	hsi::utils::add_new_dts_param "${switch_node}" "reg" $switch_reg int
 	hsi::utils::add_new_dts_param "${switch_node}" "compatible" "xlnx,tsn-switch" string
 	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-queues" $numqueues noformating
+	if {[string match -nocase $hwaddr_learn "true"]} {
+		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,hwaddr-learning" "" boolean
+	}
+	if {[string match -nocase $mgmt_tag "true"]} {
+		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,inband-mgmt-tag" "" boolean
+	}
 }
 
 proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_point_ip numqueues freq intr_parent mac0intr eth_ip connectrx_ip connecttx_ip int3 int1 id} {
