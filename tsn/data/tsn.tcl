@@ -141,6 +141,9 @@ proc generate {drv_handle} {
 		if {$num == 2} {
 			lappend mac1intr $intr1
 		}
+		if {[string match -nocase $intr1 "interrupt_ptp_timer"]} {
+			lappend mac0intr $intr1
+		}
 		if {[string match -nocase $intr1 "tsn_ep_scheduler_irq"]} {
 			lappend ep_sched_irq $intr1
 		}
