@@ -153,10 +153,11 @@ proc generate {drv_handle} {
 			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $end1 $end_point_ip $numqueues $freq $intr_parent $mac0intr $eth_ip $connectrx_ip $connecttx_ip $int3 $int1 $id
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
+			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac1_offset [get_property CONFIG.TEMAC_2_OFFSET $eth_ip]
 			set tmac1_size [get_property CONFIG.TEMAC_2_SIZE $eth_ip]
 			set addr_off [format %08x [expr 0x$baseaddr + $tmac1_offset]]
-			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $end1 $end_point_ip $node $drv_handle $proc_type $freq $eth_ip $mac1intr $connectrx_ip $connecttx_ip
+			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $end1 $end_point_ip $node $drv_handle $proc_type $freq $eth_ip $mac1intr $connectrx_ip $connecttx_ip $baseaddr
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
 			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
@@ -276,6 +277,8 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_p
 	set rxcsum "0"
 	set mac_addr "00 0A 35 00 01 0e"
 	set phy_type [get_phytype $phytype]
+	set qbv_offset [get_property CONFIG.TEMAC_1_SCHEDULER_OFFSET $periph]
+	set qbv_size [get_property CONFIG.TEMAC_1_SCHEDULER_SIZE $periph]
 	hsi::utils::add_new_dts_param $tsn_mac_node "local-mac-address" ${mac_addr} bytelist
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,txsum" $txcsum int
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,rxsum" $rxcsum int
@@ -285,6 +288,11 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_p
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,channel-ids" $id string
+	if {[llength $qbv_offset] != 0} {
+		set qbv_addr 0x[format %08x [expr 0x$addr + $qbv_offset]]
+		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-addr" $qbv_addr int
+		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-size" $qbv_size int
+	}
 	set intr_len [llength $mac0intr]
 	for {set i 0} {$i < $intr_len} {incr i} {
 		lappend intr [lindex $mac0intr $i]
@@ -394,7 +402,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle end1 end_p
 	}
 }
 
-proc gen_mac1_node {periph addr size numqueues intr_parent end1 end_point_ip parent_node drv_handle proc_type freq eth_ip mac1intr connectrx_ip connecttx_ip} {
+proc gen_mac1_node {periph addr size numqueues intr_parent end1 end_point_ip parent_node drv_handle proc_type freq eth_ip mac1intr connectrx_ip connecttx_ip baseaddr} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l tsn_emac_1 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsn_reg "0x$addr $size"
@@ -414,6 +422,8 @@ proc gen_mac1_node {periph addr size numqueues intr_parent end1 end_point_ip par
 	set rxcsum "0"
 	set mac_addr "00 0A 35 00 01 0f"
 	set phy_type [get_phytype $phytype]
+	set qbv_offset [get_property CONFIG.TEMAC_2_SCHEDULER_OFFSET $eth_ip]
+	set qbv_size [get_property CONFIG.TEMAC_2_SCHEDULER_SIZE $eth_ip]
 	hsi::utils::add_new_dts_param $tsn_mac_node "local-mac-address" ${mac_addr} bytelist
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,txsum" $txcsum int
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,rxsum" $rxcsum int
@@ -423,6 +433,11 @@ proc gen_mac1_node {periph addr size numqueues intr_parent end1 end_point_ip par
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	if {[llength $qbv_offset] != 0} {
+		set qbv_addr 0x[format %08x [expr 0x$baseaddr + $qbv_offset]]
+		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-addr" $qbv_addr int
+		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-size" $qbv_size int
+	}
 	set intr_len [llength $mac1intr]
 	for {set i 0} {$i < $intr_len} {incr i} {
 		lappend intr [lindex $mac1intr $i]
