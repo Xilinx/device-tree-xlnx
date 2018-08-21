@@ -27,6 +27,8 @@ proc generate {drv_handle} {
 	set eth_ip [get_cells -hier $drv_handle]
 	set ip_name [get_property IP_NAME $eth_ip]
 
+	global tsn_ep_node
+	set tsn_ep_node "tsn_ep"
 	set end_point_ip ""
 	set end1 ""
 	set connectrx_ip ""
@@ -233,7 +235,8 @@ proc gen_phy_node args {
 }
 
 proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_type ep_sched_irq eth_ip intr_parent int3 int1 id end1 end_point_ip connectrx_ip connecttx_ip} {
-	set ep_node [add_or_get_dt_node -n "tsn_ep" -l tsn_ep -u $ep_addr -p $parent_node]
+	global tsn_ep_node
+	set ep_node [add_or_get_dt_node -n "tsn_ep" -l $tsn_ep_node -u $ep_addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set ep_reg "0x$ep_addr $ep_size"
 	} else {
@@ -391,6 +394,8 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	global tsn_ep_node
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "tsn,endpoint" $tsn_ep_node reference
 	if {[llength $qbv_offset] != 0} {
 		set qbv_addr 0x[format %08x [expr 0x$addr + $qbv_offset]]
 		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-addr" $qbv_addr int
@@ -449,6 +454,8 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	global tsn_ep_node
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "tsn,endpoint" $tsn_ep_node reference
 	if {[llength $qbv_offset] != 0} {
 		set qbv_addr 0x[format %08x [expr 0x$baseaddr + $qbv_offset]]
 		hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,qbv-addr" $qbv_addr int
