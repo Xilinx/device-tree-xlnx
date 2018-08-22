@@ -295,6 +295,19 @@ proc gen_board_info {} {
     foreach override $overrides {
 	if {[lindex $override 0] == "BOARD"} {
 		set first_element [lindex $override 0]
+		set dtsi_file [lindex $override 1]
+		if {[file exists [glob $dtsi_file]]} {
+			set dir [pwd]
+			set pathtype [file pathtype $dtsi_file]
+			if {[string match -nocase $pathtype "relative"]} {
+				dtg_warning "checking file:$dtsi_file  pwd:$dir"
+				#Get the absolute path from relative path
+				set dtsi_file [file normalize $dtsi_file]
+			}
+			file copy -force [glob $dtsi_file] ./
+			update_system_dts_include [file tail [glob $dtsi_file]]
+			return
+		}
 		set dts_name [string tolower [lindex $override 1]]
 		if {[string match -nocase $dts_name "template"]} {
 			return
