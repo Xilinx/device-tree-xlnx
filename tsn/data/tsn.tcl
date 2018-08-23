@@ -58,8 +58,15 @@ proc generate {drv_handle} {
 	}
 	set connectedrx_ipname [get_property IP_NAME $end_ip]
 	set id 1
+	set queue ""
 	if {$connectedrx_ipname == "axi_mcdma"} {
 		set num_queues [get_property CONFIG.c_num_s2mm_channels $end_ip]
+		set rx_queues  [get_property CONFIG.c_num_mm2s_channels $end_ip]
+		if {$num_queues > $rx_queues} {
+			set queue $num_queues
+		} else {
+			set queue $rx_queues
+		}
 		for {set i 2} {$i <= $num_queues} {incr i} {
 			set i [format "%x" $i]
 			append id "\""
@@ -70,6 +77,8 @@ proc generate {drv_handle} {
 		set int2 [get_property CONFIG.interrupt-parent $target_handle]
 		set int3  [get_property CONFIG.interrupt-names $target_handle]
 	}
+	set inhex [format %x $queue]
+	append queues "/bits/ 16 <0x$inhex>"
 
 	set connected_ip [hsi::utils::get_connected_stream_ip $eth_ip "tx_axis_res"]
 	if {[llength $connected_ip] != 0} {
@@ -155,14 +164,14 @@ proc generate {drv_handle} {
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac0_size [get_property CONFIG.TEMAC_1_SIZE $eth_ip]
-			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip
+			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac1_offset [get_property CONFIG.TEMAC_2_OFFSET $eth_ip]
 			set tmac1_size [get_property CONFIG.TEMAC_2_SIZE $eth_ip]
 			set addr_off [format %08x [expr 0x$baseaddr + $tmac1_offset]]
-			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $node $drv_handle $proc_type $freq $eth_ip $mac1intr $baseaddr
+			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $node $drv_handle $proc_type $freq $eth_ip $mac1intr $baseaddr $queues
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
 			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
@@ -257,7 +266,7 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 
 	hsi::utils::add_new_dts_param "${ep_node}" "reg" $ep_reg int
 	hsi::utils::add_new_dts_param "${ep_node}" "compatible" "xlnx,tsn-ep" string
-	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,num-queues" $numqueues noformating
+	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,channel-ids" $id string
 	set mac_addr "00 0A 35 00 01 10"
 	hsi::utils::add_new_dts_param $ep_node "local-mac-address" ${mac_addr} bytelist
@@ -357,7 +366,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	}
 	hsi::utils::add_new_dts_param "${switch_node}" "reg" $switch_reg int
 	hsi::utils::add_new_dts_param "${switch_node}" "compatible" "xlnx,tsn-switch" string
-	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-queues" $numqueues noformating
+	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-tc" $numqueues noformating
 	if {[string match -nocase $hwaddr_learn "true"]} {
 		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,hwaddr-learning" "" boolean
 	}
@@ -366,7 +375,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	}
 }
 
-proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip} {
+proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l tsn_emac_0 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsnreg "0x$addr $size"
@@ -393,7 +402,8 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,eth-hasnobuf" "" boolean
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
 	global tsn_ep_node
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "tsn,endpoint" $tsn_ep_node reference
 	if {[llength $qbv_offset] != 0} {
@@ -423,7 +433,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	}
 }
 
-proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handle proc_type freq eth_ip mac1intr baseaddr} {
+proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handle proc_type freq eth_ip mac1intr baseaddr queues} {
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l tsn_emac_1 -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsn_reg "0x$addr $size"
@@ -453,7 +463,8 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,eth-hasnobuf" "" boolean
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
 	global tsn_ep_node
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "tsn,endpoint" $tsn_ep_node reference
 	if {[llength $qbv_offset] != 0} {
