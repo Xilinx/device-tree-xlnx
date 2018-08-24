@@ -28,7 +28,11 @@ proc generate {drv_handle} {
 	set ip_name [get_property IP_NAME $eth_ip]
 
 	global tsn_ep_node
+	global tsn_emac0_node
+	global tsn_emac1_node
 	set tsn_ep_node "tsn_ep"
+	set tsn_emac0_node "tsn_emac_0"
+	set tsn_emac1_node "tsn_emac_1"
 	set end_point_ip ""
 	set end1 ""
 	set connectrx_ip ""
@@ -373,10 +377,39 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	if {[string match -nocase $mgmt_tag "true"]} {
 		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,inband-mgmt-tag" "" boolean
 	}
+	set inhex [format %x 3]
+	append numports "/bits/ 16 <0x$inhex>"
+	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-ports" $numports noformating
+	global tsn_ep_node
+	global tsn_emac0_node
+	global tsn_emac1_node
+	set end1 ""
+	set end1 [lappend end1 $tsn_ep_node]
+	set end1 [lappend end1 $tsn_emac0_node]
+	set end1 [lappend end1 $tsn_emac1_node]
+	set len [llength $end1]
+        switch $len {
+                "1" {
+                        set ref_id [lindex $end1 0]
+                        hsi::utils::add_new_dts_param "${switch_node}" "ports" "$ref_id" reference
+                }
+                "2" {
+                        set ref_id [lindex $end1 0]
+                        append ref_id ">, <&[lindex $end1 1]"
+                        hsi::utils::add_new_dts_param "${switch_node}" "ports" "$ref_id" reference
+                }
+                "3" {
+                        set ref_id [lindex $end1 0]
+                        append ref_id ">, <&[lindex $end1 1]>, <&[lindex $end1 2]"
+                        hsi::utils::add_new_dts_param "${switch_node}" "ports" "$ref_id" reference
+                }
+        }
+
 }
 
 proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues} {
-	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l tsn_emac_0 -u $addr -p $parent_node]
+	global tsn_emac0_node
+	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l $tsn_emac0_node -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsnreg "0x$addr $size"
 	} else {
@@ -434,7 +467,8 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 }
 
 proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handle proc_type freq eth_ip mac1intr baseaddr queues} {
-	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l tsn_emac_1 -u $addr -p $parent_node]
+	global tsn_emac1_node
+	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l $tsn_emac1_node -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
 		set tsn_reg "0x$addr $size"
 	} else {
