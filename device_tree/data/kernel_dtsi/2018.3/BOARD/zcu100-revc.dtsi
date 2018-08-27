@@ -14,8 +14,6 @@
 
 	gpio-keys {
 		compatible = "gpio-keys";
-		#address-cells = <1>;
-		#size-cells = <0>;
 		autorepeat;
 		sw4 {
 			label = "sw4";
@@ -290,4 +288,8 @@
 	phy-names = "usb3-phy";
 	phys = <&lane3 4 1 0 26000000>;
 	maximum-speed = "super-speed";
+};
+
+&watchdog0 {
+	reset-on-timeout;
 };
