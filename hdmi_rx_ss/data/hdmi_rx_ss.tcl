@@ -46,6 +46,18 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" csc_in reference
 		}
 	}
+	if {[string match -nocase $connected_ip_type "v_scenechange"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l hdmi_rx_ports -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set port_node [add_or_get_dt_node -n "port" -l hdmi_rx_port -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
+		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
+		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+		set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmirx_out -p $port_node]
+		hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" scd_in reference
+	}
 	if {[string match -nocase $connected_ip_type "v_frmbuf_wr"]} {
 		set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
 		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
