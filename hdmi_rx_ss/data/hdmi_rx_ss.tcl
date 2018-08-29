@@ -99,4 +99,22 @@ proc generate {drv_handle} {
 	}
 	hsi::utils::add_new_dts_param "$node" "phy-names" $phy_names stringlist
 	hsi::utils::add_new_dts_param "$node" "phys" $phys reference
+	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
+	set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
+	set edid_ram_size [get_property CONFIG.C_EDID_RAM_SIZE [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram_size hexint
+	set audio_out_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "AUDIO_OUT"]
+	if {[llength $audio_out_connect_ip] != 0} {
+		set audio_out_connect_ip_type [get_property IP_NAME $audio_out_connect_ip]
+		if {[string match -nocase $audio_out_connect_ip_type "axis_switch"]} {
+			 set connected_ip [hsi::utils::get_connected_stream_ip $audio_out_connect_ip "M00_AXIS"]
+                        if {[llength $connected_ip] != 0} {
+                                hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-snd-pcm" $connected_ip reference
+                        }
+		}
+	}
+	hsi::utils::add_new_dts_param "${node}" "/* User needs to change the property xlnx,audio-enabled=<0x1> based on the HDMI audio path */" "" comment
+	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enabled" 0 hexint
 }

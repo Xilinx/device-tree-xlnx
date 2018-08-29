@@ -56,6 +56,7 @@ proc generate {drv_handle} {
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
+		hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the fields xlnx,vformat based on user requirement */" "" comment
 		hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
 		hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference
 		hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
@@ -83,4 +84,15 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$node" "phy-names" $phy_names stringlist
 	hsi::utils::add_new_dts_param "$node" "phys" $phys reference
 	set audio_in_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "AUDIO_IN"]
+	if {[llength $audio_in_connect_ip] != 0} {
+		set audio_in_connect_ip_type [get_property IP_NAME $audio_in_connect_ip]
+		if {[string match -nocase $audio_in_connect_ip_type "axis_switch"]} {
+			set connected_ip [hsi::utils::get_connected_stream_ip $audio_in_connect_ip "S00_AXIS"]
+			if {[llength $connected_ip] != 0} {
+				hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-snd-pcm" $connected_ip reference
+			}
+		}
+	}
+	hsi::utils::add_new_dts_param "${node}" "/* User needs to change the property xlnx,audio-enabled=<0x1> based on the HDMI audio path */" "" comment
+	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enabled" 0 hexint
 }
