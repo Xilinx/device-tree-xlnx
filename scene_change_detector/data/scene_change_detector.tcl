@@ -38,11 +38,11 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$scd_ports_node" "dma-channels" 1 int
 	set aximm_addr_width [get_property CONFIG.AXIMM_ADDR_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$scd_ports_node" "xlnx,addrwidth" $aximm_addr_width hexint
-	set intr_info [get_intr_id $drv_handle "interrupt"]
-	set intc [hsi::utils::get_interrupt_parent $ip "interrupt"]
-	if { [llength $intr_info] && ![string match -nocase $intr_info "-1"] } {
-		hsi::utils::add_new_dts_param $scd_ports_node "interrupts" $intr_info intlist
-		hsi::utils::add_new_dts_param $scd_ports_node "interrupt-parent" $intc reference
+	set intr_val [get_property CONFIG.interrupts $drv_handle]
+	set intr_parent [get_property CONFIG.interrupt-parent $drv_handle]
+	if { [llength $intr_val] && ![string match -nocase $intr_val "-1"] } {
+		hsi::utils::add_new_dts_param $scd_ports_node "interrupts" $intr_val intlist
+		hsi::utils::add_new_dts_param $scd_ports_node "interrupt-parent" $intr_parent reference
 	} else {
 		dtg_warning "ERROR: ${drv_handle}: interrupt port is not connected"
 	}
