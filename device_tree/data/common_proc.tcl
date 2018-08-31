@@ -3155,11 +3155,14 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	}
 
 	set intr_sink_pins [::hsi::utils::get_sink_pins $intr_pin]
-	if { [llength $intr_sink_pins] == 0 } {
+	if { [llength $intr_sink_pins] == 0 || [string match $intr_sink_pins "{}"]} {
 		return $intr_cntrl
 	}
 	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53"
 	foreach intr_sink ${intr_sink_pins} {
+		if {[llength $intr_sink] == 0} {
+			continue
+		}
 		set sink_periph [::hsi::get_cells -of_objects $intr_sink]
 		if { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
 			if { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0} {
