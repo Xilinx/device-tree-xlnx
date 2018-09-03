@@ -1580,6 +1580,23 @@ proc gen_clk_property {drv_handle} {
 		set is_clk_wiz 0
 	}
 	set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
+	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+	if {[string match -nocase $ip "vcu"]} {
+		set vcu_label $drv_handle
+		set vcu_clk1 "$drv_handle 1"
+		set updat [lappend updat $vcu_clk1]
+		set vcu_clk2 "$drv_handle 2"
+		set updat [lappend updat $vcu_clk2]
+		set vcu_clk3 "$drv_handle 3"
+		set updat [lappend updat $vcu_clk3]
+		set vcu_clk4 "$drv_handle 4"
+		set updat [lappend updat $vcu_clk4]
+		set len [llength $updat]
+		set refs [lindex $updat 0]
+		append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]"
+		set_drv_prop $drv_handle "clocks" "$refs" reference
+		return
+	}
 	set len [llength $updat]
 	switch $len {
 		"1" {

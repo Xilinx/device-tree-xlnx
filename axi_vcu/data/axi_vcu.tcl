@@ -29,6 +29,7 @@ proc generate {drv_handle} {
     }
     hsi::utils::add_new_dts_param "${node}" "#address-cells" 2 int
     hsi::utils::add_new_dts_param "${node}" "#size-cells" 2 int
+    hsi::utils::add_new_dts_param "${node}" "#clock-cells" 1 int
     set tab "\n\t\t\t\t"
     set reg "0x0 0xa0040000 0x0 0x1000>,$tab<0x0 0xa0041000 0x0 0x1000"
     set_drv_prop $drv_handle reg $reg int
@@ -68,7 +69,7 @@ proc generate {drv_handle} {
     hsi::utils::add_new_dts_param "${decoder_node}" "reg" $decoder_reg int
     hsi::utils::add_new_dts_param "${decoder_node}" "interrupts" $intr_val int
     hsi::utils::add_new_dts_param "${decoder_node}" "interrupt-parent" $intr_parent reference
-    set clknames "pll_ref aclk"
+    set clknames "pll_ref aclk vcu_core_enc vcu_core_dec vcu_mcu_enc vcu_mcu_dec"
     overwrite_clknames $clknames $drv_handle
 }
 
