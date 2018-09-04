@@ -296,7 +296,7 @@ proc gen_board_info {} {
 	if {[lindex $override 0] == "BOARD"} {
 		set first_element [lindex $override 0]
 		set dtsi_file [lindex $override 1]
-		if {[file exists [glob $dtsi_file]]} {
+		if {[file exists $dtsi_file]} {
 			set dir [pwd]
 			set pathtype [file pathtype $dtsi_file]
 			if {[string match -nocase $pathtype "relative"]} {
@@ -304,8 +304,8 @@ proc gen_board_info {} {
 				#Get the absolute path from relative path
 				set dtsi_file [file normalize $dtsi_file]
 			}
-			file copy -force [glob $dtsi_file] ./
-			update_system_dts_include [file tail [glob $dtsi_file]]
+			file copy -force $dtsi_file ./
+			update_system_dts_include [file tail $dtsi_file]
 			return
 		}
 		set dts_name [string tolower [lindex $override 1]]
