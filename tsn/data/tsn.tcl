@@ -455,7 +455,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-parent" $intr_parent reference
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-names" $mac0intr stringlist
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "clock-frequency" $freq int
-	if {$phytype == "rgmii"} {
+	if {$phytype == "rgmii" || $phytype == "gmii"} {
 		set phynode [pcspma_phy_node $periph]
 		set phya [lindex $phynode 0]
 		if { $phya != "-1"} {
@@ -517,7 +517,7 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-parent" $intr_parent reference
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-names" $mac1intr stringlist
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "clock-frequency" $freq int
-	if {$phytype == "rgmii"} {
+	if {$phytype == "rgmii" || $phytype == "gmii"} {
 		set phynode [pcspma_phy_node $periph]
 		set phya [lindex $phynode 0]
 		if { $phya != "-1"} {
