@@ -63,7 +63,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,video-width" $max_data_width int
 		set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
 		set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
-		if {[string match -nocase $connected_in_ip_type "v_proc_ss"]|| [string match -nocase $connected_in_ip_type "v_tpg"]} {
+		if {[string match -nocase $connected_in_ip_type "v_proc_ss"]|| [string match -nocase $connected_in_ip_type "v_tpg"] || [string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
 			set scaler_ports_node [add_or_get_dt_node -n "ports" -l scaler_ports -p $node]
 			hsi::utils::add_new_dts_param "$scaler_ports_node" "#address-cells" 1 int
 			hsi::utils::add_new_dts_param "$scaler_ports_node" "#size-cells" 0 int
@@ -78,6 +78,9 @@ proc generate {drv_handle} {
 			}
 			if {[string match -nocase $connected_in_ip_type "v_tpg"]} {
 				hsi::utils::add_new_dts_param "$scaler_in_node" "remote_end_point" tpg_out reference
+			}
+			if {[string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
+				hsi::utils::add_new_dts_param "$scaler_in_node" "remote_end_point" sdi_rx_out reference
 			}
 		}
 		if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {

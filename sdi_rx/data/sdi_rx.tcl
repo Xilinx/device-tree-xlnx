@@ -65,4 +65,21 @@ proc generate {drv_handle} {
 		set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
 		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote_end_point" mixer_crtc reference
 	}
+	if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set port_node [add_or_get_dt_node -n "port" -l sdirx_port -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
+		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
+		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+		set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l sdi_rx_out -p $port_node]
+		set topology [get_property CONFIG.C_TOPOLOGY $connected_ip]
+		if {$topology == 0} {
+			hsi::utils::add_new_dts_param "$sdi_rx_node" "remote_end_point" scaler_in reference
+		} else {
+			hsi::utils::add_new_dts_param "$sdi_rx_node" "remote_end_point" csc_in reference
+		}
+	}
 }
