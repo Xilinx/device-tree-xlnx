@@ -2294,6 +2294,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 				}
 		}
 		if {$status_disabled} {
+			if {[string match -nocase $ip_type "psu_smmu_gpv"]} {
+				return
+			}
 			hsi::utils::add_new_dts_param "${rt_node}" "status" "okay" string
 		}
 	} else {
