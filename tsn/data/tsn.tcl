@@ -372,10 +372,10 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 	hsi::utils::add_new_dts_param "${switch_node}" "compatible" "xlnx,tsn-switch" string
 	hsi::utils::add_new_dts_param "${switch_node}" "xlnx,num-tc" $numqueues noformating
 	if {[string match -nocase $hwaddr_learn "true"]} {
-		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,hwaddr-learning" "" boolean
+		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,has-hwaddr-learning" "" boolean
 	}
 	if {[string match -nocase $mgmt_tag "true"]} {
-		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,inband-mgmt-tag" "" boolean
+		hsi::utils::add_new_dts_param "${switch_node}" "xlnx,has-inband-mgmt-tag" "" boolean
 	}
 	set inhex [format %x 3]
 	append numports "/bits/ 16 <0x$inhex>"
