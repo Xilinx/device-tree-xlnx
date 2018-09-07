@@ -89,7 +89,7 @@ proc generate {drv_handle} {
 		if {[string match -nocase $audio_in_connect_ip_type "axis_switch"]} {
 			set connected_ip [hsi::utils::get_connected_stream_ip $audio_in_connect_ip "S00_AXIS"]
 			if {[llength $connected_ip] != 0} {
-				hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-snd-pcm" $connected_ip reference
+				hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
 			}
 		}
 	}

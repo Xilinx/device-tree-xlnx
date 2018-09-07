@@ -37,10 +37,10 @@ proc generate {drv_handle} {
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_DATA"]
 	if {[llength $connected_ip] != 0} {
-		hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-snd-pcm" $connected_ip reference
+		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
 	}
 	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_DATA"]
 	if {[llength $connect_ip] != 0} {
-		hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-snd-pcm" $connect_ip reference
+		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
 	}
 }
