@@ -2878,15 +2878,6 @@ proc gen_cpu_nodes {drv_handle} {
 	set processor_list [eval "get_cells -hier -filter { IP_TYPE == \"PROCESSOR\" && IP_NAME == \"${processor_type}\" }"]
 
 	set drv_dt_prop_list [get_driver_conf_list $processor]
-	set add_reg 0
-	set cpu0_only ""
-	if {![string equal -nocase ${processor_type} "microblaze"]} {
-		set add_reg 1
-		set cpu0_only [get_property CONFIG.cpu0_only $processor]
-		foreach prop "${cpu0_only} cpu0_only" {
-			set drv_dt_prop_list [list_remove_element $drv_dt_prop_list "CONFIG.${prop}"]
-		}
-	}
 
 	# generate mb ccf node
 	generate_mb_ccf_node $processor
@@ -2900,19 +2891,10 @@ proc gen_cpu_nodes {drv_handle} {
 		foreach drv_prop_name $drv_dt_prop_list {
 			add_driver_prop $processor $cpu_node ${drv_prop_name}
 		}
-		if {[string equal -nocase ${cpu} ${drv_handle}]} {
-			set rt_node $cpu_node
-			foreach cpu_prop ${cpu0_only} {
-				add_driver_prop $processor $cpu_node CONFIG.${cpu_prop}
-			}
-		}
-		if {$add_reg == 1} {
 			hsi::utils::add_new_dts_param "${cpu_node}" "reg" $cpu_no int ""
-		}
 		incr cpu_no
 	}
 	hsi::utils::add_new_dts_param "${cpu_root_node}" "#cpus" $cpu_no int ""
-	return $rt_node
 }
 
 proc remove_all_tree {} {
