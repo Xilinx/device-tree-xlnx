@@ -41,4 +41,11 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$node" "xlnx,num-channels" $num_channels hexint
 	set depth [get_property CONFIG.C_DEPTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,depth" $depth hexint
+	set ip [get_cells -hier $drv_handle]
+	set freq ""
+	set clk [get_pins -of_objects $ip "aud_mclk"]
+	if {[llength $clk] } {
+		set freq [get_property CLK_FREQ $clk]
+		hsi::utils::add_new_dts_param $node "aud_mclk" "$freq" hex
+	}
 }
