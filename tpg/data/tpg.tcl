@@ -67,9 +67,9 @@ proc generate {drv_handle} {
 					set csiss_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port1_node]
 					set topology [get_property CONFIG.C_TOPOLOGY $connected_out_ip]
 					if {$topology == 0} {
-						hsi::utils::add_new_dts_param "$csiss_node" "remote_end_point" scaler_in reference
+						hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" scaler_in reference
 					} else {
-						hsi::utils::add_new_dts_param "$csiss_node" "remote_end_point" csc_in reference
+						hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" csc_in reference
 					}
 				}
 				if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
@@ -79,7 +79,7 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
 					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port1_node]
-					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote_end_point" vcap_dev_in reference
+					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_dev_in reference
 					set dts_file [current_dt_tree]
 					set bus_node "amba_pl"
 					set vcap_tpg [add_or_get_dt_node -n "vcap_tpg" -d $dts_file -p $bus_node]
@@ -93,7 +93,7 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
 					hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
 					set vcap_tpg_in_node [add_or_get_dt_node -n "endpoint" -l vcap_dev_in -p $vcap_port_node]
-					hsi::utils::add_new_dts_param "$vcap_tpg_in_node" "remote_end_point" tpg_out reference
+					hsi::utils::add_new_dts_param "$vcap_tpg_in_node" "remote-endpoint" tpg_out reference
 				}
 			}
 		}

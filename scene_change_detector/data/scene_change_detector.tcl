@@ -55,7 +55,7 @@ proc generate {drv_handle} {
 		set hdmi_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
 		hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 		set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $hdmi_port_node]
-		hsi::utils::add_new_dts_param "$hdmi_in_node" "remote_end_point" hdmirx_out reference
+		hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmirx_out reference
 	}
 	set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
 	set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
@@ -63,7 +63,7 @@ proc generate {drv_handle} {
 		set hdmi_port1_node [add_or_get_dt_node -n "port" -l scd_port1 -u 1 -p $hdmi_ports_node]
 		hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
 		set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l scd_out -p $hdmi_port1_node]
-		hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote_end_point" scd_hdmi_in reference
+		hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_hdmi_in reference
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
@@ -77,7 +77,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$scd_hdmiport_node" "reg" 0 int
 		hsi::utils::add_new_dts_param "$scd_hdmiport_node" "direction" output string
 		set scd_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_hdmi_in -p $scd_hdmiport_node]
-		hsi::utils::add_new_dts_param "$scd_hdmi_in_node" "remote_end_point" scd_out reference
+		hsi::utils::add_new_dts_param "$scd_hdmi_in_node" "remote-endpoint" scd_out reference
 	}
 	set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "ap_rst_n"]]]
 	foreach pin $pins {

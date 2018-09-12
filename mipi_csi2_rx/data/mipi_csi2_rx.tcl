@@ -67,11 +67,11 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
 					hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
 					set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_out -p $port_node]
-					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote_end_point" demosaic_in reference
+					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" demosaic_in reference
 					set port1_node [add_or_get_dt_node -n "port" -l csiss_port1 -u 1 -p $ports_node]
 					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
 					hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment
-					hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote_end_point=<&out> under the node csiss_in:endpoint */" "" comment
+					hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote-endpoint=<&out> under the node csiss_in:endpoint */" "" comment
 					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
 					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
 					hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string

@@ -62,7 +62,7 @@ proc generate {drv_handle} {
 		set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 		set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
-		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote_end_point" pl_disp_crtc reference
+		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" pl_disp_crtc reference
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
@@ -81,12 +81,12 @@ proc generate {drv_handle} {
 		set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
 		hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
 		set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
-		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote_end_point" sdi_encoder reference
+		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" sdi_encoder reference
 	}
 	if {[string match -nocase $connected_ip_type "v_mix"] || [string match -nocase $ip_type "v_mix"]} {
 		set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 		set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
-		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote_end_point" mixer_crtc reference
+		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
 	}
 }

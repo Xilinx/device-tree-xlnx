@@ -41,9 +41,9 @@ proc generate {drv_handle} {
 		set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
 		set topology [get_property CONFIG.C_TOPOLOGY $connected_ip]
 		if {$topology == 0} {
-			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" vpss_scaler_in reference
+			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vpss_scaler_in reference
 		} else {
-			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" csc_in reference
+			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" csc_in reference
 		}
 	}
 	if {[string match -nocase $connected_ip_type "v_scenechange"]} {
@@ -56,7 +56,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
 		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 		set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmirx_out -p $port_node]
-		hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" scd_in reference
+		hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" scd_in reference
 	}
 	if {[string match -nocase $connected_ip_type "v_frmbuf_wr"]} {
 		set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
@@ -65,7 +65,7 @@ proc generate {drv_handle} {
 		set port_node [add_or_get_dt_node -n "port" -l hdmirx_port -u 0 -p $ports_node]
 		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 		set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
-		hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote_end_point" vcap_hdmi_in reference
+		hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vcap_hdmi_in reference
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
@@ -79,7 +79,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "reg" 0 int
 		hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "direction" input string
 		set vcap_audio_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_audio_hdmiport_node]
-		hsi::utils::add_new_dts_param "$vcap_audio_hdmi_in_node" "remote_end_point" hdmi_rx_out reference
+		hsi::utils::add_new_dts_param "$vcap_audio_hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
 	}
 
 	set link_data0 [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_IN"]

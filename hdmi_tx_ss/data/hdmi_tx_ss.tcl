@@ -42,7 +42,7 @@ proc generate {drv_handle} {
 		set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 		set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
-		hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote_end_point" mixer_crtc reference
+		hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" mixer_crtc reference
 	}
 	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
@@ -52,7 +52,7 @@ proc generate {drv_handle} {
 		set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 		set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
-		hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote_end_point" pl_disp_crtc reference
+		hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" pl_disp_crtc reference
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
@@ -64,7 +64,7 @@ proc generate {drv_handle} {
 		set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
 		hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
 		set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
-		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote_end_point" hdmi_encoder reference
+		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" hdmi_encoder reference
 	}
 	set link_data0 [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_OUT"]
 	if {[string match -nocase $link_data0 "vid_phy_controller"]} {

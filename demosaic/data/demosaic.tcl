@@ -53,7 +53,7 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
 			set demosaic_node [add_or_get_dt_node -n "endpoint" -l demosaic_in -p $port_node]
-			hsi::utils::add_new_dts_param "$demosaic_node" "remote_end_point" csiss_out reference
+			hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" csiss_out reference
 		}
 	}
 	set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
@@ -65,7 +65,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 		set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l demosaic_out -p $port1_node]
-		hsi::utils::add_new_dts_param "$csiss_rx_node" "remote_end_point" gamma_in reference
+		hsi::utils::add_new_dts_param "$csiss_rx_node" "remote-endpoint" gamma_in reference
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "ap_rst_n"]
 	set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $demosaic_ip "ap_rst_n"]]]

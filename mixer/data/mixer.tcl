@@ -54,13 +54,13 @@ proc generate {drv_handle} {
 			set ip_type [get_property IP_NAME $ip]
 		}
 		if {[string match -nocase $connected_ip_type "mipi_dsi_tx_subsystem"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote_end_point" dsi_encoder reference
+			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" dsi_encoder reference
 		}
 		if {[string match -nocase $connected_ip_type "v_hdmi_tx_ss"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote_end_point" hdmi_encoder reference
+			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" hdmi_encoder reference
 		}
 		if {[string match -nocase $connected_ip_type "v_smpte_uhdsdi_tx_ss"]|| [string match -nocase $ip_type "v_smpte_uhdsdi_tx_ss"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote_end_point" sdi_encoder reference
+			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" sdi_encoder reference
 		}
 	}
 

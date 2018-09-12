@@ -39,7 +39,7 @@ proc generate {drv_handle} {
 		set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
 		set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
-		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote_end_point" pl_disp_crtc reference
+		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" pl_disp_crtc reference
 		set dts_file [current_dt_tree]
 		set bus_node "amba_pl"
 		set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_drm_pl_disp_drv" -d $dts_file -p $bus_node]
@@ -51,13 +51,13 @@ proc generate {drv_handle} {
 		set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
 		hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
 		set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
-		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote_end_point" dsi_encoder reference
+		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" dsi_encoder reference
 	}
 	if {[string match -nocase $connected_ip_type "v_mix"]} {
 		set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
 		hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
 		set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
-		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote_end_point" mixer_crtc reference
+		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" mixer_crtc reference
 	}
 	set panel_node [add_or_get_dt_node -n "simple_panel" -l simple_panel -u 0 -p $node]
 	hsi::utils::add_new_dts_param "${panel_node}" "/* User needs to add the panel node based on their requirement */" "" comment
