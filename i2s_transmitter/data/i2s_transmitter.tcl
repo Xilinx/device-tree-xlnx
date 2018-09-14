@@ -46,6 +46,6 @@ proc generate {drv_handle} {
 	set clk [get_pins -of_objects $ip "aud_mclk"]
 	if {[llength $clk] } {
 		set freq [get_property CLK_FREQ $clk]
-		hsi::utils::add_new_dts_param $node "aud_mclk" "$freq" hex
+		hsi::utils::add_new_dts_param $node "aud_mclk" "$freq" int
 	}
 }
