@@ -3527,11 +3527,10 @@ proc get_psu_interrupt_id { ip_name port_name } {
                             set port_width [::hsi::utils::get_port_width $pin]
 	            }
             }
-            set id $ret
-            return $ret
         }
     }
 
+    set id $ret
     return $ret
 }
 
