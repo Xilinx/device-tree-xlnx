@@ -40,10 +40,12 @@ proc generate {drv_handle} {
 		set_cur_working_dts $master_dts
 
 		set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
+		set addr [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
+		regsub -all {^0x} $addr {} addr
+		set memory_node [add_or_get_dt_node -n memory -u $addr -p $parent_node]
 		set base [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
 		set high [get_property CONFIG.C_HIGHADDR [get_cells -hier $drv_handle]]
 		set size [format 0x%x [expr {${high} - ${base} + 1}]]
-		set memory_node [add_or_get_dt_node -n memory -u 0 -p $parent_node]
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {

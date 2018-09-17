@@ -430,8 +430,6 @@ proc add_skeleton {} {
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set chosen_node [add_or_get_dt_node -n "chosen" -d ${default_dts} -p ${system_root_node}]
     set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
-    # assuming memory node is call memory
-    set alias_node [add_or_get_dt_node -n "memory" -d ${default_dts} -p ${system_root_node}]
 }
 
 proc update_chosen {os_handle} {
