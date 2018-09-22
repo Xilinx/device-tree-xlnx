@@ -59,7 +59,10 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $connected_ip reference
 	}
 	if {[string match -nocase $connected_ip_type "v_frmbuf_rd"] || [string match -nocase $connected_ip_type "v_proc_ss"]|| [string match -nocase $ip_type "v_proc_ss"]} {
-		set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $node]
+		set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
 		hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 		set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
 		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" pl_disp_crtc reference
@@ -88,5 +91,15 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 		set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
 		hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
+	}
+	set audio_connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_TX_ANC_DS_OUT"]
+	if {[llength $audio_connected_ip] != 0} {
+		set audio_connected_ip_type [get_property IP_NAME $audio_connected_ip]
+		if {[string match -nocase $audio_connected_ip_type "v_uhdsdi_audio"]} {
+			set sdi_audio_port [add_or_get_dt_node -n "port" -l sdi_audio_port -u 1 -p $ports_node]
+			hsi::utils::add_new_dts_param "$sdi_audio_port" "reg" 1 int
+			set sdi_audio_node [add_or_get_dt_node -n "endpoint" -l sdi_audio_sink_port -p $sdi_audio_port]
+			hsi::utils::add_new_dts_param "$sdi_audio_node" "remote-endpoint" sditx_audio_embed_src reference
+		}
 	}
 }

@@ -29,7 +29,13 @@ proc generate {drv_handle} {
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set connected_embed_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_EMBED_ANC_DS_IN"]
 	if {[llength $connected_embed_ip] != 0} {
-		hsi::utils::add_new_dts_param "$node" "xlnx,sdi-tx-video" $connected_embed_ip reference
+		set connected_embed_ip_type [get_property IP_NAME $connected_embed_ip]
+		if {[string match -nocase $connected_embed_ip_type "v_smpte_uhdsdi_tx_ss"]} {
+			set sdi_av_port [add_or_get_dt_node -n "port" -l sdi_av_port -u 0 -p $node]
+			hsi::utils::add_new_dts_param "$sdi_av_port" "reg" 0 int
+			set sdi_embed_node [add_or_get_dt_node -n "endpoint" -l sditx_audio_embed_src -p $sdi_av_port]
+			hsi::utils::add_new_dts_param "$sdi_embed_node" "remote-endpoint" sdi_audio_sink_port reference
+		}
 	}
 	set connected_extract_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_EXTRACT_ANC_DS_IN"]
 	if {[llength $connected_extract_ip] != 0} {
