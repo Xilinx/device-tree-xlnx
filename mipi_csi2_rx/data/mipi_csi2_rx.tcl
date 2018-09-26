@@ -50,32 +50,72 @@ proc generate {drv_handle} {
 	set axis_tdata_width [get_property CONFIG.AXIS_TDATA_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,axis-tdata-width" "$axis_tdata_width" int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
-	if {[llength $connected_ip] != 0} {
-		set connected_ip_type [get_property IP_NAME $connected_ip]
-		if {[llength $connected_ip_type] != 0} {
-			if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
-				set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
-				set ip_type [get_property IP_NAME $ip]
-				if {[string match -nocase $ip_type "v_demosaic"]} {
-					set ports_node [add_or_get_dt_node -n "ports" -l csiss_ports -p $node]
-					hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-					hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-					set port_node [add_or_get_dt_node -n "port" -l csiss_port0 -u 0 -p $ports_node]
-					hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-					hsi::utils::add_new_dts_param "${port_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format and video-width user needs to fill */" "" comment
-					hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
-					hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
-					hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
-					set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_out -p $port_node]
-					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" demosaic_in reference
-					set port1_node [add_or_get_dt_node -n "port" -l csiss_port1 -u 1 -p $ports_node]
-					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-					hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment
-					hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote-endpoint=<&out> under the node csiss_in:endpoint */" "" comment
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
-					set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_in -p $port1_node]
+	foreach connect_ip $connected_ip {
+		if {[llength $connect_ip] != 0} {
+			set connected_ip_type [get_property IP_NAME $connect_ip]
+			if {[string match -nocase $connected_ip_type "system_ila"]} {
+				continue
+			}
+			if {[llength $connected_ip_type] != 0} {
+				if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
+					set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
+					set ip_type [get_property IP_NAME $ip]
+					if {[string match -nocase $ip_type "v_demosaic"]} {
+						set ports_node [add_or_get_dt_node -n "ports" -l csiss_ports -p $node]
+						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+						set port_node [add_or_get_dt_node -n "port" -l csiss_port0 -u 0 -p $ports_node]
+						hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+						hsi::utils::add_new_dts_param "${port_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format and video-width user needs to fill */" "" comment
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
+						set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_out -p $port_node]
+						hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" demosaic_in reference
+						set port1_node [add_or_get_dt_node -n "port" -l csiss_port1 -u 1 -p $ports_node]
+						hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+						hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment
+						hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote-endpoint=<&out> under the node csiss_in:endpoint */" "" comment
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
+						set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_in -p $port1_node]
+					}
+					if {[string match -nocase $ip_type "v_frmbuf_wr"]} {
+						set ports_node [add_or_get_dt_node -n "ports" -l csiss_ports -p $node]
+						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+						set port_node [add_or_get_dt_node -n "port" -l csiss_port0 -u 0 -p $ports_node]
+						hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+						hsi::utils::add_new_dts_param "${port_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format and video-width user needs to fill */" "" comment
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
+						hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
+						set rx_node [add_or_get_dt_node -n "endpoint" -l csiss_out -p $port_node]
+						hsi::utils::add_new_dts_param "$rx_node" "remote-endpoint" vcap_mipi_in reference
+						set port1_node [add_or_get_dt_node -n "port" -l csiss_port1 -u 1 -p $ports_node]
+						hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+						hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment
+						hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote-endpoint=<&out> under the node csiss_in:endpoint */" "" comment
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
+						hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
+						set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_in -p $port1_node]
+						set dts_file [current_dt_tree]
+						set bus_node "amba_pl"
+						set vcap_mipirx [add_or_get_dt_node -n "vcap_mipi" -d $dts_file -p $bus_node]
+						hsi::utils::add_new_dts_param $vcap_mipirx "compatible" "xlnx,video" string
+						hsi::utils::add_new_dts_param $vcap_mipirx "dmas" "$ip 0" reference
+						hsi::utils::add_new_dts_param $vcap_mipirx "dma-names" "port0" string
+						set vcap_mipi_node [add_or_get_dt_node -n "ports" -l vcap_mipi_ports -p $vcap_mipirx]
+						hsi::utils::add_new_dts_param "$vcap_mipi_node" "#address-cells" 1 int
+						hsi::utils::add_new_dts_param "$vcap_mipi_node" "#size-cells" 0 int
+						set vcap_mipiport_node [add_or_get_dt_node -n "port" -l vcap_mipi_port -u 0 -p $vcap_mipi_node]
+						hsi::utils::add_new_dts_param "$vcap_mipiport_node" "reg" 0 int
+						hsi::utils::add_new_dts_param "$vcap_mipiport_node" "direction" input string
+						set vcap_mipi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_mipi_in -p $vcap_mipiport_node]
+						hsi::utils::add_new_dts_param "$vcap_mipi_in_node" "remote-endpoint" csiss_out reference
+					}
 				}
 			}
 		}
