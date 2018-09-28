@@ -186,8 +186,8 @@ proc gen_sata_laneinfo {} {
 
 	lset freq 0 $i
 	lset freq 1 $j
-	set dts_file [current_dt_tree]
-	set sata_node [add_or_get_dt_node -n sata -l sata d $dts_file -p /]
+	set dts_file [get_property CONFIG.pcw_dts [get_os]]
+	set sata_node [add_or_get_dt_node -n &sata -d $dts_file]
 	set hsi_version [get_hsi_version]
 	set ver [split $hsi_version "."]
 	set version [lindex $ver 0]
