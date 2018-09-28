@@ -60,7 +60,7 @@ proc generate {drv_handle} {
 				if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
 					set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
 					set ip_type [get_property IP_NAME $ip]
-					if {[string match -nocase $ip_type "v_demosaic"]} {
+					if {[string match -nocase $ip_type "v_demosaic"]|| [string match -nocase $ip_type "v_proc_ss"]} {
 						set ports_node [add_or_get_dt_node -n "ports" -l csiss_ports -p $node]
 						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
@@ -71,7 +71,12 @@ proc generate {drv_handle} {
 						hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
 						hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
 						set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_out -p $port_node]
-						hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" demosaic_in reference
+						if {[string match -nocase $ip_type "v_demosaic"]} {
+							hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" demosaic_in reference
+						}
+						if {[string match -nocase $ip_type "v_proc_ss"]} {
+							hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" scaler_in reference
+						}
 						set port1_node [add_or_get_dt_node -n "port" -l csiss_port1 -u 1 -p $ports_node]
 						hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
 						hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment

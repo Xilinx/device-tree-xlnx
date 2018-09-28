@@ -62,52 +62,89 @@ proc generate {drv_handle} {
 		set max_data_width [get_property CONFIG.C_MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,video-width" $max_data_width int
 		set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
-		set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
-		if {[string match -nocase $connected_in_ip_type "v_proc_ss"]|| [string match -nocase $connected_in_ip_type "v_tpg"] || [string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
-			set scaler_ports_node [add_or_get_dt_node -n "ports" -l scaler_ports -p $node]
-			hsi::utils::add_new_dts_param "$scaler_ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$scaler_ports_node" "#size-cells" 0 int
-			set scaler_port_node [add_or_get_dt_node -n "port" -l scaler_port0 -u 0 -p $scaler_ports_node]
-			hsi::utils::add_new_dts_param "${scaler_port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-			hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
-			hsi::utils::add_new_dts_param "$scaler_port_node" "xlnx,video-format" 12 int
-			hsi::utils::add_new_dts_param "$scaler_port_node" "xlnx,video-width" $max_data_width int
-			set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scaler_in -p $scaler_port_node]
-			if {[string match -nocase $connected_in_ip_type "v_proc_ss"]} {
-				hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" csc_out reference
+		if {[llength $connected_in_ip] != 0} {
+			set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
+			set ip_type ""
+			if {[string match -nocase $connected_in_ip_type "axis_subset_converter"]} {
+				set in_ip [hsi::utils::get_connected_stream_ip $connected_in_ip "S_AXIS"]
+				set ip_type [get_property IP_NAME $in_ip]
 			}
-			if {[string match -nocase $connected_in_ip_type "v_tpg"]} {
-				hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" tpg_out reference
+			if {[string match -nocase $connected_in_ip_type "v_proc_ss"]|| [string match -nocase $connected_in_ip_type "v_tpg"] || [string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]|| [string match -nocase $ip_type "mipi_csi2_rx_subsystem"]} {
+				set scaler_ports_node [add_or_get_dt_node -n "ports" -l scaler_ports -p $node]
+				hsi::utils::add_new_dts_param "$scaler_ports_node" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "$scaler_ports_node" "#size-cells" 0 int
+				set scaler_port_node [add_or_get_dt_node -n "port" -l scaler_port0 -u 0 -p $scaler_ports_node]
+				hsi::utils::add_new_dts_param "${scaler_port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+				hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
+				hsi::utils::add_new_dts_param "$scaler_port_node" "xlnx,video-format" 12 int
+				hsi::utils::add_new_dts_param "$scaler_port_node" "xlnx,video-width" $max_data_width int
+				set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scaler_in -p $scaler_port_node]
+				if {[string match -nocase $connected_in_ip_type "v_proc_ss"]} {
+					hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" csc_out reference
+				}
+				if {[string match -nocase $connected_in_ip_type "v_tpg"]} {
+					hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" tpg_out reference
+				}
+				if {[string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
+					hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" sdi_rx_out reference
+				}
+				if {[string match -nocase $ip_type "mipi_csi2_rx_subsystem"]} {
+					hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" csiss_out reference
+				}
 			}
-			if {[string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
-				hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" sdi_rx_out reference
+			if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
+				set hdmi_ports_node [add_or_get_dt_node -n "ports" -l vpss_ports -p $node]
+				hsi::utils::add_new_dts_param "$hdmi_ports_node" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "$hdmi_ports_node" "#size-cells" 0 int
+				set hdmi_port_node [add_or_get_dt_node -n "port" -l vpss_port0 -u 0 -p $hdmi_ports_node]
+				hsi::utils::add_new_dts_param "${hdmi_port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
+				hsi::utils::add_new_dts_param "$hdmi_port_node" "xlnx,video-format" 12 int
+				hsi::utils::add_new_dts_param "$hdmi_port_node" "xlnx,video-width" $max_data_width int
+				set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_in -p $hdmi_port_node]
+				hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
 			}
-		}
-		if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
-			set hdmi_ports_node [add_or_get_dt_node -n "ports" -l vpss_ports -p $node]
-			hsi::utils::add_new_dts_param "$hdmi_ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$hdmi_ports_node" "#size-cells" 0 int
-			set hdmi_port_node [add_or_get_dt_node -n "port" -l vpss_port0 -u 0 -p $hdmi_ports_node]
-			hsi::utils::add_new_dts_param "${hdmi_port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-			hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
-			hsi::utils::add_new_dts_param "$hdmi_port_node" "xlnx,video-format" 12 int
-			hsi::utils::add_new_dts_param "$hdmi_port_node" "xlnx,video-width" $max_data_width int
-			set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_in -p $hdmi_port_node]
-			hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
 		}
 		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS"]
-		set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
-		if {[string match -nocase $connected_out_ip_type "axis_broadcaster"]} {
-			set broad_connected_out_ip [hsi::utils::get_connected_stream_ip $connected_out_ip "M00_AXIS"]
-			set broad_connected_out_ip_type [get_property IP_NAME $broad_connected_out_ip]
-			if {[string match -nocase $broad_connected_out_ip_type "axis_data_fifo"]} {
-				set fifo_connected_out_ip [hsi::utils::get_connected_stream_ip $broad_connected_out_ip "M_AXIS"]
-				set fifo_connected_out_ip_type [get_property IP_NAME $fifo_connected_out_ip]
+		if {[llength $connected_out_ip] != 0} {
+			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
+			if {[string match -nocase $connected_out_ip_type "axis_broadcaster"]} {
+				set broad_connected_out_ip [hsi::utils::get_connected_stream_ip $connected_out_ip "M00_AXIS"]
+				set broad_connected_out_ip_type [get_property IP_NAME $broad_connected_out_ip]
+				if {[string match -nocase $broad_connected_out_ip_type "axis_data_fifo"]} {
+					set fifo_connected_out_ip [hsi::utils::get_connected_stream_ip $broad_connected_out_ip "M_AXIS"]
+					set fifo_connected_out_ip_type [get_property IP_NAME $fifo_connected_out_ip]
+				}
+				if {[string match -nocase $fifo_connected_out_ip_type "axis_register_slice"]} {
+					set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $fifo_connected_out_ip "M_AXIS"]
+					set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
+					if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
+						set hdmi_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
+						hsi::utils::add_new_dts_param "${hdmi_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+						hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
+						hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-width" $max_data_width int
+						set hdmi_scaler_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $hdmi_port1_node]
+						hsi::utils::add_new_dts_param "$hdmi_scaler_node" "remote-endpoint" vcap_hdmi_in reference
+						set dts_file [current_dt_tree]
+						set bus_node "amba_pl"
+						set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
+						hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
+						hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
+						hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
+						set vcap_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
+						hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#address-cells" 1 int
+						hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#size-cells" 0 int
+						set vcap_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_hdmi_node]
+						hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "reg" 0 int
+						hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "direction" input string
+						set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
+						hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
+					}
+				}
 			}
-			if {[string match -nocase $fifo_connected_out_ip_type "axis_register_slice"]} {
-				set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $fifo_connected_out_ip "M_AXIS"]
-				set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
-				if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
+			if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+				if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
 					set hdmi_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
 					hsi::utils::add_new_dts_param "${hdmi_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
 					hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
@@ -119,7 +156,7 @@ proc generate {drv_handle} {
 					set bus_node "amba_pl"
 					set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 					hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
-					hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
+					hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$connected_out_ip 0" reference
 					hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
 					set vcap_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
 					hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#address-cells" 1 int
@@ -129,54 +166,29 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "direction" input string
 					set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
 					hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
+				} else {
+					set port1_node [add_or_get_dt_node -n "port" -l scaler_port1 -u 1 -p $scaler_ports_node]
+					hsi::utils::add_new_dts_param "${port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
+					set scaler_node [add_or_get_dt_node -n "endpoint" -l scaler_out -p $port1_node]
+					hsi::utils::add_new_dts_param "$scaler_node" "remote-endpoint" vcap_csi_in reference
+					set dts_file [current_dt_tree]
+					set bus_node "amba_pl"
+					set vcap_csirx [add_or_get_dt_node -n "vcap_csi" -d $dts_file -p $bus_node]
+					hsi::utils::add_new_dts_param $vcap_csirx "compatible" "xlnx,video" string
+					hsi::utils::add_new_dts_param $vcap_csirx "dmas" "$connected_out_ip 0" reference
+					hsi::utils::add_new_dts_param $vcap_csirx "dma-names" "port0" string
+					set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports -p $vcap_csirx]
+					hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
+					hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
+					set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port -u 0 -p $vcap_ports_node]
+					hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+					set vcap_csi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_csi_in -p $vcap_port_node]
+					hsi::utils::add_new_dts_param "$vcap_csi_in_node" "remote-endpoint" scaler_out reference
 				}
-			}
-		}
-		if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-			if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
-				set hdmi_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
-				hsi::utils::add_new_dts_param "${hdmi_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-				hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
-				hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-format" 12 int
-				hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-width" $max_data_width int
-				set hdmi_scaler_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $hdmi_port1_node]
-				hsi::utils::add_new_dts_param "$hdmi_scaler_node" "remote-endpoint" vcap_hdmi_in reference
-				set dts_file [current_dt_tree]
-				set bus_node "amba_pl"
-				set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
-				hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$connected_out_ip 0" reference
-				hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
-				set vcap_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
-				hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#size-cells" 0 int
-				set vcap_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_hdmi_node]
-				hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "reg" 0 int
-				hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "direction" input string
-				set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
-				hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
-			} else {
-				set port1_node [add_or_get_dt_node -n "port" -l scaler_port1 -u 1 -p $scaler_ports_node]
-				hsi::utils::add_new_dts_param "${port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-				hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-				hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
-				hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
-				set scaler_node [add_or_get_dt_node -n "endpoint" -l scaler_out -p $port1_node]
-				hsi::utils::add_new_dts_param "$scaler_node" "remote-endpoint" vcap_csi_in reference
-				set dts_file [current_dt_tree]
-				set bus_node "amba_pl"
-				set vcap_csirx [add_or_get_dt_node -n "vcap_csi" -d $dts_file -p $bus_node]
-				hsi::utils::add_new_dts_param $vcap_csirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $vcap_csirx "dmas" "$connected_out_ip 0" reference
-				hsi::utils::add_new_dts_param $vcap_csirx "dma-names" "port0" string
-				set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports -p $vcap_csirx]
-				hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-				set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port -u 0 -p $vcap_ports_node]
-				hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
-				hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
-				set vcap_csi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_csi_in -p $vcap_port_node]
-				hsi::utils::add_new_dts_param "$vcap_csi_in_node" "remote-endpoint" scaler_out reference
 			}
 		}
 	}
@@ -279,6 +291,7 @@ proc generate {drv_handle} {
 					if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 						set gpio [expr $gpio + 78]
 						hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+						break
 					}
 				}
 				if {[string match -nocase $ip "axi_gpio"]} {
