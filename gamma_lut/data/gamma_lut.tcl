@@ -76,6 +76,7 @@ proc generate {drv_handle} {
 					if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 						set gpio [expr $gpio + 78]
 						hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+						break
 					}
 				}
 				if {[string match -nocase $ip "axi_gpio"]} {

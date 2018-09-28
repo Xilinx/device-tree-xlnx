@@ -56,7 +56,28 @@ proc generate {drv_handle} {
 	set transceiver_width [get_property CONFIG.Transceiver_Width [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-width" $transceiver_width int
 	for {set ch 0} {$ch <= $tx_no_of_channels} {incr ch} {
-		set phy_node [add_or_get_dt_node -n "vphy_lane$ch" -l vphy_lane$ch -p $node]
+		set phy_node [add_or_get_dt_node -n "vphy_lane@$ch" -l vphy_lane$ch -p $node]
 		hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
+	}
+	set transceiver [get_property CONFIG.Transceiver [get_cells -hier $drv_handle]]
+	switch $transceiver {
+			"GTXE2" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 1 int
+			}
+			"GTHE2" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 2 int
+			}
+			"GTPE2" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 3 int
+			}
+			"GTHE3" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 4 int
+			}
+			"GTHE4" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 5 int
+			}
+			"GTHE5" {
+			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 6 int
+			}
 	}
 }

@@ -67,7 +67,7 @@ proc generate {drv_handle} {
 	for {set layer 0} {$layer < $num_layers} {incr layer} {
 		switch $layer {
 			"0" {
-				set mixer_node0 [add_or_get_dt_node -n "layer$layer" -l xx_mix_master -p $node]
+				set mixer_node0 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_master -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-id" $layer int
 				set maxwidth [get_property CONFIG.MAX_COLS [get_cells -hier $drv_handle]]
 				hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-max-width" $maxwidth int
@@ -87,7 +87,7 @@ proc generate {drv_handle} {
 				}
 			}
 			"1" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer1_alpha [get_property CONFIG.LAYER1_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer1_alpha "true"]} {
@@ -112,7 +112,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer1_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"2" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer2_alpha [get_property CONFIG.LAYER2_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer2_alpha "true"]} {
@@ -137,7 +137,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer2_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"3" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer3_alpha [get_property CONFIG.LAYER3_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer3_alpha "true"]} {
@@ -162,7 +162,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer3_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"4" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer4_alpha [get_property CONFIG.LAYER4_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer4_alpha "true"]} {
@@ -187,7 +187,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer4_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"5" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer5_alpha [get_property CONFIG.LAYER5_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer5_alpha "true"]} {
@@ -212,7 +212,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer5_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"6" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer6_alpha [get_property CONFIG.LAYER6_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer6_alpha "true"]} {
@@ -237,7 +237,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer6_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"7" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer7_alpha [get_property CONFIG.LAYER7_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer7_alpha "true"]} {
@@ -262,7 +262,7 @@ proc generate {drv_handle} {
 				gen_video_format $layer7_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			"8" {
-				set mixer_node1 [add_or_get_dt_node -n "layer$layer" -l xx_mix_overlay_$layer -p $node]
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 				set layer8_alpha [get_property CONFIG.LAYER8_ALPHA [get_cells -hier $drv_handle]]
 				if {[string match -nocase $layer8_alpha "true"]} {
@@ -311,6 +311,7 @@ proc generate {drv_handle} {
 					if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 						set gpio [expr $gpio + 78]
 						hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+						break
 					}
 				}
 				if {[string match -nocase $ip "axi_gpio"]} {
@@ -324,88 +325,88 @@ proc generate {drv_handle} {
 proc gen_video_format {num node drv_handle max_data_width} {
 	switch $num {
 		"0" {
-			append vid_formats " " "bg24"
+			append vid_formats " " "BG24"
 		}
 		"1" {
-			append vid_formats " " "yuyv"
+			append vid_formats " " "YUYV"
 		}
 		"2" {
 			if {$max_data_width == 10} {
-				append vid_formats " " "xv20"
+				append vid_formats " " "XV20"
 			} else {
-				append vid_formats " " "nv16"
+				append vid_formats " " "NV16"
 			}
 		}
 		"3" {
 			if {$max_data_width == 10} {
-				append vid_formats " " "xv15"
+				append vid_formats " " "XV15"
 			} else {
-				append vid_formats " " "nv12"
+				append vid_formats " " "NV12"
 			}
 		}
 		"5" {
-			append vid_formats " " "rgb888"
+			append vid_formats " " "RG24"
 		}
 		"6" {
-			append vid_formats " " "rgb888"
+			append vid_formats " " "RG24"
 		}
 		"10" {
-			append vid_formats " " "xbgr8888"
+			append vid_formats " " "XB24"
 		}
 		"11" {
-			append vid_formats " " "xvuy8888"
+			append vid_formats " " "XV24"
 		}
 		"12" {
-			append vid_formats " " "yuyv"
+			append vid_formats " " "YUYV"
 		}
 		"13" {
-			append vid_formats " " "abgr8888"
+			append vid_formats " " "AB24"
 		}
 		"14" {
 			append vid_formats " " "avuy8888"
 		}
 		"15" {
-			append vid_formats " " "xbgr2101010"
+			append vid_formats " " "XB30"
 		}
 		"16" {
-			append vid_formats " " "yuvx2101010"
+			append vid_formats " " "XV30"
 		}
 		"17" {
 			append vid_formats " " "xxxxx"
 		}
 		"18" {
-			append vid_formats " " "nv16"
+			append vid_formats " " "NV16"
 		}
 		"19" {
-			append vid_formats " " "nv12"
+			append vid_formats " " "NV12"
 		}
 		"20" {
-			append vid_formats " " "bgr888"
+			append vid_formats " " "BG24"
 		}
 		"21" {
-			append vid_formats " " "vuy888"
+			append vid_formats " " "VU24"
 		}
 		"22" {
 			append vid_formats " " "xxxxx"
 		}
 		"23" {
-			append vid_formats " " "xv15"
+			append vid_formats " " "XV15"
 		}
 		"24" {
-			append vid_formats " " "y8"
+			append vid_formats " " "GREY"
 		}
 		"25" {
-			append vid_formats " " "y10"
+			append vid_formats " " "Y10 "
 		}
 		"26" {
-			append vid_formats " " "argb8888"
+			append vid_formats " " "AR24"
 		}
 		"27" {
-			append vid_formats " " "xrgb8888"
+			append vid_formats " " "XR24"
 		}
 		"28" {
-			append vid_formats " " "uyvy"
+			append vid_formats " " "UYVY"
 		}
 	}
-	hsi::utils::add_new_dts_param "$node" "xlnx,video-format" $vid_formats stringlist
+	hsi::utils::add_new_dts_param "$node" "xlnx,vformat" $vid_formats stringlist
 }

@@ -30,9 +30,18 @@ proc generate {drv_handle} {
 	set ip [get_cells -hier $drv_handle]
 	set_drv_conf_prop $drv_handle C_S_AXI_CTRL_ADDR_WIDTH xlnx,s-axi-ctrl-addr-width
 	set_drv_conf_prop $drv_handle C_S_AXI_CTRL_DATA_WIDTH xlnx,s-axi-ctrl-data-width
+	set vid_formats ""
 	set has_bgr8 [get_property CONFIG.HAS_BGR8 [get_cells -hier $drv_handle]]
 	if {$has_bgr8 == 1} {
 		append vid_formats " " "rgb888"
+	}
+	set has_rgb8 [get_property CONFIG.HAS_RGB8 [get_cells -hier $drv_handle]]
+	if {$has_rgb8 == 1} {
+		append vid_formats " " "bgr888"
+	}
+	set has_rgbx8 [get_property CONFIG.HAS_RGBX8 [get_cells -hier $drv_handle]]
+	if {$has_rgbx8 == 1} {
+		append vid_formats " " "xbgr8888"
 	}
 	set has_bgrx8 [get_property CONFIG.HAS_BGRX8 [get_cells -hier $drv_handle]]
 	if {$has_bgrx8 == 1} {
@@ -86,7 +95,9 @@ proc generate {drv_handle} {
 	if {$has_y_uv10_420 == 1} {
 		append vid_formats " " "xv15"
 	}
-	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-formats" $vid_formats stringlist
+	if {![string match $vid_formats ""]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vid-formats" $vid_formats stringlist
+	}
 	set samples_per_clk [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,pixels-per-clock" $samples_per_clk int
 	set dma_align [expr $samples_per_clk * 8]

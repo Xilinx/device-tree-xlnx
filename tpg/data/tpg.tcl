@@ -59,12 +59,12 @@ proc generate {drv_handle} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
 			if {[llength $connected_out_ip_type] != 0} {
 				if {[string match -nocase $connected_out_ip_type "v_proc_ss"]} {
-					set port1_node [add_or_get_dt_node -n "port" -l tpg_port1 -u 1 -p $ports_node]
-					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-					hsi::utils::add_new_dts_param "${port1_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
-					set csiss_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port1_node]
+					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
+					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
+					set csiss_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port0_node]
 					set topology [get_property CONFIG.C_TOPOLOGY $connected_out_ip]
 					if {$topology == 0} {
 						hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" scaler_in reference
@@ -73,12 +73,12 @@ proc generate {drv_handle} {
 					}
 				}
 				if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-					set port1_node [add_or_get_dt_node -n "port" -l tpg_port1 -u 1 -p $ports_node]
-					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-					hsi::utils::add_new_dts_param "${port1_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
-					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
-					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port1_node]
+					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
+					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
+					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port0_node]
 					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_dev_in reference
 					set dts_file [current_dt_tree]
 					set bus_node "amba_pl"
@@ -114,6 +114,7 @@ proc generate {drv_handle} {
 					if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 						set gpio [expr $gpio + 78]
 						hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+						break
 					}
 				}
 				if {[string match -nocase $ip "axi_gpio"]} {

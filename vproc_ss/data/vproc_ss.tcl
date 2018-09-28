@@ -41,16 +41,20 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,v-scaler-phases" $v_scaler_phases int
 		set v_scaler_taps [get_property CONFIG.C_V_SCALER_TAPS [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,v-scaler-taps" $v_scaler_taps int
+		hsi::utils::add_new_dts_param "${node}" "xlnx,num-vert-taps" $v_scaler_taps int
 		set h_scaler_phases [get_property CONFIG.C_H_SCALER_PHASES [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,h-scaler-phases" $h_scaler_phases int
+		hsi::utils::add_new_dts_param "${node}" "xlnx,max-num-phases" $h_scaler_phases int
 		set h_scaler_taps [get_property CONFIG.C_H_SCALER_TAPS [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,h-scaler-taps" $h_scaler_taps int
+		hsi::utils::add_new_dts_param "${node}" "xlnx,num-hori-taps" $h_scaler_taps int
 		set max_cols [get_property CONFIG.C_MAX_COLS [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,max-width" $max_cols int
 		set max_rows [get_property CONFIG.C_MAX_ROWS [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,max-height" $max_rows int
 		set samples_per_clk [get_property CONFIG.C_SAMPLES_PER_CLK [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,samples-per-clk" $samples_per_clk int
+		hsi::utils::add_new_dts_param "${node}" "xlnx,pix-per-clk" $samples_per_clk int
 		set scaler_algo [get_property CONFIG.C_SCALER_ALGORITHM [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,scaler-algorithm" $scaler_algo int
 		set enable_csc [get_property CONFIG.C_ENABLE_CSC [get_cells -hier $drv_handle]]
@@ -203,6 +207,8 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,topology" $topology int
 		set color_support [get_property CONFIG.C_COLORSPACE_SUPPORT [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,colorspace-support" $color_support int
+		set csc_enable_window [get_property CONFIG.C_CSC_ENABLE_WINDOW [get_cells -hier $drv_handle]]
+		hsi::utils::add_new_dts_param "${node}" "xlnx,csc-enable-window" $csc_enable_window string
 		set max_cols [get_property CONFIG.C_MAX_COLS [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,max-width" $max_cols int
 		set max_data_width [get_property CONFIG.C_MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
