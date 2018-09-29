@@ -892,7 +892,7 @@
 				 <&smmu 0x4c2>, <&smmu 0x4c3>;*/
 		};
 
-		sdhci0: sdhci@ff160000 {
+		sdhci0: mmc@ff160000 {
 			u-boot,dm-pre-reloc;
 			compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
 			status = "disabled";
@@ -906,7 +906,7 @@
 			power-domains = <&pd_sd0>;
 		};
 
-		sdhci1: sdhci@ff170000 {
+		sdhci1: mmc@ff170000 {
 			u-boot,dm-pre-reloc;
 			compatible = "xlnx,zynqmp-8.9a", "arasan,sdhci-8.9a";
 			status = "disabled";
