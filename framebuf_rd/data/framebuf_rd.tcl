@@ -45,7 +45,7 @@ proc generate {drv_handle} {
 	}
 	set has_bgrx8 [get_property CONFIG.HAS_BGRX8 [get_cells -hier $drv_handle]]
 	if {$has_bgrx8 == 1} {
-		append vid_formats " " "xbgr8888"
+		append vid_formats " " "xrgb8888"
 	}
 	set has_rgb8 [get_property CONFIG.HAS_RGB8 [get_cells -hier $drv_handle]]
 	if {$has_rgb8 == 1} {
