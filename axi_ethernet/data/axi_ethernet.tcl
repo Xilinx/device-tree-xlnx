@@ -76,6 +76,7 @@ proc generate {drv_handle} {
             if { [llength $target_intf] } {
                 set connected_ip [get_connectedip $intf]
                 set_property axistream-connected "$connected_ip" $drv_handle
+                set_property axistream-control-connected "$connected_ip" $drv_handle
 		set ip_prop CONFIG.c_include_mm2s_dre
 		add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
                 set ip_prop CONFIG.Enable_1588
@@ -128,6 +129,7 @@ proc generate {drv_handle} {
     }
     if {![string_is_empty $connected_ip]} {
       set_property axistream-connected "$connected_ip" $drv_handle
+      set_property axistream-control-connected "$connected_ip" $drv_handle
       set ip_prop CONFIG.c_include_mm2s_dre
       add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
@@ -138,6 +140,7 @@ proc generate {drv_handle} {
                 set connected_ip [get_connectedip $intf]
                 if {![string_is_empty $connected_ip]} {
                       hsi::utils::add_new_dts_param $eth_node "axistream-connected" "$connected_ip" reference
+                      hsi::utils::add_new_dts_param $eth_node "axistream-control-connected" "$connected_ip" reference
                 }
                 hsi::utils::add_new_dts_param $eth_node "xlnx,include-dre" "" boolean
                 hsi::utils::add_new_dts_param $eth_node "xlnx,rxmem" "$rxethmem" hex
