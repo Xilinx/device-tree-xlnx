@@ -1399,43 +1399,38 @@ proc gen_clk_property {drv_handle} {
 			}
 			if {[string match -nocase $periph "clk_wiz_1"] && ![string match -nocase $axi "0"]} {
 				switch $number {
-					"0" {
+					"1" {
 						set peri "clk_wiz_1 0"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"1" {
+					"2" {
 						set peri "clk_wiz_1 1"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"2" {
+					"3" {
 						set peri "clk_wiz_1 2"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"3" {
+					"4" {
 						set peri "clk_wiz_1 3"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"4" {
+					"5" {
 						set peri "clk_wiz_1 4"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"5" {
+					"6" {
 						set peri "clk_wiz_1 5"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-					"6" {
-						set peri "clk_wiz_1 6"
-						set clocks [lappend clocks $peri]
-						set updat [lappend updat $peri]
-					}
 					"7" {
-						set peri "clk_wiz_1 7"
+						set peri "clk_wiz_1 6"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
@@ -1443,43 +1438,38 @@ proc gen_clk_property {drv_handle} {
 			}
 			if {[string match -nocase $periph "clk_wiz_0"] && ![string match -nocase $axi "0"]} {
 				switch $number {
-						"0" {
+						"1" {
 							set peri "clk_wiz_0 0"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"1" {
+						"2" {
 							set peri "clk_wiz_0 1"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"2" {
+						"3" {
 							set peri "clk_wiz_0 2"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"3" {
+						"4" {
 							set peri "clk_wiz_0 3"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"4" {
+						"5" {
 							set peri "clk_wiz_0 4"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"5" {
+						"6" {
 							set peri "clk_wiz_0 5"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}
-						"6" {
-							set peri "clk_wiz_0 6"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
 						"7" {
-							set peri "clk_wiz_0 7"
+							set peri "clk_wiz_0 6"
 							set clocks [lappend clocks $peri]
 							set updat [lappend updat $peri]
 						}

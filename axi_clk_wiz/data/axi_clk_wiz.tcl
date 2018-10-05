@@ -34,7 +34,7 @@ proc generate {drv_handle} {
 		}
 	}
 
-	set output_names "clk_out0 clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7"
+	set output_names "clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7"
 	set_property CONFIG.clock-output-names $output_names $drv_handle
 
 	gen_dev_ccf_binding $drv_handle "clk_in1 s_axi_aclk" "clocks clock-names"
