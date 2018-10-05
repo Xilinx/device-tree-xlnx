@@ -33,8 +33,17 @@ proc generate {drv_handle} {
 	}
 	set dphy_lanes [get_property CONFIG.C_DPHY_LANES [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-lanes" $dphy_lanes int
+	set en_csi_v2_0 [get_property CONFIG.C_EN_CSI_V2_0 [get_cells -hier $drv_handle]]
+	set en_vcx [get_property CONFIG.C_EN_VCX [get_cells -hier $drv_handle]]
 	set cmn_vc [get_property CONFIG.CMN_VC [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,vc" $cmn_vc int
+	if {$en_csi_v2_0 == true && $en_vcx == true && [string match -nocase $cmn_vc "ALL"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" 16  int
+	} elseif {$en_csi_v2_0 == false && [string match -nocase $cmn_vc "ALL"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" 4  int
+	}
+	if {[llength $en_csi_v2_0] == 0} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" $cmn_vc int
+	}
 	set cmn_pxl_format [get_property CONFIG.CMN_PXL_FORMAT [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,csi-pxl-format" $cmn_pxl_format string
 	set csi_en_activelanes [get_property CONFIG.C_CSI_EN_ACTIVELANES [get_cells -hier $drv_handle]]
