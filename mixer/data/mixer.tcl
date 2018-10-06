@@ -323,6 +323,7 @@ proc generate {drv_handle} {
 }
 
 proc gen_video_format {num node drv_handle max_data_width} {
+	set vid_formats ""
 	switch $num {
 		"0" {
 			append vid_formats " " "BG24"
@@ -371,9 +372,6 @@ proc gen_video_format {num node drv_handle max_data_width} {
 		"16" {
 			append vid_formats " " "XV30"
 		}
-		"17" {
-			append vid_formats " " "xxxxx"
-		}
 		"18" {
 			append vid_formats " " "NV16"
 		}
@@ -387,7 +385,7 @@ proc gen_video_format {num node drv_handle max_data_width} {
 			append vid_formats " " "VU24"
 		}
 		"22" {
-			append vid_formats " " "xxxxx"
+			append vid_formats " " "XV20"
 		}
 		"23" {
 			append vid_formats " " "XV15"
@@ -407,6 +405,14 @@ proc gen_video_format {num node drv_handle max_data_width} {
 		"28" {
 			append vid_formats " " "UYVY"
 		}
+		"29" {
+			append vid_formats " " "RG24"
+		}
+		default {
+			dtg_warning "Not supported format:$num"
+		}
 	}
-	hsi::utils::add_new_dts_param "$node" "xlnx,vformat" $vid_formats stringlist
+	if {![string match -nocase $vid_formats ""]} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,vformat" $vid_formats stringlist
+	}
 }
