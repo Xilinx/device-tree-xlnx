@@ -289,7 +289,3 @@
 	phys = <&lane3 4 1 0 26000000>;
 	maximum-speed = "super-speed";
 };
-
-&watchdog0 {
-	reset-on-timeout;
-};
