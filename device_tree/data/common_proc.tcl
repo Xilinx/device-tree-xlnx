@@ -1397,82 +1397,43 @@ proc gen_clk_property {drv_handle} {
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
 				}
 			}
-			if {[string match -nocase $periph "clk_wiz_1"] && ![string match -nocase $axi "0"]} {
+			if {![string match -nocase $axi "0"]} {
 				switch $number {
 					"1" {
-						set peri "clk_wiz_1 0"
+						set peri "$periph 0"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"2" {
-						set peri "clk_wiz_1 1"
+						set peri "$periph 1"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"3" {
-						set peri "clk_wiz_1 2"
+						set peri "$periph 2"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"4" {
-						set peri "clk_wiz_1 3"
+						set peri "$periph 3"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"5" {
-						set peri "clk_wiz_1 4"
+						set peri "$periph 4"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"6" {
-						set peri "clk_wiz_1 5"
+						set peri "$periph 5"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
 					"7" {
-						set peri "clk_wiz_1 6"
+						set peri "$periph 6"
 						set clocks [lappend clocks $peri]
 						set updat [lappend updat $peri]
 					}
-				}
-			}
-			if {[string match -nocase $periph "clk_wiz_0"] && ![string match -nocase $axi "0"]} {
-				switch $number {
-						"1" {
-							set peri "clk_wiz_0 0"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"2" {
-							set peri "clk_wiz_0 1"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"3" {
-							set peri "clk_wiz_0 2"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"4" {
-							set peri "clk_wiz_0 3"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"5" {
-							set peri "clk_wiz_0 4"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"6" {
-							set peri "clk_wiz_0 5"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
-						"7" {
-							set peri "clk_wiz_0 6"
-							set clocks [lappend clocks $peri]
-							set updat [lappend updat $peri]
-						}
 				}
 			}
 		}
@@ -1568,6 +1529,7 @@ proc gen_clk_property {drv_handle} {
 		append clocknames " " "$clk"
 		set is_pl_clk 0
 		set is_clk_wiz 0
+		set axi 0
 	}
 	set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
