@@ -183,7 +183,11 @@ proc generate {drv_handle} {
 							hsi::utils::add_new_dts_param "$scaler_node" "remote-endpoint" vcap_csi_in reference
 							set dts_file [current_dt_tree]
 							set bus_node "amba_pl"
-							set vcap_csirx [add_or_get_dt_node -n "vcap_csi" -d $dts_file -p $bus_node]
+							if {[string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
+								set vcap_csirx [add_or_get_dt_node -n "vcap_sdi" -d $dts_file -p $bus_node]
+							} else {
+								set vcap_csirx [add_or_get_dt_node -n "vcap_csi" -d $dts_file -p $bus_node]
+							}
 							hsi::utils::add_new_dts_param $vcap_csirx "compatible" "xlnx,video" string
 							hsi::utils::add_new_dts_param $vcap_csirx "dmas" "$connected_out_ip 0" reference
 							hsi::utils::add_new_dts_param $vcap_csirx "dma-names" "port0" string
