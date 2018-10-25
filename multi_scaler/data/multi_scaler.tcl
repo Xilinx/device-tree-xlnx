@@ -49,11 +49,15 @@ proc generate {drv_handle} {
 	}
 	set has_bgrx8 [get_property CONFIG.HAS_BGRX8 [get_cells -hier $drv_handle]]
 	if {$has_bgrx8 == 1} {
-		append vid_formats " " "xbgr8888"
+		append vid_formats " " "xrgb8888"
 	}
 	set has_rgb8 [get_property CONFIG.HAS_RGB8 [get_cells -hier $drv_handle]]
 	if {$has_rgb8 == 1} {
 		append vid_formats " " "bgr888"
+	}
+	set has_rgbx8 [get_property CONFIG.HAS_RGBX8 [get_cells -hier $drv_handle]]
+	if {$has_rgbx8 == 1} {
+		append vid_formats " " "xbgr8888"
 	}
 	set has_rgba8 [get_property CONFIG.HAS_RGBA8 [get_cells -hier $drv_handle]]
 	if {$has_rgba8 == 1} {
@@ -65,7 +69,7 @@ proc generate {drv_handle} {
 	}
 	set has_uyuy8 [get_property CONFIG.HAS_UYVY8 [get_cells -hier $drv_handle]]
 	if {$has_uyuy8 == 1} {
-		append vid_formats " " "uyuy"
+		append vid_formats " " "uyvy"
 	}
 	set has_y8 [get_property CONFIG.HAS_Y8 [get_cells -hier $drv_handle]]
 	if {$has_y8 == 1} {
@@ -82,6 +86,10 @@ proc generate {drv_handle} {
 	set has_yuvx8 [get_property CONFIG.HAS_YUVX8 [get_cells -hier $drv_handle]]
 	if {$has_yuvx8 == 1} {
 		append vid_formats " " "xvuy8888"
+	}
+	set has_yuva8 [get_property CONFIG.HAS_YUVA8 [get_cells -hier $drv_handle]]
+	if {$has_yuva8 == 1} {
+		append vid_formats " " "avuy8888"
 	}
 	set has_yuvx10 [get_property CONFIG.HAS_YUVX10 [get_cells -hier $drv_handle]]
 	if {$has_yuvx10 == 1} {
