@@ -316,6 +316,39 @@ proc gen_board_info {} {
 			return
 		}
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
+		set include_list "include*"
+		set dir_path "./"
+		set gpio_list "gpio*"
+		set intr_list "interrupt-*"
+		set phy_list  "phy*"
+		set input_list "input*"
+		set pinctrl_list "pinctrl*"
+		set gpiodir "$dir_path/include/dt-bindings/gpio"
+		set phydir "$dir_path/include/dt-bindings/phy"
+		set intrdir "$dir_path/include/dt-bindings/interrupt-controller"
+		set inputdir "$dir_path/include/dt-bindings/input"
+		set pinctrldir "$dir_path/include/dt-bindings/pinctrl"
+		file mkdir $phydir
+		file mkdir $gpiodir
+		file mkdir $intrdir
+		file mkdir $inputdir
+		file mkdir $pinctrldir
+		if {[file exists $include_dtsi]} {
+			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
+				if {[regexp $gpio_list $file match]} {
+					file copy -force $file $gpiodir
+				} elseif {[regexp $phy_list $file match]} {
+					file copy -force $file $phydir
+				} elseif {[regexp $intr_list $file match]} {
+					file copy -force $file $intrdir
+				} elseif {[regexp $input_list $file match]} {
+					file copy -force $file $inputdir
+				} elseif {[regexp $pinctrl_list $file match]} {
+					file copy -force $file $pinctrldir
+				}
+			}
+		}
 		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 		if {[string match -nocase $mainline_ker "v4.17"]} {
 			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${mainline_ker}/board"]
