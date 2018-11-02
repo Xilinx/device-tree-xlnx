@@ -6,6 +6,11 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "include/dt-bindings/input/input.h"
+#include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+#include "include/dt-bindings/phy/phy.h"
+
 / {
 	model = "ZynqMP ZCU102 Rev1.0";
 	compatible = "xlnx,zynqmp-zcu102-rev1.0", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
@@ -17,8 +22,8 @@
 		autorepeat;
 		sw19 {
 			label = "sw19";
-			gpios = <&gpio 22 0>;
-			linux,code = <108>; /* down */
+			gpios = <&gpio 22 GPIO_ACTIVE_HIGH>;
+			linux,code = <KEY_DOWN>; /* down */
 			gpio-key,wakeup;
 			autorepeat;
 		};
@@ -28,7 +33,7 @@
 		compatible = "gpio-leds";
 		heartbeat_led {
 			label = "heartbeat";
-			gpios = <&gpio 23 0>;
+			gpios = <&gpio 23 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 		};
 	};
@@ -61,8 +66,8 @@
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
-	scl-gpios = <&gpio 14 0>;
-	sda-gpios = <&gpio 15 0>;
+	scl-gpios = <&gpio 14 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&gpio 15 GPIO_ACTIVE_HIGH>;
 
 	tca6416_u97: gpio@20 {
 		/*
@@ -299,8 +304,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
-	scl-gpios = <&gpio 16 0>;
-	sda-gpios = <&gpio 17 0>;
+	scl-gpios = <&gpio 16 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 
 	/* FIXME PL i2c via PCA9306 - u45 */
 	/* FIXME MSP430 - u41 - not detected */
@@ -488,8 +493,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 		conf {
 			groups = "i2c0_3_grp";
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -501,8 +506,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "gpio0_14_grp", "gpio0_15_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -515,8 +520,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 		conf {
 			groups = "i2c1_4_grp";
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -528,8 +533,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "gpio0_16_grp", "gpio0_17_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -541,8 +546,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "uart0_4_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -564,8 +569,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "uart1_5_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -587,8 +592,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "usb0_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -611,8 +616,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "ethernet3_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -636,8 +641,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf-mdio {
 			groups = "mdio3_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 			bias-disable;
 		};
 	};
@@ -650,8 +655,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "can1_6_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -673,8 +678,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf {
 			groups = "sdio1_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 			bias-disable;
 		};
 
@@ -687,8 +692,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			groups = "sdio1_cd_0_grp";
 			bias-high-impedance;
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		mux-wp {
@@ -700,8 +705,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			groups = "sdio1_wp_0_grp";
 			bias-high-impedance;
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -713,8 +718,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf-sw {
 			groups = "gpio0_22_grp", "gpio0_23_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		mux-msp {
@@ -724,8 +729,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 
 		conf-msp {
 			groups = "gpio0_13_grp", "gpio0_38_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-pull-up {
@@ -781,7 +786,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
 	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
 	phy-names = "sata-phy";
-	phys = <&lane3 1 1 1 125000000>;
+	phys = <&lane3 PHY_TYPE_SATA 1 1 125000000>;
 };
 
 /* SD1 with level shifter */
@@ -811,5 +816,5 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
-	phys = <&lane2 4 0 2 26000000>;
+	phys = <&lane2 PHY_TYPE_USB3 0 2 26000000>;
 };

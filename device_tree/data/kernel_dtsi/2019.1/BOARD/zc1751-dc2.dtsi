@@ -7,6 +7,9 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+
 / {
 	model = "ZynqMP zc1751-xm016-dc2 RevA";
 	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
@@ -39,8 +42,8 @@
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
-	scl-gpios = <&gpio 6 0>;
-	sda-gpios = <&gpio 7 0>;
+	scl-gpios = <&gpio 6 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
 
 	tca6416_u26: gpio@20 {
 		compatible = "ti,tca6416";
@@ -133,8 +136,8 @@
 
 		conf {
 			groups = "can0_9_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -156,8 +159,8 @@
 
 		conf {
 			groups = "can1_8_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -180,8 +183,8 @@
 		conf {
 			groups = "i2c0_1_grp";
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -193,8 +196,8 @@
 
 		conf {
 			groups = "gpio0_6_grp", "gpio0_7_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -206,8 +209,8 @@
 
 		conf {
 			groups = "uart0_10_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -229,8 +232,8 @@
 
 		conf {
 			groups = "uart1_10_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -252,8 +255,8 @@
 
 		conf {
 			groups = "usb1_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -276,8 +279,8 @@
 
 		conf {
 			groups = "ethernet2_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		conf-rx {
@@ -301,8 +304,8 @@
 
 		conf-mdio {
 			groups = "mdio2_0_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 			bias-disable;
 		};
 	};
@@ -358,8 +361,8 @@
 		conf {
 			groups = "spi0_0_grp";
 			bias-disable;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		mux-cs {
@@ -384,8 +387,8 @@
 		conf {
 			groups = "spi1_3_grp";
 			bias-disable;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 
 		mux-cs {

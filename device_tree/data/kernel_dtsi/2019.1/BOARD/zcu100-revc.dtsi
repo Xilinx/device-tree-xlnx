@@ -8,6 +8,12 @@
  * Nathalie Chan King Choy
  */
 
+#include "include/dt-bindings/input/input.h"
+#include "include/dt-bindings/interrupt-controller/irq.h"
+#include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+#include "include/dt-bindings/phy/phy.h"
+
 / {
 	model = "ZynqMP ZCU100 RevC";
 	compatible = "xlnx,zynqmp-zcu100-revC", "xlnx,zynqmp-zcu100", "xlnx,zynqmp";
@@ -17,8 +23,8 @@
 		autorepeat;
 		sw4 {
 			label = "sw4";
-			gpios = <&gpio 23 1>;
-			linux,code = <108>; /* down */
+			gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_POWER>; /* down */
 			gpio-key,wakeup;
 			autorepeat;
 		};
@@ -37,33 +43,33 @@
 		compatible = "gpio-leds";
 		ds2 {
 			label = "ds2";
-			gpios = <&gpio 20 0>;
+			gpios = <&gpio 20 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 		};
 
 		ds3 {
 			label = "ds3";
-			gpios = <&gpio 19 0>;
+			gpios = <&gpio 19 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "phy0tx"; /* WLAN tx */
 			default-state = "off";
 		};
 
 		ds4 {
 			label = "ds4";
-			gpios = <&gpio 18 0>;
+			gpios = <&gpio 18 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "phy0rx"; /* WLAN rx */
 			default-state = "off";
 		};
 
 		ds5 {
 			label = "ds5";
-			gpios = <&gpio 17 0>;
+			gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "bluetooth-power";
 		};
 
 		vbus_det { /* U5 USB5744 VBUS detection via MIO25 */
 			label = "vbus_det";
-			gpios = <&gpio 25 0>;
+			gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
 		};
 	};
@@ -71,10 +77,10 @@
 	ltc2954: ltc2954 { /* U7 */
 		compatible = "lltc,ltc2954", "lltc,ltc2952";
 		status = "disabled";
-		trigger-gpios = <&gpio 26 1>; /* INT line - input */
+		trigger-gpios = <&gpio 26 GPIO_ACTIVE_LOW>; /* INT line - input */
 		/* If there is HW watchdog on mezzanine this signal should be connected there */
-		watchdog-gpios = <&gpio 35 0>; /* MIO on PAD */
-		kill-gpios = <&gpio 34 1>; /* KILL signal - output */
+		watchdog-gpios = <&gpio 35 GPIO_ACTIVE_HIGH>; /* MIO on PAD */
+		kill-gpios = <&gpio 34 GPIO_ACTIVE_LOW>; /* KILL signal - output */
 	};
 
 	wmmcsdio_fixed: fixedregulator-mmcsdio {
@@ -88,7 +94,7 @@
 
 	sdio_pwrseq: sdio_pwrseq {
 		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&gpio 7 1>; /* WIFI_EN */
+		reset-gpios = <&gpio 7 GPIO_ACTIVE_LOW>; /* WIFI_EN */
 	};
 };
 
@@ -126,8 +132,8 @@
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
-	scl-gpios = <&gpio 4 0>;
-	sda-gpios = <&gpio 5 0>;
+	scl-gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&gpio 5 GPIO_ACTIVE_HIGH>;
 	clock-frequency = <100000>;
 	i2c-mux@75 { /* u11 */
 		compatible = "nxp,pca9548";
@@ -179,7 +185,7 @@
 				compatible = "ti,tps65086";
 				reg = <0x5e>;
 				interrupt-parent = <&gpio>;
-				interrupts = <77 1>;
+				interrupts = <77 GPIO_ACTIVE_LOW>;
 				#gpio-cells = <2>;
 				gpio-controller;
 			};
@@ -227,8 +233,8 @@
 		conf {
 			groups = "i2c1_1_grp";
 			bias-pull-up;
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 
@@ -240,8 +246,8 @@
 
 		conf {
 			groups = "gpio0_4_grp", "gpio0_5_grp";
-			slew-rate = <1>;
-			io-standard = <1>;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
 		};
 	};
 };
@@ -265,27 +271,27 @@
 		compatible = "ti,wl1831";
 		reg = <2>;
 		interrupt-parent = <&gpio>;
-		interrupts = <76 1>; /* MIO76 WLAN_IRQ 1V8 */
+		interrupts = <76 IRQ_TYPE_EDGE_RISING>; /* MIO76 WLAN_IRQ 1V8 */
 	};
 };
 
 &uart0 {
 	bluetooth {
 		compatible = "ti,wl1831-st";
-		enable-gpios = <&gpio 8 0>;
+		enable-gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
 	};
 };
 
 &dwc3_0 {
 	dr_mode = "peripheral";
 	phy-names = "usb3-phy";
-	phys = <&lane2 4 0 0 26000000>;
+	phys = <&lane2 PHY_TYPE_USB3 0 0 26000000>;
 	maximum-speed = "super-speed";
 };
 
 &dwc3_1 {
 	dr_mode = "host";
 	phy-names = "usb3-phy";
-	phys = <&lane3 4 1 0 26000000>;
+	phys = <&lane3 PHY_TYPE_USB3 1 0 26000000>;
 	maximum-speed = "super-speed";
 };

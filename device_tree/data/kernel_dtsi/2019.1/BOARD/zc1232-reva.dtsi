@@ -7,6 +7,8 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "include/dt-bindings/phy/phy.h"
+
 / {
 	model = "ZynqMP ZC1232 RevA";
 	compatible = "xlnx,zynqmp-zc1232-revA", "xlnx,zynqmp-zc1232", "xlnx,zynqmp";
@@ -51,5 +53,5 @@
 	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
 	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
 	phy-names = "sata-phy";
-	phys = <&lane0 1 0 0 125000000>, <&lane1 1 1 1 125000000>;
+	phys = <&lane0 PHY_TYPE_SATA 0 0 125000000>, <&lane1 PHY_TYPE_SATA 1 1 125000000>;
 };
