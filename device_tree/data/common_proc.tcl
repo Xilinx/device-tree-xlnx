@@ -404,6 +404,13 @@ proc get_node_object {lu_node {dts_files ""} {error_out "yes"}} {
 		set dts_nodes [get_all_tree_nodes $dts_file]
 		foreach node ${dts_nodes} {
 			if {[regexp $lu_node $node match]} {
+				set node_data [split $node ":"]
+				set node_label [lindex $node_data 0]
+				set lu_node_data [split $lu_node ":"]
+				set lu_node_label [lindex $lu_node_data 0]
+				if {![string match -nocase "$node_label" "$lu_node_label"]} {
+					continue
+				}
 				# workaround for -hier not working with -of_objects
 				current_dt_tree $dts_file
 				set node_obj [get_dt_nodes -hier $node]
@@ -673,8 +680,7 @@ proc add_or_get_dt_node args {
 		set tmp_node [get_node_object ${node_label}]
 		# rename if the node default properties differs
 		if {[dt_node_def_checking $node_label $node_name $node_unit_addr $tmp_node] == 0} {
-			dtg_warning "label '$node_label' found in existing tree, rename to dtg_$node_label"
-			set node_label "dtg_${node_label}"
+			dtg_warning "label '$node_label' found in existing tree"
 		}
 	}
 
