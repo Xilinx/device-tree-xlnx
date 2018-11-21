@@ -7,9 +7,9 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
-#include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/pinctrl/pinctrl-zynqmp.h>
-#include <dt-bindings/phy/phy.h>
+#include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+#include "include/dt-bindings/phy/phy.h"
 
 / {
 	model = "ZynqMP ZCU104 RevA";
