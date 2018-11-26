@@ -1382,6 +1382,8 @@ proc gen_clk_property {drv_handle} {
 					dtg_warning "clock frequency for the $clk is NULL"
 					continue
 				}
+				# if clk_freq is float convert it to int
+				set clk_freq [expr int($clk_freq)]
 				set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 				if {![string equal $clk_freq ""]} {
 					if {[lsearch $bus_clk_list $clk_freq] < 0} {
@@ -1511,6 +1513,8 @@ proc gen_clk_property {drv_handle} {
 				dtg_warning "clock frequency for the $clk is NULL"
 				continue
 			}
+			# if clk_freq is float convert it to int
+			set clk_freq [expr int($clk_freq)]
 			set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
 			if {![string equal $clk_freq ""]} {
 				if {[lsearch $bus_clk_list $clk_freq] < 0} {
