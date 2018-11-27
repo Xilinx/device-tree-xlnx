@@ -23,7 +23,7 @@ proc set_pcie_ranges {drv_handle proctype} {
 	set high_64bit 0x00000000
 	set ranges ""
 	for {set x 0} {$x < $axibar_num} {incr x} {
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"]} {
 			set axi_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar_%d" $x]]
 			set pcie_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar2pciebar_%d" $x]]
 			set axi_highaddr [get_ip_property $drv_handle [format "CONFIG.axibar_highaddr_%d" $x]]
@@ -91,7 +91,7 @@ proc set_pcie_ranges {drv_handle proctype} {
 }
 
 proc set_pcie_reg {drv_handle proctype} {
-	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"]} {
 		set baseaddr [get_ip_property $drv_handle CONFIG.baseaddr]
 		set highaddr [get_ip_property $drv_handle CONFIG.highaddr]
 		set size [format 0x%X [expr $highaddr -$baseaddr + 1]]
