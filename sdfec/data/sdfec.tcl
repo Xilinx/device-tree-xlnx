@@ -21,7 +21,6 @@ proc generate {drv_handle} {
 		}
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,fec-engine"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ldpc_decode [get_property CONFIG.LDPC_Decode [get_cells -hier $drv_handle]]
 	set ldpc_encode [get_property CONFIG.LDPC_Encode [get_cells -hier $drv_handle]]
