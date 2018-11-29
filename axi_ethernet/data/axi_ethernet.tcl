@@ -62,7 +62,7 @@ proc generate {drv_handle} {
                set eth_node [add_or_get_dt_node -n "ethernet" -l "xxv_ethernet_$core" -u $base_addr -d $dts_file -p $bus_node]
                generate_reg_property $eth_node $ip_mem_handles $core
           }
-    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet"} {
+    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet" && $ip_name != "usxgmii"} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
         if {[string_is_empty ${intf}] != 1} {
@@ -103,7 +103,7 @@ proc generate {drv_handle} {
         }
     }
 
-    if {$ip_name == "xxv_ethernet"} {
+    if {$ip_name == "xxv_ethernet" || $ip_name == "usxgmii"} {
     	foreach n "AXI_STR_RXD axis_rx_0" {
            set intf [get_intf_pins -of_objects $eth_ip ${n}]
            if {[string_is_empty ${intf}] != 1} {
@@ -236,6 +236,13 @@ proc generate {drv_handle} {
            hsi::utils::add_new_dts_param $eth_node "phy-mode" $phytype string
        }
     }
+    if {$ip_name == "usxgmii"} {
+       set compatible [get_comp_str $drv_handle]
+       set compatible [append compatible " " "xlnx,xxv-usxgmii-ethernet-1.0"]
+       set_property compatible $compatible $drv_handle
+       hsi::utils::add_new_dts_param $node "xlnx,phy-type" 7 int
+       hsi::utils::add_new_dts_param $node "xlnx,usxgmii-rate" 1000 int
+   }
     set ips [get_cells $drv_handle]
     foreach ip [get_drivers] {
         if {[string compare -nocase $ip $connected_ip] == 0} {
