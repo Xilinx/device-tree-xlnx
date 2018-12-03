@@ -434,7 +434,7 @@ proc generate {lib_handle} {
     }
     gen_board_info
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa53"] } {
+    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"]} {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 	if {[string match -nocase $mainline_ker "none"]} {
 		gen_sata_laneinfo
@@ -479,7 +479,7 @@ proc update_chosen {os_handle} {
     } else {
 	set bootargs "earlycon"
     }
-    if {[string match -nocase $proctype "psu_cortexa53"] } {
+    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"]} {
            append bootargs " clk_ignore_unused"
     }
     hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
@@ -497,7 +497,10 @@ proc update_cpu_node {os_handle} {
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
 
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa53"] } {
+    if {[string match -nocase $proctype "psu_cortexa72"] } {
+        set current_proc "psu_cortexa72_"
+        set total_cores 2
+    } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
         set current_proc "psu_cortexa53_"
         set total_cores 4
     } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {

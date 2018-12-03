@@ -25,7 +25,7 @@ OPTION psf_version = 2.1;
 BEGIN OS device_tree
 OPTION DRC = device_tree_drc;
 OPTION OS_TYPE = DTS
-OPTION SUPPORTED_PERIPHERALS = (microblaze ps7_cortexa9 psu_cortexa53);
+OPTION SUPPORTED_PERIPHERALS = (microblaze ps7_cortexa9 psu_cortexa53 psu_cortexa72);
 OPTION DESC = "Generate flat device tree";
 OPTION COMPILE_BSP = FALSE;
 
