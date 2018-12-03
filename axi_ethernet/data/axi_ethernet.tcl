@@ -53,13 +53,15 @@ proc generate {drv_handle} {
         generate_reg_property $node $ip_mem_handles $num
         set num_cores [get_property CONFIG.NUM_OF_CORES [get_cells -hier $drv_handle]]
     }
+    set new_label ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
                set dts_file [current_dt_tree]
                set bus_node "amba_pl"
                set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
                regsub -all {^0x} $base_addr {} base_addr
-               set eth_node [add_or_get_dt_node -n "ethernet" -l "xxv_ethernet_$core" -u $base_addr -d $dts_file -p $bus_node]
+               append new_label $drv_handle "_" $core
+               set eth_node [add_or_get_dt_node -n "ethernet" -l "$new_label" -u $base_addr -d $dts_file -p $bus_node]
                generate_reg_property $eth_node $ip_mem_handles $core
           }
     if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet" && $ip_name != "usxgmii"} {
@@ -214,9 +216,11 @@ proc generate {drv_handle} {
 	  }
     }
     if {$ip_name == "xxv_ethernet" && $core != 0} {
-        set mdionode [add_or_get_dt_node -l xxv_ethernet_${core}_mdio -n mdio -p $eth_node]
+        append new_label "_" mdio
+        set mdionode [add_or_get_dt_node -l "$new_label" -n mdio -p $eth_node]
         hsi::utils::add_new_dts_param "${mdionode}" "#address-cells" 1 int ""
         hsi::utils::add_new_dts_param "${mdionode}" "#size-cells" 0 int ""
+        set new_label ""
     }
     if {$ip_name == "axi_10g_ethernet"} {
        set phytype [string tolower [get_property CONFIG.base_kr $eth_ip]]
