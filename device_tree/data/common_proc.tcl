@@ -2224,7 +2224,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 			lappend ignore_list $ip_type
 		}
 	}
-
+	if {[regexp "pmc_*" $ip_type" match]} {
+		return 0
+	}
 	if {[lsearch $ignore_list $ip_type] >= 0  \
 		} {
 		return 0

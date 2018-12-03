@@ -474,6 +474,10 @@ proc update_chosen {os_handle} {
     set bootargs [get_property CONFIG.bootargs $os_handle]
     set console [hsi::utils::get_os_parameter_value "console"]
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "psu_cortexa72"]} {
+        # FIX_ME:Dont generate bootargs till the versal dtsis are available
+        return
+    }
     if {[llength $bootargs]} {
         append bootargs " earlycon"
     } else {
@@ -513,6 +517,19 @@ proc update_cpu_node {os_handle} {
     if {[string compare -nocase $current_proc ""] == 0} {
         return
     }
+    if {[string match -nocase $proctype "psu_cortexa72"]} {
+        set procs [get_cells -hier -filter {IP_TYPE==PROCESSOR}]
+        set pnames ""
+	foreach proc_name $procs {
+              if {[regexp "psu_cortexa72*" $proc_name match]} {
+	             append pnames " " $proc_name
+              }
+        }
+        set a72cores [llength $pnames]
+        if {[string match -nocase $a72cores $total_cores]} {
+	     return
+        }
+    }
     #getting boot arguments
     set proc_instance 0
     for {set i 0} {$i < $total_cores} {incr i} {
@@ -547,6 +564,10 @@ proc update_alias {os_handle} {
 	# Search for ps_qspi, if it is there then interchange this with first driver
 	# because to have correct internal u-boot commands qspi has to be listed in aliases as the first for spi0
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+        if {[string match -nocase $proctype "psu_cortexa72"]} {
+             # FIX_ME:Dont generate bootargs till the versal dtsis are available
+             return
+        }
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		set pos [lsearch $all_drivers "ps7_qspi*"]
 	} else {
