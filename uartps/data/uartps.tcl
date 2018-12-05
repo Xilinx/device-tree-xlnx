@@ -50,7 +50,7 @@ proc generate {drv_handle} {
     }
     set_property CONFIG.port-number $port_number $drv_handle
     set uboot_prop [get_property IP_NAME [get_cells -hier $drv_handle]]
-    if {[string match -nocase $uboot_prop "psu_uart"]} {
+    if {[string match -nocase $uboot_prop "psu_uart"] || [string match -nocase $uboot_prop "psu_sbsauart"]} {
         set_drv_prop $drv_handle "u-boot,dm-pre-reloc" "" boolean
     }
 }

@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver uartps
 
-  OPTION supported_peripherals = (ps7_uart psu_uart);
+  OPTION supported_peripherals = (ps7_uart psu_uart psu_sbsauart);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = uartps;
