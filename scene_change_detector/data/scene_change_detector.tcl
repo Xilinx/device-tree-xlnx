@@ -32,7 +32,6 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$node" "xlnx,numstreams" $max_nr_streams int
 	hsi::utils::add_new_dts_param $node "#address-cells" 1 int
 	hsi::utils::add_new_dts_param $node "#size-cells" 0 int
-	hsi::utils::add_new_dts_param $node "#xlnx,streaming-based" 1 int
 	set scd_ports_node [add_or_get_dt_node -n "scenechangedma" -l scdma -p $node]
 	hsi::utils::add_new_dts_param "$scd_ports_node" "#dma-cells" 1 int
 	hsi::utils::add_new_dts_param "$scd_ports_node" "dma-channels" 1 int
