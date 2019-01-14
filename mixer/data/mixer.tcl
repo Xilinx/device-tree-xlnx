@@ -45,6 +45,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$mixer_port_node" "reg" 0 int
 	set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc -p $mixer_port_node]
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
+	}
 	if {[llength $connected_ip] != 0} {
 		set connected_ip_type [get_property IP_NAME $connected_ip]
 	}

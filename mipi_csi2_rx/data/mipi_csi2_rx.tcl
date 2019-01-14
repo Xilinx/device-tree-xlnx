@@ -59,6 +59,9 @@ proc generate {drv_handle} {
 	set axis_tdata_width [get_property CONFIG.AXIS_TDATA_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,axis-tdata-width" "$axis_tdata_width" int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle VIDEO_OUT pin is not connected...check your design"
+	}
 	foreach connect_ip $connected_ip {
 		if {[llength $connect_ip] != 0} {
 			set connected_ip_type [get_property IP_NAME $connect_ip]

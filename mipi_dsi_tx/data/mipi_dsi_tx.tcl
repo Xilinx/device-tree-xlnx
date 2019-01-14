@@ -34,30 +34,35 @@ proc generate {drv_handle} {
 	set dsi_datatype [get_property CONFIG.DSI_DATATYPE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,dsi-datatype" $dsi_datatype string
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
-	set connected_ip_type [get_property IP_NAME $connected_ip]
-	if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
-		set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
-		hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
-		set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
-		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" pl_disp_crtc reference
-		set dts_file [current_dt_tree]
-		set bus_node "amba_pl"
-		set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_drm_pl_disp_drv" -d $dts_file -p $bus_node]
-		hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
-		hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference
-		hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
-		hsi::utils::add_new_dts_param "${pl_display}" "/* User needs to fill the xlnx,vformat=BG24 based on their requirement */" "" comment
-		hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "BG24" string
-		set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
-		hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
-		set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
-		hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" dsi_encoder reference
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle pin S_AXIS is not connected ..check your design"
 	}
-	if {[string match -nocase $connected_ip_type "v_mix"]} {
-		set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
-		hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
-		set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
-		hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" mixer_crtc reference
+	if {[llength $connected_ip]} {
+		set connected_ip_type [get_property IP_NAME $connected_ip]
+		if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+			set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
+			hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
+			set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
+			hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" pl_disp_crtc reference
+			set dts_file [current_dt_tree]
+			set bus_node "amba_pl"
+			set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_drm_pl_disp_drv" -d $dts_file -p $bus_node]
+			hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
+			hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference
+			hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
+			hsi::utils::add_new_dts_param "${pl_display}" "/* User needs to fill the xlnx,vformat=BG24 based on their requirement */" "" comment
+			hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "BG24" string
+			set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
+			hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
+			set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
+			hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" dsi_encoder reference
+		}
+		if {[string match -nocase $connected_ip_type "v_mix"]} {
+			set dsi_port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port -u 0 -p $node]
+			hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
+			set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
+			hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" mixer_crtc reference
+		}
 	}
 	set panel_node [add_or_get_dt_node -n "simple_panel" -l simple_panel -u 0 -p $node]
 	hsi::utils::add_new_dts_param "${panel_node}" "/* User needs to add the panel node based on their requirement */" "" comment

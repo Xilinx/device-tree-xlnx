@@ -27,13 +27,16 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,v-hdmi-rx-ss-3.1"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
+	set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle pin VIDEO_OUT is not connected ...check your design"
+	}
 	if {[llength $connected_ip] != 0} {
 		set connected_ip_type [get_property IP_NAME $connected_ip]
 		if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			set port_node [add_or_get_dt_node -n "port" -l hdmirx_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
@@ -48,9 +51,6 @@ proc generate {drv_handle} {
 			}
 		}
 		if {[string match -nocase $connected_ip_type "v_scenechange"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l hdmi_rx_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			set port_node [add_or_get_dt_node -n "port" -l hdmi_rx_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
@@ -60,9 +60,6 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" scd_in reference
 		}
 		if {[string match -nocase $connected_ip_type "v_frmbuf_wr"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			set port_node [add_or_get_dt_node -n "port" -l hdmirx_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 			set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
@@ -84,29 +81,31 @@ proc generate {drv_handle} {
 		}
 		if {[string match -nocase $connected_ip_type "axis_register_slice"]} {
 			set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
-			set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
-			if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
-				set ports_node [add_or_get_dt_node -n "ports" -l hdmirx_ports -p $node]
-				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-				set port_node [add_or_get_dt_node -n "port" -l hdmirx_port -u 0 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-				set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
-				hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vcap_hdmi_in reference
-				set dts_file [current_dt_tree]
-				set bus_node "amba_pl"
-				set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
-				hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
-				hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
-				set vcap_audio_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
-				hsi::utils::add_new_dts_param "$vcap_audio_hdmi_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$vcap_audio_hdmi_node" "#size-cells" 0 int
-				set vcap_audio_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_audio_hdmi_node]
-				hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "reg" 0 int
-				hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "direction" input string
-				set vcap_audio_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_audio_hdmiport_node]
-				hsi::utils::add_new_dts_param "$vcap_audio_hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
+			if {![llength $axis_reg_slice_ip]} {
+				dtg_warning "$connected_ip pin M_AXIS is not connected...check your design"
+			}
+			if {[llength $axis_reg_slice_ip]} {
+				set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
+				if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
+					set port_node [add_or_get_dt_node -n "port" -l hdmirx_port -u 0 -p $ports_node]
+					hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+					set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
+					hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vcap_hdmi_in reference
+					set dts_file [current_dt_tree]
+					set bus_node "amba_pl"
+					set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
+					hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
+					hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
+					hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
+					set vcap_audio_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
+					hsi::utils::add_new_dts_param "$vcap_audio_hdmi_node" "#address-cells" 1 int
+					hsi::utils::add_new_dts_param "$vcap_audio_hdmi_node" "#size-cells" 0 int
+					set vcap_audio_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_audio_hdmi_node]
+					hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "$vcap_audio_hdmiport_node" "direction" input string
+					set vcap_audio_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_audio_hdmiport_node]
+					hsi::utils::add_new_dts_param "$vcap_audio_hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
+				}
 			}
 		}
 	}

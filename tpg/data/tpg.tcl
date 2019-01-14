@@ -34,6 +34,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,s-axi-ctrl-data-width" $s_axi_ctrl_data_width int
 	set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected..check your design"
+	}
 	if {[llength $connected_ip] != 0} {
 		set connected_ip_type [get_property IP_NAME $connected_ip]
 		set ports_node ""
@@ -55,6 +58,9 @@ proc generate {drv_handle} {
 			}
 		}
 		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
+		if {![llength $connected_out_ip]} {
+			dtg_warning "$drv_handle pin M_AXIS_VIDEO is not connected ...check your design"
+		}
 		if {[llength $connected_out_ip] != 0} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
 			if {[llength $connected_out_ip_type] != 0} {

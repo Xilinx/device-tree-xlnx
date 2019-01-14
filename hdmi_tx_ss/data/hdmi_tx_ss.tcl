@@ -37,6 +37,9 @@ proc generate {drv_handle} {
 		}
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
+	if {![llength $connected_ip]} {
+		dtg_warning "$drv_handle pin VIDEO_IN is not connected... check your design"
+	}
 	if {[llength $connected_ip] != 0} {
 		set connected_ip_type [get_property IP_NAME $connected_ip]
 		if {[string match -nocase $connected_ip_type "v_mix"]} {
