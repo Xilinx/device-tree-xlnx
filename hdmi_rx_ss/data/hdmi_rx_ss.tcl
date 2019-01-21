@@ -153,9 +153,13 @@ proc generate {drv_handle} {
 			 set connected_ip [hsi::utils::get_connected_stream_ip $audio_out_connect_ip "M00_AXIS"]
                         if {[llength $connected_ip] != 0} {
                                 hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+				hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enabled" "" boolean
                         }
+		} elseif {[string match -nocase $audio_out_connect_ip_type "audio_formatter"]} {
+			hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $audio_out_connect_ip reference
+			hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enabled" "" boolean
 		}
+	} else {
+		dtg_warning "$drv_handle pin AUDIO_OUT is not connected... check your design"
 	}
-	hsi::utils::add_new_dts_param "${node}" "/* User needs to change the property xlnx,audio-enabled=<0x1> based on the HDMI audio path */" "" comment
-	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enabled" 0 hexint
 }

@@ -41,6 +41,8 @@ proc generate {drv_handle} {
 			if {[llength $connected_ip] != 0} {
 				hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
 			}
+		} elseif {[string match -nocase $connect_ip_type "audio_formatter"]} {
+			hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
 		}
 	}
 	set dwidth [get_property CONFIG.C_DWIDTH [get_cells -hier $drv_handle]]
