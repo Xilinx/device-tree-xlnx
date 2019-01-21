@@ -129,6 +129,10 @@ proc generate {drv_handle} {
 	if {[string match -nocase $include_hdcp_2_2 "true"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,include-hdcp-2-2" "" boolean
 	}
+	if {[string match -nocase $include_hdcp_1_4 "true"] || [string match -nocase $include_hdcp_2_2 "true"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-authenticate" 0x1 int
+		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-encrypt" 0x1 int
+	}
 	set audio_in_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "AUDIO_IN"]
 	if {[llength $audio_in_connect_ip] != 0} {
 		set audio_in_connect_ip_type [get_property IP_NAME $audio_in_connect_ip]
