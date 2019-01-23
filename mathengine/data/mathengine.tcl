@@ -25,6 +25,6 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,mathengine"]
+	set compatible [append compatible " " "xlnx,ai_engine"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 }
