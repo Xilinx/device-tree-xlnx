@@ -1,0 +1,12 @@
+&axi_ethernet_0 {
+	phy-handle = <&phy0>;
+	/delete-node/ mdio;
+	axi_ethernet_mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy0: phy@3 {
+			device_type = "ethernet-phy";
+			reg = <3>;
+		};
+	};
+};
