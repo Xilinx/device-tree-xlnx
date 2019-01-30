@@ -44,6 +44,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,pixels-per-clock" $pixelclock string
 	set video_intf [get_property CONFIG.C_VIDEO_INTF [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,video-intf" $video_intf string
+	set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
 	if {![llength $connected_ip]} {
 		dtg_warning "$drv_handle pin VIDEO_IN is not connected...check your design"
@@ -63,9 +66,6 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $connected_ip reference
 		}
 		if {[string match -nocase $connected_ip_type "v_frmbuf_rd"] || [string match -nocase $connected_ip_type "v_proc_ss"]|| [string match -nocase $ip_type "v_proc_ss"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 			set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
@@ -91,7 +91,7 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" sdi_encoder reference
 		}
 		if {[string match -nocase $connected_ip_type "v_mix"] || [string match -nocase $ip_type "v_mix"]} {
-			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $node]
+			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 			set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
 			hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference

@@ -27,6 +27,9 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,v-smpte-uhdsdi-rx-ss"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
+	set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
 	if {![llength $connected_ip]} {
 		dtg_warning "$drv_handle pin VIDEO_OUT is not connected...check your design"
@@ -38,9 +41,6 @@ proc generate {drv_handle} {
 		}
 		set connected_ip_type [get_property IP_NAME $connected_ip]
 		if {[string match -nocase $connected_ip_type "v_frmbuf_wr"] || [string match -nocase $connected_ip_type "axi_vdma"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			set port_node [add_or_get_dt_node -n "port" -l sdirx_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
@@ -64,7 +64,7 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$vcap_sdirx_in_node" "remote-endpoint" sdi_rx_out reference
 		}
 		if {[string match -nocase $connected_ip_type "v_mix"]} {
-			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $node]
+			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
 			set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
 			hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
