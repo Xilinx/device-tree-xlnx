@@ -30,9 +30,11 @@ proc generate {drv_handle} {
 	global tsn_ep_node
 	global tsn_emac0_node
 	global tsn_emac1_node
+	global tsn_ex_ep_node
 	set tsn_ep_node "tsn_ep"
 	set tsn_emac0_node "tsn_emac_0"
 	set tsn_emac1_node "tsn_emac_1"
+	set tsn_ex_ep_node "tsn_ex_ep"
 	set end_point_ip ""
 	set end1 ""
 	set connectrx_ip ""
@@ -291,6 +293,15 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 	set mac_addr "00 0A 35 00 01 10"
 	hsi::utils::add_new_dts_param $ep_node "local-mac-address" ${mac_addr} bytelist
 	hsi::utils::add_new_dts_param "$ep_node" "xlnx,eth-hasnobuf" "" boolean
+	global tsn_ex_ep_node
+	set tsn_ex_ep [get_property CONFIG.EN_EP_PORT_EXTN $eth_ip]
+	if {[string match -nocase $tsn_ex_ep "true"]} {
+		set tsn_ex_ep_node [add_or_get_dt_node -n "tsn_ex_ep" -l $tsn_ex_ep_node -p $parent_node]
+		hsi::utils::add_new_dts_param "${tsn_ex_ep_node}" "compatible" "xlnx,tsn-ex-ep" string
+		set mac_addr "00 0A 35 00 01 0d"
+		hsi::utils::add_new_dts_param $tsn_ex_ep_node "local-mac-address" ${mac_addr} bytelist
+		hsi::utils::add_new_dts_param "$tsn_ex_ep_node" "tsn,endpoint" $tsn_ep_node reference
+	}
 
 	set len [llength $end1]
 	switch $len {
