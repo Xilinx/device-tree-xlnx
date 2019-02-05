@@ -118,8 +118,13 @@ proc generate {drv_handle} {
 						hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
 						hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 						set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l csiss_in -p $port1_node]
+						set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+						if {$dt_overlay} {
+							set bus_node "overlay2"
+						} else {
+							set bus_node "amba_pl"
+						}
 						set dts_file [current_dt_tree]
-						set bus_node "amba_pl"
 						set vcap_mipirx [add_or_get_dt_node -n "vcap_mipi" -d $dts_file -p $bus_node]
 						hsi::utils::add_new_dts_param $vcap_mipirx "compatible" "xlnx,video" string
 						hsi::utils::add_new_dts_param $vcap_mipirx "dmas" "$ip 0" reference

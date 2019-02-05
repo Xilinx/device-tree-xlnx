@@ -86,8 +86,13 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
 					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port0_node]
 					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_dev_in reference
+					set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+					if {$dt_overlay} {
+						set bus_node "overlay2"
+					} else {
+						set bus_node "amba_pl"
+					}
 					set dts_file [current_dt_tree]
-					set bus_node "amba_pl"
 					set vcap_tpg [add_or_get_dt_node -n "vcap_tpg" -d $dts_file -p $bus_node]
 					hsi::utils::add_new_dts_param $vcap_tpg "compatible" "xlnx,video" string
 					hsi::utils::add_new_dts_param $vcap_tpg "dmas" "$connected_out_ip 0" reference

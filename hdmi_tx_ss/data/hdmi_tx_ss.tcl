@@ -57,8 +57,13 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 			set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 			hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" pl_disp_crtc reference
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
 			set dts_file [current_dt_tree]
-			set bus_node "amba_pl"
 			set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the fields xlnx,vformat based on user requirement */" "" comment
 			hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
@@ -81,8 +86,13 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 				set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 				hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" dmaengine_crtc reference
+				set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+				if {$dt_overlay} {
+					set bus_node "overlay2"
+				} else {
+					set bus_node "amba_pl"
+				}
 				set dts_file [current_dt_tree]
-				set bus_node "amba_pl"
 				set pl_display [add_or_get_dt_node -n "drm-dmaengine-drv" -l "v_drm_dmaengine_drv" -d $dts_file -p $bus_node]
 				hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the fields xlnx,vformat based on user requirement */" "" comment
 				hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string

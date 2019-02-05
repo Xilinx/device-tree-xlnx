@@ -44,8 +44,13 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$dsi_port_node" "reg" 0 int
 			set dsi_encoder_node [add_or_get_dt_node -n "endpoint" -l dsi_encoder -p $dsi_port_node]
 			hsi::utils::add_new_dts_param "$dsi_encoder_node" "remote-endpoint" pl_disp_crtc reference
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
 			set dts_file [current_dt_tree]
-			set bus_node "amba_pl"
 			set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_drm_pl_disp_drv" -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
 			hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference

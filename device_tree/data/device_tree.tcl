@@ -250,8 +250,13 @@ proc gen_ext_axi_interface {}  {
 			set base [string tolower [get_property BASE_VALUE $drv_handle]]
 			set high [string tolower [get_property HIGH_VALUE $drv_handle]]
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
 			set default_dts pl.dtsi
-			set bus_node "amba_pl"
 			if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 				set temp $base
 				set temp [string trimleft [string trimleft $temp 0] x]

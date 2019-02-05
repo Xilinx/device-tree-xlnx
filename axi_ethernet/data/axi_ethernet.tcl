@@ -56,8 +56,13 @@ proc generate {drv_handle} {
     set new_label ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
+               set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+               if {$dt_overlay} {
+                     set bus_node "overlay2"
+               } else {
+                    set bus_node "amba_pl"
+               }
                set dts_file [current_dt_tree]
-               set bus_node "amba_pl"
                set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
                regsub -all {^0x} $base_addr {} base_addr
                append new_label $drv_handle "_" $core

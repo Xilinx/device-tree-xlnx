@@ -64,8 +64,13 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 			set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
 			hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vcap_hdmi_in reference
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
 			set dts_file [current_dt_tree]
-			set bus_node "amba_pl"
 			set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
 			hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$connected_ip 0" reference
@@ -91,8 +96,13 @@ proc generate {drv_handle} {
 					hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 					set hdmi_rx_node [add_or_get_dt_node -n "endpoint" -l hdmi_rx_out -p $port_node]
 					hsi::utils::add_new_dts_param "$hdmi_rx_node" "remote-endpoint" vcap_hdmi_in reference
+					set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+					if {$dt_overlay} {
+						set bus_node "overlay2"
+					} else {
+						set bus_node "amba_pl"
+					}
 					set dts_file [current_dt_tree]
-					set bus_node "amba_pl"
 					set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 					hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
 					hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
