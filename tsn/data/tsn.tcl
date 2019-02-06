@@ -163,12 +163,30 @@ proc generate {drv_handle} {
 			lappend ep_sched_irq $intr1
 		}
 	}
+	set switch_present ""
 	set periph_list [get_cells -hier]
 	foreach periph $periph_list {
+		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
+			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
+			set high_addr [get_property CONFIG.C_HIGHADDR $eth_ip]
+			set one 0x1
+			set switch_present 0x1
+			set switch_addr [format %08x [expr 0x$baseaddr + $switch_offset]]
+			set switch_size [format %08x [expr $high_addr - 0x$switch_addr]]
+			set switch_size [format %08x [expr 0x${switch_size} + 1]]
+			gen_switch_node $periph $switch_addr $switch_size $numqueues $node $drv_handle $proc_type $eth_ip
+		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac0_size [get_property CONFIG.TEMAC_1_SIZE $eth_ip]
-			gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues
+			if { $switch_present != 1 } {
+				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+			} else {
+				set end_point_ip ""
+				set connectrx_ip ""
+				set connecttx_ip ""
+				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+			}
 		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
@@ -177,21 +195,19 @@ proc generate {drv_handle} {
 			set addr_off [format %08x [expr 0x$baseaddr + $tmac1_offset]]
 			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $node $drv_handle $proc_type $freq $eth_ip $mac1intr $baseaddr $queues
 		}
-		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
-			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
-			set high_addr [get_property CONFIG.C_HIGHADDR $eth_ip]
-			set one 0x1
-			set switch_addr [format %08x [expr 0x$baseaddr + $switch_offset]]
-			set switch_size [format %08x [expr $high_addr - 0x$switch_addr]]
-			set switch_size [format %08x [expr 0x${switch_size} + 1]]
-			gen_switch_node $periph $switch_addr $switch_size $numqueues $node $drv_handle $proc_type $eth_ip
-		}
 		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_endpoint_block_0" $periph]} {
 			set ep_offset [get_property CONFIG.EP_SCHEDULER_OFFSET $eth_ip]
 			if {[llength $ep_offset] != 0} {
-			set ep_addr [format %08x [expr 0x$baseaddr + $ep_offset]]
-			set ep_size [get_property CONFIG.EP_SCHEDULER_SIZE $eth_ip]
-			gen_ep_node $periph $ep_addr $ep_size $numqueues $node $drv_handle $proc_type $ep_sched_irq $eth_ip $intr_parent $int3 $int1 $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+				set ep_addr [format %08x [expr 0x$baseaddr + $ep_offset]]
+				set ep_size [get_property CONFIG.EP_SCHEDULER_SIZE $eth_ip]
+				if { $switch_present == 1 } {
+					gen_ep_node $periph $ep_addr $ep_size $numqueues $node $drv_handle $proc_type $ep_sched_irq $eth_ip $intr_parent $int3 $int1 $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+				} else {
+					set end_point_ip ""
+					set connectrx_ip ""
+					set connecttx_ip ""
+					gen_ep_node $periph $ep_addr $ep_size $numqueues $node $drv_handle $proc_type $ep_sched_irq $eth_ip $intr_parent $int3 $int1 $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+				}
 			}
 		}
 	}
@@ -407,7 +423,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 
 }
 
-proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues} {
+proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues id end1 end_point_ip connectrx_ip connecttx_ip} {
 	global tsn_emac0_node
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l $tsn_emac0_node -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
@@ -436,6 +452,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,channel-ids" $id string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
 	global tsn_ep_node
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "tsn,endpoint" $tsn_ep_node reference
@@ -462,6 +479,87 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 			set phy_name "[lindex $phynode 1]"
 			hsi::utils::add_new_dts_param "${tsn_mac_node}" "phy-handle" $phy_name reference
 			gen_phy_node $mdionode $phy_name $phya
+		}
+	}
+	set len [llength $end1]
+	switch $len {
+		"1" {
+			set ref_id [lindex $end1 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]>, <&[lindex $end1 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+	}
+	set len3 [llength $connecttx_ip]
+	switch $len3 {
+		"1" {
+			set ref_id [lindex $connecttx_ip 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $connecttx_ip 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]>, <&[lindex $connecttx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+	}
+	if {$len && $len3} {
+		if {$len == 1} {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $connecttx_ip 1]>, <&[lindex $connecttx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+		if {$len == 2} {
+			set ref_id [lindex $end1 0]
+			append ref_id ">, <&[lindex $end1 1]>, <&[lindex $connecttx_ip 0]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-tx" "$ref_id" reference
+		}
+	}
+
+	set len1 [llength $end_point_ip]
+	switch $len1 {
+		"1" {
+			set ref_id [lindex $end_point_ip 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $end_point_ip 0]
+			append ref_id ">, <&[lindex $end_point_ip 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $end_point_ip 0]
+			append ref_id ">, <&[lindex $end_point_ip 1]>, <&[lindex $end_point_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+	}
+	set len2 [llength $connectrx_ip]
+	switch $len2 {
+		"1" {
+			set ref_id [lindex $connectrx_ip 0]
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+		"2" {
+			set ref_id [lindex $connectrx_ip 0]
+			append ref_id ">, <&[lindex $connectrx_ip 1]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
+		}
+		"3" {
+			set ref_id [lindex $connectrx_ip 0]
+			append ref_id ">, <&[lindex $connectrx_ip 1]>, <&[lindex $connectrx_ip 2]"
+			hsi::utils::add_new_dts_param "${tsn_mac_node}" "axistream-connected-rx" "$ref_id" reference
 		}
 	}
 }
