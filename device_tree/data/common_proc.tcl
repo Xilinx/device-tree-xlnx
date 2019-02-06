@@ -500,6 +500,16 @@ proc update_system_dts_include {include_file} {
 	set master_dts [get_property CONFIG.master_dts [get_os]]
 	set cur_dts [current_dt_tree]
 	set master_dts_obj [get_dt_trees ${master_dts}]
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "microblaze"]} {
+		set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+		set dtsi_file " "
+		foreach override $overrides {
+			if {[lindex $override 0] == "BOARD"} {
+				set dtsi_file [lindex $override 1]
+			}
+		}
+	}
 
 	if {[string_is_empty $master_dts_obj] == 1} {
 		set master_dts_obj [set_cur_working_dts ${master_dts}]
@@ -513,10 +523,20 @@ proc update_system_dts_include {include_file} {
 		if {[string_is_empty $cur_inc_list]} {
 			set cur_inc_list $include_file
 		} else {
-			append cur_inc_list "," $include_file
-			set field [split $cur_inc_list ","]
-			set cur_inc_list [lsort -decreasing $field]
-			set cur_inc_list [join $cur_inc_list ","]
+			if {[string match -nocase $proctype "microblaze"]} {
+				append cur_inc_list "," $include_file
+				set field [split $cur_inc_list ","]
+				if {[regexp $dtsi_file $include_file match]} {
+				} else {
+					set cur_inc_list [lsort -decreasing $field]
+					set cur_inc_list [join $cur_inc_list ","]
+				}
+			} else {
+				append cur_inc_list "," $include_file
+				set field [split $cur_inc_list ","]
+				set cur_inc_list [lsort -decreasing $field]
+				set cur_inc_list [join $cur_inc_list ","]
+			}
 		}
 		set_property INCLUDE_FILES ${cur_inc_list} $master_dts_obj
 	}
