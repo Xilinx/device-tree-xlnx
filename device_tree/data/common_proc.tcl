@@ -2612,7 +2612,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP0_DATA_WIDTH"] >= 0} {
 						set val [get_property CONFIG.C_S_AXI_HP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
 						set bus_width [get_axi_datawidth $val]
-						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+						hsi::utils::add_new_dts_param "${afi_node}" "xlnx,afi-width" "$bus_width" int
 					}
 				}
 			}
@@ -2639,7 +2639,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP1_DATA_WIDTH"] >= 0} {
 						set val [get_property CONFIG.C_S_AXI_HP1_DATA_WIDTH [get_cells -hier $zynq_periph]]
 						set bus_width [get_axi_datawidth $val]
-						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+						hsi::utils::add_new_dts_param "${afi_node}" "xlnx,afi-width" "$bus_width" int
 					}
 				}
 			}
@@ -2666,7 +2666,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP2_DATA_WIDTH"] >= 0} {
 						set val [get_property CONFIG.C_S_AXI_HP2_DATA_WIDTH [get_cells -hier $zynq_periph]]
 						set bus_width [get_axi_datawidth $val]
-						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+						hsi::utils::add_new_dts_param "${afi_node}" "xlnx,afi-width" "$bus_width" int
 					}
 				}
 			}
@@ -2693,7 +2693,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					if {[lsearch -nocase $avail_param "CONFIG.C_S_AXI_HP3_DATA_WIDTH"] >= 0} {
 						set val [get_property CONFIG.C_S_AXI_HP3_DATA_WIDTH [get_cells -hier $zynq_periph]]
 						set bus_width [get_axi_datawidth $val]
-						hsi::utils::add_new_dts_param "${afi_node}" "afi-width" "$bus_width" int
+						hsi::utils::add_new_dts_param "${afi_node}" "xlnx,afi-width" "$bus_width" int
 					}
 				}
 			}
