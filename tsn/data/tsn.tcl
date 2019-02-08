@@ -167,8 +167,9 @@ proc generate {drv_handle} {
 	}
 	set switch_present ""
 	set periph_list [get_cells -hier]
+   set tsn_inst_name [get_cells -filter {IP_NAME =~ "*tsn*"}]
 	foreach periph $periph_list {
-		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_switch_core_top_0" $periph] } {
+		if {[string match -nocase "${tsn_inst_name}_switch_core_top_0" $periph] } {
 			set switch_offset [get_property CONFIG.SWITCH_OFFSET $eth_ip]
 			set high_addr [get_property CONFIG.C_HIGHADDR $eth_ip]
 			set one 0x1
@@ -178,26 +179,26 @@ proc generate {drv_handle} {
 			set switch_size [format %08x [expr 0x${switch_size} + 1]]
 			gen_switch_node $periph $switch_addr $switch_size $numqueues $node $drv_handle $proc_type $eth_ip
 		}
-		if {[string match -nocase "tsn_endpoint_ethernet_mac_0" $periph] } {
+		if {[string match -nocase "${tsn_inst_name}" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac0_size [get_property CONFIG.TEMAC_1_SIZE $eth_ip]
 			if { $switch_present != 1 } {
-				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip $tsn_inst_name
 			} else {
 				set end_point_ip ""
 				set connectrx_ip ""
 				set connecttx_ip ""
-				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip
+				gen_mac0_node $periph $baseaddr $tmac0_size $node $proc_type $drv_handle $numqueues $freq $intr_parent $mac0intr $eth_ip $queues $id $end1 $end_point_ip $connectrx_ip $connecttx_ip $tsn_inst_name
 			}
 		}
-		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_temac_2" $periph] } {
+		if {[string match -nocase "${tsn_inst_name}_tsn_temac_2" $periph] } {
 			set baseaddr [get_baseaddr $eth_ip no_prefix]
 			set tmac1_offset [get_property CONFIG.TEMAC_2_OFFSET $eth_ip]
 			set tmac1_size [get_property CONFIG.TEMAC_2_SIZE $eth_ip]
 			set addr_off [format %08x [expr 0x$baseaddr + $tmac1_offset]]
-			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $node $drv_handle $proc_type $freq $eth_ip $mac1intr $baseaddr $queues
+			gen_mac1_node $periph $addr_off $tmac1_size $numqueues $intr_parent $node $drv_handle $proc_type $freq $eth_ip $mac1intr $baseaddr $queues $tsn_inst_name
 		}
-		if {[string match -nocase "tsn_endpoint_ethernet_mac_0_tsn_endpoint_block_0" $periph]} {
+		if {[string match -nocase "${tsn_inst_name}_tsn_endpoint_block_0" $periph]} {
 			set ep_offset [get_property CONFIG.EP_SCHEDULER_OFFSET $eth_ip]
 			if {[llength $ep_offset] != 0} {
 				set ep_addr [format %08x [expr 0x$baseaddr + $ep_offset]]
@@ -241,10 +242,10 @@ proc get_phytype {value} {
 	return $value
 }
 
-proc pcspma_phy_node {slave} {
+proc pcspma_phy_node {slave tsn_inst_name} {
 	set phyaddr [get_property CONFIG.PHYADDR $slave]
 	set phyaddr [::hsi::utils::convert_binary_to_decimal $phyaddr]
-	if {[string match -nocase $slave "tsn_endpoint_ethernet_mac_0_tsn_temac_2"]} {
+	if {[string match -nocase $slave "${tsn_inst_name}_tsn_temac_2"]} {
 		set phyaddr "2"
 	} else {
 		set phyaddr "1"
@@ -434,7 +435,7 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
 
 }
 
-proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues id end1 end_point_ip connectrx_ip connecttx_ip} {
+proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues freq intr_parent mac0intr eth_ip queues id end1 end_point_ip connectrx_ip connecttx_ip tsn_inst_name} {
 	global tsn_emac0_node
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_0" -l $tsn_emac0_node -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
@@ -484,7 +485,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-names" $mac0intr stringlist
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "clock-frequency" $freq int
 	if {$phytype == "rgmii" || $phytype == "gmii"} {
-		set phynode [pcspma_phy_node $periph]
+		set phynode [pcspma_phy_node $periph $tsn_inst_name]
 		set phya [lindex $phynode 0]
 		if { $phya != "-1"} {
 			set phy_name "[lindex $phynode 1]"
@@ -575,7 +576,7 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	}
 }
 
-proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handle proc_type freq eth_ip mac1intr baseaddr queues} {
+proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handle proc_type freq eth_ip mac1intr baseaddr queues tsn_inst_name} {
 	global tsn_emac1_node
 	set tsn_mac_node [add_or_get_dt_node -n "tsn_emac_1" -l $tsn_emac1_node -u $addr -p $parent_node]
 	if {[string match -nocase $proc_type "ps7_cortexa9"]} {
@@ -627,7 +628,7 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "interrupt-names" $mac1intr stringlist
 	hsi::utils::add_new_dts_param "${tsn_mac_node}" "clock-frequency" $freq int
 	if {$phytype == "rgmii" || $phytype == "gmii"} {
-		set phynode [pcspma_phy_node $periph]
+		set phynode [pcspma_phy_node $periph $tsn_inst_name]
 		set phya [lindex $phynode 0]
 		if { $phya != "-1"} {
 			set phy_name "[lindex $phynode 1]"
