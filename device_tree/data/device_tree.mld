@@ -33,6 +33,8 @@ PARAMETER name = dtg_version, desc = "DTG version", default = "2014.4";
 
 PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type = bool, default = false;
 
+PARAMETER name = firmware_name, desc = "Device-tree Overlay Firmware name", type = string, default = "";
+
 PARAMETER name = remove_pl, desc = "Remove PL Support", type = bool, default = false;
 
 PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, values = ("none" = none, "v4.17" = v4.17), default = none;

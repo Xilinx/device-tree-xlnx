@@ -612,7 +612,10 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 1 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 1 int
 		}
-		set hw_name [get_property NAME [get_hw_designs]]
+		set hw_name [get_property CONFIG.firmware_name [get_os]]
+		if {![llength $hw_name]} {
+			set hw_name [get_property NAME [get_hw_designs]]
+		}
 		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bit.bin" string
 
 	} else {
