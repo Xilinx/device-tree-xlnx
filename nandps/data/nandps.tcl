@@ -48,5 +48,7 @@ proc generate {drv_handle} {
 	set_drv_prop $drv_handle "arm,nand-cycle-t4" [ns_to_cycle $drv_handle "${nand_par_prefix}T4" $nand_cycle_time]
 	set_drv_prop $drv_handle "arm,nand-cycle-t5" [ns_to_cycle $drv_handle "${nand_par_prefix}T5" $nand_cycle_time]
 	set_drv_prop $drv_handle "arm,nand-cycle-t6" [ns_to_cycle $drv_handle "${nand_par_prefix}T6" $nand_cycle_time]
+	set bus_width [get_property CONFIG.C_NAND_WIDTH [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_property $drv_handle "nand-bus-width" int $bus_width
     }
 }
