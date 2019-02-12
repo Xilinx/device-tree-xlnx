@@ -40,26 +40,26 @@ proc generate_dp_param {drv_handle} {
 			if {[string match -nocase $mode "Single"]} {
 				if {[string match -nocase $lan_sel "Lower"]} {
 					set lan_name "dp-phy0"
-					set lan_phy_type "lane1 PHY_TYPE_DP 0 $val $dp_freq"
+					set lan_phy_type "lane1 6 0 $val $dp_freq"
 					set_drv_prop $drv_handle phy-names "$lan_name" stringlist
 					set_drv_prop $drv_handle phys "$lan_phy_type" reference
 				} else {
 					set lan_name "dp-phy0"
-					set lan_phy_type "lane3 PHY_TYPE_DP 0 $val $dp_freq"
+					set lan_phy_type "lane3 6 0 $val $dp_freq"
 					set_drv_prop $drv_handle phy-names "$lan_name" stringlist
 					set_drv_prop $drv_handle phys "$lan_phy_type" reference
 				}
 				set_drv_prop $drv_handle xlnx,max-lanes 1 int
 			} elseif {[string match -nocase $mode "Dual"]} {
 				if {[string match -nocase $lan_sel "Lower"]} {
-					set lan0_phy_type "lane1 PHY_TYPE_DP 0 $val $dp_freq"
-					set lan1_phy_type "lane0 PHY_TYPE_DP 1 $val $dp_freq"
+					set lan0_phy_type "lane1 6 0 $val $dp_freq"
+					set lan1_phy_type "lane0 6 1 $val $dp_freq"
 					set_drv_prop $drv_handle phy-names "dp-phy0\",\"dp-phy1" stringlist
 					set phy_ids "$lan0_phy_type>, <&$lan1_phy_type"
 					set_drv_prop $drv_handle phys "$phy_ids" reference
 				} else {
-					set lan0_phy_type "lane3 PHY_TYPE_DP 0 $val $dp_freq"
-					set lan1_phy_type "lane2 PHY_TYPE_DP 1 $val $dp_freq"
+					set lan0_phy_type "lane3 6 0 $val $dp_freq"
+					set lan1_phy_type "lane2 6 1 $val $dp_freq"
 					set_drv_prop $drv_handle phy-names "dp-phy0\",\"dp-phy1" stringlist
 					set phy_ids "$lan0_phy_type>, <&$lan1_phy_type"
 					set_drv_prop $drv_handle phys "$phy_ids" reference
