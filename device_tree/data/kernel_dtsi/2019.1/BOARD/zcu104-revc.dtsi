@@ -15,6 +15,10 @@
 	model = "ZynqMP ZCU104 RevC";
 	compatible = "xlnx,zynqmp-zcu104-revC", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
 
+	chosen {
+		xlnx,eeprom = &eeprom;
+	};
+
 };
 
 &can1 {
