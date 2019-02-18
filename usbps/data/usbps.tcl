@@ -20,7 +20,6 @@ proc generate {drv_handle} {
             break
         }
     }
-
     ps7_reset_handle $drv_handle CONFIG.C_USB_RESET CONFIG.usb-reset
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     set default_dts [set_drv_def_dts $drv_handle]
@@ -28,6 +27,10 @@ proc generate {drv_handle} {
         set_drv_prop $drv_handle phy_type ulpi string
     } else {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	if {[string match -nocase $proctype "psu_cortexa72"]} {
+		#TODO:Remove this once the versal dts is fully updated.
+		return
+	}
 	if {[string match -nocase $mainline_ker "none"]} {
              set index [string index $drv_handle end]
              set rt_node [add_or_get_dt_node -n usb -l usb$index -d $default_dts -auto_ref_parent]
