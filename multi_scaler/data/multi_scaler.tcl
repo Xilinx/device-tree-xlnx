@@ -41,7 +41,7 @@ proc generate {drv_handle} {
 	set pixes_per_clock [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
 	set pixel $pixes_per_clock
 	append pixel_per_clock "/bits/ 8 <$pixel>"
-	hsi::utils::add_new_dts_param "$node" "xlnx,pixels-per-clock" $pixel_per_clock noformatting
+	hsi::utils::add_new_dts_param "$node" "xlnx,pixels-per-clock" $pixel_per_clock noformating
 	set has_bgr8 [get_property CONFIG.HAS_BGR8 [get_cells -hier $drv_handle]]
 	set vid_formats ""
 	if {$has_bgr8 == 1} {
