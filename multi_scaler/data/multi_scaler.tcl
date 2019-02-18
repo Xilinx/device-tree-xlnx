@@ -39,7 +39,9 @@ proc generate {drv_handle} {
 	set aximm_addr_width [get_property CONFIG.AXIMM_ADDR_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,dma-addr-width" $aximm_addr_width hexint
 	set pixes_per_clock [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "$node" "xlnx,pixels-per-clock" $pixes_per_clock int
+	set pixel $pixes_per_clock
+	append pixel_per_clock "/bits/ 8 <$pixel>"
+	hsi::utils::add_new_dts_param "$node" "xlnx,pixels-per-clock" $pixel_per_clock noformatting
 	set has_bgr8 [get_property CONFIG.HAS_BGR8 [get_cells -hier $drv_handle]]
 	set vid_formats ""
 	if {$has_bgr8 == 1} {
