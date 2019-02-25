@@ -37,6 +37,10 @@
 			linux,default-trigger = "heartbeat";
 		};
 	};
+
+	chosen {
+		xlnx,eeprom = &eeprom;
+	};
 };
 
 &can1 {
