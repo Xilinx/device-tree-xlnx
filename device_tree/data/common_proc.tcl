@@ -1525,22 +1525,22 @@ proc gen_clk_property {drv_handle} {
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			switch $pl_clk {
 				"pl_clk0" {
-						set pl_clk0 "clk 71"
+						set pl_clk0 "zynqmp_clk 71"
 						set clocks [lappend clocks $pl_clk0]
 						set updat  [lappend updat $pl_clk0]
 				}
 				"pl_clk1" {
-						set pl_clk1 "clk 72"
+						set pl_clk1 "zynqmp_clk 72"
 						set clocks [lappend clocks $pl_clk1]
 						set updat  [lappend updat $pl_clk1]
 				}
 				"pl_clk2" {
-						set pl_clk2 "clk 73"
+						set pl_clk2 "zynqmp_clk 73"
 						set clocks [lappend clocks $pl_clk2]
 						set updat [lappend updat $pl_clk2]
 				}
 				"pl_clk3" {
-						set pl_clk3 "clk 74"
+						set pl_clk3 "zynqmp_clk 74"
 						set clocks [lappend clocks $pl_clk3]
 						set updat [lappend updat $pl_clk3]
 				}

@@ -122,7 +122,7 @@ proc generate {drv_handle} {
                 set tsu-clk-freq [get_property CONFIG.C_ENET_TSU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
                 hsi::utils::add_new_dts_param "${tsu_node}" "clock-frequency" ${tsu-clk-freq} int
                 set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
-                set_drv_prop_if_empty $drv_handle "clocks" "clk 31>, <&clk 107>, <&clk 48>, <&clk 52>, <&tsu_ext_clk" reference
+                set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 107>, <&zynqmp_clk 48>, <&zynqmp_clk 52>, <&tsu_ext_clk" reference
             }
         }
     }
