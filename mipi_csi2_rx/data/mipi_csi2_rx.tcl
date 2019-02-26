@@ -25,7 +25,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,mipi-csi2-rx-subsystem-3.0"]
+	set compatible [append compatible " " "xlnx,mipi-csi2-rx-subsystem-4.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set dphy_en_reg_if [get_property CONFIG.DPY_EN_REG_IF [get_cells -hier $drv_handle]]
 	if {[string match -nocase $dphy_en_reg_if "true"]} {
