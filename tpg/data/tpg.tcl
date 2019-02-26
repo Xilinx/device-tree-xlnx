@@ -33,6 +33,8 @@ proc generate {drv_handle} {
 	set s_axi_ctrl_data_width [get_property CONFIG.C_S_AXI_CTRL_DATA_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,s-axi-ctrl-data-width" $s_axi_ctrl_data_width int
 	set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
+	set pixels_per_clock [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,ppc" $pixels_per_clock int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
 	if {![llength $connected_ip]} {
 		dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected..check your design"
