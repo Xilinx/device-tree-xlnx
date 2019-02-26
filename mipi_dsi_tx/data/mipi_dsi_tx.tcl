@@ -32,7 +32,13 @@ proc generate {drv_handle} {
 	set dsi_pixels_perbeat [get_property CONFIG.DSI_PIXELS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,dsi-pixels-perbeat" $dsi_pixels_perbeat int
 	set dsi_datatype [get_property CONFIG.DSI_DATATYPE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "$node" "xlnx,dsi-datatype" $dsi_datatype string
+	if {[string match -nocase $dsi_datatype "RGB888"]} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 0 int
+	} elseif {[string match -nocase $dsi_datatype "RGB666"]} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 1 int
+	} elseif {[string match -nocase $dsi_datatype "RGB565"]} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 3 int
+	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
 	if {![llength $connected_ip]} {
 		dtg_warning "$drv_handle pin S_AXIS is not connected ..check your design"
