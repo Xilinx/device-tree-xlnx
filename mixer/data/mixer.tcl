@@ -33,6 +33,8 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,num-layers" $num_layers int
 	set samples_per_clock [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,ppc" $samples_per_clock int
+	set dma_addr_width [get_property CONFIG.AXIMM_ADDR_WIDTH [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "$node" "xlnx,dma-addr-width" $dma_addr_width int
 	set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,bpc" $max_data_width int
 	set logo_layer [get_property CONFIG.LOGO_LAYER [get_cells -hier $drv_handle]]
