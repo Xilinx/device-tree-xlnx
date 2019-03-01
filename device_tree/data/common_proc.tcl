@@ -589,13 +589,13 @@ proc set_drv_def_dts {drv_handle} {
 						set val [get_property CONFIG.C_NUM_FABRIC_RESETS [get_cells -hier $zynq_periph]]
 						switch $val {
 							"1" {
-								set resets "rst 116"
+								set resets "zynqmp_reset 116"
 							} "2" {
-								set resets "rst 116>,<&rst 117"
+								set resets "zynqmp_reset 116>,<&zynqmp_reset 117"
 							} "3" {
-								set resets "rst 116>, <&rst 117>, <&rst 118"
+								set resets "zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118"
 							} "4" {
-								set resets "rst 116>, <&rst 117>, <&rst 118>, <&rst 119"
+								set resets "zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118>, <&zynqmp_reset 119"
 							}
 						}
 						if {$val != 0} {
@@ -2535,10 +2535,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 				if {[string match -nocase $val "true"]} {
 					set clocking_node [add_or_get_dt_node -n "clocking0" -l "clocking0" -p $bus_node]
 					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
-					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 71" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "zynqmp_clk 71" reference
 					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 71" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "zynqmp_clk 71" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
@@ -2548,10 +2548,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 				if {[string match -nocase $val "true"]} {
 					set clocking_node [add_or_get_dt_node -n "clocking1" -l "clocking1" -p $bus_node]
 					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
-					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 72" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "zynqmp_clk 72" reference
 					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 72" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "zynqmp_clk 72" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
@@ -2561,10 +2561,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 				if {[string match -nocase $val "true"]} {
 					set clocking_node [add_or_get_dt_node -n "clocking2" -l "clocking2" -p $bus_node]
 					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
-					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 73" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "zynqmp_clk 73" reference
 					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 73" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "zynqmp_clk 73" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL2_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
@@ -2574,10 +2574,10 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 				if {[string match -nocase $val "true"]} {
 					set clocking_node [add_or_get_dt_node -n "clocking3" -l "clocking3" -p $bus_node]
 					hsi::utils::add_new_dts_param "${clocking_node}" "compatible" "xlnx,fclk" string
-					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "clk 74" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "clocks" "zynqmp_clk 74" reference
 					hsi::utils::add_new_dts_param "${clocking_node}" "clock-output-names" "fabric_clk" string
 					hsi::utils::add_new_dts_param "${clocking_node}" "#clock-cells" 0 int
-					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "clk 74" reference
+					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clocks" "zynqmp_clk 74" reference
 					set freq [get_property CONFIG.PSU__CRL_APB__PL3_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
