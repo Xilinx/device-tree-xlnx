@@ -79,29 +79,37 @@ proc generate {drv_handle} {
     set clknames "pll_ref aclk vcu_core_enc vcu_core_dec vcu_mcu_enc vcu_mcu_dec"
     overwrite_clknames $clknames $drv_handle
     set ip [get_cells -hier $drv_handle]
-    set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "vcu_resetn"]]]
-           foreach pin $pins {
-                set sink_periph [::hsi::get_cells -of_objects $pin]
-                set sink_ip [get_property IP_NAME $sink_periph]
-                if {[string match -nocase $sink_ip "xlslice"]} {
-                        set gpio [get_property CONFIG.DIN_FROM $sink_periph]
-                        set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
-                        foreach pin $pins {
-                                set periph [::hsi::get_cells -of_objects $pin]
-                                set ip [get_property IP_NAME $periph]
-                                set proc_type [get_sw_proc_prop IP_NAME]
-                                if {[string match -nocase $proc_type "psu_cortexa53"] } {
-                                        if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
-                                                set gpio [expr $gpio + 78]
-                                                hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 0" reference
-                                        }
-                                }
-                                if {[string match -nocase $ip "axi_gpio"]} {
-                                         hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
-                                }
-                        }
-                }
-           }
+    set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] "vcu_resetn"]]
+	foreach pin $pins {
+		set sink_periph [::hsi::get_cells -of_objects $pin]
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "xlslice"]} {
+				set gpio [get_property CONFIG.DIN_FROM $sink_periph]
+				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
+				foreach pin $pins {
+					set periph [::hsi::get_cells -of_objects $pin]
+					if {[llength $periph]} {
+						set ip [get_property IP_NAME $periph]
+						set proc_type [get_sw_proc_prop IP_NAME]
+						if {[string match -nocase $proc_type "psu_cortexa53"] } {
+							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
+								set gpio [expr $gpio + 78]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 0" reference
+							}
+						}
+						if {[string match -nocase $ip "axi_gpio"]} {
+							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+						}
+					} else {
+						dtg_warning "periph for the pin:$pin is NULL $periph...check the design"
+					}
+				}
+			}
+		} else {
+			dtg_warning "peripheral for the pin:$pin is NULL $sink_periph...check the design"
+		}
+	}
 }
 
 proc get_ipdetails {drv_handle arg} {

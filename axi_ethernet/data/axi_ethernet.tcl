@@ -79,7 +79,7 @@ proc generate {drv_handle} {
     if { [llength $intf] } {
         set intf_net [get_intf_nets -of_objects $intf ]
         if { [llength $intf_net]  } {
-            set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
+            set target_intf [::hsi::utils::get_other_intf_pin $intf_net $intf]
             if { [llength $target_intf] } {
                 set connected_ip [get_connectedip $intf]
                 set_property axistream-connected "$connected_ip" $drv_handle
@@ -252,7 +252,7 @@ proc generate {drv_handle} {
        hsi::utils::add_new_dts_param $node "xlnx,phy-type" 7 int
        hsi::utils::add_new_dts_param $node "xlnx,usxgmii-rate" 1000 int
    }
-    set ips [get_cells $drv_handle]
+    set ips [get_cells -hier $drv_handle]
     foreach ip [get_drivers] {
         if {[string compare -nocase $ip $connected_ip] == 0} {
             set target_handle $ip
@@ -464,7 +464,7 @@ proc get_targetip {ip} {
       }
       set target_periph [get_cells -of_objects $conn_busif_handle]
       set cell_name [get_cells -hier $target_periph]
-      set target_name [get_property IP_NAME [get_cells $target_periph]]
+      set target_name [get_property IP_NAME [get_cells -hier $target_periph]]
       if {$target_name == "axis_data_fifo" || $target_name == "Ethernet_filter"} {
           #set target_periph [get_cells -of_objects $conn_busif_handle]
           set master_slaves [get_intf_pins -of [get_cells -hier $cell_name]]
@@ -483,7 +483,7 @@ proc get_targetip {ip} {
           }
           set intf [get_intf_pins -of_objects $cell_name $master_intf]
           set intf_net [get_intf_nets -of_objects $intf]
-          set intf_pins [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET"]
+          set intf_pins [::hsi::utils::get_other_intf_pin $intf_net $intf]
           foreach intf $intf_pins {
               set target_intf [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" $intf]
               set connected_ip [get_cells -of_objects $target_intf]
@@ -507,10 +507,13 @@ proc get_connectedip {intf} {
       set connected_ip ""
       set intf_net [get_intf_nets -of_objects $intf ]
       if { [llength $intf_net]  } {
-         set target_intf [lindex [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" ] 0]
+         set target_intf [::hsi::utils::get_other_intf_pin $intf_net $intf]
          if { [llength $target_intf] } {
             set connected_ip [get_cells -of_objects $target_intf]
             set target_ipname [get_property IP_NAME $connected_ip]
+            if {$target_ipname == "ila"} {
+                return
+            }
             if {$target_ipname == "axis_data_fifo"} {
                set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $connected_ip]
                if {[string_is_empty $fifo_width_bytes]} {

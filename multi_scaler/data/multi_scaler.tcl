@@ -121,14 +121,15 @@ proc generate {drv_handle} {
 	}
 	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-formats" $vid_formats stringlist
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "ap_rst_n"]
-	set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "ap_rst_n"]]]
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] "ap_rst_n"]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
-		set sink_ip [get_property IP_NAME $sink_periph]
-		if {[string match -nocase $sink_ip "xlslice"]} {
-			set gpio [get_property CONFIG.DIN_FROM $sink_periph]
-			set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
-			foreach pin $pins {
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "xlslice"]} {
+				set gpio [get_property CONFIG.DIN_FROM $sink_periph]
+				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
+				foreach pin $pins {
 					set periph [::hsi::get_cells -of_objects $pin]
 					set ip [get_property IP_NAME $periph]
 					set proc_type [get_sw_proc_prop IP_NAME]
@@ -141,6 +142,7 @@ proc generate {drv_handle} {
 					if {[string match -nocase $ip "axi_gpio"]} {
 						hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
 					}
+				}
 			}
 		}
 	}

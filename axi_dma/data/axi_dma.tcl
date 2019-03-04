@@ -130,7 +130,7 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
     set datawidth_list "[format "CONFIG.C_%s_AXIS_%s_DATA_WIDTH" $modeIndex $mode] [format "CONFIG.C_%s_AXIS_%s_TDATA_WIDTH" $modeIndex $mode]"
     add_cross_property_to_dtnode $drv_handle $datawidth_list $dma_channel "xlnx,datawidth"
 
-    set num_channles [get_property CONFIG.c_num_mm2s_channels [get_cells $drv_handle]]
+    set num_channles [get_property CONFIG.c_num_mm2s_channels [get_cells -hier $drv_handle]]
     hsi::utils::add_new_dts_param $dma_channel "dma-channels" $num_channles hexint
 
     return $dma_channel

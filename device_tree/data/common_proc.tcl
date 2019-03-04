@@ -1387,7 +1387,7 @@ proc gen_clk_property {drv_handle} {
 	}
 	foreach clk $clk_pins {
 		set ip [get_cells -hier $drv_handle]
-		set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip $clk]]]
+		set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] $clk]]
 		set valid_clk_list "clk_out0 clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7 clk_out8 clk_out9"
 		set pl_clk ""
 		set clkout ""
@@ -1395,12 +1395,12 @@ proc gen_clk_property {drv_handle} {
 			if {[lsearch $valid_clk_list $pin] >= 0} {
 				set clkout $pin
 				set is_clk_wiz 1
+				set periph [::hsi::get_cells -of_objects $pin]
 			}
 		}
 		if {[llength $clkout]} {
 			set number [regexp -all -inline -- {[0-9]+} $clkout]
-			set periph [::hsi::get_cells -of_objects $clkout]
-			set clk_wiz [get_pins -of_objects [get_cells $periph] -filter TYPE==clk]
+			set clk_wiz [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
 			set axi_clk "s_axi_aclk"
 			foreach clk1 $clk_wiz {
 				if {[regexp $axi_clk $clk1 match]} {
@@ -1410,7 +1410,7 @@ proc gen_clk_property {drv_handle} {
 
 			if {[string match -nocase $axi "0"]} {
 				dtg_warning "no s_axi_aclk for clockwizard"
-				set pins [get_pins -of_objects [get_cells $periph] -filter TYPE==clk]
+				set pins [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
 				set clk_list "pl_clk*"
 				set clk_pl ""
 				set num ""
@@ -1845,20 +1845,8 @@ proc gen_mb_interrupt_property {cpu_handle {intr_port_name ""}} {
 	if {[string_is_empty $intr_port_name]} {
 		set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 	}
-
-	foreach pin ${intr_port_name} {
-		set mb_net [get_nets -of_objects $pin]
-		set connected_pin_names [get_pins -of_objects $mb_net]
-		foreach cpin ${connected_pin_names} {
-			if {[string equal -nocase $pin $cpin]} {
-				continue
-			}
-			set intc [get_cells -of_objects $cpin]
-			if {![string_is_empty $intc]} {
-				break
-			}
-		}
-	}
+	set cpin [hsi::utils::get_interrupt_sources [get_cells -hier $cpu_handle]]
+	set intc [get_cells -of_objects $cpin]
 	if {[string_is_empty $intc]} {
 		error "no interrupt controller found"
 	}
@@ -1894,7 +1882,6 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 		}
 	}
-
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
@@ -3471,7 +3458,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
 	if {[llength $sink_periph] == 0 } {
 		continue
 	}
-        set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
+        set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
         # check for direct connection or concat block connected
         if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
             set number [regexp -all -inline -- {[0-9]+} $sink_pin]
@@ -3501,7 +3488,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
                 set sink_pin $pin
             }
             set sink_periph [::hsi::get_cells -of_objects $sink_pin]
-            set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
+            set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
             if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
                 set number [regexp -all -inline -- {[0-9]+} $sink_pin]
                 set dout "dout"
@@ -3544,7 +3531,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
 	    if {[llength $sink_periph] == 0 } {
 		break
 	    }
-            set connected_ip [get_property IP_NAME [get_cells $sink_periph]]
+            set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
             if {[string match -nocase $connected_ip "axi_intc"] } {
                 set sink_pin [::hsi::get_pins -of_objects $periph -filter {TYPE==INTERRUPT && DIRECTION==O}]
             }

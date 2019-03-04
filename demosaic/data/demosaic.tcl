@@ -75,26 +75,28 @@ proc generate {drv_handle} {
 		dtg_warning "$drv_handle output port pin M_AXIS_VIDEO is not connected ...check your design"
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "ap_rst_n"]
-	set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $demosaic_ip "ap_rst_n"]]]
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $demosaic_ip] "ap_rst_n"]]
 	set proc_type [get_sw_proc_prop IP_NAME]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
-		set sink_ip [get_property IP_NAME $sink_periph]
-		if {[string match -nocase $sink_ip "xlslice"]} {
-			set gpio [get_property CONFIG.DIN_FROM $sink_periph]
-			set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
-			foreach pin $pins {
-				set periph [::hsi::get_cells -of_objects $pin]
-				set ip [get_property IP_NAME $periph]
-				if {[string match -nocase $proc_type "psu_cortexa53"] } {
-					if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
-						set gpio [expr $gpio + 78]
-						hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
-						break
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "xlslice"]} {
+				set gpio [get_property CONFIG.DIN_FROM $sink_periph]
+				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
+				foreach pin $pins {
+					set periph [::hsi::get_cells -of_objects $pin]
+					set ip [get_property IP_NAME $periph]
+					if {[string match -nocase $proc_type "psu_cortexa53"] } {
+						if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
+							set gpio [expr $gpio + 78]
+							hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+							break
+						}
 					}
-				}
-				if {[string match -nocase $ip "axi_gpio"]} {
-					hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+					if {[string match -nocase $ip "axi_gpio"]} {
+						hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+					}
 				}
 			}
 		}
