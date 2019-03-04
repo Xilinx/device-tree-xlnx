@@ -24,6 +24,10 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
+	set tpg_count [hsi::utils::get_os_parameter_value "tpg_count"]
+	if { [llength $tpg_count] == 0 } {
+		set tpg_count 0
+	}
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,v-tpg-7.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
@@ -52,7 +56,7 @@ proc generate {drv_handle} {
 					set sink_ip [get_property IP_NAME $sink_periph]
 					if {[string match -nocase $sink_ip "v_tc"]} {
 						hsi::utils::add_new_dts_param "$node" "xlnx,vtc" "$sink_periph" reference
-						set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports -p $node]
+						set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$tpg_count -p $node]
 						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 					}
@@ -81,13 +85,13 @@ proc generate {drv_handle} {
 					}
 				}
 				if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
+					set port0_node [add_or_get_dt_node -n "port" -l tpg_port$tpg_count -u 0 -p $ports_node]
 					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
 					hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
 					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
 					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
-					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port0_node]
-					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_dev_in reference
+					set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l tpg_out$tpg_count -p $port0_node]
+					hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_dev_in$tpg_count reference
 					set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 					if {$dt_overlay} {
 						set bus_node "overlay2"
@@ -95,18 +99,18 @@ proc generate {drv_handle} {
 						set bus_node "amba_pl"
 					}
 					set dts_file [current_dt_tree]
-					set vcap_tpg [add_or_get_dt_node -n "vcap_tpg" -d $dts_file -p $bus_node]
+					set vcap_tpg [add_or_get_dt_node -n "vcap_tp$tpg_count" -d $dts_file -p $bus_node]
 					hsi::utils::add_new_dts_param $vcap_tpg "compatible" "xlnx,video" string
 					hsi::utils::add_new_dts_param $vcap_tpg "dmas" "$connected_out_ip 0" reference
 					hsi::utils::add_new_dts_param $vcap_tpg "dma-names" "port0" string
-					set vcap_ports_node [add_or_get_dt_node -n "ports" -l v_ports -p $vcap_tpg]
+					set vcap_ports_node [add_or_get_dt_node -n "ports" -l v_ports$tpg_count -p $vcap_tpg]
 					hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
 					hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-					set vcap_port_node [add_or_get_dt_node -n "port" -l v_port -u 0 -p $vcap_ports_node]
+					set vcap_port_node [add_or_get_dt_node -n "port" -l v_port$tpg_count -u 0 -p $vcap_ports_node]
 					hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
 					hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
-					set vcap_tpg_in_node [add_or_get_dt_node -n "endpoint" -l vcap_dev_in -p $vcap_port_node]
-					hsi::utils::add_new_dts_param "$vcap_tpg_in_node" "remote-endpoint" tpg_out reference
+					set vcap_tpg_in_node [add_or_get_dt_node -n "endpoint" -l vcap_dev_in$tpg_count -p $vcap_port_node]
+					hsi::utils::add_new_dts_param "$vcap_tpg_in_node" "remote-endpoint" tpg_out$tpg_count reference
 				}
 			}
 		}
@@ -138,4 +142,6 @@ proc generate {drv_handle} {
 			}
 		}
 	}
+	incr tpg_count
+	hsi::utils::set_os_parameter_value "tpg_count" $tpg_count
 }
