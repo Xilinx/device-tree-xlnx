@@ -70,6 +70,15 @@ proc generate {drv_handle} {
 		if {[llength $connected_out_ip] != 0} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
 			if {[llength $connected_out_ip_type] != 0} {
+				if {[string match -nocase $connected_out_ip_type "v_demosaic"]} {
+					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
+					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+					hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
+					set demosaic_node [add_or_get_dt_node -n "endpoint" -l tpg_out -p $port0_node]
+					hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" demosaic_in reference
+				}
 				if {[string match -nocase $connected_out_ip_type "v_proc_ss"]} {
 					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
 					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int

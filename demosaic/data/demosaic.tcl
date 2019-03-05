@@ -56,6 +56,18 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" csiss_out reference
 			}
 		}
+		if {[string match -nocase $connected_ip_type "v_tpg"]} {
+			set ports_node [add_or_get_dt_node -n "ports" -l demosaic_ports -p $node]
+			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+			set port_node [add_or_get_dt_node -n "port" -l demosaic_port0 -u 0 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+			hsi::utils::add_new_dts_param "${port_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
+			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
+			hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
+			set demosaic_node [add_or_get_dt_node -n "endpoint" -l demosaic_in -p $port_node]
+			hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" tpg_out reference
+		}
 	} else {
 		dtg_warning "$drv_handle input port pin S_AXIS_VIDEO is not connected...check your design"
 	}

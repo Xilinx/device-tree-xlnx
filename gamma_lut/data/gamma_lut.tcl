@@ -67,6 +67,32 @@ proc generate {drv_handle} {
 			set csiss_node [add_or_get_dt_node -n "endpoint" -l gamma_out -p $port1_node]
 			hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" csc_in reference
 		}
+		if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+			set gamma_port1_node [add_or_get_dt_node -n "port" -l gamma_port1 -u 1 -p $ports_node]
+			hsi::utils::add_new_dts_param "$gamma_port1_node" "reg" 1 int
+			hsi::utils::add_new_dts_param "$gamma_port1_node" "xlnx,video-width" $max_data_width int
+			set gamma_frwr_node [add_or_get_dt_node -n "endpoint" -l gamma_out -p $gamma_port1_node]
+			hsi::utils::add_new_dts_param "$gamma_frwr_node" "remote-endpoint" vcap_gamma_in reference
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
+			set dts_file [current_dt_tree]
+			set vcap_gamma [add_or_get_dt_node -n "vcap_gama" -d $dts_file -p $bus_node]
+			hsi::utils::add_new_dts_param $vcap_gamma "compatible" "xlnx,video" string
+			hsi::utils::add_new_dts_param $vcap_gamma "dmas" "$connected_out_ip 0" reference
+			hsi::utils::add_new_dts_param $vcap_gamma "dma-names" "port0" string
+			set vcap_gamma_node [add_or_get_dt_node -n "ports" -l vcap_gamma_ports -p $vcap_gamma]
+			hsi::utils::add_new_dts_param "$vcap_gamma_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$vcap_gamma_node" "#size-cells" 0 int
+			set vcap_gammaport_node [add_or_get_dt_node -n "port" -l vcap_gamma_port -u 0 -p $vcap_gamma_node]
+			hsi::utils::add_new_dts_param "$vcap_gammaport_node" "reg" 0 int
+			hsi::utils::add_new_dts_param "$vcap_gammaport_node" "direction" input string
+			set vcap_gamma_in_node [add_or_get_dt_node -n "endpoint" -l vcap_gamma_in -p $vcap_gammaport_node]
+			hsi::utils::add_new_dts_param "$vcap_gamma_in_node" "remote-endpoint" gamma_out reference
+		}
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "ap_rst_n"]
 	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $gamma_ip] "ap_rst_n"]]
