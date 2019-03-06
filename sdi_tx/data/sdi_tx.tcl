@@ -111,5 +111,7 @@ proc generate {drv_handle} {
 			set sdi_audio_node [add_or_get_dt_node -n "endpoint" -l sdi_audio_sink_port -p $sdi_audio_port]
 			hsi::utils::add_new_dts_param "$sdi_audio_node" "remote-endpoint" sditx_audio_embed_src reference
 		}
+	} else {
+		dtg_warning "$drv_handle:connected ip for audio port pin SDI_TX_ANC_DS_OUT is NULL"
 	}
 }

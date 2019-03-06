@@ -109,6 +109,8 @@ proc generate {drv_handle} {
 				set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_in -p $hdmi_port_node]
 				hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmi_rx_out reference
 			}
+		} else {
+			dtg_warning "$drv_handle:input port pin S_AXIS is not connected"
 		}
 		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS"]
 		if {[llength $connected_out_ip] != 0} {
@@ -218,6 +220,8 @@ proc generate {drv_handle} {
 					}
 				}
 			}
+		} else {
+			dtg_warning "$drv_handle: output port pin M_AXIS is not connected"
 		}
 	}
 	if {$topology == 3} {
@@ -248,61 +252,69 @@ proc generate {drv_handle} {
 		set use_uram [get_property CONFIG.C_USE_URAM [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-uram" $use_uram int
 		set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
-		set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
 		set ports_node ""
-		if {[string match -nocase $connected_in_ip_type "v_gamma_lut"]|| [string match -nocase $connected_in_ip_type "v_tpg"]} {
-			set ports_node [add_or_get_dt_node -n "ports" -l csc_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-			set port_node [add_or_get_dt_node -n "port" -l csc_port0 -u 0 -p $ports_node]
-			hsi::utils::add_new_dts_param "${port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
-			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
-			set gamma_node [add_or_get_dt_node -n "endpoint" -l csc_in -p $port_node]
-			if {[string match -nocase $connected_in_ip_type "v_gamma_lut"]} {
-				hsi::utils::add_new_dts_param "$gamma_node" "remote-endpoint" gamma_out reference
+		if {[llength $connected_in_ip]} {
+			set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
+			if {[string match -nocase $connected_in_ip_type "v_gamma_lut"]|| [string match -nocase $connected_in_ip_type "v_tpg"]} {
+				set ports_node [add_or_get_dt_node -n "ports" -l csc_ports -p $node]
+				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+				set port_node [add_or_get_dt_node -n "port" -l csc_port0 -u 0 -p $ports_node]
+				hsi::utils::add_new_dts_param "${port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
+				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
+				set gamma_node [add_or_get_dt_node -n "endpoint" -l csc_in -p $port_node]
+				if {[string match -nocase $connected_in_ip_type "v_gamma_lut"]} {
+					hsi::utils::add_new_dts_param "$gamma_node" "remote-endpoint" gamma_out reference
+				}
+				if {[string match -nocase $connected_in_ip_type "v_tpg"]} {
+					hsi::utils::add_new_dts_param "$gamma_node" "remote-endpoint" tpg_out reference
+				}
 			}
-			if {[string match -nocase $connected_in_ip_type "v_tpg"]} {
-				hsi::utils::add_new_dts_param "$gamma_node" "remote-endpoint" tpg_out reference
-			}
+		} else {
+			dtg_warning "$drv_handle: input port pin S_AXIS is not connected"
 		}
 		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS"]
-		set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
-		if {[string match -nocase $connected_out_ip_type "v_proc_ss"]|| [string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-			if {[llength $ports_node]} {
-				set port1_node [add_or_get_dt_node -n "port" -l csc_port1 -u 1 -p $ports_node]
-				hsi::utils::add_new_dts_param "${port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-				hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-				hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
-				hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
-				set csiss_node [add_or_get_dt_node -n "endpoint" -l csc_out -p $port1_node]
-				if {[string match -nocase $connected_out_ip_type "v_proc_ss"]} {
-					hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" scaler_in reference
-				}
-				if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-					hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" vcap_in reference
-					set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-					if {$dt_overlay} {
-						set bus_node "overlay2"
-					} else {
-						set bus_node "amba_pl"
+		if {[llength $connected_out_ip]} {
+			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
+			if {[string match -nocase $connected_out_ip_type "v_proc_ss"]|| [string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+				if {[llength $ports_node]} {
+					set port1_node [add_or_get_dt_node -n "port" -l csc_port1 -u 1 -p $ports_node]
+					hsi::utils::add_new_dts_param "${port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+					hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+					hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
+					set csiss_node [add_or_get_dt_node -n "endpoint" -l csc_out -p $port1_node]
+					if {[string match -nocase $connected_out_ip_type "v_proc_ss"]} {
+						hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" scaler_in reference
 					}
-					set dts_file [current_dt_tree]
-					set vcap_sdirx [add_or_get_dt_node -n "vcap_sdirx" -d $dts_file -p $bus_node]
-					hsi::utils::add_new_dts_param $vcap_sdirx "compatible" "xlnx,video" string
-					hsi::utils::add_new_dts_param $vcap_sdirx "dmas" "$connected_out_ip 0" reference
-					hsi::utils::add_new_dts_param $vcap_sdirx "dma-names" "port0" string
-					set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports -p $vcap_sdirx]
-					hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
-					hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-					set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port -u 0 -p $vcap_ports_node]
-					hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
-					hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
-					set vcap_sdirx_in_node [add_or_get_dt_node -n "endpoint" -l vcap_in -p $vcap_port_node]
-					hsi::utils::add_new_dts_param "$vcap_sdirx_in_node" "remote-endpoint" csc_out reference
+					if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+						hsi::utils::add_new_dts_param "$csiss_node" "remote-endpoint" vcap_in reference
+						set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+						if {$dt_overlay} {
+							set bus_node "overlay2"
+						} else {
+							set bus_node "amba_pl"
+						}
+						set dts_file [current_dt_tree]
+						set vcap_sdirx [add_or_get_dt_node -n "vcap_sdirx" -d $dts_file -p $bus_node]
+						hsi::utils::add_new_dts_param $vcap_sdirx "compatible" "xlnx,video" string
+						hsi::utils::add_new_dts_param $vcap_sdirx "dmas" "$connected_out_ip 0" reference
+						hsi::utils::add_new_dts_param $vcap_sdirx "dma-names" "port0" string
+						set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports -p $vcap_sdirx]
+						hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
+						hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
+						set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port -u 0 -p $vcap_ports_node]
+						hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
+						hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+						set vcap_sdirx_in_node [add_or_get_dt_node -n "endpoint" -l vcap_in -p $vcap_port_node]
+						hsi::utils::add_new_dts_param "$vcap_sdirx_in_node" "remote-endpoint" csc_out reference
+					}
 				}
 			}
+		} else {
+			dtg_warning "$drv_handle:output port pin M_AXIS is not connected"
 		}
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "aresetn_ctrl"]
@@ -326,19 +338,25 @@ proc generate {drv_handle} {
 					set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
 					foreach pin $pins {
 						set periph [::hsi::get_cells -of_objects $pin]
-						set ip [get_property IP_NAME $periph]
-						if {[string match -nocase $proc_type "psu_cortexa53"] } {
-							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
-								set gpio [expr $gpio + 78]
-								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
-								break
+						if {[llength $periph]} {
+							set ip [get_property IP_NAME $periph]
+							if {[string match -nocase $proc_type "psu_cortexa53"] } {
+								if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
+									set gpio [expr $gpio + 78]
+									hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+									break
+								}
 							}
-						}
-						if {[string match -nocase $ip "axi_gpio"]} {
-							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+							if {[string match -nocase $ip "axi_gpio"]} {
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+							}
+						} else {
+							dtg_warning "peripheral is NULL for the $pin $periph"
 						}
 					}
 				}
+			} else {
+				dtg_warning "$drv_handle:peripheral is NULL for the $pin $sink_periph"
 			}
 		}
 	}

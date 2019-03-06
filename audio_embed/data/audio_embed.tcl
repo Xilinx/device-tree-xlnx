@@ -36,17 +36,25 @@ proc generate {drv_handle} {
 			set sdi_embed_node [add_or_get_dt_node -n "endpoint" -l sditx_audio_embed_src -p $sdi_av_port]
 			hsi::utils::add_new_dts_param "$sdi_embed_node" "remote-endpoint" sdi_audio_sink_port reference
 		}
+	} else {
+		dtg_warning "$drv_handle connected_ip is NULL for the pin SDI_EMBED_ANC_DS_IN"
 	}
 	set connected_extract_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_EXTRACT_ANC_DS_IN"]
 	if {[llength $connected_extract_ip] != 0} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,sdi-rx-video" $connected_extract_ip reference
+	} else {
+		dtg_warning "$drv_handle connected_extract_ip is NULL for the pin SDI_EXTRACT_ANC_DS_IN"
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_DATA"]
 	if {[llength $connected_ip] != 0} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+	} else {
+		dtg_warning "$drv_handle connected ip is NULL for the pin S_AXIS_DATA"
 	}
 	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_DATA"]
 	if {[llength $connect_ip] != 0} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
+	} else {
+		dtg_warning "$drv_handle connected ip is NULL for the pin M_AXIS_DATA"
 	}
 }

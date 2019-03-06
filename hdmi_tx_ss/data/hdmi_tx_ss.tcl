@@ -31,9 +31,13 @@ proc generate {drv_handle} {
 	set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $ip "acr_n"]]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
-		set sink_ip [get_property IP_NAME $sink_periph]
-		if {[string match -nocase $sink_ip "hdmi_acr_ctrl"]} {
-			hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-hdmi-acr-ctrl" $sink_periph reference
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "hdmi_acr_ctrl"]} {
+				hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-hdmi-acr-ctrl" $sink_periph reference
+			}
+		} else {
+			dtg_warning "$drv_handle:peripheral is NULL for the $pin $sink_periph"
 		}
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]

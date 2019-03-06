@@ -3459,47 +3459,57 @@ proc get_psu_interrupt_id { ip_name port_name } {
 		continue
 	}
         set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
-        # check for direct connection or concat block connected
-        if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
-            set number [regexp -all -inline -- {[0-9]+} $sink_pin]
-            set dout "dout"
-            set concat_block 1
-            set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
-            set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
-            foreach pin $sink_pins {
-                set sink_pin $pin
-                if {[string match -nocase $sink_pin "IRQ0_F2P"]} {
-                     set sink_pin "IRQ0_F2P"
-                     break
-                }
-                if {[string match -nocase $sink_pin "IRQ1_F2P"]} {
-                     set sink_pin "IRQ1_F2P"
-                     break
-                }
-            }
-        }
-        # check for ORgate
-        if { [string compare -nocase "$sink_pin" "Op1"] == 0 } {
-            set dout "Res"
-            set sink_periph [::hsi::get_cells -of_objects $sink_pin]
-            set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
-            set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
-            foreach pin $sink_pins {
-                set sink_pin $pin
-            }
-            set sink_periph [::hsi::get_cells -of_objects $sink_pin]
-            set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
-            if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
-                set number [regexp -all -inline -- {[0-9]+} $sink_pin]
-                set dout "dout"
-                set concat_block 1
-                set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
-                set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
-                foreach pin $sink_pins {
-                    set sink_pin $pin
-                }
-            }
-        }
+	if {[llength $connected_ip]} {
+		# check for direct connection or concat block connected
+		if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
+			set number [regexp -all -inline -- {[0-9]+} $sink_pin]
+			set dout "dout"
+			set concat_block 1
+			set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
+			set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
+			foreach pin $sink_pins {
+				set sink_pin $pin
+				if {[string match -nocase $sink_pin "IRQ0_F2P"]} {
+					set sink_pin "IRQ0_F2P"
+					break
+				}
+				if {[string match -nocase $sink_pin "IRQ1_F2P"]} {
+					set sink_pin "IRQ1_F2P"
+					break
+				}
+			}
+		}
+	}
+	# check for ORgate
+	if { [string compare -nocase "$sink_pin" "Op1"] == 0 } {
+		set dout "Res"
+		set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+		if {[llength $sink_periph]} {
+			set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
+			if {[llength $intr_pin]} {
+				set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
+				foreach pin $sink_pins {
+					set sink_pin $pin
+				}
+				set sink_periph [::hsi::get_cells -of_objects $sink_pin]
+				if {[llength $sink_periph]} {
+					set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
+					if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
+						set number [regexp -all -inline -- {[0-9]+} $sink_pin]
+						set dout "dout"
+						set concat_block 1
+						set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
+						if {[llength $intr_pin]} {
+							set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
+							foreach pin $sink_pins {
+								set sink_pin $pin
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
         # generate irq id for IRQ1_F2P
         if { [string compare -nocase "$sink_pin" "IRQ1_F2P"] == 0 } {

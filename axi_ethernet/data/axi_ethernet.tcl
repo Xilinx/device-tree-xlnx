@@ -82,10 +82,14 @@ proc generate {drv_handle} {
             set target_intf [::hsi::utils::get_other_intf_pin $intf_net $intf]
             if { [llength $target_intf] } {
                 set connected_ip [get_connectedip $intf]
-                set_property axistream-connected "$connected_ip" $drv_handle
-                set_property axistream-control-connected "$connected_ip" $drv_handle
-		set ip_prop CONFIG.c_include_mm2s_dre
-		add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
+		if {[llength $connected_ip]} {
+			set_property axistream-connected "$connected_ip" $drv_handle
+			set_property axistream-control-connected "$connected_ip" $drv_handle
+			set ip_prop CONFIG.c_include_mm2s_dre
+			add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
+		} else {
+			dtg_warning "$drv_handle connected ip is NULL for the interface $intf"
+		}
                 set ip_prop CONFIG.Enable_1588
                 add_cross_property $eth_ip $ip_prop $drv_handle "xlnx,eth-hasptp" boolean
             }
@@ -486,16 +490,24 @@ proc get_targetip {ip} {
           set intf_pins [::hsi::utils::get_other_intf_pin $intf_net $intf]
           foreach intf $intf_pins {
               set target_intf [get_intf_pins -of_objects $intf_net -filter "TYPE==TARGET" $intf]
-              set connected_ip [get_cells -of_objects $target_intf]
-              set cell [get_cells -hier $connected_ip]
-              set target_name [get_property IP_NAME [get_cells -hier $cell]]
-              if {$target_name == "axis_data_fifo"} {
-                  return [get_targetip $connected_ip]
+              if {[llength $target_intf]} {
+                   set connected_ip [get_cells -of_objects $target_intf]
+                   if {[llength $connected_ip]} {
+                         set cell [get_cells -hier $connected_ip]
+                         set target_name [get_property IP_NAME [get_cells -hier $cell]]
+                         if {$target_name == "axis_data_fifo"} {
+                                  return [get_targetip $connected_ip]
+                         }
+                         if {![string_is_empty $connected_ip] && [is_ethsupported_target $connected_ip] == "true"} {
+                                  return $connected_ip
+                         }
+                   } else {
+                          dtg_warning "$drv_handle connected ip is NULL for the target intf $target_intf"
+                   }
+              } else {
+                      dtg_warning "$drv_handle target interface is NULL for the intf pin $intf"
               }
-              if {![string_is_empty $connected_ip] && [is_ethsupported_target $connected_ip] == "true"} {
-                  return $connected_ip
-              }
-          }
+         }
       }
    }
    return $target_periph
@@ -510,23 +522,27 @@ proc get_connectedip {intf} {
          set target_intf [::hsi::utils::get_other_intf_pin $intf_net $intf]
          if { [llength $target_intf] } {
             set connected_ip [get_cells -of_objects $target_intf]
-            set target_ipname [get_property IP_NAME $connected_ip]
-            if {$target_ipname == "ila"} {
-                return
-            }
-            if {$target_ipname == "axis_data_fifo"} {
-               set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $connected_ip]
-               if {[string_is_empty $fifo_width_bytes]} {
-                   set fifo_width_bytes 1
-               }
-               set rxethmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
-               # FIFO can be other than 8 bits, and we need the rxmem in bytes
-               set rxethmem [expr $rxethmem * $fifo_width_bytes]
+            if {[llength $connected_ip]} {
+                  set target_ipname [get_property IP_NAME $connected_ip]
+                  if {$target_ipname == "ila"} {
+                         return
+                  }
+                  if {$target_ipname == "axis_data_fifo"} {
+                        set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $connected_ip]
+                        if {[string_is_empty $fifo_width_bytes]} {
+                              set fifo_width_bytes 1
+                        }
+                        set rxethmem [get_property CONFIG.FIFO_DEPTH $connected_ip]
+                        # FIFO can be other than 8 bits, and we need the rxmem in bytes
+                        set rxethmem [expr $rxethmem * $fifo_width_bytes]
+                 } else {
+	                # In 10G MAC case if the rx_stream interface is not connected to
+	                # a Stream-fifo set the rxethmem value to a default jumbo MTU size
+	                set rxethmem 9600
+	         }
             } else {
-	       # In 10G MAC case if the rx_stream interface is not connected to
-	       # a Stream-fifo set the rxethmem value to a default jumbo MTU size
-	       set rxethmem 9600
-	    }
+                    dtg_warning "$drv_handle connected_ip is NULL for the target_intf $target_intf"
+            }
          }
 	if {[string_is_empty $connected_ip]} {
 		return ""

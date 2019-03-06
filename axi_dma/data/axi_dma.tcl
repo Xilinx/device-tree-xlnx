@@ -50,6 +50,8 @@ proc generate {drv_handle} {
             || [string match -nocase $connected_ip_type axi_ethernet_buffer ] } {
                 set axiethernetfound 1
         }
+    } else {
+        dtg_warning "$drv_handle connected ip is NULL for the pin M_AXIS_MM2S"
     }
 
     set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
@@ -258,6 +260,7 @@ proc get_connected_ip {drv_handle dma_pin} {
     set connected_ip [::hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] $intf]
 
     if {[string_is_empty ${connected_ip}]} {
+	dtg_warning "$drv_handle connected ip is NULL for the pin $intf"
         return 0
     }
     set iptype [get_property IP_NAME [get_cells -hier $connected_ip]]

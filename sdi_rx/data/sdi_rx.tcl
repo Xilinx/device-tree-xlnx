@@ -39,7 +39,9 @@ proc generate {drv_handle} {
 		if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
 			set connected_ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
 		}
-		set connected_ip_type [get_property IP_NAME $connected_ip]
+		if {[llength $connected_ip]} {
+			set connected_ip_type [get_property IP_NAME $connected_ip]
+		}
 		if {[string match -nocase $connected_ip_type "v_frmbuf_wr"] || [string match -nocase $connected_ip_type "axi_vdma"]} {
 			set port_node [add_or_get_dt_node -n "port" -l sdirx_port -u 0 -p $ports_node]
 			hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
