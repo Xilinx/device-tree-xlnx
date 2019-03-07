@@ -2418,6 +2418,22 @@ proc get_afi_val {val} {
 	return $afival
 }
 
+proc get_max_afi_val {val} {
+	set max_afival ""
+	switch $val {
+		"128" {
+			set max_afival 2
+		} "64" {
+			set max_afival 1
+		} "32" {
+			set max_afival 0
+		} default {
+			dtg_warning "invalid value:$val"
+		}
+	}
+	return $max_afival
+}
+
 proc get_axi_datawidth {val} {
 	set data_width ""
 	switch $val {
@@ -2493,14 +2509,17 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			}
 			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP0_DATA_WIDTH"] >= 0} {
 				set val [get_property CONFIG.C_MAXIGP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
-				set afival [get_afi_val $val]
-				append config_afi " <14 $afival>,"
+				set afival0 [get_max_afi_val $val]
 			}
 			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP1_DATA_WIDTH"] >= 0} {
 				set val [get_property CONFIG.C_MAXIGP1_DATA_WIDTH [get_cells -hier $zynq_periph]]
-				set afival [get_afi_val $val]
-				append config_afi " <14 $afival>,"
+				set afival1 [get_max_afi_val $val]
 			}
+			set afi0 [expr $afival0 <<8]
+			set afi1 [expr $afival1 << 10]
+			set afival [expr {$afi0} | {$afi1}]
+			set afi_hex [format %x $afival]
+			append config_afi " <14 0x$afi_hex>,"
 			if {[lsearch -nocase $avail_param "CONFIG.C_MAXIGP2_DATA_WIDTH"] >= 0} {
 				set val [get_property CONFIG.C_MAXIGP2_DATA_WIDTH [get_cells -hier $zynq_periph]]
 				switch $val {
