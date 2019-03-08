@@ -28,7 +28,7 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,mixer-3.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-	set ip [get_cells -hier $drv_handle]
+	set mixer_ip [get_cells -hier $drv_handle]
 	set num_layers [get_property CONFIG.NR_LAYERS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,num-layers" $num_layers int
 	set samples_per_clock [get_property CONFIG.SAMPLES_PER_CLOCK [get_cells -hier $drv_handle]]
@@ -301,7 +301,7 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $logo_width int
 	set logo_height [get_property CONFIG.MAX_LOGO_ROWS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-height" $logo_height int
-	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] "ap_rst_n"]]
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $mixer_ip] "ap_rst_n"]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
 		if {[llength $sink_periph]} {
