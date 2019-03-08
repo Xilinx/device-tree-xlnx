@@ -128,6 +128,16 @@ proc add_cross_property args {
 					set type "boolean"
 					set value ""
 				}
+				if {[regexp -nocase {0x([0-9a-f]{9})} "$value" match]} {
+					set temp $value
+					set temp [string trimleft [string trimleft $temp 0] x]
+					set len [string length $temp]
+					set rem [expr {${len} - 8}]
+					set high_base "0x[string range $temp $rem $len]"
+					set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+					set low_base [format 0x%08x $low_base]
+					set value "$low_base $high_base"
+				}
 				hsi::utils::add_new_property $dest_handle $dest_prop $type $value
 				return 0
 			}
