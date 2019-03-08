@@ -1302,7 +1302,7 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	if {[string match -nocase $mainline_ker "v4.17"]} {
 		set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_gpio axi_traffic_gen axi_ethernet axi_ethernet_buffer can canfd axi_iic xadc_wiz vcu"
 	} else {
-		set valid_ip_list "axi_ethernet axi_ethernet_buffer xadc_wiz"
+		set valid_ip_list "xadc_wiz"
 	}
 	set valid_proc_list "ps7_cortexa9 psu_cortexa53"
 	if {[lsearch  -nocase $valid_proc_list $proctype] >= 0} {
