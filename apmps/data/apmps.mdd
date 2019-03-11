@@ -15,7 +15,7 @@
 OPTION psf_version = 3.0;
 
 BEGIN driver apmps
-  OPTION supported_peripherals = (psu_apm);
+  OPTION supported_peripherals = (psu_apm psv_apm);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = apmps;

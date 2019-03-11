@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver ddrps
 
-  OPTION supported_peripherals = (ps7_ddr psu_ddr);
+  OPTION supported_peripherals = (ps7_ddr psu_ddr psv_ddr);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ddrps;

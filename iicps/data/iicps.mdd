@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver iicps
 
-  OPTION supported_peripherals = (ps7_i2c psu_i2c);
+  OPTION supported_peripherals = (ps7_i2c psu_i2c psv_i2c);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = iicps;

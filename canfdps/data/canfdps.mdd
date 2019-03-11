@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver canfdps
 
-  OPTION supported_peripherals = (psu_canfd);
+  OPTION supported_peripherals = (psu_canfd psv_canfd);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = canfdps;

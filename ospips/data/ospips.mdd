@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver ospips
 
-  OPTION supported_peripherals = (psu_ospi);
+  OPTION supported_peripherals = (psu_ospi psv_ospi);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ospips;

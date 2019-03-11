@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver usbps
 
-  OPTION supported_peripherals = (ps7_usb psu_usb_xhci);
+  OPTION supported_peripherals = (ps7_usb psu_usb_xhci psv_usb_xhci);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = usbps;

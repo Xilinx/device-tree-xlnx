@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver scuwdt
 
-  OPTION supported_peripherals = (ps7_scuwdt psu_wdt);
+  OPTION supported_peripherals = (ps7_scuwdt psu_wdt psv_wdt);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = scuwdt;

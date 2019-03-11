@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver wdtps
 
-  OPTION supported_peripherals = (ps7_wdt psu_wdt);
+  OPTION supported_peripherals = (ps7_wdt psu_wdt psv_wdt);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = wdtps;

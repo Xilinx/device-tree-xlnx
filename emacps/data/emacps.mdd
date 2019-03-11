@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver emacps
 
-  OPTION supported_peripherals = (ps7_ethernet psu_ethernet);
+  OPTION supported_peripherals = (ps7_ethernet psu_ethernet psv_ethernet);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = emacps;

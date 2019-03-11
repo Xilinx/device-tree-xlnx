@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver dmaps
 
-  OPTION supported_peripherals = (ps7_dma psu_adma psu_gdma psu_csudma);
+  OPTION supported_peripherals = (ps7_dma psu_adma psu_gdma psu_csudma psv_adma psv_gdma psv_csudma);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = dmaps;

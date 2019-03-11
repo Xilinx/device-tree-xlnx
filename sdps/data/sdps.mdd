@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver sdps
 
-  OPTION supported_peripherals = (ps7_sdioi psu_sd);
+  OPTION supported_peripherals = (ps7_sdioi psu_sd psv_sd);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = sdps;

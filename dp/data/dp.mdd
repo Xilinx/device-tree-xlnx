@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver dp
 
-  OPTION supported_peripherals = (psu_dp);
+  OPTION supported_peripherals = (psu_dp psv_dp);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = dp;

@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver gpiops
 
-  OPTION supported_peripherals = (ps7_gpio psu_gpio);
+  OPTION supported_peripherals = (ps7_gpio psu_gpio psv_gpio);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = gpiops;

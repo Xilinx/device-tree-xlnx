@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver ttcps
 
-  OPTION supported_peripherals = (ps7_ttc psu_ttc);
+  OPTION supported_peripherals = (ps7_ttc psu_ttc psv_ttc);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ttcps;
