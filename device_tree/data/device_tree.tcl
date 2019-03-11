@@ -586,6 +586,7 @@ proc update_alias {os_handle} {
 	} elseif {[string match -nocase $proctype "psv_cortexa72"]} {
 		set pos [lsearch $all_drivers "psv_qspi*"]
 	} else {
+		set pos [lsearch $all_drivers "psu_qspi*"]
 	}
 	if { $pos >= 0 } {
 		set first_element [lindex $all_drivers 0]
