@@ -45,3 +45,17 @@
 &sdhci1 {
 	no-1-8-v;
 };
+
+&gem1 {
+	status = "okay";
+	phy-mode = "gmii";
+	phy-handle = <&gmiitorgmii>;
+	phy: ethernet-phy@0 {
+		reg = <0x0>;
+	};
+	gmiitorgmii: gmiitorgmii@8 {
+		compatible = "xlnx,gmii-to-rgmii-1.0";
+		reg = <8>;
+		phy-handle = <&phy>;
+	};
+};
