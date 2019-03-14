@@ -39,6 +39,8 @@ PARAMETER name = remove_pl, desc = "Remove PL Support", type = bool, default = f
 
 PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, values = ("none" = none, "v4.17" = v4.17), default = none;
 
+PARAMETER name = overlay_custom_dts, desc = "Overlay custom dts filename", type = string, default ="";
+
 PARAMETER name = bootargs, desc = "Booting arguments", type = string, default = "";
 
 PARAMETER name = console_device, desc = "Instance name of IP core for boot console (e.g. RS232_Uart_1, not xps_uart16550)", type = peripheral_instance, range = (axi_uart16550, axi_uartlite, ps7_uart, psu_uart), default = none;

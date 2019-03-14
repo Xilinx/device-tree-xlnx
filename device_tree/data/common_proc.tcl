@@ -508,6 +508,31 @@ proc list_remove_element {cur_list elements} {
 	return $cur_list
 }
 
+proc update_overlay_custom_dts_include {include_file} {
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
+	set overlay_custom_dts_obj [get_dt_trees ${overlay_custom_dts}]
+	if {[string_is_empty $overlay_custom_dts_obj] == 1} {
+		set overlay_custom_dts_obj [set_cur_working_dts ${overlay_custom_dts}]
+	}
+	if {[string equal ${include_file} ${overlay_custom_dts_obj}]} {
+		return 0
+	}
+	set cur_inc_list [get_property INCLUDE_FILES $overlay_custom_dts_obj]
+	set tmp_list [split $cur_inc_list ","]
+	if { [lsearch $tmp_list $include_file] < 0} {
+		if {[string_is_empty $cur_inc_list]} {
+			set cur_inc_list $include_file
+		} else {
+			append cur_inc_list "," $include_file
+			set field [split $cur_inc_list ","]
+			set cur_inc_list [lsort -decreasing $field]
+			set cur_inc_list [join $cur_inc_list ","]
+		}
+		set_property INCLUDE_FILES ${cur_inc_list} $overlay_custom_dts_obj
+	}
+}
+
 proc update_system_dts_include {include_file} {
 	# where should we get master_dts data
 	set master_dts [get_property CONFIG.master_dts [get_os]]
@@ -630,7 +655,13 @@ proc set_drv_def_dts {drv_handle} {
 			set hw_name [get_property NAME [get_hw_designs]]
 		}
 		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bit.bin" string
-
+		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
+		if {[llength $overlay_custom_dts]} {
+			update_overlay_custom_dts_include $default_dts
+			set dts_file custom.dtsi
+			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
+			update_overlay_custom_dts_include $dts_file
+		}
 	} else {
 		update_system_dts_include $default_dts
 	}
