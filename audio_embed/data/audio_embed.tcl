@@ -25,7 +25,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,v-uhdsdi-audio-1.0"]
+	set compatible [append compatible " " "xlnx,v-uhdsdi-audio-2.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set connected_embed_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_EMBED_ANC_DS_IN"]
 	if {[llength $connected_embed_ip] != 0} {
