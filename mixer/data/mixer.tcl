@@ -298,9 +298,9 @@ proc generate {drv_handle} {
 	set mixer_node1 [add_or_get_dt_node -n "logo" -l xx_mix_logo -p $node]
 	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
 	set logo_width [get_property CONFIG.MAX_LOGO_COLS [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $logo_width int
+	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,logo-width" $logo_width int
 	set logo_height [get_property CONFIG.MAX_LOGO_ROWS [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-height" $logo_height int
+	hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,logo-height" $logo_height int
 	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $mixer_ip] "ap_rst_n"]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
