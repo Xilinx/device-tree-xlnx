@@ -34,8 +34,10 @@ proc generate {drv_handle} {
 	set dsi_datatype [get_property CONFIG.DSI_DATATYPE [get_cells -hier $drv_handle]]
 	if {[string match -nocase $dsi_datatype "RGB888"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 0 int
-	} elseif {[string match -nocase $dsi_datatype "RGB666"]} {
+	} elseif {[string match -nocase $dsi_datatype "RGB666_L"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 1 int
+	} elseif {[string match -nocase $dsi_datatype "RGB666_P"]} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 2 int
 	} elseif {[string match -nocase $dsi_datatype "RGB565"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 3 int
 	}
