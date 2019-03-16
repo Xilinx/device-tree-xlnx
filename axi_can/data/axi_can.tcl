@@ -26,8 +26,13 @@ proc generate {drv_handle} {
     set compatible [append compatible " " "xlnx,axi-can-1.00.a"]
     set_drv_prop $drv_handle compatible "$compatible" stringlist
     set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
+    set version [string tolower [common::get_property VLNV $drv_handle]]
     if {[string match -nocase $ip_name "canfd"]} {
-        hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-1.0"
+        if {[string compare -nocase "xilinx.com:ip:canfd:1.0" $version] == 0} {
+            hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-1.0"
+        } else {
+            hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-2.0"
+        }
         set_drv_conf_prop $drv_handle NUM_OF_TX_BUF tx-fifo-depth hexint
         set_drv_conf_prop $drv_handle NUM_OF_TX_BUF rx-fifo-depth hexint
     } else {
