@@ -6,6 +6,7 @@
 		#size-cells = <0>;
 		phy0: phy@3 {
 			device_type = "ethernet-phy";
+			ti,6-wire-mode;
 			reg = <3>;
 		};
 	};
