@@ -33,7 +33,7 @@ proc generate {drv_handle} {
         } else {
             hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,canfd-2.0"
         }
-        set_drv_conf_prop $drv_handle NUM_OF_TX_BUF tx-fifo-depth hexint
+        set_drv_conf_prop $drv_handle NUM_OF_TX_BUF tx-mailbox-count hexint
         set_drv_conf_prop $drv_handle NUM_OF_TX_BUF rx-fifo-depth hexint
     } else {
         set_drv_conf_prop $drv_handle c_can_tx_dpth tx-fifo-depth hexint
