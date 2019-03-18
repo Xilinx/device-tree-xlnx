@@ -27,6 +27,8 @@ proc generate {drv_handle} {
 	set compatible "xlnx,v-scd"
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
+	set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-data-width" $max_data_width int
 	set memory_scd [get_property CONFIG.MEMORY_BASED [get_cells -hier $drv_handle]]
 	if {$memory_scd == 1} {
 		set max_nr_streams [get_property CONFIG.MAX_NR_STREAMS [get_cells -hier $drv_handle]]
@@ -77,17 +79,6 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,numstreams" $max_nr_streams int
 		hsi::utils::add_new_dts_param $node "#address-cells" 1 int
 		hsi::utils::add_new_dts_param $node "#size-cells" 0 int
-		set scd_ports_node [add_or_get_dt_node -n "scenechangedma" -l scdma -p $node]
-		hsi::utils::add_new_dts_param "$scd_ports_node" "#dma-cells" 1 int
-		hsi::utils::add_new_dts_param "$scd_ports_node" "dma-channels" 1 int
-		set aximm_addr_width [get_property CONFIG.AXIMM_ADDR_WIDTH [get_cells -hier $drv_handle]]
-		hsi::utils::add_new_dts_param "$scd_ports_node" "xlnx,addrwidth" $aximm_addr_width hexint
-		set intr_val [get_property CONFIG.interrupts $drv_handle]
-		set intr_parent [get_property CONFIG.interrupt-parent $drv_handle]
-		if { [llength $intr_val] && ![string match -nocase $intr_val "-1"] } {
-			hsi::utils::add_new_dts_param $scd_ports_node "interrupts" $intr_val intlist
-			hsi::utils::add_new_dts_param $scd_ports_node "interrupt-parent" $intr_parent reference
-		}
 		set hdmi_ports_node [add_or_get_dt_node -n "ports" -l scd_ports -p $node]
 		hsi::utils::add_new_dts_param "$hdmi_ports_node" "#address-cells" 1 int
 		hsi::utils::add_new_dts_param "$hdmi_ports_node" "#size-cells" 0 int
@@ -102,6 +93,12 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 				set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $hdmi_port_node]
 				hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmirx_out reference
+			}
+			if {[string match -nocase $connected_in_ip_type "v_proc_ss"]} {
+				set scaler_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
+				hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
+				set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $scaler_port_node]
+				hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" vpss_scaler_out reference
 			}
 		}
 		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
@@ -124,7 +121,7 @@ proc generate {drv_handle} {
 				set dts_file [current_dt_tree]
 				set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
 				hsi::utils::add_new_dts_param $scd_hdmirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $scd_hdmirx "dmas" "scdma 0" reference
+				hsi::utils::add_new_dts_param $scd_hdmirx "dmas" "$drv_handle 0" reference
 				hsi::utils::add_new_dts_param $scd_hdmirx "dma-names" "port0" string
 				set scd_hdmi_node [add_or_get_dt_node -n "ports" -l scd_hdmi_ports -p $scd_hdmirx]
 				hsi::utils::add_new_dts_param "$scd_hdmi_node" "#address-cells" 1 int
