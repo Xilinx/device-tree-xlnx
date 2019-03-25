@@ -2097,6 +2097,12 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 					set reg "$base $size"
 				}
 			} else {
+				if {[string match -nocase $proctype "ps7_cortexa9"] || [string match -nocase $proctype "microblaze"]} {
+					set index [check_base $reg $base $size]
+					if {$index == "true"} {
+						continue
+					}
+				}
 				# ensure no duplication
 				if {![regexp ".*${reg}.*" "$base $size" matched]} {
 					if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
@@ -2109,6 +2115,58 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 		}
 	}
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
+}
+
+proc check_base {reg base size} {
+	set len [llength $reg]
+	switch $len {
+		"2" {
+			set base_index0 [lindex $reg 0]
+			set size_index0 [lindex $reg 1]
+			if {$base_index0 == $base || $size_index0 == $size} {
+				return true
+			}
+		}
+		"4" {
+			set base_index0 [lindex $reg 0]
+			set size_index0 [lindex $reg 1]
+			set base_index1 [lindex $reg 2]
+			set size_index1 [lindex $reg 3]
+			if {$base_index0 == $base || $base_index1 == $base} {
+				if {$size_index0 == $size || $size_index1 == $size} {
+					return true
+				}
+			}
+		}
+		"6" {
+			set base_index0 [lindex $reg 0]
+			set size_index0 [lindex $reg 1]
+			set base_index1 [lindex $reg 2]
+			set size_index1 [lindex $reg 3]
+			set base_index2 [lindex $reg 4]
+			set size_index2 [lindex $reg 5]
+			if {$base_index0 == $base || $base_index1 == $base || $base_index2 == $base} {
+				if {$size_index0 == $size || $size_index1 == $size || $size_index2 == $size} {
+					return true
+				}
+			}
+		}
+		"8" {
+			set base_index0 [lindex $reg 0]
+			set size_index0 [lindex $reg 1]
+			set base_index1 [lindex $reg 2]
+			set size_index1 [lindex $reg 3]
+			set base_index2 [lindex $reg 4]
+			set size_index2 [lindex $reg 5]
+			set base_index3 [lindex $reg 6]
+			set size_index3 [lindex $reg 7]
+			if {$base_index0 == $base || $base_index1 == $base || $base_index2 == $base || $base_index3 == $base} {
+				if {$size_index0 == $size || $size_index1 == $size || $size_index2 == $size || $size_index3 == $size} {
+					return true
+				}
+			}
+		}
+	}
 }
 
 proc gen_compatible_property {drv_handle} {
