@@ -1,0 +1,32 @@
+/ {
+	amba_apu: amba_apu {
+		compatible = "simple-bus";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		gic: interrupt-controller@f9000000 {
+			compatible = "arm,gic-v3";
+			#interrupt-cells = <3>;
+			reg = <0x0 0xf9000000 0x0 0x80000>, /* GICD */
+			      <0x0 0xf9080000 0x0 0x80000>; /* GICR */
+			interrupt-controller;
+			interrupt-parent = <&gic>;
+			interrupts = <0x1 0x9 4>;
+		};
+	};
+
+	amba: amba {
+		compatible = "simple-bus";
+		#address-cells = <0x2>;
+		#size-cells = <0x2>;
+                ranges;
+
+		serial0: serial@ff000000 {
+			compatible = "arm,pl011", "arm,sbsa-uart";
+			interrupt-parent = <&gic>;
+			interrupts = <0 18 4>;
+			reg = <0x0 0xff000000 0x0 0x1000>;
+			current-speed = <115200>;
+		};
+	};
+};
