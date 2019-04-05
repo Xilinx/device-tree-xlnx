@@ -5,7 +5,7 @@
 &iic_main {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	i2cswitch@75 {
+	i2c-mux@75 {
 		compatible = "nxp,pca9544";
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -15,7 +15,7 @@
 			#size-cells = <0>;
 			reg = <3>;
 			eeprom@54 {
-				compatible = "at,24c08";
+				compatible = "atmel,24c08";
 				reg = <0x54>;
 			};
 		};
