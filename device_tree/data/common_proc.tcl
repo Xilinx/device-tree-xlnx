@@ -2047,16 +2047,16 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 		}
 	}
 	set ip_name  [get_property IP_NAME [get_cells -hier $drv_handle]]
-	if {$ip_name == "xxv_ethernet"} {
+	if {$ip_name == "xxv_ethernet" || $ip_name == "ddr4"} {
 		return
 	}
 
 	set reg ""
-	set ip_skip_list "ddr4_*"
+	#set ip_skip_list "ddr4_*"
 	set slave [get_cells -hier ${drv_handle}]
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
 	foreach mem_handle ${ip_mem_handles} {
-		if {![regexp $ip_skip_list $mem_handle match]} {
+	#	if {![regexp $ip_skip_list $mem_handle match]} {
 			set base [string tolower [get_property BASE_VALUE $mem_handle]]
 			set high [string tolower [get_property HIGH_VALUE $mem_handle]]
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
@@ -2134,7 +2134,7 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 					}
 				}
 			}
-		}
+	#	}
 	}
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
 }
