@@ -2872,6 +2872,14 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		set child_name "__overlay__"
 		set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
+			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 2 int
+		} else {
+			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
+		}
 	} else {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
