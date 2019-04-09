@@ -205,7 +205,7 @@ proc get_intr_id {drv_handle intr_port_name} {
 	foreach pin ${intr_port_name} {
 		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 		if {[string_is_empty $intc] == 1} {continue}
-		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 			set intc [get_property IP_NAME $intc]
 			if {[llength $intc] > 1} {
 				foreach intr_cntr $intc {
@@ -217,14 +217,11 @@ proc get_intr_id {drv_handle intr_port_name} {
 			if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa53"] && [string match -nocase $intc "axi_intc"] } {
 				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 			}
-			if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa72"] && [string match -nocase $intc "axi_intc"] } {
-				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
-			}
 			if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psv_cortexa72"] && [string match -nocase $intc "axi_intc"] } {
 				set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 			}
 		}
-		if {[string match -nocase $proctype "psu_cortexa53"] ||[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 			set intr_id [get_psu_interrupt_id $drv_handle $pin]
 		} else {
 			set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
@@ -1109,7 +1106,7 @@ proc gen_ps7_mapping {} {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 
 	set def_ps_mapping [dict create]
-	if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"] } {
+	if {[string match -nocase $proctype "psv_cortexa72"] } {
 		dict set def_ps_mapping f9000000 label gic
 		dict set def_ps_mapping fd4b0000 label gpu
 		dict set def_ps_mapping ffa80000 label adma0
@@ -1421,7 +1418,7 @@ proc gen_clk_property {drv_handle} {
 	if {[string match -nocase $proctype "microblaze"]} {
 		return
 	}
-	if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+	if {[string match -nocase $proctype "psv_cortexa72"]} {
 		return
 	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
@@ -1937,7 +1934,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		}
 		set connected_intc_name [get_property IP_NAME $connected_intc]
 		set valid_gpio_list "ps7_gpio axi_gpio"
-		set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psu_cortexa72 psv_cortexa72"
+		set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 		# check whether intc is gpio or other
 		if {[lsearch  -nocase $valid_gpio_list $connected_intc_name] >= 0} {
 			generate_gpio_intr_info $connected_intc $drv_handle $pin
@@ -1954,7 +1951,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				continue
 			}
 			set ip_name $intc
-			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 				set intc [get_property IP_NAME $intc]
 				if {[llength $intc] > 1} {
 					foreach intr_cntr $intc {
@@ -1966,15 +1963,12 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa53"] && [string match -nocase $intc "axi_intc"] } {
 					set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 				}
-				if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psu_cortexa72"] && [string match -nocase $intc "axi_intc"] } {
-					set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
-				}
 				if {[string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "psv_cortexa72"] && [string match -nocase $intc "axi_intc"] } {
 					set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 				}
 			}
 
-			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] } {
 					set intr_id [get_psu_interrupt_id $drv_handle "irq"]
 				} else {
@@ -2068,7 +2062,7 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 			if {[string_is_empty $reg]} {
-				if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+				if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 					# check if base address is 64bit and split it as MSB and LSB
 					if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 						set temp $base
@@ -2105,7 +2099,7 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 				}
 				# ensure no duplication
 				if {![regexp ".*${reg}.*" "$base $size" matched]} {
-					if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+					if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 						set reg "$reg 0x0 $base 0x0 $size"
 					} else {
 						set reg "$reg $base $size"
@@ -2486,7 +2480,7 @@ proc detect_bus_name {ip_drv} {
 	set valid_buses [get_cells -hier -filter { IP_TYPE == "BUS" && IP_NAME != "axi_protocol_converter" && IP_NAME != "lmb_v10"}]
 
 	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
-	set valid_proc_list "ps7_cortexa9 psu_cortexa53 psu_cortexa72 psv_cortexa72"
+	set valid_proc_list "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	if {[is_pl_ip $ip_drv] && $remove_pl} {
 		return 0
@@ -2882,7 +2876,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		}
 	} else {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -u 0 -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 		} else {
 			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
@@ -2890,7 +2884,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 
 		if {![string match "&*" $bus_node]} {
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 				hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
 				hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 2 int
 			} else {
@@ -2928,12 +2922,6 @@ proc gen_root_node {drv_handle} {
 			update_system_dts_include [file tail ${dtsi_fname}]
 			update_system_dts_include [file tail "zynqmp-clk-ccf.dtsi"]
 			# no root_node required as zynqmp.dtsi
-			return 0
-		}
-		"psu_cortexa72" {
-			create_dt_tree_from_dts_file
-			global dtsi_fname
-			update_system_dts_include [file tail ${dtsi_fname}]
 			return 0
 		}
 		"psv_cortexa72" {
@@ -3006,9 +2994,6 @@ proc gen_cpu_nodes {drv_handle} {
 			return 0
 		}
 		"psv_cortexa72" {
-			return 0
-		}
-		"psu_cortexa72" {
 			return 0
 		} "microblaze" {}
 		default {
@@ -3271,7 +3256,7 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_pin] == 0 } {
 		return $intr_cntrl
 	}
-	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psu_cortexa72 psv_cortexa72"
+	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if { [string match -nocase [common::get_property IP_NAME $periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0 } {
 		set sinks [::hsi::utils::get_sink_pins $intr_pin]
@@ -3316,7 +3301,7 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_sink_pins] == 0 || [string match $intr_sink_pins "{}"]} {
 		return $intr_cntrl
 	}
-	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psu_cortexa72 psv_cortexa72"
+	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	foreach intr_sink ${intr_sink_pins} {
 		if {[llength $intr_sink] == 0} {
 			continue
@@ -3711,16 +3696,6 @@ proc check_ip_trustzone_state { drv_handle } {
             if {[string match -nocase $state "Secure"]} {
                 return 1
             }
-        }
-    } elseif {[string match -nocase $proctype "psu_cortexa72"]} {
-        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psu_cortexa72_0]] $drv_handle]
-        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa72_0]] $index]]
-        if {[lsearch -nocase $avail_param "TRUSTZONE"] >= 0} {
-                set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa72_0]] $index]]
-                # Don't generate status okay when the peripheral is in Secure Trustzone
-                if {[string match -nocase $state "Secure"]} {
-                     return 1
-                }
         }
    } elseif {[string match -nocase $proctype "psv_cortexa72"]} {
         set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psv_cortexa72_0]] $drv_handle]

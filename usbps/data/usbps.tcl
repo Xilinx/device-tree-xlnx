@@ -27,7 +27,7 @@ proc generate {drv_handle} {
         set_drv_prop $drv_handle phy_type ulpi string
     } else {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+	if {[string match -nocase $proctype "psv_cortexa72"]} {
 		#TODO:Remove this once the versal dts is fully updated.
 		return
 	}

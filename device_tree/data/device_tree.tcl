@@ -439,7 +439,7 @@ proc generate {lib_handle} {
     }
     gen_board_info
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 	if {[string match -nocase $mainline_ker "none"]} {
 		gen_sata_laneinfo
@@ -479,7 +479,7 @@ proc update_chosen {os_handle} {
     set bootargs [get_property CONFIG.bootargs $os_handle]
     set console [hsi::utils::get_os_parameter_value "console"]
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psv_cortexa72"]} {
         # FIX_ME:Dont generate bootargs till the versal dtsis are available
         return
     }
@@ -488,7 +488,7 @@ proc update_chosen {os_handle} {
     } else {
 	set bootargs "earlycon"
     }
-    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
            append bootargs " clk_ignore_unused"
     }
     hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
@@ -506,10 +506,7 @@ proc update_cpu_node {os_handle} {
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
 
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa72"] } {
-        set current_proc "psu_cortexa72_"
-        set total_cores 2
-    } elseif {[string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psv_cortexa72"] } {
         set current_proc "psv_cortexa72_"
         set total_cores 2
     } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
@@ -525,13 +522,10 @@ proc update_cpu_node {os_handle} {
     if {[string compare -nocase $current_proc ""] == 0} {
         return
     }
-    if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psv_cortexa72"]} {
         set procs [get_cells -hier -filter {IP_TYPE==PROCESSOR}]
         set pnames ""
 	foreach proc_name $procs {
-              if {[regexp "psu_cortexa72*" $proc_name match]} {
-	             append pnames " " $proc_name
-              }
               if {[regexp "psv_cortexa72*" $proc_name match]} {
 	             append pnames " " $proc_name
               }
@@ -575,7 +569,7 @@ proc update_alias {os_handle} {
 	# Search for ps_qspi, if it is there then interchange this with first driver
 	# because to have correct internal u-boot commands qspi has to be listed in aliases as the first for spi0
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-        if {[string match -nocase $proctype "psu_cortexa72"] || [string match -nocase $proctype "psv_cortexa72"]} {
+        if {[string match -nocase $proctype "psv_cortexa72"]} {
              # FIX_ME:Dont generate bootargs till the versal dtsis are available
              return
         }
