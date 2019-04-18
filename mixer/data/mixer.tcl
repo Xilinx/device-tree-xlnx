@@ -26,7 +26,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,mixer-3.0"]
+	set compatible [append compatible " " "xlnx,mixer-3.0 xlnx,mixer-4.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set mixer_ip [get_cells -hier $drv_handle]
 	set num_layers [get_property CONFIG.NR_LAYERS [get_cells -hier $drv_handle]]
@@ -290,6 +290,206 @@ proc generate {drv_handle} {
 				}
 				set layer8_video_format [get_property CONFIG.LAYER8_VIDEO_FORMAT [get_cells -hier $drv_handle]]
 				gen_video_format $layer8_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"9" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer9_alpha [get_property CONFIG.LAYER9_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer9_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer9_maxwidth [get_property CONFIG.LAYER9_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer9_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video9"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER9_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer9_video_format [get_property CONFIG.LAYER9_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer9_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"10" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer10_alpha [get_property CONFIG.LAYER10_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer10_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer10_maxwidth [get_property CONFIG.LAYER10_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer10_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video10"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER10_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer10_video_format [get_property CONFIG.LAYER10_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer10_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"11" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer11_alpha [get_property CONFIG.LAYER11_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer11_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer11_maxwidth [get_property CONFIG.LAYER11_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer11_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video11"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER11_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer11_video_format [get_property CONFIG.LAYER11_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer11_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"12" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer12_alpha [get_property CONFIG.LAYER12_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer12_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer12_maxwidth [get_property CONFIG.LAYER12_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer12_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video12"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER12_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer12_video_format [get_property CONFIG.LAYER12_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer12_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"13" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer13_alpha [get_property CONFIG.LAYER13_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer13_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer13_maxwidth [get_property CONFIG.LAYER13_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer13_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video13"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER13_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer13_video_format [get_property CONFIG.LAYER13_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer13_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"14" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer14_alpha [get_property CONFIG.LAYER14_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer14_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer14_maxwidth [get_property CONFIG.LAYER14_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer14_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video14"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER14_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer14_video_format [get_property CONFIG.LAYER14_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer14_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"15" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer15_alpha [get_property CONFIG.LAYER15_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer15_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer15_maxwidth [get_property CONFIG.LAYER15_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer15_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video15"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER15_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer15_video_format [get_property CONFIG.LAYER15_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer15_video_format $mixer_node1 $drv_handle $max_data_width
+			}
+			"16" {
+				set mixer_node1 [add_or_get_dt_node -n "layer_$layer" -l xx_mix_overlay_$layer -p $node]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-id" $layer int
+				set layer16_alpha [get_property CONFIG.LAYER16_ALPHA [get_cells -hier $drv_handle]]
+				if {[string match -nocase $layer16_alpha "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-alpha" "" boolean
+				}
+				set layer16_maxwidth [get_property CONFIG.LAYER16_MAX_WIDTH [get_cells -hier $drv_handle]]
+				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer16_maxwidth int
+				set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video16"]
+				if {[llength $connected_ip]} {
+					set connected_ip_type [get_property IP_NAME $connected_ip]
+					if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
+						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+					}
+				}
+				set sample [get_property CONFIG.LAYER16_UPSAMPLE [get_cells -hier $drv_handle]]
+				if {[string match -nocase $sample "true"]} {
+					hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-scale" "" boolean
+				}
+				set layer16_video_format [get_property CONFIG.LAYER16_VIDEO_FORMAT [get_cells -hier $drv_handle]]
+				gen_video_format $layer16_video_format $mixer_node1 $drv_handle $max_data_width
 			}
 			default {
 			}
