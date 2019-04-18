@@ -2097,10 +2097,38 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 						continue
 					}
 				}
+				if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+					set index [check_64_base $reg $base $size]
+					if {$index == "true"} {
+						continue
+					}
+				}
 				# ensure no duplication
 				if {![regexp ".*${reg}.*" "$base $size" matched]} {
 					if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
-						set reg "$reg 0x0 $base 0x0 $size"
+						set base1 "0x0 $base"
+						set size1 "0x0 $size"
+						if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+					                set temp $base
+					                set temp [string trimleft [string trimleft $temp 0] x]
+					                set len [string length $temp]
+					                set rem [expr {${len} - 8}]
+					                set high_base "0x[string range $temp $rem $len]"
+					                set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+					                set low_base [format 0x%08x $low_base]
+							set base1 "$low_base $high_base"
+						}
+						if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+							set temp $size
+							set temp [string trimleft [string trimleft $temp 0] x]
+							set len [string length $temp]
+							set rem [expr {${len} - 8}]
+							set high_size "0x[string range $temp $rem $len]"
+							set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+							set low_size [format 0x%08x $low_size]
+							set size1 "$low_size $high_size"
+						}
+						set reg "$reg $base1 $size1"
 					} else {
 						set reg "$reg $base $size"
 					}
@@ -2109,6 +2137,86 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 		}
 	}
 	set_drv_prop_if_empty $drv_handle reg $reg intlist
+}
+
+proc check_64_base {reg base size} {
+	set high_base 0xdeadbeef
+	set low_base  0
+	if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+		set temp $base
+		set temp [string trimleft [string trimleft $temp 0] x]
+		set len [string length $temp]
+		set rem [expr {${len} - 8}]
+		set high_base "0x[string range $temp $rem $len]"
+		set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+		set low_base [format 0x%08x $low_base]
+	}
+	set len [llength $reg]
+	switch $len {
+		"4" {
+			set base_index0 [lindex $reg 0]
+			set base_index1 [lindex $reg 1]
+			if {$high_base != 0xdeadbeef} {
+				if {$base_index0 == $low_base && $base_index1 == $high_base} {
+					return true
+				}
+			} else {
+				if {$base_index1 == $base} {
+					return true
+				}
+			}
+		}
+		"8" {
+			set base_index0 [lindex $reg 0]
+			set base_index1 [lindex $reg 1]
+			set base_index4 [lindex $reg 4]
+			set base_index5 [lindex $reg 5]
+			if {$high_base != 0xdeadbeef} {
+				if {$base_index0 == $low_base && $base_index1 == $high_base} {
+					return true
+				}
+				if {$base_index4 == $low_base && $base_index5 == $high_base} {
+					return true
+				}
+			} else {
+				if {$base_index1 == $base} {
+					return true
+				}
+				if {$base_index5 == $base} {
+					return true
+				}
+			}
+		}
+		"12" {
+			set base_index0 [lindex $reg 0]
+			set base_index1 [lindex $reg 1]
+			set base_index4 [lindex $reg 4]
+			set base_index5 [lindex $reg 5]
+			set base_index8 [lindex $reg 8]
+			set base_index9 [lindex $reg 9]
+			if {$high_base != 0xdeadbeef} {
+				if {$base_index0 == $low_base && $base_index1 == $high_base} {
+					return true
+				}
+				if {$base_index4 == $low_base && $base_index5 == $high_base} {
+					return true
+				}
+				if {$base_index8 == $low_base && $base_index9 == $high_base} {
+					return true
+				}
+			} else {
+				if {$base_index1 == $base} {
+					return true
+				}
+				if {$base_index5 == $base} {
+					return true
+				}
+				if {$base_index9 == $base} {
+					return true
+				}
+			}
+		}
+	}
 }
 
 proc check_base {reg base size} {
