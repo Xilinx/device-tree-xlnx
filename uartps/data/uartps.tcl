@@ -53,4 +53,8 @@ proc generate {drv_handle} {
     if {[string match -nocase $uboot_prop "psu_uart"] || [string match -nocase $uboot_prop "psu_sbsauart"]} {
         set_drv_prop $drv_handle "u-boot,dm-pre-reloc" "" boolean
     }
+    set has_modem [get_property CONFIG.C_HAS_MODEM [get_cells -hier $drv_handle]]
+    if {$has_modem == 0} {
+         hsi::utils::add_new_property $drv_handle "cts-override" boolean ""
+    }
 }
