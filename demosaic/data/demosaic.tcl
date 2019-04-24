@@ -46,7 +46,13 @@ proc generate {drv_handle} {
 		if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
 			set ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
 			set ip_type [get_property IP_NAME $ip]
-			if {[string match -nocase $ip_type "mipi_csi2_rx_subsystem"]} {
+			set broadip " "
+			set broadip_type " "
+			if {[string match -nocase $ip_type "axis_broadcaster"]} {
+				set broadip [hsi::utils::get_connected_stream_ip $ip "S_AXIS"]
+				set broadip_type [get_property IP_NAME $broadip]
+			}
+			if {[string match -nocase $ip_type "mipi_csi2_rx_subsystem"] || [string match -nocase $broadip_type "mipi_csi2_rx_subsystem"]} {
 				set port_node [add_or_get_dt_node -n "port" -l demosaic_port0 -u 0 -p $ports_node]
 				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
 				hsi::utils::add_new_dts_param "${port_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
@@ -82,6 +88,34 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 			set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l demosaic_out -p $port1_node]
 			hsi::utils::add_new_dts_param "$csiss_rx_node" "remote-endpoint" gamma_in reference
+		}
+		if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+			set port0_node [add_or_get_dt_node -n "port" -l demosaic_port1 -u 1 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port0_node" "reg" 1 int
+			hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+			hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+			hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
+			set frmbufwr_node [add_or_get_dt_node -n "endpoint" -l demosaic_out -p $port0_node]
+			hsi::utils::add_new_dts_param "$frmbufwr_node" "remote-endpoint" vcap_demosaic_in reference
+			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+			if {$dt_overlay} {
+				set bus_node "overlay2"
+			} else {
+				set bus_node "amba_pl"
+			}
+			set dts_file [current_dt_tree]
+			set vcap_demo [add_or_get_dt_node -n "vcap_demo" -d $dts_file -p $bus_node]
+			hsi::utils::add_new_dts_param $vcap_demo "compatible" "xlnx,video" string
+			hsi::utils::add_new_dts_param $vcap_demo "dmas" "$connected_out_ip 0" reference
+			hsi::utils::add_new_dts_param $vcap_demo "dma-names" "port0" string
+			set vcap_demo_ports_node [add_or_get_dt_node -n "ports" -l v_portts -p $vcap_demo]
+			hsi::utils::add_new_dts_param "$vcap_demo_ports_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$vcap_demo_ports_node" "#size-cells" 0 int
+			set vcap_demo_port_node [add_or_get_dt_node -n "port" -l v_portt -u 0 -p $vcap_demo_ports_node]
+			hsi::utils::add_new_dts_param "$vcap_demo_port_node" "reg" 0 int
+			hsi::utils::add_new_dts_param "$vcap_demo_port_node" "direction" input string
+			set vcap_demo_in_node [add_or_get_dt_node -n "endpoint" -l vcap_demosaic_in -p $vcap_demo_port_node]
+			hsi::utils::add_new_dts_param "$vcap_demo_in_node" "remote-endpoint" demosaic_out reference
 		}
 	} else {
 		dtg_warning "$drv_handle output port pin M_AXIS_VIDEO is not connected ...check your design"

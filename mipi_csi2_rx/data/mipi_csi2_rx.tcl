@@ -68,10 +68,21 @@ proc generate {drv_handle} {
 			if {[string match -nocase $connected_ip_type "system_ila"]} {
 				continue
 			}
+			set broadoutip " "
+			set broad_connectedip_type " "
 			if {[llength $connected_ip_type] != 0} {
-				if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
-					set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
-					set ip_type [get_property IP_NAME $ip]
+				if {[string match -nocase $connected_ip_type "axis_broadcaster"]} {
+					set broadoutip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
+					set broad_connectedip_type [get_property IP_NAME $broadoutip]
+				}
+				if {[string match -nocase $connected_ip_type "axis_subset_converter"] || [string match -nocase $broad_connectedip_type "axis_subset_converter"]} {
+					if {[string match -nocase $broad_connectedip_type "axis_subset_converter"]} {
+						set ip [hsi::utils::get_connected_stream_ip $broadoutip "M_AXIS"]
+						set ip_type [get_property IP_NAME $ip]
+					} else {
+						set ip [hsi::utils::get_connected_stream_ip $connect_ip "M_AXIS"]
+						set ip_type [get_property IP_NAME $ip]
+					}
 					if {[string match -nocase $ip_type "v_demosaic"]|| [string match -nocase $ip_type "v_proc_ss"]} {
 						set ports_node [add_or_get_dt_node -n "ports" -l csiss_ports -p $node]
 						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
