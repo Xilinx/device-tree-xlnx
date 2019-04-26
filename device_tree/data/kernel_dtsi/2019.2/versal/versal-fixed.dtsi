@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal fixed clock default configuration
+ *
+ * (C) Copyright 2019, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+/ {
+	clk125: clk125 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <125000000>;
+	};
+};
+
+&ethernet0 {
+	clocks = <&clk125 &clk125 &clk125 &clk125>;
+};
+
+&ethernet1 {
+	clocks = <&clk125 &clk125 &clk125 &clk125>;
+};

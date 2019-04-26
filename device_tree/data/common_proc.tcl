@@ -3036,6 +3036,7 @@ proc gen_root_node {drv_handle} {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
 			update_system_dts_include [file tail ${dtsi_fname}]
+			update_system_dts_include [file tail "versal-fixed.dtsi"]
 			return 0
 		}
 		"microblaze" {
