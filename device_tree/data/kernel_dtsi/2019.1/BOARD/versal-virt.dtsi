@@ -533,9 +533,9 @@
 		serial0 = &serial0;
 		ethernet0 = &ethernet0;
 		ethernet1 = &ethernet1;
-		qspi = &qspi;
-		spi0 = &spi0;
-		spi1 = &spi1;
+		spi0 = &qspi;
+		spi1 = &spi0;
+		spi2 = &spi1;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 	};
