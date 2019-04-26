@@ -1923,6 +1923,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 		}
 	}
+	if {[string match -nocase $proctype "psv_cortexa72"]} {
+		set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+		if {[string match -nocase $ip "axi_traffic_gen"]} {
+			#hack till DTG generates the interrupts
+			return
+		}
+	}
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]

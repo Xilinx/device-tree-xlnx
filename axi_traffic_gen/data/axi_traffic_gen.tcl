@@ -30,7 +30,7 @@ proc generate {drv_handle} {
 	if { ![string match -nocase $atg_mode "AXI4"] } {
 		return 0
 	}
-
+	set proc_type [get_sw_proc_prop IP_NAME]
 	# set up interrupt-names
 	set intr_list "irq_out err_out"
 	set interrupts ""
@@ -38,7 +38,11 @@ proc generate {drv_handle} {
 	foreach irq ${intr_list} {
 		set intr_info [get_intr_id $drv_handle $irq]
 		if { [string match -nocase $intr_info "-1"] } {
-			error "ERROR: ${drv_handle}: $irq port is not connected"
+			if {[string match -nocase $proc_type "psv_cortexa72"]} {
+				continue
+			} else {
+				error "ERROR: ${drv_handle}: $irq port is not connected"
+			}
 		}
 		if { [string match -nocase $interrupt_names ""] } {
 			set interrupt_names "$irq"
