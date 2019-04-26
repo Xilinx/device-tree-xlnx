@@ -22,3 +22,24 @@
 &dcc {
         status = "okay";
 };
+
+&ethernet0 {
+	status = "okay";
+	clocks = <&clk125 &clk125 &clk125 &clk125>;
+	phy-handle = <&phy1>; /* u9 */
+	phy-mode = "rgmii-id";
+	phy1: phy@1 {
+		reg = <1>;
+		/*
+		 * 1 is default, 0 via J7
+		 * 1-2: 0x00 (VDDO: 3.3V/1.8V)
+		 * 3-4: 0x01 (VDDO: 3.3V/1.8V) - default
+		 * 5-6: 0x00 (VDDO: 2.5V/1.8V)
+		 * 7-8: 0x01 (VDDO: 2.5V/1.8V)
+		 */
+		ti,rx-internal-delay = <8>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <1>;
+		ti,dp83867-rxctrl-strap-quirk; /* FIXME */
+	};
+};

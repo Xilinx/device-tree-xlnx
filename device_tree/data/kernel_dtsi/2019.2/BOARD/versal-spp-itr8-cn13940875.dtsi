@@ -23,6 +23,7 @@
 		i2c1 = &i2c1;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
+		usb0 = &usb0;
 	};
 	
 	memory@0 {
@@ -37,19 +38,19 @@
 	clk25: clk25 {
 		u-boot,dm-pre-reloc;
 		compatible = "fixed-clock";
-		#clock-cells = <0x0>;
+		#clock-cells = <0>;
 		clock-frequency = <25000000>;
 	};
 
 	clk100: clk100 {
 		compatible = "fixed-clock";
-		#clock-cells = <0x0>;
+		#clock-cells = <0>;
 		clock-frequency = <100000000>;
 	};
 
 	clk125: clk125 {
 		compatible = "fixed-clock";
-		#clock-cells = <0x0>;
+		#clock-cells = <0>;
 		clock-frequency = <125000000>;
 	};
 
@@ -107,6 +108,19 @@
 &lpd_dma_chan7 {
 	status = "okay";
 	clocks = <&clk100 &clk100>;
+};
+
+&usb0 {
+	status = "okay";
+	clocks = <&clk125 &clk125>;
+};
+
+&usb0_dwc {
+	status = "okay";
+	dr_mode = "host";
+	snps,usb3_lpm_capable;
+	phy-names = "usb3-phy";
+	maximum-speed = "high-speed";
 };
 
 &ethernet0 {

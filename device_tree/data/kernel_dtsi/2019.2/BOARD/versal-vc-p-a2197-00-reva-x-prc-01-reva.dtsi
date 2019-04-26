@@ -36,3 +36,29 @@
 &serial0 {
         status = "okay";
 };
+
+&ethernet0 {
+	status = "okay";
+	phy-handle = <&phy1>; /* u128 */
+	phy-mode = "rgmii-id";
+	phy1: phy@1 {
+		reg = <1>;
+		ti,rx-internal-delay = <8>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <1>;
+		ti,dp83867-rxctrl-strap-quirk; /* FIXME */
+	};
+};
+
+&ethernet1 {
+	status = "okay";
+	phy-handle = <&phy1>; /* u134 */
+	phy-mode = "rgmii-id";
+	phy2: phy@2 {
+		reg = <2>;
+		ti,rx-internal-delay = <8>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <1>;
+		ti,dp83867-rxctrl-strap-quirk; /* FIXME */
+	};
+};
