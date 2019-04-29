@@ -13,33 +13,101 @@
                      "xlnx,versal-vc-p-a2197", "xlnx,versal";
         model = "Xilinx Versal A2197 Processor board revA";
 
-        memory@0 {
-                device_type = "memory";
-                reg = <0 0 0 0x80000000>;
-        };
+	memory: memory@0 {
+		device_type = "memory";
+		reg = <0 0 0 0x80000000>;
+	};
 };
 
 &dcc {
         status = "okay";
 };
 
-&ethernet0 {
+&serial0 {
 	status = "okay";
-	clocks = <&clk125 &clk125 &clk125 &clk125>;
-	phy-handle = <&phy1>; /* u9 */
+};
+
+&gem0 {
+	status = "okay";
+	phy-handle = <&phy0>; /* u9 */
 	phy-mode = "rgmii-id";
-	phy1: phy@1 {
-		reg = <1>;
-		/*
-		 * 1 is default, 0 via J7
-		 * 1-2: 0x00 (VDDO: 3.3V/1.8V)
-		 * 3-4: 0x01 (VDDO: 3.3V/1.8V) - default
-		 * 5-6: 0x00 (VDDO: 2.5V/1.8V)
-		 * 7-8: 0x01 (VDDO: 2.5V/1.8V)
-		 */
-		ti,rx-internal-delay = <8>;
-		ti,tx-internal-delay = <0xa>;
-		ti,fifo-depth = <1>;
-		ti,dp83867-rxctrl-strap-quirk; /* FIXME */
+	phy0: phy@0 {
+		reg = <0>;
+	};
+};
+
+
+&sdhci0 {
+	status = "okay";
+	xlnx,mio_bank = <1>;
+};
+
+&sdhci1 { /* U1A */
+	status = "okay";
+	non-removable;
+	disable-wp;
+	bus-width = <8>;
+	xlnx,mio_bank = <0>;
+};
+
+&usb0 {
+	status = "okay";
+	xlnx,usb-polarity = <0>;
+	xlnx,usb-reset-mode = <0>;
+};
+
+&dwc3_0 { /* U4 */
+	status = "okay";
+	dr_mode = "peripheral";
+	snps,dis_u2_susphy_quirk;
+	snps,dis_u3_susphy_quirk;
+	maximum-speed = "high-speed";
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <400000>;
+	/* U12 Catalyst EEPROM - AT24 should be equivalent */
+	eeprom_versal: eeprom@51 {
+		compatible = "atmel,24c128";
+		reg = <0x51>;
+	};
+
+	/* FIXME - U13 and U15 */
+};
+
+&spi0 {
+	status = "okay";
+	num-cs = <1>;
+
+	flash@0 { /* U18 */
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "sst,sst25vf016b", "m25p80", "spi-flash";
+		spi-max-frequency = <50000000>;	/* FIXME */
+		reg = <0x0>;
+
+		partition@0 {
+			label = "spi0-flash0";
+			reg = <0x0 0x100000>;
+		};
+	};
+};
+
+&spi1 {
+	status = "okay";
+	num-cs = <3>;	/* FIXME - check SPI1_SS0-2_B */
+
+	flash@1 { /* U19 */
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "m25p80", "spi-flash";
+		spi-max-frequency = <50000000>;	/* FIXME */
+		reg = <0x0>;
+
+		partition@1 {
+			label = "spi1-flash0";
+			reg = <0x0 0x100000>;
+		};
 	};
 };

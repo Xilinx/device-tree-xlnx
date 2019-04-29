@@ -216,12 +216,12 @@
 			/* dma-coherent; */
 		};
 
-		ethernet0: ethernet@ff0c0000 {
+		gem0: ethernet@ff0c0000 {
 			compatible = "cdns,zynqmp-gem";
 			status = "disabled";
 			reg = <0 0xff0c0000 0 0x1000>;
 			interrupts = <0 56 4>, <0 56 4>;
-			clock-names = "pclk", "hclk", "tx_clk", "rx_clk";
+			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x234>; */
 			/* dma-coherent; */
@@ -229,12 +229,12 @@
 			#size-cells = <0>;
 		};
 
-		ethernet1: ethernet@ff0d0000 {
+		gem1: ethernet@ff0d0000 {
 			compatible = "cdns,zynqmp-gem";
 			status = "disabled";
 			reg = <0 0xff0d0000 0 0x1000>;
 			interrupts = <0 58 4>, <0 58 4>;
-			clock-names = "pclk", "hclk", "tx_clk", "rx_clk";
+			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
 			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x235>; */
 			/* dma-coherent; */
@@ -404,7 +404,7 @@
 			#address-cells = <2>;
 			#size-cells = <2>;
 
-			usb0_dwc: dwc3@fe200000 {
+			dwc3_0: dwc3@fe200000 {
 				compatible = "snps,dwc3";
 				status = "disabled";
 				reg = <0 0xfe200000 0 0x10000>;
