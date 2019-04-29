@@ -377,7 +377,7 @@
 			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x244>; */
 			clocks = <&clk125 &clk125>;
-			is-dual = <1>;
+			is-dual = <0>;
 			spi-rx-bus-width = <4>;
 			spi-tx-bus-width = <4>;
 
