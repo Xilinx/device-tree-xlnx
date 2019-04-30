@@ -13,8 +13,8 @@
 	
 	aliases {
 		serial0 = &serial0;
-		ethernet0 = &ethernet0;
-		ethernet1 = &ethernet1;
+		ethernet0 = &gem0;
+		ethernet1 = &gem1;
 		spi0 = &qspi;
 		spi1 = &ospi;
 		spi2 = &spi0;
@@ -115,7 +115,7 @@
 	clocks = <&clk125 &clk125>;
 };
 
-&usb0_dwc {
+&dwc3_0 {
 	status = "okay";
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
@@ -123,7 +123,7 @@
 	maximum-speed = "high-speed";
 };
 
-&ethernet0 {
+&gem0 {
 	status = "okay";
 	clocks = <&clk125 &clk125 &clk125 &clk125>;
 	phy-handle = <&phy0>;
@@ -138,7 +138,7 @@
 	};
 };
 
-&ethernet1 {
+&gem1 {
 	status = "okay";
 	clocks = <&clk125 &clk125 &clk125 &clk125>;
 	phy-handle = <&phy1>;

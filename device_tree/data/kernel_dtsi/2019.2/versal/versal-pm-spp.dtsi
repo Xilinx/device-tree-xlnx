@@ -1,0 +1,215 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal with PM
+ *
+ * (C) Copyright 2017 - 2019, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+/ {
+	alt_ref_clk: alt_ref_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+
+	clk2: clk2 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <2670000>;
+	};
+
+	clk25: clk25 {
+		u-boot,dm-pre-reloc;
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <25000000>;
+	};
+
+	clk100: clk100 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+	};
+
+	clk125: clk125 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <125000000>;
+	};
+
+	pl_alt_ref_clk: pl_alt_ref_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+
+	ref_clk: ref_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+	};
+
+	firmware {
+		versal_firmware: versal-firmware {
+			compatible = "xlnx,versal-firmware-wip";
+			method = "smc";
+			#power-domain-cells = <1>;
+
+			versal_clk: clock-controller {
+				#clock-cells = <1>;
+				compatible = "xlnx,versal-clk";
+				clocks = <&ref_clk>, <&alt_ref_clk>, <&pl_alt_ref_clk>;
+				clock-names = "ref_clk", "alt_ref_clk", "pl_alt_ref_clk";
+			};
+
+			zynqmp_power: zynqmp-power {
+				compatible = "xlnx,zynqmp-power";
+				interrupt-parent = <&gic>;
+				interrupts = <0 30 4>;
+				mboxes = <&ipi_mailbox_pmu1 0>,
+					 <&ipi_mailbox_pmu1 1>;
+				mbox-names = "tx", "rx";
+			};
+		};
+	};
+
+	zynqmp_ipi {
+		compatible = "xlnx,zynqmp-ipi-mailbox";
+		interrupt-parent = <&gic>;
+		interrupts = <0 30 4>;
+		xlnx,ipi-id = <2>;
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		ipi_mailbox_pmu1: mailbox@ff3f0440 {
+			reg = <0 0xff3f0440 0 0x20>,
+			      <0 0xff3f0460 0 0x20>,
+			      <0 0xff3f0280 0 0x20>,
+			      <0 0xff3f02a0 0 0x20>;
+			reg-names = "local_request_region", "local_response_region",
+				    "remote_request_region", "remote_response_region";
+			#mbox-cells = <1>;
+			xlnx,ipi-id = <1>;
+		};
+	};
+};
+&can0 {
+	clocks = <&versal_clk 96>, <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x1822401f>;
+};
+
+&can1 {
+	clocks = <&versal_clk 97>, <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x18224020>;
+};
+
+&gem0 {
+	clocks = <&clk2 &clk125 &clk125 &clk125>;
+	power-domains = <&versal_firmware 0x18224019>;
+};
+
+&gem1 {
+	clocks = <&clk2 &clk125 &clk125 &clk125>;
+	power-domains = <&versal_firmware 0x1822401a>;
+};
+
+&gpio {
+	clocks = <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x18224023>;
+};
+
+&i2c0 {
+	clocks = <&versal_clk 98>;
+	power-domains = <&versal_firmware 0x1822401d>;
+};
+
+&i2c1 {
+	clocks = <&versal_clk 99>;
+	power-domains = <&versal_firmware 0x1822401e>;
+};
+
+&lpd_dma_chan0 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x18224035>;
+};
+
+&lpd_dma_chan1 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x18224036>;
+};
+
+&lpd_dma_chan2 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x18224037>;
+};
+
+&lpd_dma_chan3 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x18224038>;
+};
+
+&lpd_dma_chan4 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x18224039>;
+};
+
+&lpd_dma_chan5 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x1822403a>;
+};
+
+&lpd_dma_chan6 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x1822403b>;
+};
+
+&lpd_dma_chan7 {
+	clocks = <&clk100 &clk100>;
+	power-domains = <&versal_firmware 0x1822403c>;
+};
+
+&qspi {
+	clocks = <&clk25 &clk25>;
+	power-domains = <&versal_firmware 0x1822402b>;
+};
+
+&rtc {
+	power-domains = <&versal_firmware 0x18224034>;
+};
+
+&serial0 {
+	power-domains = <&versal_firmware 0x18224021>;
+};
+
+&serial1 {
+	power-domains = <&versal_firmware 0x18224022>;
+};
+
+&sdhci0 {
+	clocks = <&versal_clk 59>, <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x1822402e>;
+};
+
+&sdhci1 {
+	clocks = <&versal_clk 60>, <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x1822402f>;
+};
+
+&spi0 {
+	clocks = <&clk25 &clk25>;
+	power-domains = <&versal_firmware 0x1822401b>;
+};
+
+&spi1 {
+	clocks = <&clk25 &clk25>;
+	power-domains = <&versal_firmware 0x1822401c>;
+};
+
+&usb0 {
+	clocks = <&clk125 &clk125>;
+	power-domains = <&versal_firmware 0x18224018>;
+};
+
+&watchdog {
+	clocks = <&clk25>;
+};

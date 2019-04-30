@@ -3043,7 +3043,18 @@ proc gen_root_node {drv_handle} {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
 			update_system_dts_include [file tail ${dtsi_fname}]
-			update_system_dts_include [file tail "versal-fixed.dtsi"]
+			set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+			set dtsi_file " "
+			foreach override $overrides {
+				if {[lindex $override 0] == "BOARD"} {
+					set dtsi_file [lindex $override 1]
+				}
+			}
+			if {[string match -nocase $dtsi_file "versal-spp-itr8-cn13940875"]} {
+				update_system_dts_include [file tail "versal-pm-spp.dtsi"]
+			} else {
+				update_system_dts_include [file tail "versal-fixed.dtsi"]
+			}
 			return 0
 		}
 		"microblaze" {
