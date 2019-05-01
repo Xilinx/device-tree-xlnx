@@ -22,21 +22,6 @@
 FIXME no idea what they do VCCO_500_RBIAS, VCCO_501_RBIAS, VCCO_502_RBIAS
 SYSCTLR_GPIO0 - 5 - conneced to versal */
 /* cpu thermal for MAX6643 fan control  */
-	leds {
-		compatible = "gpio-leds";
-		dc38_led {
-			label = "ds38-green"; /* sc AB11 500_RBIAS_LED */
-			gpios = <&gpio 23 GPIO_ACTIVE_HIGH>; /* FIXME */
-		};
-		dc37_led {
-			label = "ds37-green"; /* sc AD10 501_RBIAS_LED */
-			gpios = <&gpio 23 GPIO_ACTIVE_HIGH>; /* FIXME */
-		};
-		dc36_led {
-			label = "ds36-green"; /* sc AD11 502_RBIAS_LED */
-			gpios = <&gpio 23 GPIO_ACTIVE_HIGH>; /* FIXME */
-		};
-	};
 };
 /*
 usb - type C - pl
@@ -81,14 +66,11 @@ marwell m88e1512 - SGMII */
 	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii"; /* DTG generates this properly  1512 */
-	phy-reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>;
+	is-internal-pcspma;
+	/* phy-reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>; */
 	phy0: phy@0 {
 		reg = <0>;
-/*		xlnx,phy-type = <PHY_TYPE_SGMII>; */
 	};
-/*	phy-names = "...";
-	phys = <&lane0 PHY_TYPE_SGMII ... >
-	Note: lane0 sgmii/lane1 usb3 */
 };
 
 &gpio {
@@ -396,7 +378,7 @@ marwell m88e1512 - SGMII */
 			reg = <0>;
 			/* Use for storing information about SC board */
 			eeprom: eeprom@54 { /* u34 - m24128 16kB FIXME addr */
-				compatible = "atmel,24c08";
+				compatible = "st,24c128", "atmel,24c128";
 				reg = <0x54>;
 			};
 			si570_ref_clk: clock-generator@5d { /* u32 */
@@ -467,10 +449,10 @@ marwell m88e1512 - SGMII */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			si570_ddr_dimm1: clock-generator@5d { /* u2 */
+			si570_ddr_dimm1: clock-generator@60 { /* u2 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
-				reg = <0x5d>;
+				reg = <0x60>;
 				temperature-stability = <50>;
 				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
 				clock-frequency = <33333333>;
@@ -482,10 +464,10 @@ marwell m88e1512 - SGMII */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			si570_ddr_dimm2: clock-generator@5d { /* u3 */
+			si570_ddr_dimm2: clock-generator@60 { /* u3 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
-				reg = <0x5d>;
+				reg = <0x60>;
 				temperature-stability = <50>;
 				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
 				clock-frequency = <33333333>;
@@ -497,10 +479,10 @@ marwell m88e1512 - SGMII */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <5>;
-			si570_lpddr4: clock-generator@5d { /* u4 */
+			si570_lpddr4: clock-generator@60 { /* u4 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
-				reg = <0x5d>; /* FIXME addr */
+				reg = <0x60>; /* FIXME addr */
 				temperature-stability = <50>;
 				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
 				clock-frequency = <33333333>;
@@ -550,12 +532,13 @@ marwell m88e1512 - SGMII */
 &dwc3_0 {
         status = "okay";
 	dr_mode = "host";
-	/* dr_mode = "peripheral"; */
+	snps,dis_u2_susphy_quirk;
+	snps,dis_u3_susphy_quirk;
 	maximum-speed = "high-speed";
 };
 
 &usb1 {
-        status = "disabled"; /* not at mem board */
+        status = "okay"; /* not at mem board */
         xlnx,usb-polarity = <0x0>;
         xlnx,usb-reset-mode = <0x0>;
 };
@@ -563,10 +546,23 @@ marwell m88e1512 - SGMII */
 &dwc3_1 {
         /delete-property/ phy-names ;
         /delete-property/ phys ;
+	dr_mode = "host";
         maximum-speed = "high-speed";
         snps,dis_u2_susphy_quirk ;
         snps,dis_u3_susphy_quirk ;
-       status = "disabled";
+       status = "okay";
+};
+
+&xilinx_ams {
+	status = "okay";
+};
+
+&ams_ps {
+	status = "okay";
+};
+
+&ams_pl {
+	status = "okay";
 };
 
 
