@@ -18,10 +18,24 @@
                 stdout-path = "serial0:115200";
         };
 
+	aliases {
+		serial0 = &serial0;
+		ethernet0 = &gem0;
+		ethernet1 = &gem1;
+		i2c0 = &i2c1;
+		mmc0 = &sdhci1;
+		gpio0 = &gpio;
+		spi0 = &qspi;
+	};
+
         memory: memory@0 {
                 device_type = "memory";
                 reg = <0 0 0 0x80000000>;
         };
+};
+
+&gpio {
+	status = "okay";
 };
 
 &dcc {
