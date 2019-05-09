@@ -77,7 +77,17 @@ proc generate {drv_handle} {
 				set bus_node "amba_pl"
 			}
 			set dts_file [current_dt_tree]
+			set drm_pl_disp_drv_count [hsi::utils::get_os_parameter_value "drm_pl_disp_drv_count"]
+			if { [llength $drm_pl_disp_drv_count] == 0 } {
+				set drm_pl_disp_drv_count 0
+			}
+			if {$drm_pl_disp_drv_count != 0} {
+				dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+				return
+			}
 			set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
+			incr drm_pl_disp_drv_count
+			hsi::utils::set_os_parameter_value "drm_pl_disp_drv_count" $drm_pl_disp_drv_count
 			hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
 			if {[string match -nocase $ip_type "v_proc_ss"]} {
 				set connect_ip [hsi::utils::get_connected_stream_ip $ip "S_AXIS"]

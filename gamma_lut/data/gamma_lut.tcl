@@ -80,7 +80,17 @@ proc generate {drv_handle} {
 				set bus_node "amba_pl"
 			}
 			set dts_file [current_dt_tree]
+			set vcap_gama_count [hsi::utils::get_os_parameter_value "vcap_gama_count"]
+			if { [llength $vcap_gama_count] == 0 } {
+				set vcap_gama_count 0
+			}
+			if {$vcap_gama_count != 0} {
+				dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+				return
+			}
 			set vcap_gamma [add_or_get_dt_node -n "vcap_gama" -d $dts_file -p $bus_node]
+			incr vcap_gama_count
+			hsi::utils::set_os_parameter_value "vcap_gama_count" $vcap_gama_count
 			hsi::utils::add_new_dts_param $vcap_gamma "compatible" "xlnx,video" string
 			hsi::utils::add_new_dts_param $vcap_gamma "dmas" "$connected_out_ip 0" reference
 			hsi::utils::add_new_dts_param $vcap_gamma "dma-names" "port0" string

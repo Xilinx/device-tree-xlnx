@@ -140,7 +140,17 @@ proc generate {drv_handle} {
 							set bus_node "amba_pl"
 						}
 						set dts_file [current_dt_tree]
+						set vcap_hdmi_count [hsi::utils::get_os_parameter_value "vcap_hdmi_count"]
+						if { [llength $vcap_hdmi_count] == 0 } {
+							set vcap_hdmi_count 0
+						}
+						if {$vcap_hdmi_count != 0} {
+							dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+							return
+						}
 						set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
+						incr vcap_hdmi_count
+						hsi::utils::set_os_parameter_value "vcap_hdmi_count" $vcap_hdmi_count
 						hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
 						hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
 						hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
@@ -180,7 +190,17 @@ proc generate {drv_handle} {
 						set bus_node "amba_pl"
 					}
 					set dts_file [current_dt_tree]
+					set vcap_hdmi_count [hsi::utils::get_os_parameter_value "vcap_hdmi_count"]
+					if { [llength $vcap_hdmi_count] == 0 } {
+						set vcap_hdmi_count 0
+					}
+					if {$vcap_hdmi_count != 0} {
+						dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+						return
+					}
 					set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
+					incr vcap_hdmi_count
+					hsi::utils::set_os_parameter_value "vcap_hdmi_count" $vcap_hdmi_count
 					hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
 					hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$connected_out_ip 0" reference
 					hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
@@ -210,9 +230,29 @@ proc generate {drv_handle} {
 							}
 							set dts_file [current_dt_tree]
 							if {[string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]} {
+								set vcapsdi_count [hsi::utils::get_os_parameter_value "vcapsdi_count"]
+								if { [llength $vcapsdi_count] == 0 } {
+									set vcapsdi_count 0
+								}
+								if {$vcapsdi_count != 0} {
+									dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+									return
+								}
 								set vcap_csirx [add_or_get_dt_node -n "vcap_sdi" -d $dts_file -p $bus_node]
+								incr vcapsdi_count
+								hsi::utils::set_os_parameter_value "vcapsdi_count" $vcapsdi_count
 							} else {
+								set vcapcsi_count [hsi::utils::get_os_parameter_value "vcapcsi_count"]
+								if { [llength $vcapcsi_count] == 0 } {
+									set vcapcsi_count 0
+								}
+								if {$vcapcsi_count != 0} {
+									dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+									return
+								}
 								set vcap_csirx [add_or_get_dt_node -n "vcap_csi" -d $dts_file -p $bus_node]
+								incr vcapcsi_count
+								hsi::utils::set_os_parameter_value "vcapcsi_count" $vcapcsi_count
 							}
 							hsi::utils::add_new_dts_param $vcap_csirx "compatible" "xlnx,video" string
 							hsi::utils::add_new_dts_param $vcap_csirx "dmas" "$connected_out_ip 0" reference
@@ -307,7 +347,17 @@ proc generate {drv_handle} {
 							set bus_node "amba_pl"
 						}
 						set dts_file [current_dt_tree]
+						set vcap_sdirx_count [hsi::utils::get_os_parameter_value "vcap_sidrx_count"]
+						if { [llength $vcap_sdirx_count] == 0 } {
+							set vcap_sdirx_count 0
+						}
+						if {$vcap_sdirx_count != 0} {
+							dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+							return
+						}
 						set vcap_sdirx [add_or_get_dt_node -n "vcap_sdirx" -d $dts_file -p $bus_node]
+						incr vcap_sdirx_count
+						hsi::utils::set_os_parameter_value "vcap_sdirx_count" $vcap_sdirx_count
 						hsi::utils::add_new_dts_param $vcap_sdirx "compatible" "xlnx,video" string
 						hsi::utils::add_new_dts_param $vcap_sdirx "dmas" "$connected_out_ip 0" reference
 						hsi::utils::add_new_dts_param $vcap_sdirx "dma-names" "port0" string
