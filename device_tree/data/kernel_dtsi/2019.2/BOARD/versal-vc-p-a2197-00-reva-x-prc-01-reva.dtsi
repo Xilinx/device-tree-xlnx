@@ -26,6 +26,7 @@
 		mmc0 = &sdhci1;
 		gpio0 = &gpio;
 		spi0 = &qspi;
+		usb0 = &usb0;
 	};
 
         memory: memory@0 {
@@ -78,12 +79,6 @@
 		ti,fifo-depth = <1>;
 		ti,dp83867-rxctrl-strap-quirk; /* FIXME - Remove if board is fixed */
 	};
-};
-
-&gem1 {
-	status = "okay";
-	phy-handle = <&phy2>; /* u134 */
-	phy-mode = "rgmii-id";
 	phy2: phy@2 {
 		reg = <2>;
 		ti,rx-internal-delay = <0xb>;
@@ -91,6 +86,12 @@
 		ti,fifo-depth = <1>;
 		ti,dp83867-rxctrl-strap-quirk; /* FIXME -  Remove if board is fixed */
 	};
+};
+
+&gem1 {
+	status = "okay";
+	phy-handle = <&phy2>; /* u134 */
+	phy-mode = "rgmii-id";
 };
 
 &i2c1 {
@@ -116,4 +117,6 @@
 	maximum-speed = "high-speed";
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
+	snps,usb3_lpm_capable;
+	phy-names = "usb3-phy";
 };

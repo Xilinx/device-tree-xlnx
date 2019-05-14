@@ -8,6 +8,13 @@
  */
 
 / {
+	clk60: clk60 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <60000000>;
+		u-boot,dm-pre-reloc;
+	};
+
 	clk100: clk100 {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -81,4 +88,8 @@
 
 &serial1 {
 	clocks = <&clk100 &clk100>;
+};
+
+&usb0 {
+	clocks = <&clk60 &clk60>;
 };
