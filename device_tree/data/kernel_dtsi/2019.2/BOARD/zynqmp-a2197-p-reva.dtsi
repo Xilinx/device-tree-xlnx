@@ -48,7 +48,7 @@ usb - type C - pl
 };
 
 &sdhci1 { /* sd1 MIO45-51 cd in place */
-	status = "disable";
+	status = "okay";
 	no-1-8-v;
 	disable-wp;
 	xlnx,mio_bank = <1>;
@@ -125,7 +125,7 @@ marwell m88e1512 - SGMII */
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x74>;
-		/* FIXME reset connected to SYSCTRL_IIC_MUX0_RESET */
+		/* reset-gpios = <&gpio SYSCTLR_IIC_MUX0_RESET_B GPIO_ACTIVE_HIGH>; */
 		i2c@0 { /* PMBUS1 */
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -371,7 +371,7 @@ marwell m88e1512 - SGMII */
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x74>;
-		/* FIXME reset connected to SYSCTRL_IIC_MUX1_RESET */
+		/* reset-gpios = <&gpio SYSCTLR_IIC_MUX1_RESET_B GPIO_ACTIVE_HIGH>; */
 		dc_i2c: i2c@0 { /* DC_I2C */
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -530,11 +530,11 @@ marwell m88e1512 - SGMII */
 };
 
 &dwc3_0 {
-        status = "okay";
-	dr_mode = "host";
+	status = "okay";
+	dr_mode = "peripheral";
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
-	maximum-speed = "high-speed";
+	maximum-speed = "super-speed";
 };
 
 &usb1 {
@@ -544,13 +544,13 @@ marwell m88e1512 - SGMII */
 };
 
 &dwc3_1 {
-        /delete-property/ phy-names ;
-        /delete-property/ phys ;
+	/delete-property/ phy-names ;
+	/delete-property/ phys ;
 	dr_mode = "host";
-        maximum-speed = "high-speed";
-        snps,dis_u2_susphy_quirk ;
-        snps,dis_u3_susphy_quirk ;
-       status = "okay";
+	maximum-speed = "high-speed";
+	snps,dis_u2_susphy_quirk ;
+	snps,dis_u3_susphy_quirk ;
+	status = "okay";
 };
 
 &xilinx_ams {
