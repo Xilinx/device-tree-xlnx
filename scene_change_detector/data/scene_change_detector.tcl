@@ -82,55 +82,65 @@ proc generate {drv_handle} {
 		set hdmi_ports_node [add_or_get_dt_node -n "scd" -l scd_ports -p $node]
 		hsi::utils::add_new_dts_param "$hdmi_ports_node" "#address-cells" 1 int
 		hsi::utils::add_new_dts_param "$hdmi_ports_node" "#size-cells" 0 int
-		set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
-		if {![llength $connected_ip]} {
+		set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+		if {![llength $connect_ip]} {
 			dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected...check your design"
 		}
-		if {[llength $connected_ip]} {
-			set connected_in_ip_type [get_property IP_NAME $connected_ip]
-			if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
-				set hdmi_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
-				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
-				set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $hdmi_port_node]
-				hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmirx_out reference
-			}
-			if {[string match -nocase $connected_in_ip_type "v_proc_ss"]} {
-				set scaler_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
-				hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
-				set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $scaler_port_node]
-				hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" vpss_scaler_out reference
+		foreach connected_ip $connect_ip {
+			if {[llength $connected_ip]} {
+				set connected_in_ip_type [get_property IP_NAME $connected_ip]
+				if {[string match -nocase $connected_in_ip_type "system_ila"]} {
+					continue
+				}
+				if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
+					set hdmi_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
+					hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
+					set hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $hdmi_port_node]
+					hsi::utils::add_new_dts_param "$hdmi_in_node" "remote-endpoint" hdmirx_out reference
+				}
+				if {[string match -nocase $connected_in_ip_type "v_proc_ss"]} {
+					set scaler_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
+					hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
+					set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $scaler_port_node]
+					hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" vpss_scaler_out reference
+				}
 			}
 		}
-		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
-		if {![llength $connected_out_ip]} {
+		set connect_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
+		if {![llength $connect_out_ip]} {
 			dtg_warning "$drv_handle pin M_AXIS_VIDEO is not connected... check your design"
 		}
-		if {[llength $connected_out_ip]} {
-			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
-			if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
-				set hdmi_port1_node [add_or_get_dt_node -n "port" -l scd_port1 -u 1 -p $hdmi_ports_node]
-				hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
-				set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l scd_out -p $hdmi_port1_node]
-				hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_hdmi_in reference
-				set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-				if {$dt_overlay} {
-					set bus_node "overlay2"
-				} else {
-					set bus_node "amba_pl"
+		foreach connected_out_ip $connect_out_ip {
+			if {[llength $connected_out_ip]} {
+				set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
+				if {[string match -nocase $connected_out_ip_type "system_ila"]} {
+					continue
 				}
-				set dts_file [current_dt_tree]
-				set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
-				hsi::utils::add_new_dts_param $scd_hdmirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $scd_hdmirx "dmas" "$connected_out_ip 0" reference
-				hsi::utils::add_new_dts_param $scd_hdmirx "dma-names" "port0" string
-				set scd_hdmi_node [add_or_get_dt_node -n "ports" -l scd_hdmi_ports -p $scd_hdmirx]
-				hsi::utils::add_new_dts_param "$scd_hdmi_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$scd_hdmi_node" "#size-cells" 0 int
-				set scd_hdmiport_node [add_or_get_dt_node -n "port" -l scd_hdmi_port -u 0 -p $scd_hdmi_node]
-				hsi::utils::add_new_dts_param "$scd_hdmiport_node" "reg" 0 int
-				hsi::utils::add_new_dts_param "$scd_hdmiport_node" "direction" input string
-				set scd_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_hdmi_in -p $scd_hdmiport_node]
-				hsi::utils::add_new_dts_param "$scd_hdmi_in_node" "remote-endpoint" scd_out reference
+				if {[string match -nocase $connected_out_ip_type "v_frmbuf_wr"]} {
+					set hdmi_port1_node [add_or_get_dt_node -n "port" -l scd_port1 -u 1 -p $hdmi_ports_node]
+					hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
+					set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l scd_out -p $hdmi_port1_node]
+					hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_hdmi_in reference
+					set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+					if {$dt_overlay} {
+						set bus_node "overlay2"
+					} else {
+						set bus_node "amba_pl"
+					}
+					set dts_file [current_dt_tree]
+					set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
+					hsi::utils::add_new_dts_param $scd_hdmirx "compatible" "xlnx,video" string
+					hsi::utils::add_new_dts_param $scd_hdmirx "dmas" "$connected_out_ip 0" reference
+					hsi::utils::add_new_dts_param $scd_hdmirx "dma-names" "port0" string
+					set scd_hdmi_node [add_or_get_dt_node -n "ports" -l scd_hdmi_ports -p $scd_hdmirx]
+					hsi::utils::add_new_dts_param "$scd_hdmi_node" "#address-cells" 1 int
+					hsi::utils::add_new_dts_param "$scd_hdmi_node" "#size-cells" 0 int
+					set scd_hdmiport_node [add_or_get_dt_node -n "port" -l scd_hdmi_port -u 0 -p $scd_hdmi_node]
+					hsi::utils::add_new_dts_param "$scd_hdmiport_node" "reg" 0 int
+					hsi::utils::add_new_dts_param "$scd_hdmiport_node" "direction" input string
+					set scd_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l scd_hdmi_in -p $scd_hdmiport_node]
+					hsi::utils::add_new_dts_param "$scd_hdmi_in_node" "remote-endpoint" scd_out reference
+				}
 			}
 		}
 	}

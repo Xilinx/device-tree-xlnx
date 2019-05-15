@@ -65,11 +65,15 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-uram" $use_uram int
 		set max_data_width [get_property CONFIG.C_MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,video-width" $max_data_width int
-		set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
+		set connect_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
 		set scaler_ports_node ""
+		foreach connected_in_ip $connect_in_ip {
 		if {[llength $connected_in_ip] != 0} {
 			set connected_in_ip_type [get_property IP_NAME $connected_in_ip]
 			set ip_type ""
+			if {[string match -nocase $connected_in_ip_type "system_ila"]} {
+				continue
+			}
 			if {[string match -nocase $connected_in_ip_type "axis_subset_converter"]} {
 				set in_ip [hsi::utils::get_connected_stream_ip $connected_in_ip "S_AXIS"]
 				set ip_type [get_property IP_NAME $in_ip]
@@ -112,9 +116,14 @@ proc generate {drv_handle} {
 		} else {
 			dtg_warning "$drv_handle:input port pin S_AXIS is not connected"
 		}
-		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS"]
+		}
+		set connect_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS"]
+		foreach connected_out_ip $connect_out_ip {
 		if {[llength $connected_out_ip] != 0} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
+			if {[string match -nocase $connected_out_ip_type "system_ila"]} {
+				continue
+			}
 			if {[string match -nocase $connected_out_ip_type "axis_broadcaster"]} {
 				set broad_connected_out_ip [hsi::utils::get_connected_stream_ip $connected_out_ip "M00_AXIS"]
 				set broad_connected_out_ip_type [get_property IP_NAME $broad_connected_out_ip]
@@ -271,6 +280,7 @@ proc generate {drv_handle} {
 			}
 		} else {
 			dtg_warning "$drv_handle: output port pin M_AXIS is not connected"
+		}
 		}
 	}
 	if {$topology == 3} {

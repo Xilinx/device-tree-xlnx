@@ -46,29 +46,33 @@ proc generate {drv_handle} {
 	set mixer_port_node [add_or_get_dt_node -n "port" -l crtc_mixer_port -u 0 -p $node]
 	hsi::utils::add_new_dts_param "$mixer_port_node" "reg" 0 int
 	set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc -p $mixer_port_node]
-	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
-	if {![llength $connected_ip]} {
+	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	if {![llength $connect_ip]} {
 		dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
 	}
-	if {[llength $connected_ip] != 0} {
-		set connected_ip_type [get_property IP_NAME $connected_ip]
+	foreach connected_ip $connect_ip {
+		if {[llength $connected_ip] != 0} {
+			set connected_ip_type [get_property IP_NAME $connected_ip]
+		}
+		if {[llength $connected_ip_type] != 0} {
+			if {[string match -nocase $connected_ip_type "system_ila"]} {
+				continue
+			}
+			if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
+				set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
+				set ip_type [get_property IP_NAME $ip]
+			}
+			if {[string match -nocase $connected_ip_type "mipi_dsi_tx_subsystem"]} {
+				hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" dsi_encoder reference
+			}
+			if {[string match -nocase $connected_ip_type "v_hdmi_tx_ss"]} {
+				hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" hdmi_encoder reference
+			}
+			if {[string match -nocase $connected_ip_type "v_smpte_uhdsdi_tx_ss"]|| [string match -nocase $ip_type "v_smpte_uhdsdi_tx_ss"]} {
+				hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" sdi_encoder reference
+			}
+		}
 	}
-	if {[llength $connected_ip_type] != 0} {
-		if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
-			set ip [hsi::utils::get_connected_stream_ip $connected_ip "M_AXIS"]
-			set ip_type [get_property IP_NAME $ip]
-		}
-		if {[string match -nocase $connected_ip_type "mipi_dsi_tx_subsystem"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" dsi_encoder reference
-		}
-		if {[string match -nocase $connected_ip_type "v_hdmi_tx_ss"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" hdmi_encoder reference
-		}
-		if {[string match -nocase $connected_ip_type "v_smpte_uhdsdi_tx_ss"]|| [string match -nocase $ip_type "v_smpte_uhdsdi_tx_ss"]} {
-			hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" sdi_encoder reference
-		}
-	}
-
 	for {set layer 0} {$layer < $num_layers} {incr layer} {
 		switch $layer {
 			"0" {

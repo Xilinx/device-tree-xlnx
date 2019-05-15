@@ -43,37 +43,47 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-width" $max_cols int
 	set max_rows [get_property CONFIG.MAX_ROWS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-height" $max_rows int
-	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
-	if {![llength $connected_ip]} {
+	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+	if {![llength $connect_ip]} {
 		dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected..check your design"
 	}
-	if {[llength $connected_ip] != 0} {
-		set connected_ip_type [get_property IP_NAME $connected_ip]
-		set ports_node ""
-		set sink_periph ""
-		if {[llength $connected_ip_type] != 0} {
-			if {[string match -nocase $connected_ip_type "v_vid_in_axi4s"]} {
-				set connected1_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $connected_ip] "VID_ACTIVE_VIDEO"]
-				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $connected_ip "vid_active_video"]]]
-				foreach pin $pins {
-					set sink_periph [::hsi::get_cells -of_objects $pin]
-					set sink_ip [get_property IP_NAME $sink_periph]
-					if {[string match -nocase $sink_ip "v_tc"]} {
-						hsi::utils::add_new_dts_param "$node" "xlnx,vtc" "$sink_periph" reference
-						set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$tpg_count -p $node]
-						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+	foreach connected_ip $connect_ip {
+		if {[llength $connected_ip] != 0} {
+			set connected_ip_type [get_property IP_NAME $connected_ip]
+			set ports_node ""
+			set sink_periph ""
+			if {[llength $connected_ip_type] != 0} {
+				if {[string match -nocase $connected_ip_type "system_ila"]} {
+					continue
+				}
+				if {[string match -nocase $connected_ip_type "v_vid_in_axi4s"]} {
+					set connected1_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $connected_ip] "VID_ACTIVE_VIDEO"]
+					set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $connected_ip "vid_active_video"]]]
+					foreach pin $pins {
+						set sink_periph [::hsi::get_cells -of_objects $pin]
+						set sink_ip [get_property IP_NAME $sink_periph]
+						if {[string match -nocase $sink_ip "v_tc"]} {
+							hsi::utils::add_new_dts_param "$node" "xlnx,vtc" "$sink_periph" reference
+							set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$tpg_count -p $node]
+							hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+							hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+						}
 					}
 				}
 			}
 		}
-		set connected_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
-		if {![llength $connected_out_ip]} {
-			dtg_warning "$drv_handle pin M_AXIS_VIDEO is not connected ...check your design"
-		}
+	}
+	set connect_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
+	if {![llength $connect_out_ip]} {
+		dtg_warning "$drv_handle pin M_AXIS_VIDEO is not connected ...check your design"
+	}
+	foreach connected_out_ip $connect_out_ip {
 		if {[llength $connected_out_ip] != 0} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
 			if {[llength $connected_out_ip_type] != 0} {
+				if {[string match -nocase $connected_out_ip_type "system_ila"]} {
+					continue
+				}
 				if {[string match -nocase $connected_out_ip_type "v_demosaic"]} {
 					set port0_node [add_or_get_dt_node -n "port" -l tpg_port0 -u 0 -p $ports_node]
 					hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int

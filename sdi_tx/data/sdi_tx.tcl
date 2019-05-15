@@ -47,69 +47,74 @@ proc generate {drv_handle} {
 	set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports -p $node]
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
-	if {![llength $connected_ip]} {
+	set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
+	if {![llength $connected_in_ip]} {
 		dtg_warning "$drv_handle pin VIDEO_IN is not connected...check your design"
 	}
-	if {[llength $connected_ip]} {
-		set connected_ip_type [get_property IP_NAME $connected_ip]
-		set ip_type ""
-		set ip ""
-		if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
-			set ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
-			set ip_type [get_property IP_NAME $ip]
-			if {[string match -nocase $ip_type "v_proc_ss"]} {
-				hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $ip reference
+	foreach connected_ip $connected_in_ip {
+		if {[llength $connected_ip]} {
+			set connected_ip_type [get_property IP_NAME $connected_ip]
+			set ip_type ""
+			set ip ""
+			if {[string match -nocase $connected_ip_type "system_ila"]} {
+				continue
 			}
-		}
-		if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
-			hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $connected_ip reference
-		}
-		if {[string match -nocase $connected_ip_type "v_frmbuf_rd"] || [string match -nocase $connected_ip_type "v_proc_ss"]|| [string match -nocase $ip_type "v_proc_ss"]} {
-			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
-			hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
-			set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
-			hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" pl_disp_crtc reference
-			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-			if {$dt_overlay} {
-				set bus_node "overlay2"
-			} else {
-				set bus_node "amba_pl"
-			}
-			set dts_file [current_dt_tree]
-			set drm_pl_disp_drv_count [hsi::utils::get_os_parameter_value "drm_pl_disp_drv_count"]
-			if { [llength $drm_pl_disp_drv_count] == 0 } {
-				set drm_pl_disp_drv_count 0
-			}
-			if {$drm_pl_disp_drv_count != 0} {
-				dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-				return
-			}
-			set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
-			incr drm_pl_disp_drv_count
-			hsi::utils::set_os_parameter_value "drm_pl_disp_drv_count" $drm_pl_disp_drv_count
-			hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
-			if {[string match -nocase $ip_type "v_proc_ss"]} {
-				set connect_ip [hsi::utils::get_connected_stream_ip $ip "S_AXIS"]
-				set connected_ip [hsi::utils::get_connected_stream_ip $connect_ip "S_AXIS"]
+			if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
+				set ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
+				set ip_type [get_property IP_NAME $ip]
+				if {[string match -nocase $ip_type "v_proc_ss"]} {
+					hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $ip reference
+				}
 			}
 			if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
-				set connected_ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
+				hsi::utils::add_new_dts_param "$node" "xlnx,vpss" $connected_ip reference
 			}
-			hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference
-			hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
-			hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the field xlnx,vformat based on user requirement */" "" comment
-			hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "YUYV" string
-			set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
-			hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
-			set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
-			hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" sdi_encoder reference
-		}
-		if {[string match -nocase $connected_ip_type "v_mix"] || [string match -nocase $ip_type "v_mix"]} {
-			set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
-			hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
-			set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
-			hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
+			if {[string match -nocase $connected_ip_type "v_frmbuf_rd"] || [string match -nocase $connected_ip_type "v_proc_ss"]|| [string match -nocase $ip_type "v_proc_ss"]} {
+				set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
+				hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
+				set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
+				hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" pl_disp_crtc reference
+				set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+				if {$dt_overlay} {
+					set bus_node "overlay2"
+				} else {
+					set bus_node "amba_pl"
+				}
+				set dts_file [current_dt_tree]
+				set drm_pl_disp_drv_count [hsi::utils::get_os_parameter_value "drm_pl_disp_drv_count"]
+				if { [llength $drm_pl_disp_drv_count] == 0 } {
+					set drm_pl_disp_drv_count 0
+				}
+				if {$drm_pl_disp_drv_count != 0} {
+					dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+					return
+				}
+				set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_pl_disp" -d $dts_file -p $bus_node]
+				incr drm_pl_disp_drv_count
+				hsi::utils::set_os_parameter_value "drm_pl_disp_drv_count" $drm_pl_disp_drv_count
+				hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
+				if {[string match -nocase $ip_type "v_proc_ss"]} {
+					set connect_ip [hsi::utils::get_connected_stream_ip $ip "S_AXIS"]
+					set connected_ip [hsi::utils::get_connected_stream_ip $connect_ip "S_AXIS"]
+				}
+				if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
+					set connected_ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
+				}
+				hsi::utils::add_new_dts_param $pl_display "dmas" "$connected_ip 0" reference
+				hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
+				hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the field xlnx,vformat based on user requirement */" "" comment
+				hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "YUYV" string
+				set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port -u 0 -p $pl_display]
+				hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
+				set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l pl_disp_crtc -p $pl_display_port_node]
+				hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" sdi_encoder reference
+			}
+			if {[string match -nocase $connected_ip_type "v_mix"] || [string match -nocase $ip_type "v_mix"]} {
+				set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
+				hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
+				set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
+				hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
+			}
 		}
 	}
 	set audio_connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_TX_ANC_DS_OUT"]
