@@ -41,6 +41,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+	if {[llength $connect_ip] == 0} {
+		dtg_warning "$drv_handle input port pin S_AXIS_VIDEO is not connected...check your design"
+	}
 	foreach connected_ip $connect_ip {
 		if {[llength $connected_ip]} {
 			set connected_ip_type [get_property IP_NAME $connected_ip]
@@ -83,6 +86,9 @@ proc generate {drv_handle} {
 		}
 	}
 	set connect_out_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_VIDEO"]
+	if {[llength $connect_out_ip] == 0} {
+		dtg_warning "$drv_handle output port pin M_AXIS_VIDEO is not connected ...check your design"
+	}
 	foreach connected_out_ip $connect_out_ip {
 		if {[llength $connected_out_ip]} {
 			set connected_out_ip_type [get_property IP_NAME $connected_out_ip]
