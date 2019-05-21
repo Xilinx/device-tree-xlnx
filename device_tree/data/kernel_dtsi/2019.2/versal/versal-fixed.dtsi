@@ -90,6 +90,14 @@
 	clocks = <&clk100 &clk100>;
 };
 
+&spi0 {
+	clocks = <&clk200 &clk200>;
+};
+
+&spi1 {
+	clocks = <&clk200 &clk200>;
+};
+
 &usb0 {
 	clocks = <&clk60 &clk60>;
 };
