@@ -8,6 +8,9 @@
 			device_type = "ethernet-phy";
 			ti,6-wire-mode;
 			ti,dp83867-rxctrl-strap-quirk;
+			ti,rx-internal-delay = <0x8>;
+			ti,tx-internal-delay = <0xa>;
+			ti,fifo-depth = <0x1>;
 			reg = <3>;
 		};
 	};
