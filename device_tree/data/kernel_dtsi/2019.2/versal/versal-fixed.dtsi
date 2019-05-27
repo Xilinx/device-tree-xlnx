@@ -34,6 +34,12 @@
 		clock-frequency = <150000000>;
 	};
 
+	clk160: clk160 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <160000000>;
+	};
+
 	clk200: clk200 {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -53,6 +59,50 @@
 	};
 };
 
+&can0 {
+	clocks = <&clk160 &clk100>;
+};
+
+&can1 {
+	clocks = <&clk160 &clk100>;
+};
+
+&lpd_dma_chan0 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan1 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan2 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan3 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan4 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan5 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan6 {
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan7 {
+	clocks = <&clk100 &clk100>;
+};
+
+&gpio {
+	clocks = <&clk100>;
+};
+
 &gem0 {
 	clocks = <&clk100 &clk125 &clk125 &clk125 &clk250>;
 };
@@ -64,6 +114,10 @@
 
 &qspi {
 	clocks = <&clk300 &clk100>;
+};
+
+&ospi {
+	clocks = <&clk200 &clk100>;
 };
 
 &i2c0 {
@@ -100,4 +154,8 @@
 
 &usb0 {
 	clocks = <&clk60 &clk60>;
+};
+
+&watchdog {
+	clocks = <&clk100>;
 };
