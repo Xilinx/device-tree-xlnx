@@ -14,11 +14,11 @@
 
 OPTION psf_version = 3.0;
 
-BEGIN driver mathengine
+BEGIN driver ai_engine
 
   OPTION supported_peripherals = (ai_engine);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
-  OPTION NAME = mathengine;
+  OPTION NAME = ai_engine;
 
 END driver
