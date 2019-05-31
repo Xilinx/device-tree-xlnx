@@ -179,6 +179,15 @@ proc generate {drv_handle} {
 						set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
 						hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
 					}
+					if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_scenechange"]} {
+						set scd_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
+						hsi::utils::add_new_dts_param "${scd_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+						hsi::utils::add_new_dts_param "$scd_port1_node" "reg" 1 int
+						hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-format" 12 int
+						hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-width" $max_data_width int
+						set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $scd_port1_node]
+						hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_in reference
+					}
 				}
 			}
 			if {[string match -nocase $connected_out_ip_type "v_scenechange"]} {

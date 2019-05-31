@@ -92,6 +92,24 @@ proc generate {drv_handle} {
 				if {[string match -nocase $connected_in_ip_type "system_ila"]} {
 					continue
 				}
+				if {[string match -nocase $connected_in_ip_type "axis_register_slice"]} {
+					set slice_connected_ip [hsi::utils::get_connected_stream_ip $connected_ip "S_AXIS"]
+					set slice_connected_ip_type [get_property IP_NAME $slice_connected_ip]
+					if {[string match -nocase $slice_connected_ip_type "axis_data_fifo"]} {
+						set fifo_connected_ip [hsi::utils::get_connected_stream_ip $slice_connected_ip "S_AXIS"]
+						set fifo_connected_ip_type [get_property IP_NAME $fifo_connected_ip]
+						if {[string match -nocase $fifo_connected_ip_type "axis_broadcaster"]} {
+							set broadcaster_connected_ip [hsi::utils::get_connected_stream_ip $fifo_connected_ip "S_AXIS"]
+							set broadcaster_connected_ip_type [get_property IP_NAME $broadcaster_connected_ip]
+							if {[string match -nocase $broadcaster_connected_ip_type "v_proc_ss"]} {
+								set scaler_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
+								hsi::utils::add_new_dts_param "$scaler_port_node" "reg" 0 int
+								set scaler_in_node [add_or_get_dt_node -n "endpoint" -l scd_in -p $scaler_port_node]
+								hsi::utils::add_new_dts_param "$scaler_in_node" "remote-endpoint" vpss_scaler_out reference
+							}
+						}
+					}
+				}
 				if {[string match -nocase $connected_in_ip_type "v_hdmi_rx_ss"]} {
 					set hdmi_port_node [add_or_get_dt_node -n "port" -l scd_port0 -u 0 -p $hdmi_ports_node]
 					hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
@@ -127,8 +145,18 @@ proc generate {drv_handle} {
 					} else {
 						set bus_node "amba_pl"
 					}
+					set scd_count [hsi::utils::get_os_parameter_value "scd_count"]
+					if { [llength $scd_count] == 0 } {
+						set scd_count 0
+					}
+					if {$scd_count != 0} {
+						dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+						return
+					}
 					set dts_file [current_dt_tree]
 					set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
+					incr scd_count
+					hsi::utils::set_os_parameter_value "scd_count" $scd_count
 					hsi::utils::add_new_dts_param $scd_hdmirx "compatible" "xlnx,video" string
 					hsi::utils::add_new_dts_param $scd_hdmirx "dmas" "$connected_out_ip 0" reference
 					hsi::utils::add_new_dts_param $scd_hdmirx "dma-names" "port0" string
