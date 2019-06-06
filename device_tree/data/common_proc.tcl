@@ -3132,8 +3132,8 @@ proc gen_root_node {drv_handle} {
 					set dtsi_file [lindex $override 1]
 				}
 			}
-			if {[string match -nocase $dtsi_file "versal-spp-itr8-cn13940875"]} {
-				update_system_dts_include [file tail "versal-pm-spp.dtsi"]
+			if {[string match -nocase $dtsi_file "versal-spp-itr8-cn13940875"] || [string match -nocase $dtsi_file "versal-vc-p-a2197-00-reva-x-prc-01-reva-pm"]} {
+				update_system_dts_include [file tail "versal-spp-pm.dtsi"]
 			} else {
 				update_system_dts_include [file tail "versal-fixed.dtsi"]
 			}

@@ -11,6 +11,7 @@
 	alt_ref_clk: alt_ref_clk {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
+		clock-frequency = <33333333>;
 	};
 
 	clk2: clk2 {
@@ -41,11 +42,13 @@
 	pl_alt_ref_clk: pl_alt_ref_clk {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
+		clock-frequency = <33333333>;
 	};
 
 	ref_clk: ref_clk {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
+		clock-frequency = <33333333>;
 	};
 
 	firmware {
