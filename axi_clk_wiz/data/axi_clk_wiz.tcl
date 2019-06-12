@@ -27,8 +27,18 @@ proc generate {drv_handle} {
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	gen_speedgrade $drv_handle
-	set output_names "clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7"
-	set_property CONFIG.clock-output-names $output_names $drv_handle
+	set output_names ""
+	for {set i 1} {$i < 8} {incr i} {
+		if {[get_property CONFIG.C_CLKOUT${i}_USED $ip] != 0} {
+			set freq [get_property CONFIG.C_CLKOUT${i}_OUT_FREQ $ip]
+			set pin_name [get_property CONFIG.C_CLK_OUT${i}_PORT $ip]
+			lappend output_names $pin_name
+		}
+	}
+	if {![string_is_empty $output_names]} {
+		set_property CONFIG.clock-output-names $output_names $drv_handle
+	}
+
 
 	gen_dev_ccf_binding $drv_handle "clk_in1 s_axi_aclk" "clocks clock-names"
 	set sw_proc [get_sw_processor]
