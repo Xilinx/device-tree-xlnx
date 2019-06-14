@@ -105,6 +105,10 @@ proc generate {drv_handle} {
 	}
 	set ip_prop CONFIG.c_include_mm2s_dre
 	add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
+	set addr_width [get_property CONFIG.c_addr_width $dma_ip]
+	set inhex [format %x $addr_width]
+	append addrwidth "/bits/ 8 <0x$inhex>"
+	hsi::utils::add_new_dts_param "$node" "xlnx,addrwidth" $addrwidth noformating
     }
     incr dma_count
     hsi::utils::set_os_parameter_value "dma_count" $dma_count
