@@ -71,6 +71,11 @@
 		};
 	};
 };
+
+&cpu0 {
+	clocks = <&versal_clk 77>;
+};
+
 &can0 {
 	clocks = <&versal_clk 96>, <&versal_clk 82>;
 	power-domains = <&versal_firmware 0x1822401f>;
