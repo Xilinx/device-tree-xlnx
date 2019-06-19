@@ -253,7 +253,7 @@ proc get_connected_ip {drv_handle dma_pin} {
     # Check whether dma is connected to 10G/25G MAC
     # currently we are handling only data fifo
     set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $drv_handle] $dma_pin]
-    set valid_eth_list "xxv_ethernet axi_ethernet axi_10g_ethernet"
+    set valid_eth_list "xxv_ethernet axi_ethernet axi_10g_ethernet usxgmii"
     if {[string_is_empty ${intf}]} {
         return 0
     }
