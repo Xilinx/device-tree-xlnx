@@ -27,12 +27,17 @@
 		gpio0 = &gpio;
 		spi0 = &qspi;
 		usb0 = &usb0;
+		rtc0 = &rtc;
 	};
 
         memory: memory@0 {
                 device_type = "memory";
                 reg = <0 0 0 0x80000000>;
         };
+};
+
+&rtc {
+	status = "okay";
 };
 
 &gpio {
