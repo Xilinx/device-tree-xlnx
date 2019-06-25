@@ -9,18 +9,21 @@
 
 / {
 	alt_ref_clk: alt_ref_clk {
+		u-boot,dm-pre-reloc;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <33333333>;
 	};
 
 	pl_alt_ref_clk: pl_alt_ref_clk {
+		u-boot,dm-pre-reloc;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <33333333>;
 	};
 
 	ref_clk: ref_clk {
+		u-boot,dm-pre-reloc;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <33333333>;
@@ -29,10 +32,12 @@
 	firmware {
 		versal_firmware: versal-firmware {
 			compatible = "xlnx,versal-firmware-wip";
+			u-boot,dm-pre-reloc;
 			method = "smc";
 			#power-domain-cells = <1>;
 
 			versal_clk: clock-controller {
+				u-boot,dm-pre-reloc;
 				#clock-cells = <1>;
 				compatible = "xlnx,versal-clk";
 				clocks = <&ref_clk>, <&alt_ref_clk>, <&pl_alt_ref_clk>;

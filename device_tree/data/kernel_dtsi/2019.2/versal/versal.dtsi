@@ -382,7 +382,7 @@
 			cdns,fifo-width = <4>;
 			cdns,is-dma = <1>;
 			cdns,is-stig-pgm = <1>;
-			cdns,trigger-address = <0x00000000>;
+			cdns,trigger-address = <0xC0000000>;
 			#stream-id-cells = <1>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -441,6 +441,8 @@
 				/* iommus = <&smmu 0x230>; */
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
+				snps,quirk-frame-length-adjustment = <0x20>;
+				snps,refclk_fladj;
 				/* dma-coherent; */
 			};
 		};
