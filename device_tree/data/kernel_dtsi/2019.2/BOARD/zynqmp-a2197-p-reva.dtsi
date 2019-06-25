@@ -7,6 +7,7 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 #include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/phy/phy.h"
 
 / {
 	model = "Versal System Controller on a2197 Processor Char board RevA"; /* Tenzing */
@@ -339,7 +340,8 @@ marwell m88e1512 - SGMII */
 			vcc_bat: ina226@4e { /* u12 */
 				compatible = "ti,ina226";
 				reg = <0x4e>;
-				shunt-resistor = <10000000>; /* 10 ohm */
+				/* 10 ohm real value - setup 1ohm because of driver limitation */
+				shunt-resistor = <1000000>;
 			};
 		};
 		i2c@4 { /* LP_I2C_SM */
@@ -386,9 +388,9 @@ marwell m88e1512 - SGMII */
 				compatible = "silabs,si570";
 				reg = <0x5d>; /* FIXME addr */
 				temperature-stability = <50>;
-				factory-fout = <156250000>; /* FIXME every chip can be different */
+				factory-fout = <33333333>;
 				clock-frequency = <33333333>;
-				clock-output-names = "REF_CLK"; /* FIXME */
+				clock-output-names = "ref_clk";
 			};
 			/* Connection via Samtec J212D */
 			/* Use for storing information about X-PRC card */
@@ -454,9 +456,9 @@ marwell m88e1512 - SGMII */
 				compatible = "silabs,si570";
 				reg = <0x60>;
 				temperature-stability = <50>;
-				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
-				clock-frequency = <33333333>;
-				clock-output-names = "REF_CLK"; /* FIXME */
+				factory-fout = <200000000>;
+				clock-frequency = <200000000>;
+				clock-output-names = "si570_ddrdimm1_clk";
 			};
 			/* 0x50 SPD? */
 		};
@@ -469,9 +471,9 @@ marwell m88e1512 - SGMII */
 				compatible = "silabs,si570";
 				reg = <0x60>;
 				temperature-stability = <50>;
-				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
-				clock-frequency = <33333333>;
-				clock-output-names = "REF_CLK"; /* FIXME */
+				factory-fout = <200000000>;
+				clock-frequency = <200000000>;
+				clock-output-names = "si570_ddrdimm2_clk";
 			};
 			/* 0x50 SPD? */
 		};
@@ -484,9 +486,9 @@ marwell m88e1512 - SGMII */
 				compatible = "silabs,si570";
 				reg = <0x60>; /* FIXME addr */
 				temperature-stability = <50>;
-				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
-				clock-frequency = <33333333>;
-				clock-output-names = "LPDDR4_SI570_CLK";
+				factory-fout = <200000000>;
+				clock-frequency = <200000000>;
+				clock-output-names = "si570_lpddr4_clk";
 			};
 		};
 		i2c@6 { /* HSDP_SI570 */
@@ -498,9 +500,9 @@ marwell m88e1512 - SGMII */
 				compatible = "silabs,si570";
 				reg = <0x5d>; /* FIXME addr */
 				temperature-stability = <50>;
-				factory-fout = <156250000>; /* FIXME every chip can be different - 10MHZ_TO_810MHZ */
-				clock-frequency = <33333333>;
-				clock-output-names = "HSDP_SI570";
+				factory-fout = <156250000>;
+				clock-frequency = <156250000>;
+				clock-output-names = "si570_hsdp_clk";
 			};
 		};
 		i2c@7 { /* PCIE_CLK */
@@ -535,6 +537,8 @@ marwell m88e1512 - SGMII */
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
 	maximum-speed = "super-speed";
+	phy-names = "usb3-phy";
+	phys = <&lane1 PHY_TYPE_USB3 0 1 26000000>;
 };
 
 &usb1 {
