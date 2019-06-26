@@ -27,6 +27,7 @@
 		gpio0 = &gpio;
 		spi0 = &ospi;
 		usb0 = &usb0;
+		rtc0 = &rtc;
 	};
 
         memory: memory@0 {
@@ -35,11 +36,19 @@
         };
 };
 
+&rtc {
+        status = "okay";
+};
+
 &gpio {
 	status = "okay";
 };
 
 &dcc {
+        status = "okay";
+};
+
+&watchdog {
         status = "okay";
 };
 
