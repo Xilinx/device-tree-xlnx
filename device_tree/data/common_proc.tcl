@@ -1925,13 +1925,6 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			set intr_port_name [get_pins -of_objects $slave -filter {TYPE==INTERRUPT}]
 		}
 	}
-	if {[string match -nocase $proctype "psv_cortexa72"]} {
-		set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
-		if {[string match -nocase $ip "axi_traffic_gen"]} {
-			#hack till DTG generates the interrupts
-			return
-		}
-	}
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
@@ -3870,6 +3863,38 @@ proc get_psu_interrupt_id { ip_name port_name } {
                     return $ret
                 }
              }
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq0"] == 0} {
+		set ret 84
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq1"] == 0} {
+		set ret 85
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq2"] == 0} {
+		set ret 86
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq3"] == 0} {
+		set ret 87
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq4"] == 0} {
+		set ret 88
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq5"] == 0} {
+		set ret 89
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq6"] == 0} {
+		set ret 90
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq7"] == 0} {
+		set ret 91
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq8"] == 0} {
+		set ret 92
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq9"] == 0} {
+		set ret 93
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq10"] == 0} {
+		set ret 94
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq11"] == 0} {
+		set ret 95
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq12"] == 0} {
+		set ret 96
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq13"] == 0} {
+		set ret 97
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq14"] == 0} {
+		set ret 98
+	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq15"] == 0} {
+		set ret 99
         } else {
 
             set sink_periph [::hsi::get_cells -of_objects $sink_pin]
