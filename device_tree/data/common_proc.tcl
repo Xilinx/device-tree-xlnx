@@ -1420,9 +1420,6 @@ proc gen_clk_property {drv_handle} {
 	if {[string match -nocase $proctype "microblaze"]} {
 		return
 	}
-	if {[string match -nocase $proctype "psv_cortexa72"]} {
-		return
-	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 	if {[string match -nocase $ip "vcu"]} {
@@ -1468,26 +1465,28 @@ proc gen_clk_property {drv_handle} {
 				if {[llength $clk_pl]} {
 					set num [regexp -all -inline -- {[0-9]+} $clk_pl]
 				}
-				switch $num {
-					"0" {
-						set def_dts [get_property CONFIG.pcw_dts [get_os]]
-						set fclk_node [add_or_get_dt_node -n "&fclk0" -d $def_dts]
-						hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-					}
-					"1" {
-						set def_dts [get_property CONFIG.pcw_dts [get_os]]
-						set fclk_node [add_or_get_dt_node -n "&fclk1" -d $def_dts]
-						hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-					}
-					"2" {
-						set def_dts [get_property CONFIG.pcw_dts [get_os]]
-						set fclk_node [add_or_get_dt_node -n "&fclk2" -d $def_dts]
-						hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-					}
-					"3" {
-						set def_dts [get_property CONFIG.pcw_dts [get_os]]
-						set fclk_node [add_or_get_dt_node -n "&fclk3" -d $def_dts]
-						hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
+				if {[string match -nocase $proctype "psu_cortexa53"]} {
+					switch $num {
+						"0" {
+							set def_dts [get_property CONFIG.pcw_dts [get_os]]
+							set fclk_node [add_or_get_dt_node -n "&fclk0" -d $def_dts]
+							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
+						}
+						"1" {
+							set def_dts [get_property CONFIG.pcw_dts [get_os]]
+							set fclk_node [add_or_get_dt_node -n "&fclk1" -d $def_dts]
+							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
+						}
+						"2" {
+							set def_dts [get_property CONFIG.pcw_dts [get_os]]
+							set fclk_node [add_or_get_dt_node -n "&fclk2" -d $def_dts]
+							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
+						}
+						"3" {
+							set def_dts [get_property CONFIG.pcw_dts [get_os]]
+							set fclk_node [add_or_get_dt_node -n "&fclk3" -d $def_dts]
+							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
+						}
 					}
 				}
 				set dts_file "pl.dtsi"
@@ -1554,7 +1553,7 @@ proc gen_clk_property {drv_handle} {
 				}
 			}
 		}
-		if {[string match -nocase $proctype "psu_cortexa53"]} {
+		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 			set clklist "pl_clk*"
 		} elseif {[string match -nocase $proctype "ps7_cortexa9"]} {
 			set clklist "FCLK_CLK*"
@@ -1563,6 +1562,33 @@ proc gen_clk_property {drv_handle} {
 			if {[regexp $clklist $pin match]} {
 				set pl_clk $pin
 				set is_pl_clk 1
+			}
+		}
+		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			switch $pl_clk {
+				"pl_clk0" {
+						set pl_clk0 "versal_clk 65"
+						set clocks [lappend clocks $pl_clk0]
+						set updat  [lappend updat $pl_clk0]
+				}
+				"pl_clk1" {
+						set pl_clk1 "versal_clk 66"
+						set clocks [lappend clocks $pl_clk1]
+						set updat  [lappend updat $pl_clk1]
+				}
+				"pl_clk2" {
+						set pl_clk2 "versal_clk 67"
+						set clocks [lappend clocks $pl_clk2]
+						set updat [lappend updat $pl_clk2]
+				}
+				"pl_clk3" {
+						set pl_clk3 "versal_clk 68"
+						set clocks [lappend clocks $pl_clk3]
+						set updat [lappend updat $pl_clk3]
+				}
+				default {
+						dtg_warning "not supported pl_clk:$pl_clk"
+				}
 			}
 		}
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
