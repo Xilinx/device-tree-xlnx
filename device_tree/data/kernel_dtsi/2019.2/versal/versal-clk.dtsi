@@ -163,6 +163,7 @@
 
 &ospi {
 	clocks = <&versal_clk 58>, <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x1822402a>;
 };
 
 &rtc {
@@ -206,4 +207,5 @@
 
 &watchdog {
 	clocks = <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x18224029>;
 };
