@@ -154,7 +154,7 @@ proc generate {drv_handle} {
 						continue
 					}
 					set dts_file [current_dt_tree]
-					set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
+					set scd_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 					incr scd_count
 					hsi::utils::set_os_parameter_value "scd_count" $scd_count
 					hsi::utils::add_new_dts_param $scd_hdmirx "compatible" "xlnx,video" string
