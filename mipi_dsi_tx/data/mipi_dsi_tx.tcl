@@ -69,7 +69,7 @@ proc generate {drv_handle} {
 				}
 				if {$drm_pl_disp_drv_count == 1} {
 					dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-					return
+					continue
 				}
 				set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv" -l "v_drm_pl_disp_drv" -d $dts_file -p $bus_node]
 				incr drm_pl_disp_drv_count

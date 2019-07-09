@@ -142,7 +142,7 @@ proc generate {drv_handle} {
 						}
 						if {$vcap_mipi_count != 0} {
 							dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-							return
+							continue
 						}
 						set vcap_mipirx [add_or_get_dt_node -n "vcap_mipi" -d $dts_file -p $bus_node]
 						incr vcap_mipi_count

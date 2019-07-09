@@ -81,7 +81,7 @@ proc generate {drv_handle} {
 				}
 				if {$vcap_hdmirx_count != 0} {
 					dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-					return
+					continue
 				}
 				set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 				incr vcap_hdmirx_count
@@ -123,7 +123,7 @@ proc generate {drv_handle} {
 						}
 						if {$vcap_hdmi_count != 0} {
 							dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-							return
+							continue
 						}
 						set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
 						incr vcap_hdmi_count

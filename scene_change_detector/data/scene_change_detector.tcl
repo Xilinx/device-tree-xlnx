@@ -151,7 +151,7 @@ proc generate {drv_handle} {
 					}
 					if {$scd_count != 0} {
 						dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-						return
+						continue
 					}
 					set dts_file [current_dt_tree]
 					set scd_hdmirx [add_or_get_dt_node -n "scd_hdmi" -d $dts_file -p $bus_node]
