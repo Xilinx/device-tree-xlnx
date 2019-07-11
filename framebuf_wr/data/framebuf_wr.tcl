@@ -130,6 +130,14 @@ proc generate {drv_handle} {
 					if {[llength $periph]} {
 						set ip [get_property IP_NAME $periph]
 						set proc_type [get_sw_proc_prop IP_NAME]
+						if {[string match -nocase $proc_type "psv_cortexa72"] } {
+							if {[string match -nocase $ip "versal_cips"]} {
+								# As versal has only bank0 for MIOs
+								set gpio [expr $gpio + 26]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+								break
+							}
+						}
 						if {[string match -nocase $proc_type "psu_cortexa53"] } {
 							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 								set gpio [expr $gpio + 78]
