@@ -1558,12 +1558,12 @@ proc gen_clk_property {drv_handle} {
 			}
 		}
 		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
-			set clklist "pl_clk*"
+			set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
 		} elseif {[string match -nocase $proctype "ps7_cortexa9"]} {
-			set clklist "FCLK_CLK*"
+			set clklist "FCLK_CLK0 FCLK_CLK1 FCLK_CLK2 FCLK_CLK3"
 		}
 		foreach pin $pins {
-			if {[regexp $clklist $pin match]} {
+			if {[lsearch $clklist $pin] >= 0} {
 				set pl_clk $pin
 				set is_pl_clk 1
 			}
@@ -1649,7 +1649,6 @@ proc gen_clk_property {drv_handle} {
 				}
 			}
 		}
-
 		if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
 			set dts_file "pl.dtsi"
 			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
