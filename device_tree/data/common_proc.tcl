@@ -1422,6 +1422,10 @@ proc gen_clk_property {drv_handle} {
 	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+	if {[lsearch $ignore_list $ip] >= 0 } {
+		return 0
+        }
 	if {[string match -nocase $ip "vcu"]} {
 		set clk_pins "pll_ref_clk s_axi_lite_aclk"
 	}
@@ -2542,7 +2546,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	}
 	# TODO: more ignore ip list?
 	set ip_type [get_property IP_NAME $ip]
-	set ignore_list "lmb_bram_if_cntlr PERIPHERAL"
+	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
 	if {[string match -nocase $ip_type "psu_pcie"]} {
 		set pcie_config [get_property CONFIG.C_PCIE_MODE [get_cells -hier $drv_handle]]
 		if {[string match -nocase $pcie_config "Endpoint Device"]} {
