@@ -74,7 +74,7 @@ proc generate {drv_handle} {
 		if {[string match -nocase "${nvme_inst_name}_nvme_mapper_0" $periph] } {
       set addr [get_property CONFIG.MAPER_S_AXI_LITE_OFFSET $nvme_ip]
       set addr [format %0x $addr]
-			gen_mapper_node $periph $addr $node $drv_handle $proc_type $periph $intr_parent $mapper_intr
+			gen_mapper_node $periph $addr $node $drv_handle $proc_type $nvme_ip $intr_parent $mapper_intr
     }
 	}
 }
@@ -237,8 +237,8 @@ proc gen_mapper_node {periph addr parent_node drv_handle proc_type nvme_ip intr_
 	}
 	hsi::utils::add_new_dts_param "${mapper_node}" "reg" $ha_reg int
 	hsi::utils::add_new_dts_param "${mapper_node}" "compatible" "xlnx,nvme-mapper-1.0" string
-    gen_property "CONFIG.MAX_PRP_PER_CMD" "xlnx,max-prp-per-cmd" $nvme_ip $mapper_node
-    gen_property "CONFIG.NUM_UID_SUPPORT" "xlnx,num-uid-support" $nvme_ip $mapper_node
+    gen_property "CONFIG.MAX_PRP_PER_CMD" "xlnx,max-prp-per-cmd" $periph $mapper_node
+    gen_property "CONFIG.NUM_UID_SUPPORT" "xlnx,num-uid-support" $periph $mapper_node
 }
 
 proc gen_property {property pro_dt_name nvme_ip node} {
