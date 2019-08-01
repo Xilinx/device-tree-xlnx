@@ -1965,7 +1965,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 		}
 		set connected_intc_name [get_property IP_NAME $connected_intc]
 		set valid_gpio_list "ps7_gpio axi_gpio"
-		set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
+		set valid_cascade_proc "microblaze ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 		# check whether intc is gpio or other
 		if {[lsearch  -nocase $valid_gpio_list $connected_intc_name] >= 0} {
 			generate_gpio_intr_info $connected_intc $drv_handle $pin
@@ -2009,7 +2009,11 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "ps7_cortexa9"]} {
 					set intr_id [::hsi::utils::get_interrupt_id $drv_handle "irq"]
 				} else {
-					set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
+					if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "microblaze"]						} {
+					set intr_id [get_psu_interrupt_id $drv_handle "irq"]
+					} else {
+					set intr_id [get_psu_interrupt_id $drv_handle $pin]
+					}
 				}
 			}
 			if {[string match -nocase $intr_id "-1"] && ![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
@@ -3484,7 +3488,7 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_pin] == 0 } {
 		return $intr_cntrl
 	}
-	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
+	set valid_cascade_proc "microblaze ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if { [string match -nocase [common::get_property IP_NAME $periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0 } {
 		set sinks [::hsi::utils::get_sink_pins $intr_pin]
@@ -3497,6 +3501,8 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 				# this the case where interrupt port is connected to XLConcat IP.
 				lappend intr_cntrl [get_intr_cntrl_name $sink_periph "dout"]
 			} elseif { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
+				lappend intr_cntrl $sink_periph
+			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "microblaze"] } {
 				lappend intr_cntrl $sink_periph
 			}
 			if {[llength $intr_cntrl] > 1} {
@@ -3529,7 +3535,7 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_sink_pins] == 0 || [string match $intr_sink_pins "{}"]} {
 		return $intr_cntrl
 	}
-	set valid_cascade_proc "ps7_cortexa9 psu_cortexa53 psv_cortexa72"
+	set valid_cascade_proc "microblaze ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	foreach intr_sink ${intr_sink_pins} {
 		if {[llength $intr_sink] == 0} {
 			continue
@@ -3699,7 +3705,6 @@ proc get_psu_interrupt_id { ip_name port_name } {
     if { [llength $port_name] == 0 } {
         return $ret
     }
-
     global pl_ps_irq1
     global pl_ps_irq0
     if { [llength $ip_name] != 0 } {
@@ -3806,6 +3811,30 @@ proc get_psu_interrupt_id { ip_name port_name } {
     if { [llength $sink_pins] == 0 } {
         return
     }
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {[string match -nocase $proctype "microblaze"]} {
+         if {[string match -nocase "[get_property IP_NAME $periph]" "axi_intc"]} {
+             set ip [get_property IP_NAME $periph]
+             set cascade_master [get_property CONFIG.C_CASCADE_MASTER [get_cells -hier $periph]]
+             set en_cascade_mode [get_property CONFIG.C_EN_CASCADE_MODE [get_cells -hier $periph]]
+             set sink_pn [::hsi::utils::get_sink_pins $intr_pin]
+             set peri [::hsi::get_cells -of_objects $sink_pn]
+             set periph_ip [get_property IP_NAME [get_cells -hier $peri]]
+             if {[string match -nocase $periph_ip "xlconcat"]} {
+                 set dout "dout"
+                 set intr_pin [::hsi::get_pins -of_objects $peri -filter "NAME==$dout"]
+                 set pins [::hsi::utils::get_sink_pins "$intr_pin"]
+                 set perih [::hsi::get_cells -of_objects $pins]
+                 if {[string match -nocase "[get_property IP_NAME $perih]" "axi_intc"]} {
+                     set cascade_master [get_property CONFIG.C_CASCADE_MASTER [get_cells -hier $perih]]
+                     set en_cascade_mode [get_property CONFIG.C_EN_CASCADE_MODE [get_cells -hier $perih]]
+                }
+           }
+           set number [regexp -all -inline -- {[0-9]+} $sink_pn]
+           return $number
+       }
+    }
+
     set concat_block 0
     foreach sink_pin $sink_pins {
         set sink_periph [::hsi::get_cells -of_objects $sink_pin]
