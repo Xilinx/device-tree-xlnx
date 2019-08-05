@@ -13,10 +13,10 @@
                      "xlnx,versal-vc-p-a2197", "xlnx,versal";
         model = "Xilinx Versal A2197 Processor board revA";
 
-        chosen {
-                bootargs = "rdinit=/bin/sh console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused maxcpus=1";
-                stdout-path = "serial0:115200";
-        };
+	chosen {
+		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
+		stdout-path = "serial0:115200";
+	};
 
 	aliases {
 		serial0 = &serial0;
