@@ -231,14 +231,20 @@ proc gen_mapper_node {periph addr parent_node drv_handle proc_type nvme_ip intr_
 	set full_size [get_property CONFIG.MAPPER_SW_S_AXI_SIZE $nvme_ip]
 	if {[string match -nocase $proc_type "ps7_cortexa9"] ||
       [string match -nocase $proc_type "microblaze"]} {
-		set ha_reg "0x$addr $lite_size $full_off $full_size"
+		set mapper_reg "0x$addr $lite_size $full_off $full_size"
 	} else {
-		set ha_reg "0x0 0x$addr 0x0 $lite_size 0x0 $full_off 0x0 $full_size"
+		set mapper_reg "0x0 0x$addr 0x0 $lite_size 0x0 $full_off 0x0 $full_size"
 	}
-	hsi::utils::add_new_dts_param "${mapper_node}" "reg" $ha_reg int
+	hsi::utils::add_new_dts_param "${mapper_node}" "reg" $mapper_reg int
 	hsi::utils::add_new_dts_param "${mapper_node}" "compatible" "xlnx,nvme-mapper-1.0" string
+
+	set en_p2p [get_property CONFIG.EN_P2P_BUFFERS $nvme_ip]
+	if {[string match -nocase $en_p2p "true"]} {
+	    hsi::utils::add_new_dts_param "${mapper_node}" "xlnx,en-p2p-buffer" "" boolean
+    }
     gen_property "CONFIG.MAX_PRP_PER_CMD" "xlnx,max-prp-per-cmd" $periph $mapper_node
     gen_property "CONFIG.NUM_UID_SUPPORT" "xlnx,num-uid-support" $periph $mapper_node
+    gen_property "CONFIG.P2P_PF_NUM" "xlnx,p2p-pf-num" $periph $mapper_node
 }
 
 proc gen_property {property pro_dt_name nvme_ip node} {
