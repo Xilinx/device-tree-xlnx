@@ -58,7 +58,7 @@
 		};
 
 		idle-states {
-			entry-method = "arm,psci";
+			entry-method = "psci";
 
 			CPU_SLEEP_0: cpu-sleep-0 {
 				compatible = "arm,idle-state";
@@ -879,6 +879,8 @@
 			#stream-id-cells = <1>;
 			iommus = <&smmu 0x870>;
 			power-domains = <&zynqmp_firmware 39>;
+			nvmem-cells = <&soc_revision>;
+			nvmem-cell-names = "soc_revision";
 		};
 
 		sdhci1: mmc@ff170000 {
@@ -893,6 +895,8 @@
 			#stream-id-cells = <1>;
 			iommus = <&smmu 0x871>;
 			power-domains = <&zynqmp_firmware 40>;
+			nvmem-cells = <&soc_revision>;
+			nvmem-cell-names = "soc_revision";
 		};
 
 		spi0: spi@ff040000 {
