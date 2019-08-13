@@ -335,7 +335,7 @@
 &qspi {
 	status = "okay";
 	flash@0 {
-		compatible = "m25p80", "spi-flash"; /* n25q512a 128MiB */
+		compatible = "m25p80", "jedec,spi-nor"; /* n25q512a 128MiB */
 		#address-cells = <1>;
 		#size-cells = <1>;
 		reg = <0x0>;
@@ -379,7 +379,6 @@
 &sdhci1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
-	no-1-8-v;
 	disable-wp;
 };
 

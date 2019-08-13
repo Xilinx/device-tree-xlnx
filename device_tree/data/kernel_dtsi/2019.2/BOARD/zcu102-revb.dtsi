@@ -709,7 +709,7 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 &qspi {
 	is-dual = <1>;
 	flash@0 {
-		compatible = "m25p80"; /* 32MB */
+		compatible = "m25p80", "jedec,spi-nor"; /* 32MB */
 		#address-cells = <1>;
 		#size-cells = <1>;
 		reg = <0x0>;
@@ -754,7 +754,6 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 &sdhci1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
-	no-1-8-v;
 };
 
 &uart0 {
