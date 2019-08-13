@@ -7,6 +7,8 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "include/dt-bindings/gpio/gpio.h"
+
 / {
         compatible = "xlnx,versal-vc-p-a2197-00-revA",
                      "xlnx,versal-vc-p-a2197-00",
@@ -24,7 +26,6 @@
 		ethernet1 = &gem1;
 		i2c0 = &i2c1;
 		mmc0 = &sdhci1;
-		gpio0 = &gpio;
 		spi0 = &ospi;
 		usb0 = &usb0;
 		rtc0 = &rtc;
@@ -40,7 +41,11 @@
         status = "okay";
 };
 
-&gpio {
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
 	status = "okay";
 };
 
@@ -64,6 +69,7 @@
 	#stream-id-cells = <1>;
 	#address-cells = <1>;
 	#size-cells = <0>;
+	reset-gpios = <&gpio1 0xc GPIO_ACTIVE_HIGH>;
 
 	flash@0 {
 		compatible = "mt35xu02g", "micron,m25p80", "spi-flash";

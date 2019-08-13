@@ -25,7 +25,6 @@
 		i2c0 = &i2c0;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
-		gpio0 = &gpio;
 		spi0 = &qspi;
 		usb0 = &usb0;
 	};
@@ -57,7 +56,11 @@
 	phy-mode = "rgmii-id";
 };
 
-&gpio {
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
 	status = "okay";
 };
 

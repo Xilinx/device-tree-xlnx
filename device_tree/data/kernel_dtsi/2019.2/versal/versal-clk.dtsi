@@ -117,8 +117,13 @@
 	power-domains = <&versal_firmware 0x1822401a>;
 };
 
-&gpio {
+&gpio0 {
 	clocks = <&versal_clk 82>;
+	power-domains = <&versal_firmware 0x18224023>;
+};
+
+&gpio1 {
+	clocks = <&versal_clk 61>;
 	power-domains = <&versal_firmware 0x18224023>;
 };
 
