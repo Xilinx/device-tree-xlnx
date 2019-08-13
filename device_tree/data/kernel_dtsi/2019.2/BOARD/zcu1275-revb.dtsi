@@ -47,7 +47,7 @@
 
 &gem1 {
 	psu_ethernet_1_mdio: mdio {
-		phy1: phy@1 {
+		phy1: ethernet-phy@1 {
 			device_type = "ethernet-phy";
 			reg = <1>; /* KSZ9031RNXIC on AES-FMC-NETW1-G */
 			rxc-skew-ps = <1800>; /* Skew control of RX_CLK pad output */
