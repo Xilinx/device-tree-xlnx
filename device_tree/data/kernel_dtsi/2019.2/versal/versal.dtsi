@@ -23,7 +23,7 @@
 			enable-method = "psci";
 			operating-points-v2 = <&cpu_opp_table>;
 			reg = <0>;
-			cpu-idle-states = <&CPU_SLEEP_0>
+			cpu-idle-states = <&CPU_SLEEP_0>;
 		};
 
 		cpu1: cpu@1 {
@@ -32,7 +32,7 @@
 			enable-method = "psci";
 			operating-points-v2 = <&cpu_opp_table>;
 			reg = <1>;
-			cpu-idle-states = <&CPU_SLEEP_0>
+			cpu-idle-states = <&CPU_SLEEP_0>;
 		};
 
 		idle-states {
