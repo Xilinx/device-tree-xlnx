@@ -2005,17 +2005,22 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				} else {
 					set intr_id [get_psu_interrupt_id $drv_handle $pin]
 				}
-			} else {
-				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "ps7_cortexa9"]} {
+			}
+			if { [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "ps7_cortexa9"]} {
+				if { [string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] } {
 					set intr_id [::hsi::utils::get_interrupt_id $drv_handle "irq"]
 				} else {
-					if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] && [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "microblaze"]						} {
-					set intr_id [get_psu_interrupt_id $drv_handle "irq"]
-					} else {
-					set intr_id [get_psu_interrupt_id $drv_handle $pin]
-					}
+					set intr_id [::hsi::utils::get_interrupt_id $drv_handle $pin]
 				}
 			}
+			if { [string match -nocase [get_property IP_NAME [get_cells -hier [get_sw_processor]]] "microblaze"]} {
+				if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"] } {
+					set intr_id [get_psu_interrupt_id $drv_handle "irq"]
+				} else {
+					set intr_id [get_psu_interrupt_id $drv_handle $pin]
+				}
+			}
+
 			if {[string match -nocase $intr_id "-1"] && ![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 				continue
 			}
