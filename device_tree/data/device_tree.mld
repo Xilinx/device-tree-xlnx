@@ -43,7 +43,7 @@ PARAMETER name = overlay_custom_dts, desc = "Overlay custom dts filename", type 
 
 PARAMETER name = bootargs, desc = "Booting arguments", type = string, default = "";
 
-PARAMETER name = console_device, desc = "Instance name of IP core for boot console (e.g. RS232_Uart_1, not xps_uart16550)", type = peripheral_instance, range = (axi_uart16550, axi_uartlite, ps7_uart, psu_uart), default = none;
+PARAMETER name = console_device, desc = "Instance name of IP core for boot console (e.g. RS232_Uart_1, not xps_uart16550)", type = peripheral_instance, range = (axi_uart16550, axi_uartlite, ps7_uart, psu_uart, psv_sbsauart), default = none;
 
 PARAMETER name = periph_type_overrides, desc = "List of peripheral type overrides", type = string, default = "";
 PARAMETER name = main_memory, desc = "Name of Main Memory used with PetaLinux", type = peripheral_instance, range = (ps7_ddr, psu_ddr, mpmc, mig_7series, axi_emc), default = none;

@@ -479,10 +479,6 @@ proc update_chosen {os_handle} {
     set bootargs [get_property CONFIG.bootargs $os_handle]
     set console [hsi::utils::get_os_parameter_value "console"]
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psv_cortexa72"]} {
-        # FIX_ME:Dont generate bootargs till the versal dtsis are available
-        return
-    }
     if {[llength $bootargs]} {
         append bootargs " earlycon"
     } else {
@@ -569,16 +565,12 @@ proc update_alias {os_handle} {
 	# Search for ps_qspi, if it is there then interchange this with first driver
 	# because to have correct internal u-boot commands qspi has to be listed in aliases as the first for spi0
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-        if {[string match -nocase $proctype "psv_cortexa72"]} {
-             # FIX_ME:Dont generate bootargs till the versal dtsis are available
-             return
-        }
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		set pos [lsearch $all_drivers "ps7_qspi*"]
 	} elseif {[string match -nocase $proctype "psu_cortexa53"]} {
 		set pos [lsearch $all_drivers "psu_qspi*"]
 	} elseif {[string match -nocase $proctype "psv_cortexa72"]} {
-		set pos [lsearch $all_drivers "psv_qspi*"]
+		set pos [lsearch $all_drivers "psv_pmc_qspi*"]
 	} else {
 		set pos [lsearch $all_drivers "psu_qspi*"]
 	}
@@ -634,6 +626,14 @@ proc update_alias {os_handle} {
             if {[check_ip_trustzone_state $drv_handle] == 1} {
                 continue
             }
+            set ip_name  [get_property IP_NAME [get_cells -hier $drv_handle]]
+            if {[string match -nocase $ip_name "psv_pmc_qspi"]} {
+                  set ip_type [get_property IP_TYPE [get_cells -hier $drv_handle]]
+                  if {[string match -nocase $ip_type "PERIPHERAL"]} {
+                        continue
+                  }
+            }
+
         set tmp [list_property $drv_handle CONFIG.dtg.alias]
         if {[string_is_empty $tmp]} {
             continue
