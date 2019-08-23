@@ -642,7 +642,7 @@ proc update_alias {os_handle} {
             set alias_count [get_os_dev_count alias_${alias_str}_count]
             set conf_name ${alias_str}${alias_count}
             set value [ps_node_mapping $drv_handle label]
-            set ip_list "i2c spi"
+            set ip_list "i2c spi serial"
             # TODO: need to check if the label already exists in the current system
 			if {[lsearch $all_labels $conf_name] >=0} {
 				set str [lsearch $ip_list $alias_str]
