@@ -141,7 +141,7 @@ proc generate {drv_handle} {
 							if {[string match -nocase $ip "versal_cips"]} {
 								# As versal has only bank0 for MIOs
 								set gpio [expr $gpio + 26]
-								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio0 $gpio 1" reference
 								break
 							}
 						}
