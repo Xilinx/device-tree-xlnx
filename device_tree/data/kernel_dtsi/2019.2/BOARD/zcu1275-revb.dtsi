@@ -43,6 +43,11 @@
 };
 
 &sdhci1 {
+	/*
+	* 1.0 revision has level shifter and this property should be
+	* removed for supporting UHS mode
+	*/
+	no-1-8-v;
 };
 
 &gem1 {
