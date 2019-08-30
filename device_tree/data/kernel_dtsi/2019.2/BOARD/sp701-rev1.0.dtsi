@@ -13,3 +13,23 @@
 		};
 	};
 };
+
+&axi_iic_0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	i2c-mux@75 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x75>;
+		i2c@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			eeprom@50 {
+				compatible = "atmel,24c08";
+				reg = <0x50>;
+			};
+		};
+	};
+};
