@@ -393,7 +393,7 @@ proc gen_board_info {} {
 				set valid_axi_list "kc705-full kc705-lite ac701-full ac701-lite"
 				set valid_no_axi_list "kcu105 zc702 zc706 zc1751-dc1 zc1751-dc2 zedboard"
 				if {[lsearch -nocase $valid_axi_list $dts_name] >= 0 || [string match -nocase $dts_name "kcu705"]} {
-					hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 1" reference
+					hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 0 1" reference
 				}
 			} else {
 				puts "File not found\n\r"
