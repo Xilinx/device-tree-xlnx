@@ -2552,6 +2552,23 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	if {[string_is_empty $dev_type] == 1} {
 		set dev_type [get_property IP_NAME [get_cell -hier $ip]]
 	}
+	set proc_type [get_sw_proc_prop IP_NAME]
+	if {[string match -nocase $proc_type "psv_cortexa72"] } {
+		set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+		set avail_param [list_property [get_cells -hier $versal_periph]]
+		if {[lsearch -nocase $avail_param "CONFIG.CPM_PCIE0_PORT_TYPE"] >= 0} {
+			set val [get_property CONFIG.CPM_PCIE0_PORT_TYPE [get_cells -hier $versal_periph]]
+			if {[string match -nocase $val "Root_Port_of_PCI_Express_Root_Complex"]} {
+				#For Root port device tree entry should be set Okay
+			} else {
+				set ip_type [get_property IP_NAME $ip]
+				if {[string match -nocase $ip_type "psv_cpm_slcr"]} {
+				# For Non-Root port(PCI_Express_Endpoint_device) there should not be any device tree entry in DTS
+					return 0
+				}
+			}
+		}
+	}
 	# TODO: more ignore ip list?
 	set ip_type [get_property IP_NAME $ip]
 	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
