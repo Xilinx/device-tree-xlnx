@@ -121,6 +121,28 @@ proc generate {drv_handle} {
         }
     }
 
+    if {[string match -nocase $proc_type "psv_cortexa72"] } {
+	set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+	set avail_param [list_property [get_cells -hier $versal_periph]]
+	if {[lsearch -nocase $avail_param "CONFIG.PS_GEM_TSU_ENABLE"] >= 0} {
+		set val [get_property CONFIG.PS_GEM_TSU_ENABLE [get_cells -hier $versal_periph]]
+		if {$val == 1} {
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+			set tsu_node [add_or_get_dt_node -n "tsu_ext_clk" -l "tsu_ext_clk" -d $default_dts -p $root_node]
+			hsi::utils::add_new_dts_param "${tsu_node}" "compatible" "fixed-clock" stringlist
+			hsi::utils::add_new_dts_param "${tsu_node}" "#clock-cells" 0 int
+			set tsu-clk-freq [get_property CONFIG.C_ENET_TSU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
+			hsi::utils::add_new_dts_param "${tsu_node}" "clock-frequency" ${tsu-clk-freq} int
+			set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
+			if {[string match -nocase $node "&gem0"]} {
+				set_drv_prop_if_empty $drv_handle "clocks" "versal_clk 82>, <&versal_clk 88>, <&versal_clk 49>, <&versal_clk 48>, <&tsu_ext_clk" reference
+			} elseif {[string match -nocase $node "&gem1"]} {
+				set_drv_prop_if_empty $drv_handle "clocks" "versal_clk 82>, <&versal_clk 89>, <&versal_clk 51>, <&versal_clk 50>, <&tsu_ext_clk" reference
+			}
+		}
+	}
+    }
     # check if gmii2rgmii converter is used.
     set conv_data [is_gmii2rgmii_conv_present $slave]
     set phya [lindex $conv_data 0]
