@@ -23,12 +23,6 @@
 		serial0 = &serial0;
 		serial1 = &serial1;
 	};
-
-	memory: memory@0 {
-		device_type = "memory"; /* 16GB total via MC0/1/2/3 */
-		reg = <0 0 0 0x80000000>; /* 2GB here */
-		/* <0x8 0x0 0x3 0x80000000> */ /* 12GB - enable it later */
-	};
 };
 
 &dcc {

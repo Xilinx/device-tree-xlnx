@@ -13,10 +13,6 @@
 		     "xlnx,versal-vc-p-a2197", "xlnx,versal";
 	model = "Xilinx Versal A2197 Processor board revA";
 
-	memory: memory@0 {
-		device_type = "memory";
-		reg = <0 0 0 0x80000000>;
-	};
 };
 
 &dcc {

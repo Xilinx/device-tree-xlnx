@@ -28,10 +28,6 @@
 		spi0 = &qspi;
 		spi1 = &spi0;
 	};
-        memory: memory@0 {
-                device_type = "memory";
-                reg = <0 0 0 0x80000000>;
-        };
 };
 
 &dcc {

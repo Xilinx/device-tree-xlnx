@@ -13,11 +13,6 @@
 		     "xlnx,versal-vc-e-a2197", "xlnx,versal";
 	model = "Xilinx Versal A2197 Eval board revA";
 
-	memory: memory@0 {
-		device_type = "memory";
-		reg = <0 0 0 0x80000000>;
-	};
-
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
 		stdout-path = "serial0:115200";
