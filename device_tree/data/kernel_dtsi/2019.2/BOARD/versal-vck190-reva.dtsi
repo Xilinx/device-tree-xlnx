@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * dts file for Xilinx Versal VC-E-A2191-00 revA (Also called VCK190/VCK180/EB1)
+ * dts file for Xilinx Versal VCK190 revA
  *
  * (C) Copyright 2019, Xilinx, Inc.
  *
@@ -8,10 +8,8 @@
  */
 
 / {
-	compatible = "xlnx,versal-vc-e-a2197-00-revA",
-		     "xlnx,versal-vc-e-a2197-00",
-		     "xlnx,versal-vc-e-a2197", "xlnx,versal";
-	model = "Xilinx Versal A2197 Eval board revA";
+	compatible = "xlnx,versal-vck190-revA", "xlnx,versal";
+	model = "Xilinx Versal vck190 Eval board revA";
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
