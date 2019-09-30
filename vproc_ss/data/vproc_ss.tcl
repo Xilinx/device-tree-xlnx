@@ -30,7 +30,7 @@ proc generate {drv_handle} {
 	#scaler
 		set name [get_property NAME [get_cells -hier $drv_handle]]
 		set compatible [get_comp_str $drv_handle]
-		set compatible [append compatible " " "xlnx,v-vpss-scaler-1.0 xlnx,vpss-scaler"]
+		set compatible [append compatible " " "xlnx,v-proc-ss-2.2 xlnx,vpss-scaler-2.2 xlnx,vpss-scaler"]
 		set_drv_prop $drv_handle compatible "$compatible" stringlist
 		set ip [get_cells -hier $drv_handle]
 		set csc_enable_window [get_property CONFIG.C_CSC_ENABLE_WINDOW [get_cells -hier $drv_handle]]
