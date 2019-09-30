@@ -80,7 +80,9 @@ proc generate {drv_handle} {
 			}
 			if {[string match -nocase $connected_in_ip_type "axis_subset_converter"]} {
 				set in_ip [hsi::utils::get_connected_stream_ip $connected_in_ip "S_AXIS"]
-				set ip_type [get_property IP_NAME $in_ip]
+				if {[llength $in_ip] != 0} {
+					set ip_type [get_property IP_NAME $in_ip]
+				}
 			}
 			if {[string match -nocase $connected_in_ip_type "v_proc_ss"]|| [string match -nocase $connected_in_ip_type "v_tpg"] || [string match -nocase $connected_in_ip_type "v_smpte_uhdsdi_rx_ss"]|| [string match -nocase $ip_type "mipi_csi2_rx_subsystem"]} {
 				set scaler_ports_node [add_or_get_dt_node -n "ports" -l scaler_ports -p $node]
