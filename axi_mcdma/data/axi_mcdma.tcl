@@ -65,7 +65,9 @@ proc generate {drv_handle} {
 				dtg_warning "ERROR: ${drv_handle}: mm2s_introut port is not connected"
 			}
 			set intr_parent [get_property CONFIG.interrupt-parent $drv_handle]
-			hsi::utils::add_new_dts_param "${tx_chan_node}" "interrupt-parent" $intr_parent reference
+			if {[llength $intr_parent]} {
+				hsi::utils::add_new_dts_param "${tx_chan_node}" "interrupt-parent" $intr_parent reference
+			}
 			add_dma_coherent_prop $drv_handle "M_AXI_MM2S"
 		}
 		set rx_chan [hsi::utils::get_ip_param_value $mcdma_ip C_INCLUDE_S2MM]
@@ -79,7 +81,9 @@ proc generate {drv_handle} {
 				dtg_warning "ERROR: ${drv_handle}: s2mm_introut port is not connected"
 			}
 			set intr_parent [get_property CONFIG.interrupt-parent $drv_handle]
-			hsi::utils::add_new_dts_param "${rx_chan_node}" "interrupt-parent" $intr_parent reference
+			if {[llength $intr_parent]} {
+				hsi::utils::add_new_dts_param "${rx_chan_node}" "interrupt-parent" $intr_parent reference
+			}
 			add_dma_coherent_prop $drv_handle "M_AXI_S2MM"
 		}
 	} else {
@@ -98,13 +102,20 @@ proc get_interrupt_info {drv_handle chan_name} {
 	} else {
 		set num_channles [get_property CONFIG.c_num_s2mm_channels [get_cells -hier $drv_handle]]
 	}
+	set intr_info ""
 	for {set i 1} {$i <= $num_channles} {incr i} {
 		set intr_pin_name [format "%s_%s_introut" [string tolower $chan_name] ch$i]
-		lappend intr_info [get_intr_id $drv_handle $intr_pin_name]
+		set intr1_info [get_intr_id $drv_handle $intr_pin_name]
+		if {[string match -nocase $intr1_info "-1"]} {
+			continue
+		}
+		lappend intr_info $intr1_info
 	}
-	regsub -all "\{||\t" $intr_info {} intr_info
-	regsub -all "\}||\t" $intr_info {} intr_info
-	return $intr_info
+	if {[llength $intr_info]} {
+		regsub -all "\{||\t" $intr_info {} intr_info
+		regsub -all "\}||\t" $intr_info {} intr_info
+		return $intr_info
+	}
 }
 
 proc get_connected_ip {drv_handle dma_pin} {
