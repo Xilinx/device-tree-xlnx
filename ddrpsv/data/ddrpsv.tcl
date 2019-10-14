@@ -39,6 +39,9 @@ proc generate {drv_handle} {
 	set is_ddr_low_1 0
 	set is_ddr_low_2 0
 	set is_ddr_low_3 0
+	set is_ddr_ch_1 0
+	set is_ddr_ch_2 0
+	set is_ddr_ch_3 0
 
 	set sw_proc [hsi::get_sw_processor]
 	set periph [::hsi::utils::get_common_driver_ips $drv_handle]
@@ -46,33 +49,52 @@ proc generate {drv_handle} {
 
 	set i 0
 	foreach block_name $interface_block_names {
-		if {$block_name == "C0_DDR_LOW0" } {
+		if {[string match "C0_DDR_LOW0*" $block_name]} {
 			if {$is_ddr_low_0 == 0} {
 				set base_value_0 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			}
 			set high_value_0 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			set is_ddr_low_0 1
-		} elseif {$block_name == "C0_DDR_LOW1" } {
+		} elseif {[string match "C0_DDR_LOW1*" $block_name]} {
 			if {$is_ddr_low_1 == 0} {
 				set base_value_1 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			}
 			set high_value_1 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			set is_ddr_low_1 1
-		} elseif {$block_name == "C0_DDR_LOW2" } {
+		} elseif {[string match "C0_DDR_LOW2*" $block_name]} {
 			if {$is_ddr_low_2 == 0} {
 				set base_value_2 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			}
 			set high_value_2 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			set is_ddr_low_2 1
-		} elseif {$block_name == "C0_DDR_LOW3" } {
+		} elseif {[string match "C0_DDR_LOW3*" $block_name]} {
 			if {$is_ddr_low_3 == "0"} {
 				set base_value_3 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			}
 			set high_value_3 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			set is_ddr_low_3 1
+		} elseif {[string match "C0_DDR_CH1*" $block_name]} {
+			if {$is_ddr_ch_1 == "0"} {
+				set base_value_4 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set high_value_4 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_ddr_ch_1 1
+		} elseif {[string match "C0_DDR_CH2*" $block_name]} {
+			if {$is_ddr_ch_2 == "0"} {
+				set base_value_5 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set high_value_5 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_ddr_ch_2 1
+		} elseif {[string match "C0_DDR_CH3*" $block_name]} {
+			if {$is_ddr_ch_3 == "0"} {
+				set base_value_6 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set high_value_6 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_ddr_ch_3 1
 		}
 		incr i
 	}
+	set updat ""
 	if {$is_ddr_low_0 == 1} {
 		set reg_val_0 [generate_reg_property $base_value_0 $high_value_0]
 		set updat [lappend updat $reg_val_0]
@@ -88,6 +110,18 @@ proc generate {drv_handle} {
 	if {$is_ddr_low_3 == 1} {
 		set reg_val_3 [generate_reg_property $base_value_3 $high_value_3]
 		set updat [lappend updat $reg_val_3]
+	}
+	if {$is_ddr_ch_1 == 1} {
+		set reg_val_4 [generate_reg_property $base_value_4 $high_value_4]
+		set updat [lappend updat $reg_val_4]
+	}
+	if {$is_ddr_ch_2 == 1} {
+		set reg_val_5 [generate_reg_property $base_value_5 $high_value_5]
+		set updat [lappend updat $reg_val_5]
+	}
+	if {$is_ddr_ch_3 == 1} {
+		set reg_val_6 [generate_reg_property $base_value_6 $hiagh_value_6]
+		set updat [lappend updat $reg_val_6]
 	}
 	set len [llength $updat]
 	switch $len {
@@ -108,6 +142,21 @@ proc generate {drv_handle} {
 		"4" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]"
+			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
+		}
+		"5" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]"
+			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
+		}
+		"6" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]"
+			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
+		}
+		"7" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]"
 			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 	}
