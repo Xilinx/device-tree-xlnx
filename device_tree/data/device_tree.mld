@@ -47,7 +47,7 @@ PARAMETER name = console_device, desc = "Instance name of IP core for boot conso
 
 PARAMETER name = periph_type_overrides, desc = "List of peripheral type overrides", type = string, default = "";
 PARAMETER name = main_memory, desc = "Name of Main Memory used with PetaLinux", type = peripheral_instance, range = (ps7_ddr, psu_ddr, mpmc, mig_7series, axi_emc), default = none;
-PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.4" = 2014.4, "2015.1" = 2015.1, "2015.2" = 2015.2, "2015.3" = 2015.3, "2015.4" = 2015.4, "2016.1" = 2016.1, "2016.2" = 2016.2, "2016.3" = 2016.3, "2016.4" = 2016.4, "2017.1" = 2017.1, "2017.2" = 2017.2, "2017.3" = 2017.3, "2017.4" = 2017.4, "2018.1" = 2018.1, "2018.2" = 2018.2, "2018.3" = 2018.3, "2019.1" = 2019.1, "2019.2" = 2019.2), default = 2019.2;
+PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.4" = 2014.4, "2015.1" = 2015.1, "2015.2" = 2015.2, "2015.3" = 2015.3, "2015.4" = 2015.4, "2016.1" = 2016.1, "2016.2" = 2016.2, "2016.3" = 2016.3, "2016.4" = 2016.4, "2017.1" = 2017.1, "2017.2" = 2017.2, "2017.3" = 2017.3, "2017.4" = 2017.4, "2018.1" = 2018.1, "2018.2" = 2018.2, "2018.3" = 2018.3, "2019.1" = 2019.1, "2019.2" = 2019.2, "2020.1" = 2020.1), default = 2020.1;
 PARAMETER name = pcw_dts, desc = "Target dts filename for PCW configurations", type = string, default = pcw.dtsi;
 PARAMETER name = master_dts, desc = "Master dts filename", type = string, default = system-top.dts;
 END OS
