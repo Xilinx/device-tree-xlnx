@@ -6,7 +6,8 @@
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
-
+#include "include/dt-bindings/clock/xlnx-versal-clk.h"
+#include "include/dt-bindings/power/xlnx-versal-power.h"
 / {
 	alt_ref_clk: alt_ref_clk {
 		u-boot,dm-pre-reloc;
@@ -32,7 +33,7 @@
 	can0_clk: can0_clk {
 		#clock-cells = <0>;
 		compatible = "fixed-factor-clock";
-		clocks = <&versal_clk 96>;
+		clocks = <&versal_clk CAN0_REF>;
 		clock-div = <2>;
 		clock-mult = <1>;
 	};
@@ -40,7 +41,7 @@
 	can1_clk: can1_clk {
 		#clock-cells = <0>;
 		compatible = "fixed-factor-clock";
-		clocks = <&versal_clk 97>;
+		clocks = <&versal_clk CAN1_REF>;
 		clock-div = <2>;
 		clock-mult = <1>;
 	};
@@ -94,139 +95,139 @@
 };
 
 &cpu0 {
-	clocks = <&versal_clk 77>;
+	clocks = <&versal_clk ACPU>;
 };
 
 &can0 {
-	clocks = <&can0_clk>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822401f>;
+	clocks = <&can0_clk>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_CAN_FD_0>;
 };
 
 &can1 {
-	clocks = <&can1_clk>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224020>;
+	clocks = <&can1_clk>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_CAN_FD_1>;
 };
 
 &gem0 {
-	clocks = <&versal_clk 82>, <&versal_clk 88>, <&versal_clk 49>, <&versal_clk 48>, <&versal_clk 43>;
-	power-domains = <&versal_firmware 0x18224019>;
+	clocks = <&versal_clk LPD_LSBUS>, <&versal_clk GEM0_REF>, <&versal_clk GEM0_TX>, <&versal_clk GEM0_RX>, <&versal_clk GEM_TSU>;
+	power-domains = <&versal_firmware PM_DEV_GEM_0>;
 };
 
 &gem1 {
-	clocks = <&versal_clk 82>, <&versal_clk 89>, <&versal_clk 51>, <&versal_clk 50>, <&versal_clk 43>;
-	power-domains = <&versal_firmware 0x1822401a>;
+	clocks = <&versal_clk LPD_LSBUS>, <&versal_clk GEM1_REF>, <&versal_clk GEM1_TX>, <&versal_clk GEM1_RX>, <&versal_clk GEM_TSU>;
+	power-domains = <&versal_firmware PM_DEV_GEM_1>;
 };
 
 &gpio0 {
-	clocks = <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224023>;
+	clocks = <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_GPIO>;
 };
 
 &gpio1 {
-	clocks = <&versal_clk 61>;
-	power-domains = <&versal_firmware 0x18224023>;
+	clocks = <&versal_clk PMC_LSBUS_REF>;
+	power-domains = <&versal_firmware PM_DEV_GPIO>;
 };
 
 &i2c0 {
-	clocks = <&versal_clk 98>;
-	power-domains = <&versal_firmware 0x1822401d>;
+	clocks = <&versal_clk I2C0_REF>;
+	power-domains = <&versal_firmware PM_DEV_I2C_0>;
 };
 
 &i2c1 {
-	clocks = <&versal_clk 99>;
-	power-domains = <&versal_firmware 0x1822401e>;
+	clocks = <&versal_clk I2C1_REF>;
+	power-domains = <&versal_firmware PM_DEV_I2C_1>;
 };
 
 &lpd_dma_chan0 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224035>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_0>;
 };
 
 &lpd_dma_chan1 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224036>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_1>;
 };
 
 &lpd_dma_chan2 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224037>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_2>;
 };
 
 &lpd_dma_chan3 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224038>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_3>;
 };
 
 &lpd_dma_chan4 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224039>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_4>;
 };
 
 &lpd_dma_chan5 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822403a>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_5>;
 };
 
 &lpd_dma_chan6 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822403b>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_6>;
 };
 
 &lpd_dma_chan7 {
-	clocks = <&versal_clk 81>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822403c>;
+	clocks = <&versal_clk ADMA>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_ADMA_7>;
 };
 
 &qspi {
-	clocks = <&versal_clk 57>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822402b>;
+	clocks = <&versal_clk QSPI_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_QSPI>;
 };
 
 &ospi {
-	clocks = <&versal_clk 58>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822402a>;
+	clocks = <&versal_clk OSPI_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_OSPI>;
 };
 
 &rtc {
-	power-domains = <&versal_firmware 0x18224034>;
+	power-domains = <&versal_firmware PM_DEV_RTC>;
 };
 
 &serial0 {
-	clocks = <&versal_clk 92>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224021>;
+	clocks = <&versal_clk UART0_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_UART_0>;
 };
 
 &serial1 {
-	clocks = <&versal_clk 93>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224022>;
+	clocks = <&versal_clk UART1_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_UART_1>;
 };
 
 &sdhci0 {
-	clocks = <&versal_clk 59>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822402e>;
+	clocks = <&versal_clk SDIO0_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_SDIO_0>;
 };
 
 &sdhci1 {
-	clocks = <&versal_clk 60>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822402f>;
+	clocks = <&versal_clk SDIO1_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_SDIO_1>;
 };
 
 &spi0 {
-	clocks = <&versal_clk 94>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822401b>;
+	clocks = <&versal_clk SPI0_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_SPI_0>;
 };
 
 &spi1 {
-	clocks = <&versal_clk 95>, <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x1822401c>;
+	clocks = <&versal_clk SPI1_REF>, <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_SPI_1>;
 };
 
 &usb0 {
-	clocks = <&versal_clk 91>, <&versal_clk 104>;
-	power-domains = <&versal_firmware 0x18224018>;
+	clocks = <&versal_clk USB0_BUS_REF>, <&versal_clk USB3_DUAL_REF>;
+	power-domains = <&versal_firmware PM_DEV_USB_0>;
 };
 
 &watchdog {
-	clocks = <&versal_clk 82>;
-	power-domains = <&versal_firmware 0x18224029>;
+	clocks = <&versal_clk LPD_LSBUS>;
+	power-domains = <&versal_firmware PM_DEV_SWDT_FPD>;
 };

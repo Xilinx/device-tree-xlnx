@@ -290,6 +290,35 @@ proc gen_ext_axi_interface {}  {
 	}
 }
 
+proc gen_include_headers {} {
+	foreach i [get_sw_cores device_tree] {
+		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
+		set include_list "include*"
+		set dir_path "./"
+		set power_list "power*"
+		set clock_list "clock*"
+		set reset_list "reset*"
+		set powerdir "$dir_path/include/dt-bindings/power"
+		set clockdir "$dir_path/include/dt-bindings/clock"
+		set resetdir "$dir_path/include/dt-bindings/reset"
+		file mkdir $powerdir
+		file mkdir $clockdir
+		file mkdir $resetdir
+		if {[file exists $include_dtsi]} {
+			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
+				if {[regexp $power_list $file match]} {
+					file copy -force $file $powerdir
+				} elseif {[regexp $clock_list $file match]} {
+					file copy -force $file $clockdir
+				} elseif {[regexp $reset_list $file match]} {
+					file copy -force $file $resetdir
+				}
+			}
+		}
+	}
+}
+
 proc gen_board_info {} {
     # periph_type_overrides = {BOARD KC705 full/lite} or {BOARD ZYNQ} or {BOARD ZC1751 ES2/ES1}
     set overrides [get_property CONFIG.periph_type_overrides [get_os]]
@@ -438,6 +467,7 @@ proc generate {lib_handle} {
         gen_clk_property $drv_handle
     }
     gen_board_info
+    gen_include_headers
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
