@@ -87,6 +87,8 @@ proc generate {drv_handle} {
 			add_dma_coherent_prop $drv_handle "M_AXI_S2MM"
 		}
 	} else {
+		set ip_prop CONFIG.c_include_mm2s_dre
+		add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
 		set addr_width [get_property CONFIG.c_addr_width $mcdma_ip]
 		set inhex [format %x $addr_width]
 		append addrwidth "/bits/ 8 <0x$inhex>"
