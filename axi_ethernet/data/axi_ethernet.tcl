@@ -292,11 +292,15 @@ proc generate {drv_handle} {
             set intr_val [get_property CONFIG.interrupts $target_handle]
             set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
             set int_names  [get_property CONFIG.interrupt-names $target_handle]
-            append intr_names " " "$int_names"
             if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
                 set intr_val1 [get_property CONFIG.interrupts $drv_handle]
                 lappend intr_val1 $intr_val
-            }
+		set intr_name [get_property CONFIG.interrupt-names $drv_handle]
+		append intr_names " " $intr_name " " $int_names
+            } else {
+		append intr_names " " $int_names
+	    }
+
             set default_dts [get_property CONFIG.pcw_dts [get_os]]
             set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
             if {![string_is_empty $intr_parent]} {
