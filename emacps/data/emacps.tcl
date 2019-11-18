@@ -152,9 +152,38 @@ proc generate {drv_handle} {
         set mdio_node [gen_mdio_node $drv_handle $node]
         gen_phy_node $mdio_node $phy_name $phya
     }
-    set is_pcspma [get_cells -hier -filter {IP_NAME == gig_ethernet_pcs_pma}]
-    if {![string_is_empty ${is_pcspma}] && $phymode == 2} {
-        # if eth mode is sgmii and no external pcs/pma found
-        hsi::utils::add_new_property $drv_handle "is-internal-pcspma" boolean ""
-    }
+	set ip_name " "
+	if {[string match -nocase $proc_type "psu_cortexa53"] } {
+		set connected_ip [hsi::utils::get_connected_stream_ip $zynq_periph "MDIO_ENET0"]
+		if {[llength $connected_ip]} {
+			set ip_name [get_property IP_NAME $connected_ip]
+		}
+	}
+	set is_pcspma [get_cells -hier -filter {IP_NAME == gig_ethernet_pcs_pma}]
+	if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+		set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $is_pcspma] "phyaddr"]]
+		if {[llength $pin]} {
+			set sink_periph [::hsi::get_cells -of_objects $pin]
+		}
+		if {[llength $sink_periph]} {
+			set val [get_property CONFIG.CONST_VAL $sink_periph]
+			set inhex [format %x $val]
+			set_drv_prop $drv_handle phy-handle "phy$inhex" reference
+			set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+			hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
+			set phy_type [get_property CONFIG.Standard $is_pcspma]
+			set is_sgmii [get_property CONFIG.c_is_sgmii $is_pcspma]
+			if {$phy_type == "1000BASEX"} {
+				hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x5 int
+			} elseif { $is_sgmii == "true"} {
+				hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x4 int
+			} else {
+				dtg_warning "unsupported phytype:$phy_type"
+			}
+		}
+	}
+	if {![string_is_empty ${is_pcspma}] && $phymode == 2} {
+		# if eth mode is sgmii and no external pcs/pma found
+		hsi::utils::add_new_property $drv_handle "is-internal-pcspma" boolean ""
+	}
 }
