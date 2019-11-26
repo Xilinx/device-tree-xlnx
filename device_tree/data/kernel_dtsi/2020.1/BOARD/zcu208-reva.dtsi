@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * dts file for Xilinx ZynqMP ZCU216
+ * dts file for Xilinx ZynqMP ZCU208
  *
  * (C) Copyright 2017 - 2019, Xilinx, Inc.
  *
- * Michal Simek <michal.simek@xilinx.com>  */
-
+ * Michal Simek <michal.simek@xilinx.com>
+ */
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
 #include "include/dt-bindings/phy/phy.h"
 
 / {
-	model = "ZynqMP ZCU216 RevA";
-	compatible = "xlnx,zynqmp-zcu216-revA", "xlnx,zynqmp-zcu216", "xlnx,zynqmp";
+	model = "ZynqMP ZCU208 RevA";
+	compatible = "xlnx,zynqmp-zcu208-revA", "xlnx,zynqmp-zcu208", "xlnx,zynqmp";
 
 	chosen {
 		xlnx,eeprom = &eeprom;
@@ -103,7 +103,6 @@
 };
 
 &gem3 {
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "rgmii-id";
 	phy0: ethernet-phy@c {
@@ -169,7 +168,7 @@
 		reg = <0x20>;
 		gpio-controller; /* interrupt not connected */
 		#gpio-cells = <2>;
-		gpio-line-names = "MAX6643_OT_B", "MAX6643_FANFAIL_B", "MIO26_PMU_INPUT_LS", "", /* 0 - 3 */
+		gpio-line-names = "MAX6643_OT_B", "MAX6643_FANFAIL_B", "MIO26_PMU_INPUT_LS", "DAC_AVTT_VOUT_SEL", /* 0 - 3 */
 				  "", "IIC_MUX_RESET_B", "GEM3_EXP_RESET_B", "MAX6643_FULL_SPEED", /* 4 - 7 */
 				  "FMCP_HSPC_PRSNT_M2C_B", "", "", "VCCINT_VRHOT_B", /* 10 - 13 */
 				  "", "8A34001_EXP_RST_B", "IRPS5401_ALERT_B", "INA226_PMBUS_ALERT"; /* 14 - 17 */
@@ -538,13 +537,12 @@
 };
 
 &qspi {
-	status = "okay";
 	is-dual = <1>;
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* U11 and U12 MT25QU02GCBBE12 1Gb */
 		#address-cells = <1>;
 		#size-cells = <1>;
-		reg = <0x0>;
+		reg = <0>;
 		spi-tx-bus-width = <1>;
 		spi-rx-bus-width = <4>; /* FIXME also DUAL configuration possible */
 		spi-max-frequency = <108000000>; /* Based on DC1 spec */
@@ -552,7 +550,6 @@
 };
 
 &sata {
-	status = "okay";
 	/* SATA OOB timing settings */
 	ceva,p0-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
 	ceva,p0-comwake-params = /bits/ 8 <0x06 0x14 0x08 0x0E>;
@@ -568,13 +565,11 @@
 
 /* SD1 with level shifter */
 &sdhci1 {
-	status = "okay";
 	disable-wp;
 	xlnx,mio_bank = <1>;
 };
 
 &dwc3_0 {
-	status = "okay";
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
