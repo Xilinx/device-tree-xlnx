@@ -32,6 +32,8 @@ proc generate {drv_handle} {
 		if {[get_property CONFIG.C_CLKOUT${i}_USED $ip] != 0} {
 			set freq [get_property CONFIG.C_CLKOUT${i}_OUT_FREQ $ip]
 			set pin_name [get_property CONFIG.C_CLK_OUT${i}_PORT $ip]
+			set basefrq [string tolower [get_property CONFIG.C_BASEADDR $ip]]
+			set pin_name "$basefrq-$pin_name"
 			lappend output_names $pin_name
 		}
 	}
