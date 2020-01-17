@@ -40,6 +40,9 @@ proc generate {drv_handle} {
 			dtg_warning "$drv_handle:peripheral is NULL for the $pin $sink_periph"
 		}
 	}
+	set ports_node [add_or_get_dt_node -n "ports" -l hdmitx_ports -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
 	if {![llength $connected_ip]} {
 		dtg_warning "$drv_handle pin VIDEO_IN is not connected... check your design"
@@ -51,7 +54,7 @@ proc generate {drv_handle} {
 				continue
 			}
 			if {[string match -nocase $connected_ip_type "v_mix"]} {
-				set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $node]
+				set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $ports_node]
 				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 				set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 				hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" mixer_crtc reference
@@ -61,7 +64,7 @@ proc generate {drv_handle} {
 			set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
 			hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
 			if {[string match -nocase $connected_ip_type "v_frmbuf_rd"]} {
-				set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $node]
+				set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $ports_node]
 				hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 				set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 				hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" pl_disp_crtc reference
@@ -97,10 +100,10 @@ proc generate {drv_handle} {
 				set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $connect_ip "S_AXIS"]
 				set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
 				if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_rd"]} {
-					set ports_node [add_or_get_dt_node -n "ports" -l hdmitx_ports -p $node]
+					set port_node [add_or_get_dt_node -n "ports" -l hdmitx_ports -p $ports_node]
 					hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 					hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-					set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $ports_node]
+					set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $port_node]
 					hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 					set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 					hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" dmaengine_crtc reference
