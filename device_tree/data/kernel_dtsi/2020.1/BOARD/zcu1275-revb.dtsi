@@ -11,7 +11,8 @@
 
 / {
 	model = "ZynqMP ZCU1275 RevB";
-	compatible = "xlnx,zynqmp-zcu1275-revB", "xlnx,zynqmp-zcu1275", "xlnx,zynqmp";
+	compatible = "xlnx,zynqmp-zcu1275-revB", "xlnx,zynqmp-zcu1275",
+		     "xlnx,zynqmp";
 };
 
 &qspi {
@@ -51,9 +52,23 @@
 };
 
 &gem1 {
-	psu_ethernet_1_mdio: mdio {
+	/* U-Boot gmii-to-rgmii bridge */
+	phy-mode = "gmii";
+	phy-handle = <&gmiitorgmii>;
+	phy: ethernet-phy@0 {
+		reg = <0x0>;
+	};
+	gmiitorgmii: gmiitorgmii@8 {
+		compatible = "xlnx,gmii-to-rgmii-1.0";
+		reg = <8>;
+		phy-handle = <&phy>;
+	};
+
+	/* Linux gmii-to-rgmii bridge */
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
 		phy1: ethernet-phy@1 {
-			device_type = "ethernet-phy";
 			reg = <1>; /* KSZ9031RNXIC on AES-FMC-NETW1-G */
 			rxc-skew-ps = <1800>; /* Skew control of RX_CLK pad output */
 			txc-skew-ps = <1800>; /* Skew control of GTX_CLK pad input */

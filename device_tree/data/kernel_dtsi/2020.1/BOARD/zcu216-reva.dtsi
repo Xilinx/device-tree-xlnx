@@ -16,7 +16,7 @@
 	compatible = "xlnx,zynqmp-zcu216-revA", "xlnx,zynqmp-zcu216", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = &eeprom;
+		xlnx,eeprom = <&eeprom>;
 	};
 
 	gpio-keys {
