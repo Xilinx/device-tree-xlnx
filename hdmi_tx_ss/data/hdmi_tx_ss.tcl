@@ -100,10 +100,7 @@ proc generate {drv_handle} {
 				set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $connect_ip "S_AXIS"]
 				set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
 				if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_rd"]} {
-					set port_node [add_or_get_dt_node -n "ports" -l hdmitx_ports -p $ports_node]
-					hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-					hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-					set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $port_node]
+					set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port -u 0 -p $ports_node]
 					hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
 					set hdmi_encoder_node [add_or_get_dt_node -n "endpoint" -l hdmi_encoder -p $hdmi_port_node]
 					hsi::utils::add_new_dts_param "$hdmi_encoder_node" "remote-endpoint" dmaengine_crtc reference
