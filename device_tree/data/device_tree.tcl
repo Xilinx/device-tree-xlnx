@@ -295,13 +295,20 @@ proc gen_ext_axi_interface {}  {
 
 proc gen_include_headers {} {
 	foreach i [get_sw_cores device_tree] {
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set include_list "include*"
 		set dir_path "./"
-		set power_list "power*"
-		set clock_list "clock*"
-		set reset_list "reset*"
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			set power_list "xlnx-zynqmp-power.h"
+			set clock_list "xlnx-zynqmp-clk.h"
+			set reset_list "xlnx-zynqmp-resets.h"
+		} else {
+			set power_list "xlnx-versal-power.h"
+			set clock_list "xlnx-zynqmp-clk.h"
+			set reset_list "xlnx-zynqmp-resets.h"
+		}
 		set powerdir "$dir_path/include/dt-bindings/power"
 		set clockdir "$dir_path/include/dt-bindings/clock"
 		set resetdir "$dir_path/include/dt-bindings/reset"
@@ -310,11 +317,11 @@ proc gen_include_headers {} {
 		file mkdir $resetdir
 		if {[file exists $include_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
-				if {[regexp $power_list $file match]} {
+				if {[string first $power_list $file]!= -1} {
 					file copy -force $file $powerdir
-				} elseif {[regexp $clock_list $file match]} {
+				} elseif {[string first $clock_list $file] != -1} {
 					file copy -force $file $clockdir
-				} elseif {[regexp $reset_list $file match]} {
+				} elseif {[string first $reset_list $file] != -1} {
 					file copy -force $file $resetdir
 				}
 			}
@@ -356,11 +363,11 @@ proc gen_board_info {} {
 		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set include_list "include*"
 		set dir_path "./"
-		set gpio_list "gpio*"
-		set intr_list "interrupt-*"
-		set phy_list  "phy*"
-		set input_list "input*"
-		set pinctrl_list "pinctrl*"
+		set gpio_list "gpio.h"
+		set intr_list "irq.h"
+		set phy_list  "phy.h"
+		set input_list "input.h"
+		set pinctrl_list "pinctrl-zynqmp.h"
 		set gpiodir "$dir_path/include/dt-bindings/gpio"
 		set phydir "$dir_path/include/dt-bindings/phy"
 		set intrdir "$dir_path/include/dt-bindings/interrupt-controller"
@@ -373,15 +380,15 @@ proc gen_board_info {} {
 		file mkdir $pinctrldir
 		if {[file exists $include_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
-				if {[regexp $gpio_list $file match]} {
+				if {[string first $gpio_list $file] != -1} {
 					file copy -force $file $gpiodir
-				} elseif {[regexp $phy_list $file match]} {
+				} elseif {[string first $phy_list $file] != -1} {
 					file copy -force $file $phydir
-				} elseif {[regexp $intr_list $file match]} {
+				} elseif {[string first $intr_list $file] != -1} {
 					file copy -force $file $intrdir
-				} elseif {[regexp $input_list $file match]} {
+				} elseif {[string first $input_list $file] != -1} {
 					file copy -force $file $inputdir
-				} elseif {[regexp $pinctrl_list $file match]} {
+				} elseif {[string first $pinctrl_list $file] != -1} {
 					file copy -force $file $pinctrldir
 				}
 			}
