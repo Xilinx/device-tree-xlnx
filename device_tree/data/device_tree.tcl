@@ -306,7 +306,7 @@ proc gen_include_headers {} {
 			set reset_list "xlnx-zynqmp-resets.h"
 		} else {
 			set power_list "xlnx-versal-power.h"
-			set clock_list "xlnx-zynqmp-clk.h"
+			set clock_list "xlnx-versal-clk.h"
 			set reset_list "xlnx-zynqmp-resets.h"
 		}
 		set powerdir "$dir_path/include/dt-bindings/power"
