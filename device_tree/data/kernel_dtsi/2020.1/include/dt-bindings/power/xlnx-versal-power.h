@@ -25,6 +25,7 @@
 #define PM_DEV_SWDT_FPD				(0x18224029U)
 #define PM_DEV_OSPI				(0x1822402aU)
 #define PM_DEV_QSPI				(0x1822402bU)
+#define PM_DEV_GPIO_PMC				(0x1822402cU)
 #define PM_DEV_SDIO_0				(0x1822402eU)
 #define PM_DEV_SDIO_1				(0x1822402fU)
 #define PM_DEV_RTC				(0x18224034U)

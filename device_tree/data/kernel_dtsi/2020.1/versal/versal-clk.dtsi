@@ -125,7 +125,7 @@
 
 &gpio1 {
 	clocks = <&versal_clk PMC_LSBUS_REF>;
-	power-domains = <&versal_firmware PM_DEV_GPIO>;
+	power-domains = <&versal_firmware PM_DEV_GPIO_PMC>;
 };
 
 &i2c0 {
