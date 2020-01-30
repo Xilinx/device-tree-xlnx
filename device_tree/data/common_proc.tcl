@@ -4001,20 +4001,20 @@ proc get_psu_interrupt_id { ip_name port_name } {
 proc check_ip_trustzone_state { drv_handle } {
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"]} {
-        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $drv_handle]
-        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $drv_handle]
+        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
         if {[lsearch -nocase $avail_param "TRUSTZONE"] >= 0} {
-            set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+            set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
             # Don't generate status okay when the peripheral is in Secure Trustzone
             if {[string match -nocase $state "Secure"]} {
                 return 1
             }
         }
    } elseif {[string match -nocase $proctype "psv_cortexa72"]} {
-        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psv_cortexa72_0]] $drv_handle]
-        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier psv_cortexa72_0]] $index]]
+        set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $drv_handle]
+        set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
         if {[lsearch -nocase $avail_param "TRUSTZONE"] >= 0} {
-                set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psv_cortexa72_0]] $index]]
+                set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
                 # Don't generate status okay when the peripheral is in Secure Trustzone
                 if {[string match -nocase $state "Secure"]} {
                         return 1

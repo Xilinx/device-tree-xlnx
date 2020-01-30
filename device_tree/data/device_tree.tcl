@@ -242,7 +242,7 @@ proc gen_ext_axi_interface {}  {
 	}
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "psu_cortexa53"]} {
-		set ext_axi_intf [get_mem_ranges -of_objects [get_cells psu_cortexa53_0] -filter {INSTANCE ==""}]
+		set ext_axi_intf [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]] -filter {INSTANCE ==""}]
 		if {[regexp "ps._*" "$ext_axi_intf" match]} {
 			return 0
 		}
