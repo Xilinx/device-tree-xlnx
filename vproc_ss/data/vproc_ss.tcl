@@ -400,7 +400,7 @@ proc generate {drv_handle} {
 								set bus_node "amba_pl"
 							}
 							set dts_file [current_dt_tree]
-							set vcap_sdirx_count [hsi::utils::get_os_parameter_value "vcap_sidrx_count"]
+							set vcap_sdirx_count [hsi::utils::get_os_parameter_value "vcap_sdirx_count"]
 							if { [llength $vcap_sdirx_count] == 0 } {
 								set vcap_sdirx_count 0
 							}
