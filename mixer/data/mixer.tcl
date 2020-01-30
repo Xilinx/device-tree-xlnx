@@ -554,7 +554,7 @@ proc gen_video_format {num node drv_handle max_data_width} {
 			append vid_formats " " "BG24"
 		}
 		"1" {
-			append vid_formats " " "YUYV"
+			append vid_formats " " "YU24"
 		}
 		"2" {
 			if {$max_data_width == 10} {
