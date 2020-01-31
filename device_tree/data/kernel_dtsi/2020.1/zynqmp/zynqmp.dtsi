@@ -24,7 +24,7 @@
 		#size-cells = <0>;
 
 		cpu0: cpu@0 {
-			compatible = "arm,cortex-a53", "arm,armv8";
+			compatible = "arm,cortex-a53";
 			device_type = "cpu";
 			enable-method = "psci";
 			operating-points-v2 = <&cpu_opp_table>;
@@ -33,7 +33,7 @@
 		};
 
 		cpu1: cpu@1 {
-			compatible = "arm,cortex-a53", "arm,armv8";
+			compatible = "arm,cortex-a53";
 			device_type = "cpu";
 			enable-method = "psci";
 			reg = <0x1>;
@@ -42,7 +42,7 @@
 		};
 
 		cpu2: cpu@2 {
-			compatible = "arm,cortex-a53", "arm,armv8";
+			compatible = "arm,cortex-a53";
 			device_type = "cpu";
 			enable-method = "psci";
 			reg = <0x2>;
@@ -51,7 +51,7 @@
 		};
 
 		cpu3: cpu@3 {
-			compatible = "arm,cortex-a53", "arm,armv8";
+			compatible = "arm,cortex-a53";
 			device_type = "cpu";
 			enable-method = "psci";
 			reg = <0x3>;
@@ -73,7 +73,7 @@
 		};
 	};
 
-	cpu_opp_table: cpu_opp_table {
+	cpu_opp_table: cpu-opp-table {
 		compatible = "operating-points-v2";
 		opp-shared;
 		opp00 {
@@ -266,7 +266,7 @@
 		compatible = "xlnx,zynqmp-aes";
 	};
 
-	amba_apu: amba_apu@0 {
+	amba_apu: amba-apu@0 {
 		compatible = "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <1>;
@@ -654,12 +654,12 @@
 			compatible = "xlnx,zynqmp-gpio-1.0";
 			status = "disabled";
 			#gpio-cells = <0x2>;
+			gpio-controller;
 			interrupt-parent = <&gic>;
 			interrupts = <0 16 4>;
 			interrupt-controller;
 			#interrupt-cells = <2>;
 			reg = <0x0 0xff0a0000 0x0 0x1000>;
-			gpio-controller;
 			power-domains = <&zynqmp_firmware PD_GPIO>;
 		};
 
