@@ -142,53 +142,57 @@ proc generate {drv_handle} {
 				}
 				if {[string match -nocase $fifo_connected_out_ip_type "axis_register_slice"]} {
 					set axis_reg_slice_ip [hsi::utils::get_connected_stream_ip $fifo_connected_out_ip "M_AXIS"]
-					set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
-					if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
-						set hdmi_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
-						hsi::utils::add_new_dts_param "${hdmi_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-						hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
-						hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-format" 3 int
-						hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-width" $max_data_width int
-						set hdmi_scaler_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $hdmi_port1_node]
-						hsi::utils::add_new_dts_param "$hdmi_scaler_node" "remote-endpoint" vcap_hdmi_in reference
-						set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-						if {$dt_overlay} {
-							set bus_node "overlay2"
-						} else {
-							set bus_node "amba_pl"
+					if {[llength $axis_reg_slice_ip]} {
+						set axis_reg_slice_connected_out_ip_type [get_property IP_NAME $axis_reg_slice_ip]
+						if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_frmbuf_wr"]} {
+							set hdmi_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
+							hsi::utils::add_new_dts_param "${hdmi_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+							hsi::utils::add_new_dts_param "$hdmi_port1_node" "reg" 1 int
+							hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-format" 3 int
+							hsi::utils::add_new_dts_param "$hdmi_port1_node" "xlnx,video-width" $max_data_width int
+							set hdmi_scaler_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $hdmi_port1_node]
+							hsi::utils::add_new_dts_param "$hdmi_scaler_node" "remote-endpoint" vcap_hdmi_in reference
+							set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+							if {$dt_overlay} {
+								set bus_node "overlay2"
+							} else {
+								set bus_node "amba_pl"
+							}
+							set dts_file [current_dt_tree]
+							set vcap_hdmi_count [hsi::utils::get_os_parameter_value "vcap_hdmi_count"]
+							if { [llength $vcap_hdmi_count] == 0 } {
+								set vcap_hdmi_count 0
+							}
+							if {$vcap_hdmi_count != 0} {
+								dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
+								continue
+							}
+							set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
+							incr vcap_hdmi_count
+							hsi::utils::set_os_parameter_value "vcap_hdmi_count" $vcap_hdmi_count
+							hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
+							hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
+							hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
+							set vcap_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
+							hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#address-cells" 1 int
+							hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#size-cells" 0 int
+							set vcap_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_hdmi_node]
+							hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "reg" 0 int
+							hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "direction" input string
+							set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
+							hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
 						}
-						set dts_file [current_dt_tree]
-						set vcap_hdmi_count [hsi::utils::get_os_parameter_value "vcap_hdmi_count"]
-						if { [llength $vcap_hdmi_count] == 0 } {
-							set vcap_hdmi_count 0
+						if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_scenechange"]} {
+							set scd_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
+							hsi::utils::add_new_dts_param "${scd_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+							hsi::utils::add_new_dts_param "$scd_port1_node" "reg" 1 int
+							hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-format" 3 int
+							hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-width" $max_data_width int
+							set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $scd_port1_node]
+							hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_in reference
 						}
-						if {$vcap_hdmi_count != 0} {
-							dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-							continue
-						}
-						set vcap_hdmirx [add_or_get_dt_node -n "vcap_hdmi" -d $dts_file -p $bus_node]
-						incr vcap_hdmi_count
-						hsi::utils::set_os_parameter_value "vcap_hdmi_count" $vcap_hdmi_count
-						hsi::utils::add_new_dts_param $vcap_hdmirx "compatible" "xlnx,video" string
-						hsi::utils::add_new_dts_param $vcap_hdmirx "dmas" "$axis_reg_slice_ip 0" reference
-						hsi::utils::add_new_dts_param $vcap_hdmirx "dma-names" "port0" string
-						set vcap_hdmi_node [add_or_get_dt_node -n "ports" -l vcap_hdmi_ports -p $vcap_hdmirx]
-						hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#address-cells" 1 int
-						hsi::utils::add_new_dts_param "$vcap_hdmi_node" "#size-cells" 0 int
-						set vcap_hdmiport_node [add_or_get_dt_node -n "port" -l vcap_hdmi_port -u 0 -p $vcap_hdmi_node]
-						hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "reg" 0 int
-						hsi::utils::add_new_dts_param "$vcap_hdmiport_node" "direction" input string
-						set vcap_hdmi_in_node [add_or_get_dt_node -n "endpoint" -l vcap_hdmi_in -p $vcap_hdmiport_node]
-						hsi::utils::add_new_dts_param "$vcap_hdmi_in_node" "remote-endpoint" vpss_scaler_out reference
-					}
-					if {[string match -nocase $axis_reg_slice_connected_out_ip_type "v_scenechange"]} {
-						set scd_port1_node [add_or_get_dt_node -n "port" -l vpss_port1 -u 1 -p $hdmi_ports_node]
-						hsi::utils::add_new_dts_param "${scd_port1_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
-						hsi::utils::add_new_dts_param "$scd_port1_node" "reg" 1 int
-						hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-format" 3 int
-						hsi::utils::add_new_dts_param "$scd_port1_node" "xlnx,video-width" $max_data_width int
-						set hdmi_scd_node [add_or_get_dt_node -n "endpoint" -l vpss_scaler_out -p $scd_port1_node]
-						hsi::utils::add_new_dts_param "$hdmi_scd_node" "remote-endpoint" scd_in reference
+					} else {
+						dtg_warning "connected stream of axis_reg_slice_ip is NULL...check the design"
 					}
 				}
 			}
