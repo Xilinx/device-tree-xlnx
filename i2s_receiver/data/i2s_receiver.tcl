@@ -27,22 +27,28 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,i2s-receiver-1.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_AUD"]
-	if {![llength $connect_ip]} {
+	set rx_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_AUD"]
+	if {![llength $rx_connect_ip]} {
 		dtg_warning "$drv_handle pin M_AXIS_AUD is not connected... check your design"
 	}
-	if {[llength $connect_ip]} {
-		set connect_ip_type [get_property IP_NAME $connect_ip]
-		if {[string match -nocase $connect_ip_type "axis_switch"]} {
-			set connected_ip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
-			if {![llength $connected_ip]} {
-				dtg_warning "$connect_ip pin M00_AXIS is not connected... check your design"
+
+	foreach connect_ip $rx_connect_ip {
+		if {[llength $connect_ip] != 0} {
+			set connect_ip_type [get_property IP_NAME $connect_ip]
+			if {[string match -nocase $connect_ip_type "system_ila"]} {
+				continue
 			}
-			if {[llength $connected_ip] != 0} {
-				hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+			if {[string match -nocase $connect_ip_type "axis_switch"]} {
+				set connected_ip [hsi::utils::get_connected_stream_ip $connect_ip "M00_AXIS"]
+				if {![llength $connected_ip]} {
+					dtg_warning "$connect_ip pin M00_AXIS is not connected... check your design"
+				}
+				if {[llength $connected_ip] != 0} {
+					hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+				}
+			} elseif {[string match -nocase $connect_ip_type "audio_formatter"]} {
+				hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
 			}
-		} elseif {[string match -nocase $connect_ip_type "audio_formatter"]} {
-			hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
 		}
 	}
 	set dwidth [get_property CONFIG.C_DWIDTH [get_cells -hier $drv_handle]]
