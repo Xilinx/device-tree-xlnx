@@ -334,14 +334,14 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,topology" $topology int
 		set use_uram [get_property CONFIG.C_USE_URAM [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-uram" $use_uram int
+		set ports_node [add_or_get_dt_node -n "ports" -l csc_ports -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 		set connected_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
 		if {[llength $connected_in_ip] == 0} {
 			dtg_warning "$drv_handle: input port pin S_AXIS is not connected"
 		}
 		foreach connect_ip $connected_in_ip {
-			set ports_node [add_or_get_dt_node -n "ports" -l csc_ports -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 			if {[llength $connect_ip]} {
 				set connected_in_ip_type [get_property IP_NAME $connect_ip]
 				if {[string match -nocase $connected_in_ip_type "system_ila"]} {
