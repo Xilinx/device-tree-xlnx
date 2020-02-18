@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP
  *
- * (C) Copyright 2014 - 2015, Xilinx, Inc.
+ * (C) Copyright 2014 - 2020, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  *
@@ -148,6 +148,11 @@
 			method = "smc";
 			#power-domain-cells = <0x1>;
 
+			zynqmp_pcap: pcap {
+				compatible = "xlnx,zynqmp-pcap-fpga";
+				clock-names = "ref_clk";
+			};
+
 			zynqmp_power: zynqmp-power {
 				u-boot,dm-pre-reloc;
 				compatible = "xlnx,zynqmp-power";
@@ -185,9 +190,10 @@
 
 	fpga_full: fpga-full {
 		compatible = "fpga-region";
-		fpga-mgr = <&pcap>;
+		fpga-mgr = <&zynqmp_pcap>;
 		#address-cells = <2>;
 		#size-cells = <2>;
+		ranges;
 	};
 
 	nvmem_firmware {
@@ -247,11 +253,6 @@
 		efuse_ppk1hash: efuse_ppk1hash@d0 {
 			reg = <0xd0 0x30>;
 		};
-	};
-
-	pcap: pcap {
-		compatible = "xlnx,zynqmp-pcap-fpga";
-		clock-names = "ref_clk";
 	};
 
 	xlnx_rsa: zynqmp_rsa {
@@ -886,6 +887,8 @@
 			power-domains = <&zynqmp_firmware PD_SD_0>;
 			nvmem-cells = <&soc_revision>;
 			nvmem-cell-names = "soc_revision";
+			#clock-cells = <1>;
+			clock-output-names = "clk_out_sd0", "clk_in_sd0";
 		};
 
 		sdhci1: mmc@ff170000 {
@@ -902,6 +905,8 @@
 			power-domains = <&zynqmp_firmware PD_SD_1>;
 			nvmem-cells = <&soc_revision>;
 			nvmem-cell-names = "soc_revision";
+			#clock-cells = <1>;
+			clock-output-names = "clk_out_sd1", "clk_in_sd1";
 		};
 
 		spi0: spi@ff040000 {

@@ -2,7 +2,7 @@
 /*
  * Clock specification for Xilinx ZynqMP
  *
- * (C) Copyright 2017, Xilinx, Inc.
+ * (C) Copyright 2017 - 2020, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -308,6 +308,6 @@
 	clocks = <&zynqmp_clk DP_AUDIO_REF>;
 };
 
-&pcap {
+&zynqmp_pcap {
 	clocks = <&zynqmp_clk PCAP>;
 };

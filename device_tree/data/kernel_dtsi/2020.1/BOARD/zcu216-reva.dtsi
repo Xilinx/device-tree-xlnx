@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP ZCU216
  *
- * (C) Copyright 2017 - 2019, Xilinx, Inc.
+ * (C) Copyright 2017 - 2020, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>  */
 
@@ -571,6 +571,10 @@
 	status = "okay";
 	disable-wp;
 	xlnx,mio_bank = <1>;
+	/*
+	 * This property should be removed for supporting UHS mode
+	 */
+	no-1-8-v;
 };
 
 &dwc3_0 {

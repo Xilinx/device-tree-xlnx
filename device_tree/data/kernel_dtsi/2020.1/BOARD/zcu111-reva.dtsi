@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP ZCU111
  *
- * (C) Copyright 2017 - 2018, Xilinx, Inc.
+ * (C) Copyright 2017 - 2020, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -732,6 +732,10 @@
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
 	disable-wp;
 	xlnx,mio_bank = <1>;
+	/*
+	 * This property should be removed for supporting UHS mode
+	 */
+	no-1-8-v;
 };
 
 &uart0 {
