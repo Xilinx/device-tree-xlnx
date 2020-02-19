@@ -598,7 +598,13 @@ proc set_drv_def_dts {drv_handle} {
 	}
 	if {[string_is_empty $default_dts]} {
 		if {[is_pl_ip $drv_handle]} {
-			set default_dts "pl.dtsi"
+			set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+			regsub -all { } $RpRm "" RpRm
+			if {[llength $RpRm]} {
+				set default_dts "$RpRm.dtsi"
+			} else {
+				set default_dts "pl.dtsi"
+			}
 		} else {
 			# PS IP, read pcw_dts property
 			set default_dts [get_property CONFIG.pcw_dts [get_os]]
@@ -614,7 +620,14 @@ proc set_drv_def_dts {drv_handle} {
 		set targets "fpga_full"
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		set child_name "__overlay__"
-		set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
+		set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+		regsub -all { } $RpRm "" RpRm
+		if {[llength $RpRm]} {
+			set default_dts "$RpRm.dtsi"
+			set child_node [add_or_get_dt_node -l "overlay0_$RpRm" -n $child_name -p $fpga_node]
+		} else {
+			set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
+                }
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
@@ -1493,7 +1506,14 @@ proc gen_clk_property {drv_handle} {
 						}
 					}
 				}
-				set dts_file "pl.dtsi"
+				set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+				regsub -all { } $RpRm "" RpRm
+				if {[llength $RpRm]} {
+					set dts_file "$RpRm.dtsi"
+				} else {
+					set dts_file "pl.dtsi"
+				}
+
 				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
 				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 				if {[llength $clk_freq] == 0} {
@@ -1508,8 +1528,14 @@ proc gen_clk_property {drv_handle} {
 						set bus_clk_list [lappend bus_clk_list $clk_freq]
 					}
 					set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
-					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
-					-d ${dts_file} -p ${bus_node}]
+					if {[llength $RpRm]} {
+						set misc_clk_node [add_or_get_dt_node -n "misc_clk_RpRm${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+					} else {
+						set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+					}
+
 					set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
 					set updat [lappend updat misc_clk_${bus_clk_cnt}]
 					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
@@ -1650,7 +1676,13 @@ proc gen_clk_property {drv_handle} {
 			}
 		}
 		if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
-			set dts_file "pl.dtsi"
+			set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+			regsub -all { } $RpRm "" RpRm
+			if {[llength $RpRm]} {
+				set dts_file "$RpRm.dtsi"
+			} else {
+				set dts_file "pl.dtsi"
+                        }
 			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
 			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 			if {[llength $clk_freq] == 0} {
@@ -1665,10 +1697,19 @@ proc gen_clk_property {drv_handle} {
 					set bus_clk_list [lappend bus_clk_list $clk_freq]
 				}
 				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
-				set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
-				-d ${dts_file} -p ${bus_node}]
+				if {[llength $RpRm]} {
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_$RpRm${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+				} else {
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+				}
 				set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
-				set updat [lappend updat misc_clk_${bus_clk_cnt}]
+				if {[llength $RpRm]} {
+					set updat [lappend updat misc_clk_$RpRm${bus_clk_cnt}]
+				} else {
+					set updat [lappend updat misc_clk_${bus_clk_cnt}]
+				}
 				hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
 				hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
 				hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
@@ -2811,7 +2852,13 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			set targets "amba"
 			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 			set child_name "__overlay__"
-			set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+			set RpRm [hsi::utils::get_rp_rm_for_drv $ip_drv]
+			regsub -all { } $RpRm "" RpRm
+			if {[llength $RpRm]} {
+				set bus_node [add_or_get_dt_node -l "overlay1_$RpRm" -n $child_name -p $fpga_node]
+			} else {
+				set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+			}
 			set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -p $bus_node]
 			hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
 			set config_afi " "
@@ -3109,7 +3156,14 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		set targets "amba"
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		set child_name "__overlay__"
-		set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
+		set RpRm [hsi::utils::get_rp_rm_for_drv $ip_drv]
+		regsub -all { } $RpRm "" RpRm
+		if {[llength $RpRm]} {
+			set default_dts "$RpRm.dtsi"
+			set bus_node [add_or_get_dt_node -l "overlay2_$RpRm" -n $child_name -p $fpga_node]
+		} else {
+			set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
+		}
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
