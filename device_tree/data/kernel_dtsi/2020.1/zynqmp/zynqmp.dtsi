@@ -267,14 +267,14 @@
 		compatible = "xlnx,zynqmp-aes";
 	};
 
-	amba_apu: amba-apu@0 {
+	amba_apu: axi@0 {
 		compatible = "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <1>;
 		ranges = <0 0 0 0 0xffffffff>;
 
 		gic: interrupt-controller@f9010000 {
-			compatible = "arm,gic-400", "arm,cortex-a15-gic";
+			compatible = "arm,gic-400";
 			#interrupt-cells = <3>;
 			reg = <0x0 0xf9010000 0x10000>,
 			      <0x0 0xf9020000 0x20000>,
@@ -300,7 +300,7 @@
 			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>;
 	};
 
-	amba: amba {
+	amba: axi {
 		compatible = "simple-bus";
 		u-boot,dm-pre-reloc;
 		#address-cells = <2>;
