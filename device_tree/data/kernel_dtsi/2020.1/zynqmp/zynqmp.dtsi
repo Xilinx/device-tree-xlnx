@@ -267,7 +267,7 @@
 		compatible = "xlnx,zynqmp-aes";
 	};
 
-	amba_apu: axi@0 {
+	amba_apu: amba-apu@0 {
 		compatible = "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <1>;
@@ -300,7 +300,7 @@
 			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>;
 	};
 
-	amba: axi {
+	amba: amba {
 		compatible = "simple-bus";
 		u-boot,dm-pre-reloc;
 		#address-cells = <2>;
