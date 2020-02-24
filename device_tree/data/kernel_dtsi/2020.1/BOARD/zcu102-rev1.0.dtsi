@@ -130,7 +130,7 @@
 		ti,rx-internal-delay = <0x8>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <0x1>;
-		ti,rxctrl-strap-worka;
+		ti,dp83867-rxctrl-strap-quirk;
 	};
 };
 
@@ -334,51 +334,51 @@
 			reg = <2>;
 			/* MAXIM_PMBUS - 00 */
 			max15301@a { /* u46 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0xa>;
 			};
 			max15303@b { /* u4 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0xb>;
 			};
 			max15303@10 { /* u13 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x10>;
 			};
 			max15301@13 { /* u47 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0x13>;
 			};
 			max15303@14 { /* u7 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x14>;
 			};
 			max15303@15 { /* u6 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x15>;
 			};
 			max15303@16 { /* u10 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x16>;
 			};
 			max15303@17 { /* u9 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x17>;
 			};
 			max15301@18 { /* u63 */
-				compatible = "max15301";
+				compatible = "maxim,max15301";
 				reg = <0x18>;
 			};
 			max15303@1a { /* u49 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1a>;
 			};
 			max15303@1b { /* u8 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1b>;
 			};
 			max15303@1d { /* u18 */
-				compatible = "max15303";
+				compatible = "maxim,max15303";
 				reg = <0x1d>;
 			};
 
@@ -386,11 +386,11 @@
 drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 */
 			max20751@72 { /* u95 FIXME - not detected */
-				compatible = "max20751";
+				compatible = "maxim,max20751";
 				reg = <0x72>;
 			};
 			max20751@73 { /* u96 FIXME - not detected */
-				compatible = "max20751";
+				compatible = "maxim,max20751";
 				reg = <0x73>;
 			};
 		};
@@ -436,8 +436,8 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			si5341: clock-generator1@36 { /* SI5341 - u69 */
-				compatible = "si5341";
+			si5341: clock-generator@36 { /* SI5341 - u69 */
+				compatible = "silabs,si5341";
 				reg = <0x36>;
 			};
 
@@ -446,33 +446,35 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			si570_1: clock-generator2@5d { /* USER SI570 - u42 */
+			si570_1: clock-generator@5d { /* USER SI570 - u42 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
 				reg = <0x5d>;
 				temperature-stability = <50>;
 				factory-fout = <300000000>;
 				clock-frequency = <300000000>;
+				clock-output-names = "si570_user";
 			};
 		};
 		i2c@3 { /* i2c mw 74 0 8 */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			si570_2: clock-generator3@5d { /* USER MGT SI570 - u56 */
+			si570_2: clock-generator@5d { /* USER MGT SI570 - u56 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
 				reg = <0x5d>;
 				temperature-stability = <50>; /* copy from zc702 */
 				factory-fout = <156250000>;
 				clock-frequency = <148500000>;
+				clock-output-names = "si570_mgt";
 			};
 		};
 		i2c@4 { /* i2c mw 74 0 10 */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			si5328: clock-generator4@69 {/* SI5328 - u20 */
+			si5328: clock-generator@69 {/* SI5328 - u20 */
 				compatible = "silabs,si5328";
 				reg = <0x69>;
 				/*
@@ -514,26 +516,6 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 			#size-cells = <0>;
 			reg = <3>;
 			/* DDR4 SODIMM */
-			dev@19 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x19>;
-			};
-			dev@30 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x30>;
-			};
-			dev@35 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x35>;
-			};
-			dev@36 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x36>;
-			};
-			dev@51 { /* u-boot detection - maybe SPD */
-				compatible = "xxx";
-				reg = <0x51>;
-			};
 		};
 		i2c@4 {
 			#address-cells = <1>;
@@ -922,4 +904,5 @@ drivers/hwmon/pmbus/Makefile:11:obj-$(CONFIG_SENSORS_MAX20751)  += max20751.o
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
 	phys = <&lane2 PHY_TYPE_USB3 0 2 26000000>;
+	maximum-speed = "super-speed";
 };
