@@ -47,10 +47,12 @@ proc generate {drv_handle} {
 	if {![llength $connect_ip]} {
 		dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected..check your design"
 	}
+	set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$tpg_count -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	foreach connected_ip $connect_ip {
 		if {[llength $connected_ip] != 0} {
 			set connected_ip_type [get_property IP_NAME $connected_ip]
-			set ports_node ""
 			set sink_periph ""
 			if {[llength $connected_ip_type] != 0} {
 				if {[string match -nocase $connected_ip_type "system_ila"]} {
@@ -64,9 +66,6 @@ proc generate {drv_handle} {
 						set sink_ip [get_property IP_NAME $sink_periph]
 						if {[string match -nocase $sink_ip "v_tc"]} {
 							hsi::utils::add_new_dts_param "$node" "xlnx,vtc" "$sink_periph" reference
-							set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$tpg_count -p $node]
-							hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-							hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 						}
 					}
 				}
