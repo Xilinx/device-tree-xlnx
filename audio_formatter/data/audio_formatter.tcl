@@ -27,29 +27,5 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,audio-formatter-1.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-	set tx_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_mm2s"]
-	foreach connect_ip $tx_connect_ip {
-		if {[llength $connect_ip] != 0} {
-			set connected_ip_type [get_property IP_NAME $connect_ip]
-			if {[string match -nocase $connected_ip_type "system_ila"]} {
-				continue
-			}
-			hsi::utils::add_new_dts_param "$node" "xlnx,tx" $connect_ip reference
-		} else {
-			dtg_warning "$drv_handle pin m_axis_mm2s is not connected... check your design"
-		}
-	}
-	set rx_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_s2mm"]
-	foreach connect_ip $rx_connect_ip {
-		if {[llength $connect_ip] != 0} {
-			set connected_ip_type [get_property IP_NAME $connect_ip]
-			if {[string match -nocase $connected_ip_type "system_ila"]} {
-				continue
-			}
-			hsi::utils::add_new_dts_param "$node" "xlnx,rx" $connect_ip reference
-		} else {
-			dtg_warning "$drv_handle pin s_axis_s2mm is not connected... check your design"
-		}
-	}
 
 }
