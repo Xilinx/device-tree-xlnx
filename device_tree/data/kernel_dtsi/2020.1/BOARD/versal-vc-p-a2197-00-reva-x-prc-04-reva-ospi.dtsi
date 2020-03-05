@@ -93,8 +93,11 @@
 	status = "okay"; /* U163/U97 MT35XU02G */
 };
 
+&sdhci0 {
+	no-1-8-v;
+};
+
 &sdhci1 { /* J3 MIO26, MIO29 - MIO33 */
-	status = "okay";
 	disable-wp;
 	xlnx,mio_bank = <1>; /* FIXME */
 	no-1-8-v;

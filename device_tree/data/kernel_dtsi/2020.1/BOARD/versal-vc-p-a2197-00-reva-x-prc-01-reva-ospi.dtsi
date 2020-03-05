@@ -87,8 +87,11 @@
 	};
 };
 
+&sdhci0 {
+	no-1-8-v;
+};
+
 &sdhci1 { /* U104 */
-	status = "okay";
 	xlnx,mio_bank = <1>;
 	no-1-8-v;
 };
