@@ -26,7 +26,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,mixer-3.0 xlnx,mixer-4.0"]
+	set compatible [append compatible " " "xlnx,mixer-3.0 xlnx,mixer-4.0 xlnx,mixer-5.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set mixer_ip [get_cells -hier $drv_handle]
 	set num_layers [get_property CONFIG.NR_LAYERS [get_cells -hier $drv_handle]]
@@ -40,6 +40,10 @@ proc generate {drv_handle} {
 	set logo_layer [get_property CONFIG.LOGO_LAYER [get_cells -hier $drv_handle]]
 	if {[string match -nocase $logo_layer "true"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,logo-layer" ""  boolean
+	}
+	set enable_csc_coefficient_registers [get_property CONFIG.ENABLE_CSC_COEFFICIENT_REGISTERS [get_cells -hier $drv_handle]]
+	if {$enable_csc_coefficient_registers == 1} {
+		hsi::utils::add_new_dts_param "$node" "xlnx,enable-csc-coefficient-register" "" boolean
 	}
 }
 
