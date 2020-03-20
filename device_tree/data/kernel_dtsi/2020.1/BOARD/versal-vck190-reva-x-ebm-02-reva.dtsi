@@ -58,8 +58,11 @@
 };
 
 &sdhci1 { /* PMC_MIO26-36/51 */
-	xlnx,mio_bank = <1>;
 	no-1-8-v;
+	non-removable;
+	disable-wp;
+	bus-width = <8>;
+	xlnx,mio_bank = <0>;
 };
 
 &serial0 { /* PMC_MIO42/43 */
