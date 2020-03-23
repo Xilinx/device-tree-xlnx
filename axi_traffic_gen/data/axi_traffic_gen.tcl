@@ -32,7 +32,7 @@ proc generate {drv_handle} {
 	}
 	set proc_type [get_sw_proc_prop IP_NAME]
 	# set up interrupt-names
-	set intr_list "irq_out err_out"
+	set intr_list "irq-out err-out"
 	set interrupts ""
 	set interrupt_names ""
 	foreach irq ${intr_list} {
