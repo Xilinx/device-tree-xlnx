@@ -31,9 +31,11 @@ proc generate {drv_handle} {
 	lappend intr_names "interrupt2"
 	lappend intr_names "interrupt3"
 	set intr_num "0x0 0x94 0x1>, <0x0 0x95 0x1>, <0x0 0x96 0x1"
+	set power_domain "&versal_firmware PM_DEV_AI"
 	hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
 	hsi::utils::add_new_dts_param ${node} "interrupts" $intr_num intlist
 	hsi::utils::add_new_dts_param "${node}" "interrupt-parent" gic reference
+	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
 
 	set bus_node "amba_pl"
 	set dts_file [current_dt_tree]
