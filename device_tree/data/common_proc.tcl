@@ -1422,7 +1422,7 @@ proc gen_clk_property {drv_handle} {
 	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
-	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc mrmac"
 	if {[lsearch $ignore_list $ip] >= 0 } {
 		return 0
         }
