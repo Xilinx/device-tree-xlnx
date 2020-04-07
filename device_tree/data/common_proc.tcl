@@ -625,8 +625,34 @@ proc set_drv_def_dts {drv_handle} {
 		if {[llength $RpRm]} {
 			set default_dts "$RpRm.dtsi"
 			set child_node [add_or_get_dt_node -l "overlay0_$RpRm" -n $child_name -p $fpga_node]
+			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+			if {[llength $pr_regions]} {
+				set pr_len [llength $pr_regions]
+				for {set pr 0} {$pr < $pr_len} {incr pr} {
+					set pr1 [lindex $pr_regions $pr]
+					if {[regexp $pr1 $RpRm match]} {
+						set targets "fpga_PR$pr"
+						hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+						break
+					}
+				}
+			}
+			hsi::utils::add_new_dts_param $child_node "partial-fpga-config" "" boolean
 		} else {
 			set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
+			set targets "fpga_full"
+			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+			if {[llength $pr_regions]} {
+				set pr_len [llength $pr_regions]
+				for {set pr 0} {$pr < $pr_len} {incr pr} {
+					set pr_node [add_or_get_dt_node -l "fpga_PR$pr" -n "fpga-PR$pr" -p $child_node]
+					hsi::utils::add_new_dts_param  "${pr_node}" "compatible"  "fpga-region" string
+					hsi::utils::add_new_dts_param "${pr_node}" "#address-cells" 2 int
+					hsi::utils::add_new_dts_param "${pr_node}" "#size-cells" 2 int
+					hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
+				}
+			}
                 }
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
@@ -663,10 +689,29 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 1 int
 		}
 		set hw_name [get_property CONFIG.firmware_name [get_os]]
+		set rprmpartial ""
 		if {![llength $hw_name]} {
-			set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
+			set hw_name [::hsi::get_hw_files -filter "TYPE == partial_bit"]
+                        set RpRm1 [hsi::utils::get_rp_rm_for_drv $drv_handle]
+			regsub -all { } $RpRm1 "_" RpRm
+			if {[llength $RpRm]} {
+				set bitfiles_len [llength $hw_name]
+				for {set i 0} {$i < $bitfiles_len} {incr i} {
+					set rprm_bit_file_name [lindex $hw_name $i]
+					if {[regexp [lindex $RpRm1 1] $rprm_bit_file_name match]} {
+						set rprmpartial [lindex $hw_name $i]
+						break
+					}
+				}
+			}
 		}
-		hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
+		if {[llength $rprmpartial]} {
+			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$rprmpartial.bin" string
+		}
+		if {![llength $RpRm]} {
+			set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
+			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
+		}
 		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
 		if {[llength $overlay_custom_dts]} {
 			update_overlay_custom_dts_include $default_dts
