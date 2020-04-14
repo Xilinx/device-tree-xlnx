@@ -1591,7 +1591,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_warning "not supported pl_clk:$pl_clk"
+						dtg_debug "not supported pl_clk:$pl_clk"
 				}
 			}
 		}
@@ -1618,7 +1618,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_warning "not supported pl_clk:$pl_clk"
+						dtg_debug "not supported pl_clk:$pl_clk"
 				}
 			}
 		}
@@ -1645,7 +1645,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_warning "not supported pl_clk:$pl_clk"
+						dtg_debug "not supported pl_clk:$pl_clk"
 				}
 			}
 		}
