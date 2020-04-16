@@ -116,10 +116,18 @@ proc generate {drv_handle} {
                 set tsu-clk-freq [get_property CONFIG.C_ENET_TSU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
                 hsi::utils::add_new_dts_param "${tsu_node}" "clock-frequency" ${tsu-clk-freq} int
                 set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
-                set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 107>, <&zynqmp_clk 48>, <&zynqmp_clk 52>, <&tsu_ext_clk" reference
-            }
-        }
-    }
+		if {[string match -nocase $node "&gem3"]} {
+			set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 107>, <&zynqmp_clk 48>, <&zynqmp_clk 52>, <&tsu_ext_clk" reference
+		} elseif {[string match -nocase $node "&gem2"]} {
+			set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 106>, <&zynqmp_clk 47>, <&zynqmp_clk 51>, <&tsu_ext_clk" reference
+		} elseif {[string match -nocase $node "&gem1"]} {
+			set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 105>, <&zynqmp_clk 46>, <&zynqmp_clk 50>, <&tsu_ext_clk" reference
+		} elseif {[string match -nocase $node "&gem0"]} {
+			set_drv_prop_if_empty $drv_handle "clocks" "zynqmp_clk 31>, <&zynqmp_clk 104>, <&zynqmp_clk 45>, <&zynqmp_clk 49>, <&tsu_ext_clk" reference
+		}
+	}
+      }
+   }
 
     if {[string match -nocase $proc_type "psv_cortexa72"] } {
 	set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
