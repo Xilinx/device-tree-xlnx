@@ -25,7 +25,6 @@ proc generate {drv_handle} {
 	set cur_dts [current_dt_tree]
 	set master_dts_obj [get_dt_trees ${master_dts}]
 	set_cur_working_dts $master_dts
-
 	set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
 	set addr [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
 	regsub -all {^0x} $addr {} addr
@@ -120,7 +119,7 @@ proc generate {drv_handle} {
 		set updat [lappend updat $reg_val_5]
 	}
 	if {$is_ddr_ch_3 == 1} {
-		set reg_val_6 [generate_reg_property $base_value_6 $hiagh_value_6]
+		set reg_val_6 [generate_reg_property $base_value_6 $high_value_6]
 		set updat [lappend updat $reg_val_6]
 	}
 	set len [llength $updat]
