@@ -465,6 +465,34 @@ proc gen_zynqmp_ccf_clk {} {
 
 }
 
+proc gen_versal_clk {} {
+	set default_dts [get_property CONFIG.pcw_dts [get_os]]
+	set ref_node [add_or_get_dt_node -n "&ref_clk" -d $default_dts]
+	set pl_alt_ref_node [add_or_get_dt_node -n "&pl_alt_ref_clk" -d $default_dts]
+	set periph_list [get_cells -hier]
+	foreach periph $periph_list {
+		set versal_ps [get_property IP_NAME $periph]
+		if {[string match -nocase $versal_ps "versal_cips"] } {
+			set avail_param [list_property [get_cells -hier $periph]]
+			if {[lsearch -nocase $avail_param "CONFIG.PMC_REF_CLK_FREQMHZ"] >= 0} {
+				set freq [get_property CONFIG.PMC_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+				if {![string match -nocase $freq "33.333"]} {
+					dtg_warning "Frequency $freq used instead of 33.333"
+					hsi::utils::add_new_dts_param "${ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ"] >= 0} {
+				set freq [get_property CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+				if {![string match -nocase $freq "33.333"]} {
+					dtg_warning "Frequency $freq used instead of 33.333"
+					hsi::utils::add_new_dts_param "${pl_alt_ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+		}
+	}
+
+}
+
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
@@ -484,6 +512,7 @@ proc generate {lib_handle} {
 	if {[string match -nocase $mainline_ker "none"]} {
 		gen_sata_laneinfo
 		gen_zynqmp_ccf_clk
+		gen_versal_clk
 	}
     }
     gen_ext_axi_interface
