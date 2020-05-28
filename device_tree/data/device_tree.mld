@@ -31,6 +31,8 @@ OPTION COMPILE_BSP = FALSE;
 
 PARAMETER name = dtg_version, desc = "DTG version", default = "2014.4";
 
+PARAMETER name = partial_image, desc = "Partial image Support", type = bool, default = false;
+
 PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type = bool, default = false;
 
 PARAMETER name = firmware_name, desc = "Device-tree Overlay Firmware name", type = string, default = "";
