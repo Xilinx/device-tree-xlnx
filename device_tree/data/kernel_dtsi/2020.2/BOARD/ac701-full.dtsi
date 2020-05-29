@@ -1,4 +1,4 @@
-&iic_main {
+&axi_iic_0 {
 	#address-cells = <1>;
 	#size-cells = <0>;
 	i2c-mux@74 {
@@ -31,7 +31,7 @@
 	};
 };
 
-&axi_ethernet {
+&axi_ethernet_0 {
 	phy-handle = <&phy0>;
 	axi_ethernet_mdio: mdio {
 		#address-cells = <1>;
