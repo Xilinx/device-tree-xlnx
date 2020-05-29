@@ -1,8 +1,4 @@
-/ {
-	hard-reset-gpios = <&reset_gpio 0 1>;
-};
-
-&iic_main {
+&axi_iic_0 {
 	#address-cells = <1>;
 	#size-cells = <0>;
 	i2c-mux@75 {
