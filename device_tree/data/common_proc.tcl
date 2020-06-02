@@ -620,17 +620,13 @@ proc set_drv_def_dts {drv_handle} {
 				set partial_imag imag
 				append RpRm1 $RpRm $partial_imag
 				set defaultdts1 "$RpRm1.dtsi"
-				puts "defaultdts1:$defaultdts1"
 				set defdt [create_dt_tree -dts_file $defaultdts1]
-				puts "defdt:$defdt"
 				set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $defdt
 				set root_node [add_or_get_dt_node -n / -d ${defdt}]
 				set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${defdt} -p ${root_node}]
-				puts "fpga_node:$fpga_node"
 				set child_name "__overlay__"
 				set child_node1 [add_or_get_dt_node -l "overlay0$RpRm1" -n $child_name -d $defdt -p $fpga_node]
-				puts "child_node1:$child_node1"
 				if {[string match -nocase $proctype "psv_cortexa72"]} {
 					set targets "fpga"
 				} else {
@@ -664,7 +660,6 @@ proc set_drv_def_dts {drv_handle} {
 				}
 			}
 		}
-	}
 
 	if {![llength $RpRm]} {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
@@ -703,6 +698,7 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
 		}
 	}
+	}
 
 	if {[is_pl_ip $drv_handle] && $dt_overlay} {
 		if 0 {
@@ -722,14 +718,11 @@ proc set_drv_def_dts {drv_handle} {
                                 puts "frag0 ret"
 			} else {
 				set default_dts "$RpRm.dtsi"
-				puts "default_dts:$default_dts"
 				set master_dts_obj [get_dt_trees ${default_dts}]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-				puts "root_node:$root_node"
 				set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${default_dts} -p ${root_node}]
 				puts "fpga_node:$fpga_node"
-				set child_node [add_or_get_dt_node -l "overlay0_$RpRm" -n $child_name -p $fpga_node]
 				set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
@@ -805,7 +798,6 @@ proc set_drv_def_dts {drv_handle} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == partial_bit"]
 			} else {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
-				puts "hw_name:$hw_name"
 			}
                         set RpRm1 [hsi::utils::get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm1 "_" RpRm
@@ -826,7 +818,6 @@ proc set_drv_def_dts {drv_handle} {
 		if {![llength $RpRm]} {
 			if {[string match -nocase $proctype "psu_cortexa53"]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
-				puts "hw_name:$hw_name"
 			} else {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
