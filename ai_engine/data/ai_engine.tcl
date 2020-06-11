@@ -36,15 +36,19 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param ${node} "interrupts" $intr_num intlist
 	hsi::utils::add_new_dts_param "${node}" "interrupt-parent" gic reference
 	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
-
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+		regsub -all { } $RpRm "" RpRm
+		if {[llength $RpRm]} {
+			set bus_node "overlay2_$RpRm"
+		} else  {
+			set bus_node "overlay2"
+		}
 	} else {
 		set bus_node "amba_pl"
 	}
-	set dts_file [current_dt_tree]
-	set aie_npi_node [add_or_get_dt_node -n "aie-npi" -l aie_npi -u f70a0000 -d $dts_file -p $bus_node]
+	set aie_npi_node [add_or_get_dt_node -n "aie-npi" -l aie_npi -u f70a0000 -p $bus_node]
 	hsi::utils::add_new_dts_param "${aie_npi_node}" "compatible" "xlnx,ai-engine-npi" stringlist
 	set aie_npi_reg "0x0 0xf70a0000 0x0 0x1000"
 	hsi::utils::add_new_dts_param "${aie_npi_node}" "reg" $aie_npi_reg intlist
