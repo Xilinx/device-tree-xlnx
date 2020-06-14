@@ -32,6 +32,8 @@ global or_id
 global or_cnt
 set or_id 0
 set or_cnt 0
+global set end_mappings [dict create]
+global set remote_mappings [dict create]
 
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
@@ -1589,6 +1591,528 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 			}
 		}
 	}
+}
+
+proc gen_endpoint {drv_handle value} {
+	global end_mappings
+	dict append end_mappings $drv_handle $value
+	set val [dict get $end_mappings $drv_handle]
+}
+proc update_endpoints {drv_handle} {
+	global end_mappings
+	global remo_mappings
+	set node [gen_peripheral_nodes $drv_handle]
+	set ip [get_cells -hier $drv_handle]
+	if {[string match -nocase [get_property IP_NAME $ip] "v_proc_ss"]} {
+		set topology [get_property CONFIG.C_TOPOLOGY [get_cells -hier $drv_handle]]
+		if {$topology == 0} {
+			set ports_node [add_or_get_dt_node -n "ports" -l scaler_ports$drv_handle -p $node]
+			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+			set port_node [add_or_get_dt_node -n "port" -l scaler_port0$drv_handle -u 0 -p $ports_node]
+			hsi::utils::add_new_dts_param "${port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 3 int
+			set scaninip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis"]
+			foreach inip $scaninip {
+				if {[llength $inip]} {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+					puts "scaintfpins:$master_intf"
+					set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+					puts "ip_mem_handles:$ip_mem_handles"
+					if {[llength $ip_mem_handles]} {
+						set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+					} else {
+						set inip [get_in_connect_ip $inip $master_intf]
+						puts "inip:$inip"
+						if {[llength $inip]} {
+							if {[string match -nocase [get_property IP_NAME $inip] "axi_vdma"]} {
+								gen_frmbuf_rd_node $inip $drv_handle $port_node
+							}
+						}
+					}
+					if {[llength $inip]} {
+						set sca_in_end ""
+						set sca_remo_in_end ""
+						if {[dict exists $end_mappings $inip]} {
+							set sca_in_end [dict get $end_mappings $inip]
+							puts "drv:$drv_handle inend:$sca_in_end"
+						}
+						if {[dict exists $remo_mappings $inip]} {
+							set sca_remo_in_end [dict get $remo_mappings $inip]
+							puts "drv:$drv_handle inremoend:$sca_remo_in_end"
+						}
+						if {[llength $sca_remo_in_end]} {
+							set scainnode [add_or_get_dt_node -n "endpoint" -l $sca_remo_in_end -p $port_node]
+						}
+						if {[llength $sca_in_end]} {
+							hsi::utils::add_new_dts_param "$scainnode" "remote-endpoint" $sca_in_end reference
+						}
+					}
+				} else {
+					dtg_warning "$drv_handle pin s_axis is not connected..check your design"
+				}
+			}
+		}
+		if {$topology == 3} {
+			set ports_node [add_or_get_dt_node -n "ports" -l csc_ports$drv_handle -p $node]
+			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+			set port_node [add_or_get_dt_node -n "port" -l csc_port0$drv_handle -u 0 -p $ports_node]
+			hsi::utils::add_new_dts_param "${port_node}" "/* For xlnx,video-format user needs to fill as per their requirement */" "" comment
+			hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 3 int
+			set cscinip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis"]
+			if {[llength $cscinip]} {
+				foreach inip $cscinip {
+					set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+					set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+					if {[llength $ip_mem_handles]} {
+						set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+						if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+							gen_frmbuf_rd_node $inip $drv_handle $port_node
+						}
+					} else {
+						set inip [get_in_connect_ip $inip $master_intf]
+						if {[llength $inip]} {
+							if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+								continue
+							}
+							if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+								gen_frmbuf_rd_node $inip $drv_handle $port_node
+							}
+						}
+					}
+					if {[llength $inip]} {
+						set csc_in_end ""
+						set csc_remo_in_end ""
+						if {[dict exists $end_mappings $inip]} {
+							set csc_in_end [dict get $end_mappings $inip]
+							puts "drv:$drv_handle inend:$csc_in_end"
+						}
+						if {[dict exists $remo_mappings $inip]} {
+							set csc_remo_in_end [dict get $remo_mappings $inip]
+							puts "drv:$drv_handle inremoend:$csc_remo_in_end"
+						}
+						if {[llength $csc_remo_in_end]} {
+							set cscinnode [add_or_get_dt_node -n "endpoint" -l $csc_remo_in_end -p $port_node]
+						}
+						if {[llength $csc_in_end]} {
+							hsi::utils::add_new_dts_param "$cscinnode" "remote-endpoint" $csc_in_end reference
+						}
+					}
+				}
+			} else {
+				dtg_warning "$drv_handle pin s_axis is not connected..check your design"
+			}
+			puts "***********CSCEND***************"
+		}
+	}
+	if {[string match -nocase [get_property IP_NAME $ip] "v_demosaic"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l demosaic_ports$drv_handle -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set port_node [add_or_get_dt_node -n "port" -l demosaic_port0$drv_handle -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+		hsi::utils::add_new_dts_param "${port_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
+		hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
+		set demo_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
+		set inip ""
+		if {[llength $demo_inip]} {
+			foreach inip $demo_inip {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+				}
+				if {[llength $inip]} {
+					set demo_in_end ""
+					set demo_remo_in_end ""
+					if {[dict exists $end_mappings $inip]} {
+						set demo_in_end [dict get $end_mappings $inip]
+						puts "demo_in_end:$demo_in_end"
+					}
+					if {[dict exists $remo_mappings $inip]} {
+						set demo_remo_in_end [dict get $remo_mappings $inip]
+						puts "demo_remo_in_end:$demo_remo_in_end"
+					}
+					if {[llength $demo_remo_in_end]} {
+						set demosaic_node [add_or_get_dt_node -n "endpoint" -l $demo_remo_in_end -p $port_node]
+					}
+					if {[llength $demo_in_end]} {
+						hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" $demo_in_end reference
+					}
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle pin s_axis is not connected..check your design"
+		}
+		puts "***************DEMOEND****************"
+	}
+	if {[string match -nocase [get_property IP_NAME $ip] "v_gamma_lut"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l gamma_ports$drv_handle -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+
+		set port_node [add_or_get_dt_node -n "port" -l gamma_port0$drv_handle -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+		set gamma_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
+		set inip ""
+		if {[llength $gamma_inip]} {
+			foreach inip $gamma_inip {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+				}
+				if {[llength $inip]} {
+					set gamma_in_end ""
+					set gamma_remo_in_end ""
+					if {[dict exists $end_mappings $inip]} {
+						set gamma_in_end [dict get $end_mappings $inip]
+						puts "gamma_in_end:$gamma_in_end"
+					}
+					if {[dict exists $remo_mappings $inip]} {
+						set gamma_remo_in_end [dict get $remo_mappings $inip]
+						puts "gamma_remo_in_end:$gamma_remo_in_end"
+					}
+					if {[llength $gamma_remo_in_end]} {
+						set gamma_node [add_or_get_dt_node -n "endpoint" -l $gamma_remo_in_end -p $port_node]
+					}
+					if {[llength $gamma_in_end]} {
+						hsi::utils::add_new_dts_param "$gamma_node" "remote-endpoint" $gamma_in_end reference
+					}
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle pin s_axis_video is not connected..check your design"
+		}
+	}
+
+	if {[string match -nocase [get_property IP_NAME $ip] "mipi_dsi_tx_subsystem"]} {
+		set dsitx_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS"]
+		if {![llength $dsitx_inip]} {
+			dtg_warning "$drv_handle pin S_AXIS is not connected ..check your design"
+		}
+		set port_node [add_or_get_dt_node -n "port" -l encoder_dsi_port$drv_handle -u 0 -p $node]
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+		set inip ""
+		foreach inip $dsitx_inip {
+			if {[llength $inip]} {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $port_node
+					}
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $port_node
+					}
+				}
+			}
+		}
+		if {[llength $inip]} {
+			set dsitx_in_end ""
+			set dsitx_remo_in_end ""
+			if {[dict exists $end_mappings $inip]} {
+				set dsitx_in_end [dict get $end_mappings $inip]
+				puts "dsitx_in_end:$dsitx_in_end"
+			}
+			if {[dict exists $remo_mappings $inip]} {
+				set dsitx_remo_in_end [dict get $remo_mappings $inip]
+				puts "dsitx_remo_in_end:$dsitx_remo_in_end"
+			}
+			if {[llength $dsitx_remo_in_end]} {
+				set dsitx_node [add_or_get_dt_node -n "endpoint" -l $dsitx_remo_in_end -p $port_node]
+			}
+			if {[llength $dsitx_in_end]} {
+				hsi::utils::add_new_dts_param "$dsitx_node" "remote-endpoint" $dsitx_in_end reference
+			}
+		}
+	}
+
+	if {[string match -nocase [get_property IP_NAME $ip] "v_smpte_uhdsdi_tx_ss"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports$drv_handle -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port$drv_handle -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
+		set sditx_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
+		if {![llength $sditx_in_ip]} {
+			dtg_warning "$drv_handle pin VIDEO_IN is not connected...check your design"
+		}
+		set inip ""
+		foreach inip $sditx_in_ip {
+			if {[llength $inip]} {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $sdi_port_node
+					}
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $sdi_port_node
+					}
+				}
+			}
+		}
+		if {[llength $inip]} {
+			set sditx_in_end ""
+			set sditx_remo_in_end ""
+			if {[dict exists $end_mappings $inip]} {
+				set sditx_in_end [dict get $end_mappings $inip]
+				puts "sditx_in_end:$sditx_in_end"
+			}
+			if {[dict exists $remo_mappings $inip]} {
+				set sditx_remo_in_end [dict get $remo_mappings $inip]
+				puts "sditx_remo_in_end:$sditx_remo_in_end"
+			}
+			if {[llength $sditx_remo_in_end]} {
+				set sditx_node [add_or_get_dt_node -n "endpoint" -l $sditx_remo_in_end -p $sdi_port_node]
+			}
+			if {[llength $sditx_in_end]} {
+				hsi::utils::add_new_dts_param "$sditx_node" "remote-endpoint" $sditx_in_end reference
+			}
+		}
+	}
+
+	if {[string match -nocase [get_property IP_NAME $ip] "v_hdmi_tx_ss"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l hdmitx_ports$drv_handle -p $node]
+		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+		set hdmi_port_node [add_or_get_dt_node -n "port" -l encoder_hdmi_port$drv_handle -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "$hdmi_port_node" "reg" 0 int
+		set hdmitx_in_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_IN"]
+		if {![llength $hdmitx_in_ip]} {
+			dtg_warning "$drv_handle pin VIDEO_IN is not connected...check your design"
+		}
+		set inip ""
+		foreach inip $hdmitx_in_ip {
+			if {[llength $inip]} {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $hdmitx_in_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $hdmi_port_node
+					}
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
+						gen_frmbuf_rd_node $inip $drv_handle $hdmi_port_node
+					}
+				}
+			}
+		}
+		if {[llength $inip]} {
+			set hdmitx_in_end ""
+			set hdmitx_remo_in_end ""
+			if {[dict exists $end_mappings $inip]} {
+				set hdmitx_in_end [dict get $end_mappings $inip]
+				puts "hdmitx_in_end:$hdmitx_in_end"
+			}
+			if {[dict exists $remo_mappings $inip]} {
+				set hdmitx_remo_in_end [dict get $remo_mappings $inip]
+				puts "hdmitx_remo_in_end:$hdmitx_remo_in_end"
+			}
+			if {[llength $hdmitx_remo_in_end]} {
+				set hdmitx_node [add_or_get_dt_node -n "endpoint" -l $hdmitx_remo_in_end -p $hdmi_port_node]
+			}
+			if {[llength $hdmitx_in_end]} {
+				hsi::utils::add_new_dts_param "$hdmitx_node" "remote-endpoint" $hdmitx_in_end reference
+			}
+		}
+	}
+	 if {[string match -nocase [get_property IP_NAME $ip] "v_scenechange"]} {
+		set memory_scd [get_property CONFIG.MEMORY_BASED [get_cells -hier $drv_handle]]
+		if {$memory_scd == 1} {
+			#memory scd
+			return
+		}
+		set scd_ports_node [add_or_get_dt_node -n "scd" -l scd_ports$drv_handle -p $node]
+		hsi::utils::add_new_dts_param "$scd_ports_node" "#address-cells" 1 int
+		hsi::utils::add_new_dts_param "$scd_ports_node" "#size-cells" 0 int
+		set port_node [add_or_get_dt_node -n "port" -l scd_port0$drv_handle -u 0 -p $scd_ports_node]
+		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+
+		set scd_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+		if {![llength $scd_inip]} {
+			dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected...check your design"
+		}
+		foreach inip $scd_inip {
+			if {[llength $inip]} {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+				} else {
+					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
+						continue
+					}
+					set inip [get_in_connect_ip $inip $master_intf]
+				}
+				if {[llength $inip]} {
+					set scd_in_end ""
+					set scd_remo_in_end ""
+					if {[dict exists $end_mappings $inip]} {
+						set scd_in_end [dict get $end_mappings $inip]
+						puts "scd_in_end:$scd_in_end"
+					}
+					if {[dict exists $remo_mappings $inip]} {
+						set scd_remo_in_end [dict get $remo_mappings $inip]
+						puts "scd_remo_in_end:$scd_remo_in_end"
+					}
+					if {[llength $scd_remo_in_end]} {
+						set scd_node [add_or_get_dt_node -n "endpoint" -l $scd_remo_in_end -p $port_node]
+					}
+					if {[llength $scd_in_end]} {
+						hsi::utils::add_new_dts_param "$scd_node" "remote-endpoint" $scd_in_end reference
+					}
+				}
+			}
+		}
+	}
+}
+
+proc gen_remoteendpoint {drv_handle value} {
+	global remo_mappings
+	dict append remo_mappings $drv_handle $value
+	set val [dict get $remo_mappings $drv_handle]
+}
+
+proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
+	set frmbuf_rd_node [add_or_get_dt_node -n "endpoint" -l encoder$drv_handle -p $sdi_port_node]
+	hsi::utils::add_new_dts_param "$frmbuf_rd_node" "remote-endpoint" $ip$drv_handle reference
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set bus_node "overlay2"
+	} else {
+		set bus_node "amba_pl"
+	}
+	set pl_display [add_or_get_dt_node -n "drm-pl-disp-drv$drv_handle" -l "v_pl_disp$drv_handle" -p $bus_node]
+	hsi::utils::add_new_dts_param $pl_display "compatible" "xlnx,pl-disp" string
+	hsi::utils::add_new_dts_param $pl_display "dmas" "$ip 0" reference
+	hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
+	hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the field xlnx,vformat based on user requirement */" "" comment
+	hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "YUYV" string
+	set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port$drv_handle -u 0 -p $pl_display]
+	hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
+	set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l $ip$drv_handle -p $pl_display_port_node]
+	hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" encoder$drv_handle reference
+}
+
+proc get_connect_ip {ip intfpins} {
+        puts "get_con_ip:$ip pins:$intfpins"
+	if {[llength $intfpins]== 0} {
+		return
+	}
+	if {[llength $ip]== 0} {
+		return
+	}
+	global connectip ""
+	foreach intf $intfpins {
+		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+		if {[llength $connectip]} {
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
+			if {[llength $ip_mem_handles]} {
+				break
+			} else {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
+				get_connect_ip $connectip $master_intf
+			}
+		}
+	}
+	return $connectip
+}
+
+proc get_in_connect_ip {ip intfpins} {
+        puts "get_in_con_ip:$ip pins:$intfpins"
+	if {[llength $intfpins]== 0} {
+		return
+	}
+	if {[llength $ip]== 0} {
+		return
+	}
+	global connectip ""
+	foreach intf $intfpins {
+			set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+			set len [llength $connectip]
+			if {$len > 1} {
+				for {set i 0 } {$i < $len} {incr i} {
+					set ip [lindex $connectip $i]
+					if {[regexp -nocase "ila" $ip match]} {
+						continue
+					}
+					set connectip "$ip"
+				}
+			}
+			if {[llength $connectip]} {
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
+				if {[llength $ip_mem_handles]} {
+						break
+				} else {
+					if {[string match -nocase [get_property IP_NAME $connectip] "system_ila"]} {
+							continue
+					}
+					set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+					get_in_connect_ip $connectip $master_intf
+				}
+			}
+	}
+	return $connectip
+}
+
+proc get_connected_stream_ip { ip_name intf_name } {
+    set ip [::hsi::get_cells -hier $ip_name]
+    if { [llength $ip] == 0 } {
+        return ""
+    }
+    set intf [::hsi::get_intf_pins -of_objects $ip "$intf_name"]
+    if { [llength $intf] == 0 } {
+        return ""
+    }
+    set intf_type [common::get_property TYPE $intf]
+
+    set intf_net [::hsi::get_intf_nets -of_objects $intf]
+    if { [llength $intf_net] == 0 } {
+        return ""
+    }
+    set connected_intf_pins [::hsi::utils::get_other_intf_pin $intf_net $intf]
+    set connected_intf_pin [::hsi::utils::get_intf_pin_oftype $connected_intf_pins $intf_type 0]
+
+    if { [llength $connected_intf_pin] } {
+        set connected_ip [::hsi::get_cells -of_objects $connected_intf_pin]
+        return $connected_ip
+    }
+    return ""
 }
 
 proc gen_clk_property {drv_handle} {

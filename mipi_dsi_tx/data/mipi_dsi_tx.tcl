@@ -41,4 +41,8 @@ proc generate {drv_handle} {
 	} elseif {[string match -nocase $dsi_datatype "RGB565"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,dsi-data-type" 3 int
 	}
+	set panel_node [add_or_get_dt_node -n "simple_panel" -l simple_panel$drv_handle -u 0 -p $node]
+	hsi::utils::add_new_dts_param "${panel_node}" "/* User needs to add the panel node based on their requirement */" "" comment
+	hsi::utils::add_new_dts_param "$panel_node" "reg" 0 int
+	hsi::utils::add_new_dts_param "$panel_node" "compatible" "auo,b101uan01" string
 }

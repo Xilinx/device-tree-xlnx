@@ -37,4 +37,110 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$node" "xlnx,max-height" $max_rows int
 	set max_cols [get_property CONFIG.MAX_COLS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,max-width" $max_cols int
+
+	set ports_node [add_or_get_dt_node -n "ports" -l gamma_ports$drv_handle -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+	set port1_node [add_or_get_dt_node -n "port" -l gamma_port1$drv_handle -u 1 -p $ports_node]
+	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
+
+	set gammaoutip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	foreach outip $gammaoutip {
+		if {[llength $outip]} {
+			set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $outip] -filter { TYPE==MASTER || TYPE == INITIATOR}]
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $outip]
+			if {[llength $ip_mem_handles]} {
+				set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+				set gammanode [add_or_get_dt_node -n "endpoint" -l gamma_out$drv_handle -p $port1_node]
+				hsi::utils::add_new_dts_param "$gammanode" "remote-endpoint" $outip$drv_handle reference
+				gen_endpoint $drv_handle "gamma_out$drv_handle"
+				gen_remoteendpoint $drv_handle "$outip$drv_handle"
+				if {[string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"]} {
+					gen_frmbuf_wr_node $outip $drv_handle
+				}
+			} else {
+				if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
+					continue
+				}
+				set connectip [get_connect_ip $ip $master_intf]
+				if {[llength $connectip]} {
+					set gammanode [add_or_get_dt_node -n "endpoint" -l gamma_out$drv_handle -p $port1_node]
+					gen_endpoint $drv_handle "gamma_out$drv_handle"
+					hsi::utils::add_new_dts_param "$gammanode" "remote-endpoint" $connectip$drv_handle reference
+					gen_remoteendpoint $drv_handle "$connectip$drv_handle"
+					if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+						gen_frmbuf_wr_node $connectip $drv_handle
+					}
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle pin m_axis_video is not connected..check your design"
+		}
+	}
+	gen_gpio_reset $drv_handle $node
+}
+
+proc gen_frmbuf_wr_node {outip drv_handle} {
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set bus_node "overlay2"
+	} else {
+		set bus_node "amba_pl"
+	}
+        set vcap [add_or_get_dt_node -n "vcap_sdirx$drv_handle" -p $bus_node]
+        hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
+        hsi::utils::add_new_dts_param $vcap "dmas" "$outip 0" reference
+        hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
+        set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports$drv_handle -p $vcap]
+        hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
+        hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
+        set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
+        hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
+        hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+        set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $outip$drv_handle -p $vcap_port_node]
+        hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" gamma_out$drv_handle reference
+}
+
+proc gen_gpio_reset {drv_handle node} {
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier [get_cells -hier $drv_handle]] "ap_rst_n"]]
+	set proc_type [get_sw_proc_prop IP_NAME]
+	foreach pin $pins {
+		set sink_periph [::hsi::get_cells -of_objects $pin]
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "xlslice"]} {
+				set gpio [get_property CONFIG.DIN_FROM $sink_periph]
+				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
+				foreach pin $pins {
+					set periph [::hsi::get_cells -of_objects $pin]
+					if {[llength $periph]} {
+						set ip [get_property IP_NAME $periph]
+						if {[string match -nocase $proc_type "psv_cortexa72"] } {
+							if {[string match -nocase $ip "versal_cips"]} {
+								# As versal has only bank0 for MIOs
+								set gpio [expr $gpio + 26]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio0 $gpio 1" reference
+								break
+							}
+						}
+						if {[string match -nocase $proc_type "psu_cortexa53"] } {
+							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
+								set gpio [expr $gpio + 78]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+								break
+							}
+						}
+						if {[string match -nocase $ip "axi_gpio"]} {
+							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+						}
+					} else {
+						dtg_warning "$drv_handle: peripheral is NULL for the $pin $periph"
+					}
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle: peripheral is NULL for the $pin $sink_periph"
+		}
+	}
 }

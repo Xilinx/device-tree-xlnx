@@ -44,4 +44,19 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,pixels-per-clock" $pixelclock string
 	set video_intf [get_property CONFIG.C_VIDEO_INTF [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,video-intf" $video_intf string
+	set ports_node [add_or_get_dt_node -n "ports" -l sditx_ports$drv_handle -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+	set audio_connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "SDI_TX_ANC_DS_OUT"]
+	if {[llength $audio_connected_ip] != 0} {
+		set audio_connected_ip_type [get_property IP_NAME $audio_connected_ip]
+		if {[string match -nocase $audio_connected_ip_type "v_uhdsdi_audio"]} {
+			set sdi_audio_port [add_or_get_dt_node -n "port" -l sdi_audio_port -u 1 -p $ports_node]
+			hsi::utils::add_new_dts_param "$sdi_audio_port" "reg" 1 int
+			set sdi_audio_node [add_or_get_dt_node -n "endpoint" -l sdi_audio_sink_port -p $sdi_audio_port]
+			hsi::utils::add_new_dts_param "$sdi_audio_node" "remote-endpoint" sditx_audio_embed_src reference
+		}
+	} else {
+		dtg_warning "$drv_handle:connected ip for audio port pin SDI_TX_ANC_DS_OUT is NULL"
+	}
 }

@@ -525,6 +525,7 @@ proc post_generate {os_handle} {
     gen_dev_conf
     foreach drv_handle [get_drivers] {
         gen_peripheral_nodes $drv_handle
+	update_endpoints $drv_handle
     }
     global zynq_soc_dt_tree
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
