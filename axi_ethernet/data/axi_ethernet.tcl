@@ -269,10 +269,10 @@ proc generate {drv_handle} {
     set version [lindex $ver 0]
     if {![string_is_empty $connected_ip]} {
         set connected_ipname [get_property IP_NAME $connected_ip]
-        if {$connected_ipname == "axi_mcdma"} {
+        if {$connected_ipname == "axi_mcdma" || $connected_ipname == "axi_dma"} {
             set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
             set inhex [format %x $num_queues]
-            append numqueues "/bits/ 16 <0x$inhex>"
+            set numqueues "/bits/ 16 <0x$inhex>"
             hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
             if {$version < 2018} {
                 dtg_warning "quotes to be removed or use 2018.1 version for $node param xlnx,num-queues"
@@ -287,7 +287,7 @@ proc generate {drv_handle} {
             set_property xlnx,channel-ids $id $drv_handle
             if {$ip_name == "xxv_ethernet"  && $core!= 0} {
                   hsi::utils::add_new_dts_param $eth_node "xlnx,num-queues" $numqueues noformating
-                  hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id intlist
+                  hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id stringlist
             }
             set intr_val [get_property CONFIG.interrupts $target_handle]
             set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
@@ -298,26 +298,27 @@ proc generate {drv_handle} {
 		set intr_name [get_property CONFIG.interrupt-names $drv_handle]
 		append intr_names " " $intr_name " " $int_names
             } else {
-		append intr_names " " $int_names
+		set intr_names $int_names
 	    }
 
             set default_dts [get_property CONFIG.pcw_dts [get_os]]
             set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
             if {![string_is_empty $intr_parent]} {
-                if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
-                    regsub -all "\{||\t" $intr_val1 {} intr_val1
-                    regsub -all "\}||\t" $intr_val1 {} intr_val1
-                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
-                } else {
-                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
-                }
-                hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
-                hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
                 if {$ip_name == "xxv_ethernet"  && $core!= 0} {
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-parent" $intr_parent reference
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-names" $intr_names stringlist
-                }
+                } else {
+			if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
+				regsub -all "\{||\t" $intr_val1 {} intr_val1
+				regsub -all "\}||\t" $intr_val1 {} intr_val1
+				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
+			} else {
+				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
+			}
+			hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
+			hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
+		}
             }
         }
         if {$connected_ipname == "axi_dma" || $connected_ipname == "axi_mcdma"} {
