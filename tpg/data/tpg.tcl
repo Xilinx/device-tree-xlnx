@@ -43,12 +43,18 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-width" $max_cols int
 	set max_rows [get_property CONFIG.MAX_ROWS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-height" $max_rows int
-
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$drv_handle -p $node]
+	puts "ports_node:$ports_node"
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-
-	set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -u 0 -p $ports_node]
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+		# Workaround for issue (TBF)
+		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -p $ports_node]
+	} else {
+		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -u 0 -p $ports_node]
+	}
+	puts "port0_node:$port0_node"
 	hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
 	hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
 	hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
@@ -99,18 +105,23 @@ proc generate {drv_handle} {
 					gen_endpoint $drv_handle "tpg_out$drv_handle"
 					hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $out_ip$drv_handle reference
 					gen_remoteendpoint $drv_handle "$out_ip$drv_handle"
-					if {[string match -nocase [get_property IP_NAME $out_ip] "v_frmbuf_wr"]} {
+					if {[string match -nocase [get_property IP_NAME $out_ip] "v_frmbuf_wr"] || [string match -nocase [get_property IP_NAME $out_ip] "axi_vdma"]} {
 						gen_frmbuf_node $out_ip $drv_handle
 					}
 				 } else {
 					set connectip [get_connect_ip $out_ip $master_intf]
+					puts "connectip:$connectip"
 					if {[llength $connectip]} {
-						set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port0_node]
-						gen_endpoint $drv_handle "tpg_out$drv_handle"
-						hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $out_ip$drv_handle reference
-						gen_remoteendpoint $drv_handle "$out_ip$drv_handle"
-						if {[string match -nocase [get_property IP_NAME $out_ip] "v_frmbuf_wr"]} {
-							gen_frmbuf_node $connectip $drv_handle
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
+						puts "ip_mem_handles:$ip_mem_handles"
+						if {[llength $ip_mem_handles]} {
+							set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port0_node]
+							gen_endpoint $drv_handle "tpg_out$drv_handle"
+							hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $connectip$drv_handle reference
+							gen_remoteendpoint $drv_handle "$connectip$drv_handle"
+							if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"] || [string match -nocase [get_property IP_NAME $connectip] "axi_vdma"]} {
+								gen_frmbuf_node $connectip $drv_handle
+							}
 						}
 					}
 				}
@@ -123,6 +134,7 @@ proc generate {drv_handle} {
 }
 
 proc gen_frmbuf_node {ip drv_handle} {
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
 		set bus_node "overlay2"
@@ -136,7 +148,12 @@ proc gen_frmbuf_node {ip drv_handle} {
 	set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports$drv_handle -p $vcap]
 	hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-	set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+		#Workaround for issue (TBF)
+		set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -p $vcap_ports_node]
+	} else {
+		set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
+	}
 	hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
 	hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
 	set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $ip$drv_handle -p $vcap_port_node]
