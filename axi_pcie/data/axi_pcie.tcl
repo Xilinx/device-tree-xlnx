@@ -147,7 +147,6 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,axi-pcie-host-1.00.a"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,xdma-host-3.00"
 		set msi_rx_pin_en [get_property CONFIG.msi_rx_pin_en [get_cells -hier $drv_handle]]
@@ -164,13 +163,24 @@ proc generate {drv_handle} {
 		set_drv_prop $drv_handle bus-range "0x0 0xff" hexint
 	}
 	# Add Interrupt controller child node
-	set pcieintc_cnt [get_os_dev_count "pci_intc_cnt"]
-	set pcie_child_intc_node [add_or_get_dt_node -l "pcie_intc_${pcieintc_cnt}" -n interrupt-controller -p $node]
-	set int_map "0 0 0 1 &pcie_intc_${pcieintc_cnt} 1>, <0 0 0 2 &pcie_intc_${pcieintc_cnt} 2>, <0 0 0 3 &pcie_intc_${pcieintc_cnt} 3>,\
-		 <0 0 0 4 &pcie_intc_${pcieintc_cnt} 4"
+	if {[string match -nocase $proctype "psv_cortexa72"]} {
+		set psv_pcieintc_cnt [get_os_dev_count "psv_pci_intc_cnt"]
+		set pcie_child_intc_node [add_or_get_dt_node -l "psv_pcie_intc_${psv_pcieintc_cnt}" -n interrupt-controller -p $node]
+		set int_map "0 0 0 1 &psv_pcie_intc_${psv_pcieintc_cnt} 1>, <0 0 0 2 &psv_pcie_intc_${psv_pcieintc_cnt} 2>, <0 0 0 3 &psv_pcie_intc_${psv_pcieintc_cnt} 3>,\
+			<0 0 0 4 &psv_pcie_intc_${psv_pcieintc_cnt} 4"
+			incr psv_pcieintc_cnt
+			hsi::utils::set_os_parameter_value "psv_pci_intc_cnt" $psv_pcieintc_cnt
+			set intr_names "misc msi0 msi1"
+			set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
+	} else {
+		set pcieintc_cnt [get_os_dev_count "pci_intc_cnt"]
+		set pcie_child_intc_node [add_or_get_dt_node -l "pcie_intc_${pcieintc_cnt}" -n interrupt-controller -p $node]
+		set int_map "0 0 0 1 &pcie_intc_${pcieintc_cnt} 1>, <0 0 0 2 &pcie_intc_${pcieintc_cnt} 2>, <0 0 0 3 &pcie_intc_${pcieintc_cnt} 3>,\
+			<0 0 0 4 &pcie_intc_${pcieintc_cnt} 4"
+		incr pcieintc_cnt
+		hsi::utils::set_os_parameter_value "pci_intc_cnt" $pcieintc_cnt
+	}
 	set_drv_prop $drv_handle interrupt-map $int_map int
-	incr pcieintc_cnt
-	hsi::utils::set_os_parameter_value "pci_intc_cnt" $pcieintc_cnt
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "interrupt-controller" "" boolean
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#address-cells" 0 int
 	hsi::utils::add_new_dts_param "${pcie_child_intc_node}" "#interrupt-cells" 1 int
