@@ -160,15 +160,24 @@ proc generate {drv_handle} {
         set mdio_node [gen_mdio_node $drv_handle $node]
         gen_phy_node $mdio_node $phy_name $phya
     }
-	set ip_name " "
+	set ip_name ""
+	set is_pcspma ""
 	if {[string match -nocase $proc_type "psu_cortexa53"] } {
-		set connected_ip [hsi::utils::get_connected_stream_ip $zynq_periph "MDIO_ENET0"]
+		set all_pcspma ""
+		set ip_id [string index $drv_handle end]
+		set connected_ip [hsi::utils::get_connected_stream_ip $zynq_periph "MDIO_ENET$ip_id"]
 		if {[llength $connected_ip]} {
-			set ip_name [get_property IP_NAME $connected_ip]
+			set ip_name [get_property NAME $connected_ip]
+			set all_pcspma [get_cells -hier -filter {IP_NAME == gig_ethernet_pcs_pma}]
+			foreach ip $all_pcspma {
+				if {[get_property NAME $ip] == $ip_name} {
+					set is_pcspma $ip
+					break
+				}
+			}
 		}
 	}
-	set is_pcspma [get_cells -hier -filter {IP_NAME == gig_ethernet_pcs_pma}]
-	if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+	if {[llength $is_pcspma]} {
 		set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $is_pcspma] "phyaddr"]]
 		if {[llength $pin]} {
 			set sink_periph [::hsi::get_cells -of_objects $pin]
@@ -189,9 +198,10 @@ proc generate {drv_handle} {
 				dtg_warning "unsupported phytype:$phy_type"
 			}
 		}
-	}
-	if {![string_is_empty ${is_pcspma}] && $phymode == 2} {
-		# if eth mode is sgmii and no external pcs/pma found
-		hsi::utils::add_new_property $drv_handle "is-internal-pcspma" boolean ""
+	} else {
+		if {$phymode == 2} {
+			# if eth mode is sgmii and no external pcs/pma found
+			hsi::utils::add_new_property $drv_handle "is-internal-pcspma" boolean ""
+		}
 	}
 }
