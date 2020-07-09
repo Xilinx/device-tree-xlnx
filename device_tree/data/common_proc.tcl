@@ -1196,9 +1196,10 @@ proc create_dt_tree_from_dts_file {} {
 	set mainline_dtsi ""
 	set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $mainline_ker "v4.17"]} {
+	set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+        if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 		foreach i [get_sw_cores device_tree] {
-			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/v4.17/${dtsi_fname}"]
+			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${mainline_ker}/${dtsi_fname}"]
 			if {[file exists $mainline_dtsi]} {
 				foreach file [glob [file normalize [file dirname ${mainline_dtsi}]/*]] {
 					# NOTE: ./ works only if we did not change our directory
@@ -1226,7 +1227,8 @@ proc create_dt_tree_from_dts_file {} {
 
 	global zynq_soc_dt_tree
 	set default_dts [create_dt_tree -dts_file $zynq_soc_dt_tree]
-	if {[string match -nocase $mainline_ker "v4.17"]} {
+        set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+        if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 		set fp [open $mainline_dtsi r]
 		set file_data [read $fp]
 		set data [split $file_data "\n"]
@@ -1542,7 +1544,8 @@ proc zynq_gen_pl_clk_binding {drv_handle} {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	# Assuming these device supports the clocks
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $mainline_ker "v4.17"]} {
+	set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+	if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 		set valid_ip_list "axi_timer axi_uartlite axi_uart16550 axi_gpio axi_traffic_gen axi_ethernet axi_ethernet_buffer can canfd axi_iic xadc_wiz vcu"
 	} else {
 		set valid_ip_list "xadc_wiz"
@@ -2127,7 +2130,8 @@ proc gen_clk_property {drv_handle} {
 		return 0
 	}
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $mainline_ker "v4.17"]} {
+	set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+        if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 		return 0
 	}
 	set clocks ""
@@ -3925,7 +3929,8 @@ proc gen_root_node {drv_handle} {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
 			set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-			if {[string match -nocase $mainline_ker "v4.17"]} {
+			set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+			if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 				update_system_dts_include [file tail ${dtsi_fname}]
 				update_system_dts_include [file tail "zynqmp-clk.dtsi"]
 				return 0
