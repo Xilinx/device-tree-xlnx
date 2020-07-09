@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Xilinx ZynqMP ZC1254
+ *
+ * (C) Copyright 2015 - 2018, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ * Siva Durga Prasad Paladugu <sivadur@xilinx.com>
+ */
+
+
+/ {
+	model = "ZynqMP ZC1254 RevA";
+	compatible = "xlnx,zynqmp-zc1254-revA", "xlnx,zynqmp-zc1254", "xlnx,zynqmp";
+
+	aliases {
+		serial0 = &uart0;
+		serial1 = &dcc;
+	};
+
+};
+
+&dcc {
+	status = "okay";
+};
+
