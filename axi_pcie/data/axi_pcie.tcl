@@ -18,12 +18,15 @@ proc set_pcie_ranges {drv_handle proctype} {
 	} else {
 		set axibar_num [get_ip_property $drv_handle "CONFIG.AXIBAR_NUM"]
 	}
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
+		set axibar_num [get_ip_property $drv_handle "CONFIG.C_AXIBAR_NUM"]
+	}
 	set range_type 0x02000000
 	# 64-bit high address.
 	set high_64bit 0x00000000
 	set ranges ""
 	for {set x 0} {$x < $axibar_num} {incr x} {
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"]} {
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
 			set axi_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar_%d" $x]]
 			set pcie_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar2pciebar_%d" $x]]
 			set axi_highaddr [get_ip_property $drv_handle [format "CONFIG.axibar_highaddr_%d" $x]]
@@ -48,7 +51,7 @@ proc set_pcie_ranges {drv_handle proctype} {
 			set range_type 0x43000000
 		}
 
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
 			if {[regexp -nocase {([0-9a-f]{9})} "$pcie_baseaddr" match]} {
 				set temp $pcie_baseaddr
 				set temp [string trimleft [string trimleft $temp 0] x]
@@ -91,7 +94,7 @@ proc set_pcie_ranges {drv_handle proctype} {
 }
 
 proc set_pcie_reg {drv_handle proctype} {
-	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"]} {
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
 		set baseaddr [get_ip_property $drv_handle CONFIG.baseaddr]
 		set highaddr [get_ip_property $drv_handle CONFIG.highaddr]
 		set size [format 0x%X [expr $highaddr -$baseaddr + 1]]
