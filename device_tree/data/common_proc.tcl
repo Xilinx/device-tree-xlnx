@@ -599,6 +599,7 @@ proc set_drv_def_dts {drv_handle} {
 	if {[is_pl_ip $drv_handle] && $remove_pl} {
 		return
 	}
+	global bus_clk_list
 	if {[string_is_empty $default_dts]} {
 		if {[is_pl_ip $drv_handle]} {
 			set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
@@ -679,6 +680,289 @@ proc set_drv_def_dts {drv_handle} {
 			set targets "fpga_full"
 		}
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		set ips [get_cells -hier -filter {IP_NAME == "dfx_decoupler"}]
+		set dfx_node ""
+		foreach ip $ips {
+			if {[llength $ip]} {
+				set dfx_ip [get_property IP_NAME $ip]
+				set unit_addr [get_baseaddr ${ip} no_prefix]
+				if { [string equal $unit_addr "-1"] } {
+					break
+				}
+				set label $ip
+				set dev_type [get_property IP_NAME [get_cell -hier [get_cells -hier $ip]]]
+				set dfx_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u $unit_addr -d ${defaultdts} -p $child_node -auto_ref_parent]
+				set compatible [get_comp_str $ip]
+				hsi::utils::add_new_dts_param "$dfx_node" "compatible" "$compatible" string
+				set xdevice_family [get_property CONFIG.C_XDEVICEFAMILY [get_cells -hier $ip]]
+				hsi::utils::add_new_dts_param "$dfx_node" "xlnx,xdevicefamily" $xdevice_family string
+				if {[string match -nocase $proctype "psv_cortexa72"]} {
+					hsi::utils::add_new_dts_param "$dfx_node" "external-fpga-config" "" boolean
+				}
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
+				set reg ""
+				foreach mem_handle ${ip_mem_handles} {
+					set base [string tolower [get_property BASE_VALUE $mem_handle]]
+					set high [string tolower [get_property HIGH_VALUE $mem_handle]]
+					set size [format 0x%x [expr {${high} - ${base} + 1}]]
+					if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+						set temp $base
+						set temp [string trimleft [string trimleft $temp 0] x]
+						set len [string length $temp]
+						set rem [expr {${len} - 8}]
+						set high_base "0x[string range $temp $rem $len]"
+						set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+						set low_base [format 0x%08x $low_base]
+						if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+							set temp $size
+							set temp [string trimleft [string trimleft $temp 0] x]
+							set len [string length $temp]
+							set rem [expr {${len} - 8}]
+							set high_size "0x[string range $temp $rem $len]"
+							set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+							set low_size [format 0x%08x $low_size]
+							set reg "$low_base $high_base $low_size $high_size"
+						} else {
+							set reg "$low_base $high_base 0x0 $size"
+						}
+					} else {
+						set reg "0x0 $base 0x0 $size"
+					}
+				}
+				hsi::utils::add_new_dts_param "$dfx_node" "reg" "$reg" intlist
+				set clk_pins [get_pins -of_objects [get_cells -hier $ip] -filter {TYPE==clk&&DIRECTION==I}]
+				set clocks ""
+				set axi 0
+				set is_clk_wiz 0
+				set is_pl_clk 0
+				set updat ""
+				set clocknames ""
+				foreach clk $clk_pins {
+					set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] $clk]]
+					set valid_clk_list "clk_out0 clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7 clk_out8 clk_out9"
+					set pl_clk ""
+					set clkout ""
+					foreach pin $pins {
+						if {[lsearch $valid_clk_list $pin] >= 0} {
+							set clkout $pin
+							set is_clk_wiz 1
+							set periph [::hsi::get_cells -of_objects $pin]
+						}
+					}
+					 if {[llength $clkout]} {
+						set number [regexp -all -inline -- {[0-9]+} $clkout]
+						set clk_wiz [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
+						set axi_clk "s_axi_aclk"
+						foreach clk1 $clk_wiz {
+							if {[regexp $axi_clk $clk1 match]} {
+								set axi 1
+							}
+						}
+						if {[string match -nocase $axi "0"]} {
+							dtg_warning "no s_axi_aclk for clockwizard IP block: \" $periph\"\n\r"
+							set pins [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
+							set clk_list "pl_clk*"
+							set clk_pl ""
+							set num ""
+							foreach clk_wiz_pin $pins {
+								set clk_wiz_pins [get_pins -of_objects [get_nets -of_objects $clk_wiz_pin]]
+								foreach pin $clk_wiz_pins {
+									if {[regexp $clk_list $pin match]} {
+										set clk_pl $pin
+									}
+								}
+							}
+							if {[llength $clk_pl]} {
+								set num [regexp -all -inline -- {[0-9]+} $clk_pl]
+							}
+
+							set clk_freq [get_clock_frequency [get_cells -hier $ip] "$clk"]
+							if {[lsearch $bus_clk_list $clk_freq] < 0} {
+								set bus_clk_list [lappend bus_clk_list $clk_freq]
+							}
+							set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+							set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+							-d ${defaultdts} -p ${child_node}]
+							set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+							set updat [lappend updat misc_clk_${bus_clk_cnt}]
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+						}
+						if {![string match -nocase $axi "0"]} {
+							switch $number {
+									"1" {
+										set peri "$periph 0"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"2" {
+										set peri "$periph 1"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"3" {
+										set peri "$periph 2"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"4" {
+										set peri "$periph 3"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"5" {
+										set peri "$periph 4"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"6" {
+										set peri "$periph 5"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+									"7" {
+										set peri "$periph 6"
+										set clocks [lappend clocks $peri]
+										set updat [lappend updat $peri]
+									}
+								}
+							}
+
+					}
+					if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+						set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
+					}
+					foreach pin $pins {
+						if {[lsearch $clklist $pin] >= 0} {
+							set pl_clk $pin
+							set is_pl_clk 1
+						}
+					}
+					if {[string match -nocase $proctype "psv_cortexa72"]} {
+						switch $pl_clk {
+								"pl_clk0" {
+										set pl_clk0 "versal_clk 65"
+										set clocks [lappend clocks $pl_clk0]
+										set updat  [lappend updat $pl_clk0]
+								}
+								"pl_clk1" {
+										set pl_clk1 "versal_clk 66"
+										set clocks [lappend clocks $pl_clk1]
+										set updat  [lappend updat $pl_clk1]
+								}
+								"pl_clk2" {
+										set pl_clk2 "versal_clk 67"
+										set clocks [lappend clocks $pl_clk2]
+										set updat [lappend updat $pl_clk2]
+								}
+								"pl_clk3" {
+										set pl_clk3 "versal_clk 68"
+										set clocks [lappend clocks $pl_clk3]
+										set updat [lappend updat $pl_clk3]
+								}
+								default {
+										dtg_debug "not supported pl_clk:$pl_clk"
+								}
+						}
+					}
+					if {[string match -nocase $proctype "psu_cortexa53"]} {
+						switch $pl_clk {
+								"pl_clk0" {
+										set pl_clk0 "zynqmp_clk 71"
+										set clocks [lappend clocks $pl_clk0]
+										set updat  [lappend updat $pl_clk0]
+								}
+								"pl_clk1" {
+										set pl_clk1 "zynqmp_clk 72"
+										set clocks [lappend clocks $pl_clk1]
+										set updat  [lappend updat $pl_clk1]
+								}
+								"pl_clk2" {
+										set pl_clk2 "zynqmp_clk 73"
+										set clocks [lappend clocks $pl_clk2]
+										set updat [lappend updat $pl_clk2]
+								}
+								"pl_clk3" {
+										set pl_clk3 "zynqmp_clk 74"
+										set clocks [lappend clocks $pl_clk3]
+										set updat [lappend updat $pl_clk3]
+								}
+								default {
+										dtg_debug "not supported pl_clk:$pl_clk"
+								}
+						}
+					}
+					if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
+						set clk_freq [get_clock_frequency [get_cells -hier $ip] "$clk"]
+						if {[llength $clk_freq] == 0} {
+							dtg_warning "clock frequency for the $clk is NULL of IP block: \"$drv_handle\"\n\r"
+							continue
+						}
+						set clk_freq [expr int($clk_freq)]
+						if {![string equal $clk_freq ""]} {
+							if {[lsearch $bus_clk_list $clk_freq] < 0} {
+								set bus_clk_list [lappend bus_clk_list $clk_freq]
+							}
+							set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+							set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+							-d ${defaultdts} -p ${child_node}]
+							set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+							set updat [lappend updat misc_clk_${bus_clk_cnt}]
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+							hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+						}
+					}
+
+					append clocknames " " "$clk"
+					set is_pl_clk 0
+					set is_clk_wiz 0
+					set axi 0
+				}
+				hsi::utils::add_new_dts_param "${dfx_node}" "clock-names" "$clocknames" stringlist
+				set len [llength $updat]
+				switch $len {
+					"1" {
+						set refs [lindex $updat 0]
+						hsi::utils::add_new_dts_param "${dfx_node}" "clocks" "$refs" reference
+					}
+					"2" {
+						set refs [lindex $updat 0]
+						append refs ">, <&[lindex $updat 1]"
+						hsi::utils::add_new_dts_param "${dfx_node}" "clocks" "$refs" reference
+					}
+					"3" {
+						set refs [lindex $updat 0]
+						append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]"
+						hsi::utils::add_new_dts_param "${dfx_node}" "clocks" "$refs" reference
+					}
+					"4" {
+						set refs [lindex $updat 0]
+						append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]"
+						hsi::utils::add_new_dts_param "${dfx_node}" "clocks" "$refs" reference
+					}
+				}
+				set intf [::hsi::get_intf_pins -of_objects $ip "rp_intf_0"]
+				set intf_net [::hsi::get_intf_pins -of_objects [::hsi::get_intf_nets -of_objects $intf]]
+				set pr [get_cells -of_objects [lindex $intf_net 1]]
+				set pr_type [get_property BD_TYPE [get_cells -hier $pr]]
+				set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+				if {[llength $pr_regions]} {
+					set prlen [llength $pr_regions]
+					for {set dfx 0} {$dfx < $prlen} {incr dfx} {
+						if {[string match -nocase "[lindex $pr_regions $dfx]" "$pr"]} {
+							set prnode [add_or_get_dt_node -l "fpga_PR$dfx" -n "fpga-PR$dfx" -p $dfx_node]
+							hsi::utils::add_new_dts_param  "${prnode}" "compatible"  "fpga-region" string
+			                                hsi::utils::add_new_dts_param "${prnode}" "#address-cells" 2 int
+							hsi::utils::add_new_dts_param "${prnode}" "#size-cells" 2 int
+							hsi::utils::add_new_dts_param "${prnode}" "ranges" "" boolean
+						}
+					}
+				}
+			}
+		}
+		if {![llength $dfx_node]} {
 		set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 		if {[llength $pr_regions]} {
 			set pr_len [llength $pr_regions]
@@ -689,6 +973,7 @@ proc set_drv_def_dts {drv_handle} {
 				hsi::utils::add_new_dts_param "${pr_node}" "#size-cells" 2 int
 				hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
 			}
+		}
 		}
 		hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 		hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
@@ -3379,7 +3664,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	}
 	# TODO: more ignore ip list?
 	set ip_type [get_property IP_NAME $ip]
-	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc dfx_decoupler"
 	if {[string match -nocase $ip_type "psu_pcie"]} {
 		set pcie_config [get_property CONFIG.C_PCIE_MODE [get_cells -hier $drv_handle]]
 		if {[string match -nocase $pcie_config "Endpoint Device"]} {
