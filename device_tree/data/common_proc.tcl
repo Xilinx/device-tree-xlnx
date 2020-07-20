@@ -34,6 +34,14 @@ set or_id 0
 set or_cnt 0
 global set end_mappings [dict create]
 global set remote_mappings [dict create]
+global set port1_end_mappings [dict create]
+global set port2_end_mappings [dict create]
+global set port3_end_mappings [dict create]
+global set port4_end_mappings [dict create]
+global set axis_port1_remo_mappings [dict create]
+global set axis_port2_remo_mappings [dict create]
+global set axis_port3_remo_mappings [dict create]
+global set axis_port4_remo_mappings [dict create]
 
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
@@ -1889,9 +1897,42 @@ proc gen_endpoint {drv_handle value} {
 	dict append end_mappings $drv_handle $value
 	set val [dict get $end_mappings $drv_handle]
 }
+
+proc gen_axis_port1_endpoint {drv_handle value} {
+	global port1_end_mappings
+	dict append port1_end_mappings $drv_handle $value
+	set val [dict get $port1_end_mappings $drv_handle]
+}
+
+proc gen_axis_port2_endpoint {drv_handle value} {
+	global port2_end_mappings
+	dict append port2_end_mappings $drv_handle $value
+	set val [dict get $port2_end_mappings $drv_handle]
+}
+
+proc gen_axis_port3_endpoint {drv_handle value} {
+	global port3_end_mappings
+	dict append port3_end_mappings $drv_handle $value
+	set val [dict get $port3_end_mappings $drv_handle]
+}
+
+proc gen_axis_port4_endpoint {drv_handle value} {
+	global port4_end_mappings
+	dict append port4_end_mappings $drv_handle $value
+	set val [dict get $port4_end_mappings $drv_handle]
+}
+
 proc update_endpoints {drv_handle} {
 	global end_mappings
 	global remo_mappings
+	global set port1_end_mappings
+        global set port2_end_mappings
+        global set port3_end_mappings
+        global set port4_end_mappings
+        global set axis_port1_remo_mappings
+        global set axis_port2_remo_mappings
+        global set axis_port3_remo_mappings
+        global set axis_port4_remo_mappings
 	set node [gen_peripheral_nodes $drv_handle]
 	set ip [get_cells -hier $drv_handle]
 	if {[string match -nocase [get_property IP_NAME $ip] "v_proc_ss"]} {
@@ -2011,6 +2052,89 @@ proc update_endpoints {drv_handle} {
 		hsi::utils::add_new_dts_param "${port_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
 		hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
 		set demo_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
+		if {[llength $demo_inip]} {
+			if {[string match -nocase [get_property IP_NAME $demo_inip] "axis_switch"]} {
+				set demo_in_end ""
+				set demo_remo_in_end ""
+				if {[dict exists $port1_end_mappings $demo_inip]} {
+					set demo_in_end [dict get $port1_end_mappings $demo_inip]
+					puts "demo_in_end:$demo_in_end"
+				}
+				if {[dict exists $axis_port1_remo_mappings $demo_inip]} {
+					set demo_remo_in_end [dict get $axis_port1_remo_mappings $demo_inip]
+					puts "demo_remo_in_end:$demo_remo_in_end"
+				}
+				if {[dict exists $port2_end_mappings $demo_inip]} {
+					set demo_in1_end [dict get $port2_end_mappings $demo_inip]
+					puts "demo_in1_end:$demo_in1_end"
+				}
+				if {[dict exists $axis_port2_remo_mappings $demo_inip]} {
+					set demo_remo_in1_end [dict get $axis_port2_remo_mappings $demo_inip]
+					puts "demo_remo_in1_end:$demo_remo_in1_end"
+				}
+				if {[dict exists $port3_end_mappings $demo_inip]} {
+					set demo_in2_end [dict get $port3_end_mappings $demo_inip]
+					puts "demo_in2_end:$demo_in2_end"
+				}
+				if {[dict exists $axis_port3_remo_mappings $demo_inip]} {
+					set demo_remo_in2_end [dict get $axis_port3_remo_mappings $demo_inip]
+					puts "demo_remo_in2_end:$demo_remo_in2_end"
+				}
+				if {[dict exists $port4_end_mappings $demo_inip]} {
+					set demo_in3_end [dict get $port4_end_mappings $demo_inip]
+					puts "demo_in3_end:$demo_in3_end"
+				}
+				if {[dict exists $axis_port4_remo_mappings $demo_inip]} {
+					set demo_remo_in3_end [dict get $axis_port4_remo_mappings $demo_inip]
+					puts "demo_remo_in3_end:$demo_remo_in3_end"
+				}
+				set drv [split $demo_remo_in_end "-"]
+				set handle [lindex $drv 0]
+				puts "handle:$handle"
+				if {[regexp -nocase $drv_handle "$demo_remo_in_end" match]} {
+					if {[llength $demo_remo_in_end]} {
+						set demosaic_node [add_or_get_dt_node -n "endpoint" -l $demo_remo_in_end -p $port_node]
+						puts "demosaic_node:$demosaic_node"
+					}
+					if {[llength $demo_in_end]} {
+						hsi::utils::add_new_dts_param "$demosaic_node" "remote-endpoint" $demo_in_end reference
+					}
+					puts "****DEMO_END1****"
+				}
+				if {[regexp -nocase $drv_handle "$demo_remo_in1_end" match]} {
+					if {[llength $demo_remo_in1_end]} {
+						set demosaic_node1 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in1_end -p $port_node]
+						puts "demosaic_node1:$demosaic_node1"
+					}
+					if {[llength $demo_in1_end]} {
+						hsi::utils::add_new_dts_param "$demosaic_node1" "remote-endpoint" $demo_in1_end reference
+					}
+					puts "****DEMO_END2****"
+				}
+				if {[regexp -nocase $drv_handle "$demo_remo_in2_end" match]} {
+					if {[llength $demo_remo_in2_end]} {
+						set demosaic_node2 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in2_end -p $port_node]
+						puts "demosaic_node2:$demosaic_node2"
+					}
+					if {[llength $demo_in2_end]} {
+						hsi::utils::add_new_dts_param "$demosaic_node2" "remote-endpoint" $demo_in2_end reference
+					}
+					puts "****DEMO_END3****"
+				}
+				if {[regexp -nocase $drv_handle "$demo_remo_in3_end" match]} {
+					if {[llength $demo_remo_in3_end]} {
+						set demosaic_node3 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in3_end -p $port_node]
+						puts "demosaic_node3:$demosaic_node3"
+					}
+					if {[llength $demo_in3_end]} {
+						hsi::utils::add_new_dts_param "$demosaic_node3" "remote-endpoint" $demo_in3_end reference
+					}
+					puts "****DEMO_END3****"
+				}
+				return
+			}
+		}
+
 		set inip ""
 		if {[llength $demo_inip]} {
 			foreach inip $demo_inip {
@@ -2291,12 +2415,80 @@ proc update_endpoints {drv_handle} {
 			}
 		}
 	}
+	set ips [get_cells -hier -filter {IP_NAME == "axis_switch"}]
+	foreach ip $ips {
+		if {[llength $ip]} {
+			set axis_ip [get_property IP_NAME $ip]
+			set default_dts [set_drv_def_dts $ip]
+			set unit_addr [get_baseaddr ${ip} no_prefix]
+			if { ![string equal $unit_addr "-1"] } {
+				break
+			}
+			set label $ip
+			set bus_node [add_or_get_bus_node $ip $default_dts]
+			set dev_type [get_property IP_NAME [get_cell -hier [get_cells -hier $ip]]]
+			set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
+			if {[llength $axis_ip]} {
+				set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+				set inip [get_in_connect_ip $ip $intf]
+				puts "inip:$inip"
+				set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
+				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+				set port_node [add_or_get_dt_node -n "port" -l axis_switch_port0$ip -u 0 -p $ports_node]
+				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+				if {[llength $inip]} {
+					set axis_switch_in_end ""
+					set axis_switch_remo_in_end ""
+					if {[dict exists $end_mappings $inip]} {
+						set axis_switch_in_end [dict get $end_mappings $inip]
+						puts "drv:$ip inend:$axis_switch_in_end"
+					}
+					if {[dict exists $remo_mappings $inip]} {
+						set axis_switch_remo_in_end [dict get $remo_mappings $inip]
+						puts "drv:$ip inremoend:$axis_switch_remo_in_end"
+					}
+					if {[llength $axis_switch_remo_in_end]} {
+						set axisinnode [add_or_get_dt_node -n "endpoint" -l $axis_switch_remo_in_end -p $port_node]
+					}
+					if {[llength $axis_switch_in_end]} {
+						hsi::utils::add_new_dts_param "$axisinnode" "remote-endpoint" $axis_switch_in_end reference
+					}
+				}
+			}
+		}
+	}
+
 }
 
 proc gen_remoteendpoint {drv_handle value} {
 	global remo_mappings
 	dict append remo_mappings $drv_handle $value
 	set val [dict get $remo_mappings $drv_handle]
+}
+
+proc gen_axis_port1_remoteendpoint {drv_handle value} {
+	global axis_port1_remo_mappings
+	dict append axis_port1_remo_mappings $drv_handle $value
+	set val [dict get $axis_port1_remo_mappings $drv_handle]
+}
+
+proc gen_axis_port2_remoteendpoint {drv_handle value} {
+	global axis_port2_remo_mappings
+	dict append axis_port2_remo_mappings $drv_handle $value
+	set val [dict get $axis_port2_remo_mappings $drv_handle]
+}
+
+proc gen_axis_port3_remoteendpoint {drv_handle value} {
+	global axis_port3_remo_mappings
+	dict append axis_port3_remo_mappings $drv_handle $value
+	set val [dict get $axis_port3_remo_mappings $drv_handle]
+}
+
+proc gen_axis_port4_remoteendpoint {drv_handle value} {
+	global axis_port4_remo_mappings
+	dict append axis_port4_remo_mappings $drv_handle $value
+	set val [dict get $axis_port4_remo_mappings $drv_handle]
 }
 
 proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
@@ -2320,6 +2512,73 @@ proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
 	hsi::utils::add_new_dts_param "$pl_disp_crtc_node" "remote-endpoint" encoder$drv_handle reference
 }
 
+proc gen_axis_switch {ip} {
+	set compatible [get_comp_str $ip]
+	puts "+++++++++gen_axis_switch:$ip"
+	set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+	set inip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+	puts "connectinip:$inip"
+	set intf1 [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+	set iip [get_connected_stream_ip [get_cells -hier $inip] $intf1]
+	puts "iip:$iip"
+	set inip [get_in_connect_ip $ip $intf]
+	puts "inip:$inip"
+	set bus_node "amba_pl"
+	set switch_node [add_or_get_dt_node -n "axis_switch" -l $ip -u 0 -p $bus_node]
+	set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $switch_node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+	set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
+	puts "intf:$master_intf"
+	set routing_mode [get_property CONFIG.ROUTING_MODE [get_cells -hier $ip]]
+	hsi::utils::add_new_dts_param "$switch_node" "xlnx,routing-mode" $routing_mode int
+	set num_si [get_property CONFIG.NUM_SI [get_cells -hier $ip]]
+	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-si" $num_si int
+	set num_mi [get_property CONFIG.NUM_MI [get_cells -hier $ip]]
+	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-mi" $num_mi int
+	hsi::utils::add_new_dts_param "$switch_node" "compatible" "$compatible" string
+	set count 0
+	foreach intf $master_intf {
+		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+		puts "connectip:$connectip intf:$intf"
+		if {[llength $connectip]} {
+			incr count
+		}
+		if {$count == 1} {
+			set port_node [add_or_get_dt_node -n "port" -l axis_switch_port1$ip -u 1 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" 1 int
+			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_switch_out1$ip -p $port_node]
+			gen_axis_port1_endpoint $ip "axis_switch_out1$ip"
+			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
+			gen_axis_port1_remoteendpoint $ip $connectip$ip
+		}
+		if {$count == 2} {
+			set port_node [add_or_get_dt_node -n "port" -l axis_switch_port2$ip -u 2 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" 2 int
+			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_switch_out2$ip -p $port_node]
+			gen_axis_port2_endpoint $ip "axis_switch_out2$ip"
+			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
+			gen_axis_port2_remoteendpoint $ip $connectip$ip
+		}
+		if {$count == 3} {
+			set port_node [add_or_get_dt_node -n "port" -l axis_switch_port3$ip -u 3 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" 3 int
+			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_switch_out3$ip -p $port_node]
+			gen_axis_port3_endpoint $ip "axis_switch_out3$ip"
+			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
+			gen_axis_port3_remoteendpoint $ip $connectip$ip
+		}
+		if {$count == 4} {
+			set port_node [add_or_get_dt_node -n "port" -l axis_switch_port4$ip -u 4 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" 4 int
+			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_switch_out4$ip -p $port_node]
+			gen_axis_port4_endpoint $ip "axis_switch_out4$ip"
+			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
+			gen_axis_port4_remoteendpoint $ip $connectip$ip
+		}
+	}
+}
+
 proc get_connect_ip {ip intfpins} {
         puts "get_con_ip:$ip pins:$intfpins"
 	if {[llength $intfpins]== 0} {
@@ -2331,6 +2590,10 @@ proc get_connect_ip {ip intfpins} {
 	global connectip ""
 	foreach intf $intfpins {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $connectip]] "axis_switch"]} {
+                        gen_axis_switch $connectip
+                        break
+                }
 		if {[llength $connectip]} {
 			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 			if {[llength $ip_mem_handles]} {
