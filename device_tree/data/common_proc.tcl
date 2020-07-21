@@ -2415,6 +2415,37 @@ proc update_endpoints {drv_handle} {
 			}
 		}
 	}
+	if {[string match -nocase [get_property IP_NAME $ip] "v_tpg"]} {
+		set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$drv_handle -p $node]
+		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -u 0 -p $ports_node]
+		hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+		hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+		hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+		set tpg_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
+                if {![llength $tpg_inip]} {
+                        dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected...check your design"
+                }
+		set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $tpg_inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+		set inip [get_in_connect_ip $tpg_inip $master_intf]
+		if {[llength $inip]} {
+			set tpg_in_end ""
+			set tpg_remo_in_end ""
+			if {[dict exists $end_mappings $inip]} {
+				set tpg_in_end [dict get $end_mappings $inip]
+				puts "tpg_in_end:$tpg_in_end"
+			}
+			if {[dict exists $remo_mappings $inip]} {
+				set tpg_remo_in_end [dict get $remo_mappings $inip]
+				puts "tpg_remo_in_end:$tpg_remo_in_end"
+			}
+			if {[llength $tpg_remo_in_end]} {
+				set tpg_node [add_or_get_dt_node -n "endpoint" -l $tpg_remo_in_end -p $port0_node]
+			}
+			if {[llength $tpg_in_end]} {
+				hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $tpg_in_end reference
+			}
+		}
+	}
 	set ips [get_cells -hier -filter {IP_NAME == "axis_switch"}]
 	foreach ip $ips {
 		if {[llength $ip]} {
@@ -2431,7 +2462,6 @@ proc update_endpoints {drv_handle} {
 			if {[llength $axis_ip]} {
 				set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 				set inip [get_in_connect_ip $ip $intf]
-				puts "inip:$inip"
 				set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
 				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int

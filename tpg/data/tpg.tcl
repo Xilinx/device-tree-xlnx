@@ -50,15 +50,14 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		# Workaround for issue (TBF)
-		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -p $ports_node]
+		set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -p $ports_node]
 	} else {
-		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -u 0 -p $ports_node]
+		set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -u 1 -p $ports_node]
 	}
-	puts "port0_node:$port0_node"
-	hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
-	hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
-	hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
-	hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
+	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+	hsi::utils::add_new_dts_param "${port1_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
+	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 
 	set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
 	if {![llength $connect_ip]} {
@@ -101,7 +100,7 @@ proc generate {drv_handle} {
 				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $out_ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
 				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $out_ip]
 				if {[llength $ip_mem_handles]} {
-					set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port0_node]
+					set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port1_node]
 					gen_endpoint $drv_handle "tpg_out$drv_handle"
 					hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $out_ip$drv_handle reference
 					gen_remoteendpoint $drv_handle "$out_ip$drv_handle"
@@ -115,7 +114,7 @@ proc generate {drv_handle} {
 						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 						puts "ip_mem_handles:$ip_mem_handles"
 						if {[llength $ip_mem_handles]} {
-							set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port0_node]
+							set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port1_node]
 							gen_endpoint $drv_handle "tpg_out$drv_handle"
 							hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $connectip$drv_handle reference
 							gen_remoteendpoint $drv_handle "$connectip$drv_handle"
