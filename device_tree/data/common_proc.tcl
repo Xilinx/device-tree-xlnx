@@ -2458,31 +2458,37 @@ proc update_endpoints {drv_handle} {
 			set label $ip
 			set bus_node [add_or_get_bus_node $ip $default_dts]
 			set dev_type [get_property IP_NAME [get_cell -hier [get_cells -hier $ip]]]
-			set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
 			if {[llength $axis_ip]} {
 				set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 				set inip [get_in_connect_ip $ip $intf]
-				set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
-				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-				set port_node [add_or_get_dt_node -n "port" -l axis_switch_port0$ip -u 0 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-				if {[llength $inip]} {
-					set axis_switch_in_end ""
-					set axis_switch_remo_in_end ""
-					if {[dict exists $end_mappings $inip]} {
-						set axis_switch_in_end [dict get $end_mappings $inip]
-						puts "drv:$ip inend:$axis_switch_in_end"
-					}
-					if {[dict exists $remo_mappings $inip]} {
-						set axis_switch_remo_in_end [dict get $remo_mappings $inip]
-						puts "drv:$ip inremoend:$axis_switch_remo_in_end"
-					}
-					if {[llength $axis_switch_remo_in_end]} {
-						set axisinnode [add_or_get_dt_node -n "endpoint" -l $axis_switch_remo_in_end -p $port_node]
-					}
-					if {[llength $axis_switch_in_end]} {
-						hsi::utils::add_new_dts_param "$axisinnode" "remote-endpoint" $axis_switch_in_end reference
+				set inipname [get_property IP_NAME $inip]
+				set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_l
+ut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_sc
+enechange"
+				if {[lsearch  -nocase $valid_mmip_list $inipname] >= 0} {
+					set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
+					set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
+					hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+					hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+					set port_node [add_or_get_dt_node -n "port" -l axis_switch_port0$ip -u 0 -p $ports_node]
+					hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+					if {[llength $inip]} {
+						set axis_switch_in_end ""
+						set axis_switch_remo_in_end ""
+						if {[dict exists $end_mappings $inip]} {
+							set axis_switch_in_end [dict get $end_mappings $inip]
+							puts "drv:$ip inend:$axis_switch_in_end"
+						}
+						if {[dict exists $remo_mappings $inip]} {
+							set axis_switch_remo_in_end [dict get $remo_mappings $inip]
+							puts "drv:$ip inremoend:$axis_switch_remo_in_end"
+						}
+						if {[llength $axis_switch_remo_in_end]} {
+							set axisinnode [add_or_get_dt_node -n "endpoint" -l $axis_switch_remo_in_end -p $port_node]
+						}
+						if {[llength $axis_switch_in_end]} {
+							hsi::utils::add_new_dts_param "$axisinnode" "remote-endpoint" $axis_switch_in_end reference
+						}
 					}
 				}
 			}
