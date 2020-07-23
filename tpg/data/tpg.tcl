@@ -44,16 +44,14 @@ proc generate {drv_handle} {
 	set max_rows [get_property CONFIG.MAX_ROWS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-height" $max_rows int
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-	set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$drv_handle -p $node]
-	puts "ports_node:$ports_node"
-	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	if {[string match -nocase $proctype "ps7_cortexa9"]} {
 		# Workaround for issue (TBF)
-		set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -p $ports_node]
-	} else {
-		set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -u 1 -p $ports_node]
+		return
 	}
+	set ports_node [add_or_get_dt_node -n "ports" -l tpg_ports$drv_handle -p $node]
+	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+	set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -u 1 -p $ports_node]
 	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
 	hsi::utils::add_new_dts_param "${port1_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
