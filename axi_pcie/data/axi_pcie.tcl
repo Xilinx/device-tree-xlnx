@@ -147,8 +147,11 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,axi-pcie-host-1.00.a"]
+	if {![string match -nocase $proctype "psv_cortexa72"]} {
+		set compatible [append compatible " " "xlnx,axi-pcie-host-1.00.a"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,xdma-host-3.00"
@@ -158,7 +161,6 @@ proc generate {drv_handle} {
 			set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
 		}
 	}
-	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	set_pcie_reg $drv_handle $proctype
 	set_pcie_ranges $drv_handle $proctype
 	set_drv_prop $drv_handle interrupt-map-mask "0 0 0 7" intlist
