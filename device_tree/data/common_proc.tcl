@@ -1471,6 +1471,10 @@ proc add_driver_prop {drv_handle dt_node prop} {
 	} else {
 		error "Unable to add the $prop property for $drv_handle due to missing valid type"
 	}
+	set ipname [get_property IP_NAME [get_cells -hier $drv_handle]]
+	if {[string match -nocase $ipname "axi_mcdma"] && [string match -nocase $conf_prop "xlnx,sg-include-stscntrl-strm"]&& [string match -nocase $type "boolean"]} {
+		set type "hexint"
+	}
 	dtg_debug "${dt_node} - ${prop} - ${value} - ${type}"
 
 	# only boolean allows empty string
