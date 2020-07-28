@@ -90,15 +90,22 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip] != 0} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
+							hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$connected_ip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
+							set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
+							gen_video_format $layer0_video_format $mixer_node0 $drv_handle $max_data_width
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$inip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
+							set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
+							gen_video_format $layer0_video_format $mixer_node0 $drv_handle $max_data_width
 						}
-						hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$connected_ip 0" reference
-						hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
-						hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
-						set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
-						gen_video_format $layer0_video_format $mixer_node0 $drv_handle $max_data_width
 					}
 				}
 			}
@@ -114,13 +121,18 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video1"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
-						hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
-						hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
-						hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 					}
 				}
 				set sample [get_property CONFIG.LAYER1_UPSAMPLE [get_cells -hier $drv_handle]]
@@ -142,13 +154,18 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video2"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
-						}
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
 							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						}
 					}
 				}
 				set sample [get_property CONFIG.LAYER2_UPSAMPLE [get_cells -hier $drv_handle]]
@@ -170,13 +187,18 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video3"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
-						}
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
 							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						}
 					}
 				}
 				set sample [get_property CONFIG.LAYER3_UPSAMPLE [get_cells -hier $drv_handle]]
@@ -196,15 +218,22 @@ proc generate {drv_handle} {
 				set layer4_maxwidth [get_property CONFIG.LAYER4_MAX_WIDTH [get_cells -hier $drv_handle]]
 				hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-max-width" $layer4_maxwidth int
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video4"]
+				puts "connect_ip:$connect_ip"
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
-						}
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						puts "ip_mem_handles:$ip_mem_handles"
+						if {[llength $ip_mem_handles]} {
 							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						}
 					}
 				}
 				set sample [get_property CONFIG.LAYER4_UPSAMPLE [get_cells -hier $drv_handle]]
@@ -226,13 +255,20 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video5"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
-						}
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
+							hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$connected_ip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
+							set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
+							gen_video_format $layer0_video_format $mixer_node0 $drv_handle $max_data_width
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						}
 					}
 				}
 				set sample [get_property CONFIG.LAYER5_UPSAMPLE [get_cells -hier $drv_handle]]
@@ -254,13 +290,20 @@ proc generate {drv_handle} {
 				set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video6"]
 				foreach connected_ip $connect_ip {
 					if {[llength $connected_ip]} {
-						set connected_ip_type [get_property IP_NAME $connected_ip]
-						if {[string match -nocase $connected_ip_type "system_ila"]} {
-							continue
-						}
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$connected_ip 0" reference
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connected_ip]
+						if {[llength $ip_mem_handles]} {
+							hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$connected_ip 0" reference
+							hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
+							hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
+							set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
+							gen_video_format $layer0_video_format $mixer_node0 $drv_handle $max_data_width
+						} else {
+							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+							set inip [get_in_connect_ip $connected_ip $master_intf]
+							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
+						}
 					}
 				}
 				set sample [get_property CONFIG.LAYER6_UPSAMPLE [get_cells -hier $drv_handle]]

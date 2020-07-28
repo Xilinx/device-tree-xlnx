@@ -2637,10 +2637,12 @@ proc get_connect_ip {ip intfpins} {
 	global connectip ""
 	foreach intf $intfpins {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $connectip]] "axis_switch"]} {
-                        gen_axis_switch $connectip
-                        break
-                }
+		if {[llength $connectip]} {
+			if {[string match -nocase [get_property IP_NAME [get_cells -hier $connectip]] "axis_switch"]} {
+				gen_axis_switch $connectip
+				break
+			}
+		}
 		if {[llength $connectip]} {
 			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 			if {[llength $ip_mem_handles]} {
