@@ -55,6 +55,7 @@ proc generate {drv_handle} {
     }
     set new_label ""
     set clk_label ""
+    set connected_ip ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
                set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
