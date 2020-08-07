@@ -728,7 +728,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
 	disable-wp;
-	xlnx,mio_bank = <1>;
+	xlnx,mio-bank = <1>;
 	/*
 	 * This property should be removed for supporting UHS mode
 	 */
