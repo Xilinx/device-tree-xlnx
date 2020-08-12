@@ -899,7 +899,7 @@ proc is_pl_ip {ip_inst} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {![regexp "ps._*" "$ip_name" match]} {
+	if {![regexp "^ps._" "$ip_name" match]} {
 		return 1
 	}
 	return 0
@@ -914,7 +914,7 @@ proc is_ps_ip {ip_inst} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {[regexp "ps._*" "$ip_name" match]} {
+	if {[regexp "^ps._" "$ip_name" match]} {
 		return 1
 	}
 	return 0
