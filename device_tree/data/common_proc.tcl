@@ -1215,21 +1215,51 @@ proc is_pl_ip {ip_inst} {
 		return 0
 	}
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {![regexp "ps._*" "$ip_name" match]} {
+	set nochk_list "ai_engine noc_mc_ddr4"
+	if {[lsearch $nochk_list $ip_name] >= 0} {
 		return 1
 	}
-	return 0
+	if {[catch {set proplist [list_property [hsi::get_cells -hier $ip_inst]]} msg]} {
+	} else {
+		if {[lsearch -nocase $proplist "IS_PL"] >= 0} {
+			set prop [get_property IS_PL [hsi::get_cells -hier $ip_inst]]
+			if {$prop} {
+				return 1
+			} else {
+				return 0
+			}
+		}
+	}
+        set ip_name [get_property IP_NAME $ip_obj]
+        if {![regexp "ps._*" "$ip_name" match]} {
+                return 1
+        }
+        return 0
+
 }
 
 proc is_ps_ip {ip_inst} {
 	# check if the IP is a soft IP (not PS7)
 	# return 1 if it is soft ip
 	# return 0 if not
-	set ip_obj [get_cells -hier $ip_inst]
-	if {[llength [get_cells -hier $ip_inst]] < 1} {
+	set ip_obj [hsi::get_cells -hier $ip_inst]
+	if {[catch {set proplist [list_property [hsi::get_cells -hier $ip_inst]]} msg]} {
+	} else {
+	if {[lsearch -nocase $proplist "IS_PL"] >= 0} {
+		set prop [get_property IS_PL [hsi::get_cells -hier $ip_inst]]
+		if {$prop} {
+			return 0
+		}
+	}
+	}
+	if {[llength [hsi::get_cells -hier $ip_inst]] < 1} {
 		return 0
 	}
+
 	set ip_name [get_property IP_NAME $ip_obj]
+	if {[string match -nocase $ip_name "axi_noc"]} {
+		return 0
+	}
 	if {[regexp "ps._*" "$ip_name" match]} {
 		return 1
 	}
