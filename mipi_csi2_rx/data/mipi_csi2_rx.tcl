@@ -79,6 +79,14 @@ proc generate {drv_handle} {
 	set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l mipi_csi_in$drv_handle -p $port1_node]
 
 	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
+	if {[llength $outip]} {
+		if {[string match -nocase [get_property IP_NAME $outip] "axis_broadcaster"]} {
+			set mipi_node [add_or_get_dt_node -n "endpoint" -l mipi_csirx_out$drv_handle -p $port_node]
+			gen_endpoint $drv_handle "mipi_csirx_out$drv_handle"
+			hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $outip$drv_handle reference
+			gen_remoteendpoint $drv_handle "$outip$drv_handle"
+		}
+	}
 	foreach ip $outip {
 		if {[llength $ip]} {
 			set intfpins [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]

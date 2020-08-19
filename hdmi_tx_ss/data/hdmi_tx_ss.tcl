@@ -27,6 +27,11 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,v-hdmi-tx-ss-3.1"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
+	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
+	set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
+
 	set phy_names ""
 	set phys ""
 	set link_data0 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_OUT"]

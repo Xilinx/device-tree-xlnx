@@ -75,6 +75,14 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 3 int
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 		set scaoutip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis"]
+		if {[llength $scaoutip]} {
+			if {[string match -nocase [get_property IP_NAME $scaoutip] "axis_broadcaster"]} {
+				set sca_node [add_or_get_dt_node -n "endpoint" -l sca_out$drv_handle -p $port1_node]
+				gen_endpoint $drv_handle "sca_out$drv_handle"
+				hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" $scaoutip$drv_handle reference
+				gen_remoteendpoint $drv_handle "$scaoutip$drv_handle"
+			}
+		}
 		foreach outip $scaoutip {
 			if {[llength $outip]} {
 				if {[string match -nocase [get_property IP_NAME $outip] "system_ila"]} {
@@ -147,6 +155,14 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 3 int
 		hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 		set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis"]
+		if {[llength $outip]} {
+			if {[string match -nocase [get_property IP_NAME $outip] "axis_broadcaster"]} {
+				set csc_node [add_or_get_dt_node -n "endpoint" -l csc_out$drv_handle -p $port1_node]
+				gen_endpoint $drv_handle "csc_out$drv_handle"
+				hsi::utils::add_new_dts_param "$csc_node" "remote-endpoint" $outip$drv_handle reference
+				gen_remoteendpoint $drv_handle "$outip$drv_handle"
+			}
+		}
 		foreach ip $outip {
 			if {[llength $ip]} {
 				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $outip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
