@@ -223,8 +223,8 @@ proc generate {drv_handle} {
 	  set phya [lindex $phynode 0]
 	  if { $phya != "-1"} {
 		set phy_name "[lindex $phynode 1]"
-	        set_drv_prop $drv_handle phy-handle "$phy_name" reference
-		gen_phy_node $mdio_node $phy_name $phya
+	        set_drv_prop $drv_handle phy-handle "$drv_handle$phy_name" reference
+		gen_phy_node $mdio_node $phy_name $phya $drv_handle
 	  }
     }
     if {$ip_name == "xxv_ethernet" && $core != 0} {
@@ -538,8 +538,9 @@ proc gen_phy_node args {
     set mdio_node [lindex $args 0]
     set phy_name [lindex $args 1]
     set phya [lindex $args 2]
+    set drv  [lindex $args 3]
 
-    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
+    set phy_node [add_or_get_dt_node -l $drv$phy_name -n phy -u $phya -p $mdio_node]
     hsi::utils::add_new_dts_param "${phy_node}" "reg" $phya int
     hsi::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
 
