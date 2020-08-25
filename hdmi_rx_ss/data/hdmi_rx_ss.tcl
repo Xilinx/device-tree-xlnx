@@ -70,7 +70,7 @@ proc generate {drv_handle} {
 	set link_data0 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_IN"]
 	if {[llength $link_data0]} {
 		set link_data0 [get_property IP_NAME $link_data0]
-		if {[string match -nocase $link_data0 "vid_phy_controller"]} {
+		if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"]} {
 			append phy_names " " "hdmi-phy0"
 			append phys  "vphy_lane0 0 1 1 0>,"
 		}
@@ -80,7 +80,7 @@ proc generate {drv_handle} {
 	set link_data1 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA1_IN"]
 	if {[llength $link_data1]} {
 		set link_data1 [get_property IP_NAME $link_data1]
-		if {[string match -nocase $link_data1 "vid_phy_controller"]} {
+		if {[string match -nocase $link_data1 "vid_phy_controller"] || [string match -nocase $link_data1 "hdmi_gt_controller"]} {
 			append phy_names " " "hdmi-phy1"
 			append phys  " <&vphy_lane1 0 1 1 0>,"
 		}
@@ -90,7 +90,7 @@ proc generate {drv_handle} {
 	set link_data2 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA2_IN"]
 	if {[llength $link_data2]} {
 		set link_data2 [get_property IP_NAME $link_data2]
-		if {[string match -nocase $link_data2 "vid_phy_controller"]} {
+		if {[string match -nocase $link_data2 "vid_phy_controller"] || [string match -nocase $link_data2 "hdmi_gt_controller"]} {
 			append phy_names " " "hdmi-phy2"
 			append phys " <&vphy_lane2 0 1 1 0"
 		}
@@ -100,7 +100,7 @@ proc generate {drv_handle} {
 	set link_data3 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA3_IN"]
 	if {[llength $link_data3]} {
 		set link_data3 [get_property IP_NAME $link_data3]
-		if {[string match -nocase $link_data3 "vid_phy_controller"]} {
+		if {[string match -nocase $link_data3 "vid_phy_controller"] || [string match -nocase $link_data3 "hdmi_gt_controller"]} {
 			append phy_names " " "hdmi-phy3"
 			append phys " <&vphy_lane3 0 1 1 0"
 		}
