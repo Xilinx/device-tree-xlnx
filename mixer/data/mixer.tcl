@@ -629,10 +629,10 @@ proc gen_video_format {num node drv_handle max_data_width} {
 			}
 		}
 		"5" {
-			append vid_formats " " "RG24"
+			append vid_formats " " "AB24"
 		}
 		"6" {
-			append vid_formats " " "RG24"
+			append vid_formats " " "AVUY"
 		}
 		"10" {
 			append vid_formats " " "XB24"
@@ -647,13 +647,16 @@ proc gen_video_format {num node drv_handle max_data_width} {
 			append vid_formats " " "AB24"
 		}
 		"14" {
-			append vid_formats " " "avuy8888"
+			append vid_formats " " "AVUY"
 		}
 		"15" {
 			append vid_formats " " "XB30"
 		}
 		"16" {
 			append vid_formats " " "XV30"
+		}
+		"17" {
+			append vid_formats " " "BG16"
 		}
 		"18" {
 			append vid_formats " " "NV16"
