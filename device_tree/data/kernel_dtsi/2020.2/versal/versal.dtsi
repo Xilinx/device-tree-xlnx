@@ -484,7 +484,7 @@
 
 		sysmon: sysmon@f1270000 {
 			compatible = "xlnx,versal-sysmon";
-			reg = <0x0 0xf1270000 0x0 0x1000>;
+			reg = <0x0 0xf1270000 0x0 0x4000>;
 			interrupts = <0 144 4>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
