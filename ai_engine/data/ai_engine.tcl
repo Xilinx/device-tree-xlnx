@@ -28,7 +28,9 @@ proc generate {drv_handle} {
 	set compatible [append compatible " " "xlnx,ai-engine-v1.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set intr_names "interrupt1"
-	set intr_num "0x0 0x94 0x1"
+	lappend intr_names "interrupt2"
+	lappend intr_names "interrupt3"
+	set intr_num "0x0 0x94 0x4>, <0x0 0x95 0x4>, <0x0 0x96 0x4"
 	set power_domain "&versal_firmware 0x18224072"
 	hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
 	hsi::utils::add_new_dts_param ${node} "interrupts" $intr_num intlist
