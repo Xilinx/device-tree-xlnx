@@ -1851,6 +1851,10 @@ proc update_endpoints {drv_handle} {
 	global set broad_port5_remo_mappings
 	global set broad_port6_remo_mappings
 	set broad [hsi::utils::get_os_parameter_value "broad"]
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+        if {[is_pl_ip $drv_handle] && $remove_pl} {
+                return 0
+        }
 
 	set node [gen_peripheral_nodes $drv_handle]
 	set ip [get_cells -hier $drv_handle]
