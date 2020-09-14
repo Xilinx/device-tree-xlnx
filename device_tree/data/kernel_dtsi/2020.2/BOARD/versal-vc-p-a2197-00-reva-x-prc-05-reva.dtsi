@@ -40,10 +40,12 @@
 	phy-handle = <&phy1>;
 	phy-mode = "rgmii-id";
 	phy1: phy@1 { /* 88e1510 */
-		reg = <1>; /* FIXME */
+		reg = <1>;
 	};
 	phy2: phy@2 { /* VSC8531 */
-		reg = <2>; /* FIXME */
+		reg = <2>;
+		vsc8531,rx-delay = <6>;
+		vsc8531,tx-delay = <6>;
 	};
 };
 
