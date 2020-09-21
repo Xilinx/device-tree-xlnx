@@ -5836,6 +5836,11 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Dout"]
 		} elseif {[llength $sink_periph] &&  [string match -nocase [common::get_property IP_NAME $sink_periph] "util_reduced_logic"]} {
 			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Res"]
+		} elseif {[llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "axi_gpio"]} {
+			set intr_present [get_property CONFIG.C_INTERRUPT_PRESENT $sink_periph]
+			if {$intr_present == 1} {
+				lappend intr_cntrl $sink_periph
+			}
 		}
 		if {[llength $intr_cntrl] > 1} {
 				foreach intc $intr_cntrl {
