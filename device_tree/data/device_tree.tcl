@@ -253,13 +253,8 @@ proc gen_ext_axi_interface {}  {
 			set base [string tolower [get_property BASE_VALUE $drv_handle]]
 			set high [string tolower [get_property HIGH_VALUE $drv_handle]]
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
-			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-			if {$dt_overlay} {
-				set bus_node "overlay2"
-			} else {
-				set bus_node "amba_pl"
-			}
-			set default_dts pl.dtsi
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 			if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 				set temp $base
 				set temp [string trimleft [string trimleft $temp 0] x]
@@ -284,7 +279,7 @@ proc gen_ext_axi_interface {}  {
 				set reg "0x0 $base 0x0 $size"
 			}
 			regsub -all {^0x} $base {} base
-			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $bus_node]
+			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $root_node]
 			hsi::utils::add_new_dts_param $ext_int_node "reg" "$reg" intlist
 			if {$version >= 2018} {
 				hsi::utils::add_new_dts_param "${ext_int_node}" "/* This is a external AXI interface, user may need to update the entries */" "" comment
