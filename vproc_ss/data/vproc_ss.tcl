@@ -206,7 +206,7 @@ proc gen_sca_frm_buf_node {outip drv_handle} {
 	} else {
 		set bus_node "amba_pl"
 	}
-	set vcap [add_or_get_dt_node -n "vcap_sdirx$drv_handle" -p $bus_node]
+	set vcap [add_or_get_dt_node -n "vcap_$drv_handle" -p $bus_node]
 	hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
 	hsi::utils::add_new_dts_param $vcap "dmas" "$outip 0" reference
 	hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
@@ -229,7 +229,7 @@ proc gen_csc_frm_buf_node {outip drv_handle} {
 	} else {
 		set bus_node "amba_pl"
 	}
-	set vcap [add_or_get_dt_node -n "vcap_sdirx$drv_handle" -p $bus_node]
+	set vcap [add_or_get_dt_node -n "vcap_$drv_handle" -p $bus_node]
 	hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
 	hsi::utils::add_new_dts_param $vcap "dmas" "$outip 0" reference
 	hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
