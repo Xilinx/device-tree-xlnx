@@ -243,12 +243,10 @@ proc gen_ext_axi_interface {}  {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "psu_cortexa53"]} {
 		set ext_axi_intf [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]] -filter {INSTANCE ==""}]
-		if {[regexp "ps._*" "$ext_axi_intf" match]} {
-			return 0
-		}
 		set hsi_version [get_hsi_version]
 		set ver [split $hsi_version "."]
 		set version [lindex $ver 0]
+		set intf_count 0
 		foreach drv_handle $ext_axi_intf {
 			set base [string tolower [get_property BASE_VALUE $drv_handle]]
 			set high [string tolower [get_property HIGH_VALUE $drv_handle]]
@@ -279,8 +277,9 @@ proc gen_ext_axi_interface {}  {
 				set reg "0x0 $base 0x0 $size"
 			}
 			regsub -all {^0x} $base {} base
-			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $root_node]
+			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle$intf_count -u $base -d $default_dts -p $root_node]
 			hsi::utils::add_new_dts_param $ext_int_node "reg" "$reg" intlist
+			incr intf_count
 			if {$version >= 2018} {
 				hsi::utils::add_new_dts_param "${ext_int_node}" "/* This is a external AXI interface, user may need to update the entries */" "" comment
 			}
