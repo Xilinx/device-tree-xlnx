@@ -3609,7 +3609,10 @@ proc gen_clk_property {drv_handle} {
 			set axi_clk "s_axi_aclk"
 			foreach clk1 $clk_wiz {
 				if {[regexp $axi_clk $clk1 match]} {
-					set axi 1
+					set ip_mem_handles [hsi::utils::get_ip_mem_ranges $periph]
+					if {[llength $ip_mem_handles]} {
+						set axi 1
+					}
 				}
 			}
 
