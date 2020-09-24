@@ -38,6 +38,8 @@ proc generate {drv_handle} {
 	set cmn_vc [get_property CONFIG.CMN_VC [get_cells -hier $drv_handle]]
 	if {$en_csi_v2_0 == true && $en_vcx == true && [string match -nocase $cmn_vc "ALL"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" 16  int
+	} elseif {$en_csi_v2_0 == true && $en_vcx == false && [string match -nocase $cmn_vc "ALL"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" 4  int
 	} elseif {$en_csi_v2_0 == false && [string match -nocase $cmn_vc "ALL"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" 4  int
 	}
