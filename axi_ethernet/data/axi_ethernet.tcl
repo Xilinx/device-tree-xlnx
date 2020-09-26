@@ -35,6 +35,12 @@ proc generate {drv_handle} {
     }
 
     set node [gen_peripheral_nodes $drv_handle]
+    set hw_design [hsi::current_hw_design]
+    set board_name ""
+    if {[llength $hw_design]} {
+        set board [split [get_property BOARD $hw_design] ":"]
+        set board_name [lindex $board 1]
+    }
     update_eth_mac_addr $drv_handle
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,axi-ethernet-1.00.a"]
@@ -215,6 +221,9 @@ proc generate {drv_handle} {
 
 
     set phytype [string tolower [get_property CONFIG.PHY_TYPE $eth_ip]]
+    if {$phytype == "rgmii" && $board_name == "kc705"} {
+        set phytype "rgmii-rxid"
+    }
     set_property phy-mode "$phytype" $drv_handle
     if {$phytype == "sgmii" || $phytype == "1000basex"} {
 	  set phytype "sgmii"
