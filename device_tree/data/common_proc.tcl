@@ -2710,6 +2710,10 @@ enechange"
                                 break
                         }
                         set label $ip
+			set ip_type [get_property IP_TYPE $ip]
+			if {[string match -nocase $ip_type "BUS"]} {
+				break
+			}
                         set bus_node [add_or_get_bus_node $ip $default_dts]
                         set dev_type [get_property IP_NAME [get_cell -hier [get_cells -hier $ip]]]
 			set rt_node [add_or_get_dt_node -n "axis_broadcaster$ip" -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
