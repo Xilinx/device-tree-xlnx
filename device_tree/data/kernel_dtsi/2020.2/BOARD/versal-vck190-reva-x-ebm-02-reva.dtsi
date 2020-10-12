@@ -127,4 +127,5 @@
 	disable-wp;
 	bus-width = <8>;
 	xlnx,mio_bank = <0>;
+	no-1-8-v;
 };
