@@ -45,6 +45,8 @@ proc generate {drv_handle} {
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,axi-ethernet-1.00.a"]
     set_drv_prop $drv_handle compatible "$compatible" stringlist
+    set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+    set default_dts [set_drv_def_dts $drv_handle]
 
     #adding stream connectivity
     set eth_ip [get_cells -hier $drv_handle]
@@ -64,7 +66,6 @@ proc generate {drv_handle} {
     set connected_ip ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
-               set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
                if {$dt_overlay} {
                      set bus_node "overlay2"
                } else {
@@ -280,6 +281,7 @@ proc generate {drv_handle} {
     if {![string_is_empty $connected_ip]} {
         set connected_ipname [get_property IP_NAME $connected_ip]
         if {$connected_ipname == "axi_mcdma" || $connected_ipname == "axi_dma"} {
+            set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
             set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
             set inhex [format %x $num_queues]
             set numqueues "/bits/ 16 <0x$inhex>"
@@ -307,12 +309,14 @@ proc generate {drv_handle} {
                 lappend intr_val1 $intr_val
 		set intr_name [get_property CONFIG.interrupt-names $drv_handle]
 		append intr_names " " $intr_name " " $int_names
+		if {![string match -nocase $proctype "microblaze"]} {
+		     set null ""
+	             set_property "interrupt-names" $null $drv_handle
+	             set_property "interrupts" $null $drv_handle
+		}
             } else {
 		set intr_names $int_names
 	    }
-
-            set default_dts [get_property CONFIG.pcw_dts [get_os]]
-            set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
             if {![string_is_empty $intr_parent]} {
                 if {$ip_name == "xxv_ethernet"  && $core!= 0} {
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
@@ -322,6 +326,10 @@ proc generate {drv_handle} {
 			if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
 				regsub -all "\{||\t" $intr_val1 {} intr_val1
 				regsub -all "\}||\t" $intr_val1 {} intr_val1
+				if {![string match -nocase $proctype "microblaze"]} {
+				     set_property "interrupts" $intr_val1 $drv_handle
+				     set_property "interrupt-names" $intr_names $drv_handle
+				}
 				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
 			} else {
 				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
@@ -336,6 +344,14 @@ proc generate {drv_handle} {
 	    if {![string match -nocase $proctype "microblaze"]} {
                 set eth_clk_names [get_property CONFIG.clock-names $drv_handle]
                 set eth_clks [get_property CONFIG.clocks $drv_handle]
+		if {$ip_name == "xxv_ethernet" && $core == 0} {
+			set_property "zclocks" $eth_clks $drv_handle
+			set_drv_prop $drv_handle "zclock-names" $eth_clk_names stringlist
+		}
+		if {$ip_name == "xxv_ethernet" && $core != 0} {
+			set eth_clks [get_property CONFIG.zclocks $drv_handle]
+			set eth_clk_names [get_property CONFIG.zclock-names $drv_handle]
+		}
                 set eth_clkname_len [llength $eth_clk_names]
                 set i 0
                 while {$i < $eth_clkname_len} {
@@ -363,16 +379,17 @@ proc generate {drv_handle} {
               append names "$eth_clk_names" "$clk_names"
               set names ""
               append clk  "$eth_clks>," "<&$clks"
-              set default_dts [get_property CONFIG.pcw_dts [get_os]]
-              set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
+              set null ""
+              set_property "clock-names" $null $drv_handle
+              set_property "clocks" $null $drv_handle
               if {$ip_name == "xxv_ethernet"  && $core== 0} {
                     lappend clknames "$core_clk_0" "$dclk" "$axi_aclk_0"
                     append clknames1 "$clknames" "$clk_names"
                     set index0 [lindex $clk_list $axi_index_0]
                     regsub -all "\>||\t" $index0 {} index0
                     append clkvals  "[lindex $clk_list $index_0], [lindex $clk_list $dclk_index], $index0>, <&$clks"
-                    hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals reference
-                    hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames1 stringlist
+                    set_property "clocks" $clkvals $drv_handle
+                    set_property "clock-names" $clknames1 $drv_handle
                     set clknames1 ""
              }
              if {$ip_name == "xxv_ethernet" && $core == 1} {
@@ -384,9 +401,8 @@ proc generate {drv_handle} {
                    regsub -all " " $ini1 "" ini1
                    regsub -all "\<&||\t" $ini1 {} ini1
                    append clkvals1  "$ini1, [lindex $clk_list $dclk_index], $index1>, <&$clks"
-                   set eth1_node [add_or_get_dt_node -n "&$clk_label" -d $default_dts]
-                   hsi::utils::add_new_dts_param "${eth1_node}" "clocks" $clkvals1 reference
-                   hsi::utils::add_new_dts_param "${eth1_node}" "clock-names" $clk_names1 stringlist
+                   hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals1 reference
+                   hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names1 stringlist
                    set clk_names1 ""
                    set clkvals1 ""
              }
@@ -400,9 +416,8 @@ proc generate {drv_handle} {
                   regsub -all "\<&||\t" $ini2 {} ini2
                   append clkvals2  "$ini2, [lindex $clk_list $dclk_index],[lindex $clk_list $axi_index_2], <&$clks"
                   append clk_label2 $drv_handle "_" $core
-                  set eth2_node [add_or_get_dt_node -n "&$clk_label2" -d $default_dts]
-                  hsi::utils::add_new_dts_param "${eth2_node}" "clocks" $clkvals2 reference
-                  hsi::utils::add_new_dts_param "${eth2_node}" "clock-names" $clk_names2 stringlist
+                  hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals2 reference
+                  hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names2 stringlist
                   set clk_names2 ""
                   set clkvals2 ""
              }
@@ -416,9 +431,8 @@ proc generate {drv_handle} {
                  regsub -all "\<&||\t" $ini {} ini
                  append clkvals3 "$ini, [lindex $clk_list $dclk_index], [lindex $clk_list $axi_index_3]>, <&$clks"
                  append clk_label3 $drv_handle "_" $core
-                 set eth3_node [add_or_get_dt_node -n "&$clk_label3" -d $default_dts]
-                 hsi::utils::add_new_dts_param "${eth3_node}" "clocks" $clkvals3 reference
-                 hsi::utils::add_new_dts_param "${eth3_node}" "clock-names" $clk_names3 stringlist
+                 hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals3 reference
+                 hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names3 stringlist
                  set clk_names3 ""
                  set clkvals3 ""
              }
@@ -430,6 +444,12 @@ proc generate {drv_handle} {
     }
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
  }
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+    if {![string match -nocase $proctype "microblaze"]} {
+        set null "NULL"
+        set_property "zclock-names" $null $drv_handle
+        set_property "zclocks" "$null" $drv_handle
+    }
 }
 
 proc pcspma_phy_node {slave} {
