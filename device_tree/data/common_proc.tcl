@@ -4167,7 +4167,8 @@ proc get_interrupt_parent {  periph_name intr_pin_name } {
         } elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "util_reduced_logic"] } {
             set intr_cntrl [list {*}$intr_cntrl {*}[::hsi::utils::get_connected_intr_cntrl $sink_periph "Res"]]
         }  elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "dfx_decoupler"] } {
-		set intr_cntrl [list {*}$intr_cntrl {*}[::hsi::utils::get_connected_intr_cntrl $sink_periph "s_intf_0_INTERRUPT"]]
+		set intr [get_pins -of_objects $sink_periph -filter {TYPE==INTERRUPT&&DIRECTION==O}]
+		set intr_cntrl [list {*}$intr_cntrl {*}[::hsi::utils::get_connected_intr_cntrl $sink_periph "$intr"]]
 	}
     }
     return $intr_cntrl
@@ -5774,7 +5775,6 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_pin] == 0 } {
 		return $intr_cntrl
 	}
-
 	set valid_cascade_proc "microblaze ps7_cortexa9 psu_cortexa53 psv_cortexa72"
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if { [string match -nocase [common::get_property IP_NAME $periph] "axi_intc"] && [lsearch -nocase $valid_cascade_proc $proctype] >= 0 } {
@@ -5792,7 +5792,8 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "microblaze"] } {
 				lappend intr_cntrl $sink_periph
 			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "dfx_decoupler"] } {
-				 lappend intr_cntrl [get_intr_cntrl_name $sink_periph "s_intf_0_INTERRUPT"]
+				set intr [get_pins -of_objects $sink_periph -filter {TYPE==INTERRUPT&&DIRECTION==O}]
+				lappend intr_cntrl [get_intr_cntrl_name $sink_periph "$intr"]
 			}
 			if {[llength $intr_cntrl] > 1} {
 				foreach intc $intr_cntrl {
@@ -6141,7 +6142,7 @@ proc get_psu_interrupt_id { ip_name port_name } {
         set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
 	if {[llength $connected_ip]} {
 		if {[string compare -nocase "$connected_ip" "dfx_decoupler"] == 0} {
-			set dfx_intr "s_intf_0_INTERRUPT"
+			set dfx_intr [get_pins -of_objects $sink_periph -filter {TYPE==INTERRUPT&&DIRECTION==O}]
 			set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dfx_intr"]
 			set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
 			foreach pin $sink_pins {
