@@ -29,7 +29,7 @@ proc generate {drv_handle} {
 		set tpg_count 0
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,v-tpg-7.0"]
+	set compatible [append compatible " " "xlnx,v-tpg-8.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	set s_axi_ctrl_addr_width [get_property CONFIG.C_S_AXI_CTRL_ADDR_WIDTH [get_cells -hier $drv_handle]]
@@ -54,7 +54,7 @@ proc generate {drv_handle} {
 	set port1_node [add_or_get_dt_node -n "port" -l tpg_port1$drv_handle -u 1 -p $ports_node]
 	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
 	hsi::utils::add_new_dts_param "${port1_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
-	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
+	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 2 int
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
 
 	set connect_ip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]

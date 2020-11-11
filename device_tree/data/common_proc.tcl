@@ -2624,7 +2624,7 @@ proc update_endpoints {drv_handle} {
 		set port0_node [add_or_get_dt_node -n "port" -l tpg_port0$drv_handle -u 0 -p $ports_node]
 		hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
 		hsi::utils::add_new_dts_param "${port0_node}" "/* Fill the field xlnx,video-format based on user requirement */" "" comment
-		hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 12 int
+		hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 2 int
 		set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
 		hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" $max_data_width int
 		set tpg_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
