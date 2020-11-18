@@ -33,6 +33,12 @@ proc generate {drv_handle} {
 	}
 	set dphy_lanes [get_property CONFIG.C_DPHY_LANES [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-lanes" $dphy_lanes int
+	for {set lane 1} {$lane <= $dphy_lanes} {incr lane} {
+		lappend lanes $lane
+	}
+	if {[llength $lanes]} {
+		hsi::utils::add_new_dts_param "${node}" "data-lanes" $lanes int
+	}
 	set en_csi_v2_0 [get_property CONFIG.C_EN_CSI_V2_0 [get_cells -hier $drv_handle]]
 	set en_vcx [get_property CONFIG.C_EN_VCX [get_cells -hier $drv_handle]]
 	set cmn_vc [get_property CONFIG.CMN_VC [get_cells -hier $drv_handle]]

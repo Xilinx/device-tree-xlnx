@@ -2995,9 +2995,9 @@ proc gen_axis_switch {ip} {
 	set routing_mode [get_property CONFIG.ROUTING_MODE [get_cells -hier $ip]]
 	hsi::utils::add_new_dts_param "$switch_node" "xlnx,routing-mode" $routing_mode int
 	set num_si [get_property CONFIG.NUM_SI [get_cells -hier $ip]]
-	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-si" $num_si int
+	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-si-slots" $num_si int
 	set num_mi [get_property CONFIG.NUM_MI [get_cells -hier $ip]]
-	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-mi" $num_mi int
+	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-mi-slots" $num_mi int
 	hsi::utils::add_new_dts_param "$switch_node" "compatible" "$compatible" string
 	set count 0
 	foreach intf $master_intf {
