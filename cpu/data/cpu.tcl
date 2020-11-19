@@ -38,25 +38,31 @@ proc generate {drv_handle} {
     }
 
     set icache_size [hsi::utils::get_ip_param_value $ip "C_CACHE_BYTE_SIZE"]
+    set isize  [check_64bit $icache_size]
     set icache_base [hsi::utils::get_ip_param_value $ip "C_ICACHE_BASEADDR"]
+    set ibase  [check_64bit $icache_base]
     set icache_high [hsi::utils::get_ip_param_value $ip "C_ICACHE_HIGHADDR"]
+    set ihigh_base  [check_64bit $icache_high]
     set dcache_size [hsi::utils::get_ip_param_value $ip "C_DCACHE_BYTE_SIZE"]
+    set dsize  [check_64bit $dcache_size]
     set dcache_base [hsi::utils::get_ip_param_value $ip "C_DCACHE_BASEADDR"]
+    set dbase  [check_64bit $dcache_base]
     set dcache_high [hsi::utils::get_ip_param_value $ip "C_DCACHE_HIGHADDR"]
+    set dhigh_base  [check_64bit $dcache_high]
     set icache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_ICACHE_LINE_LEN"]]
     set dcache_line_size [expr 4*[hsi::utils::get_ip_param_value $ip "C_DCACHE_LINE_LEN"]]
 
 
     if { [llength $icache_size] != 0 } {
-        set_property CONFIG.i-cache-baseaddr  "$icache_base"      $drv_handle
-        set_property CONFIG.i-cache-highaddr  "$icache_high"      $drv_handle
-        set_property CONFIG.i-cache-size      "$icache_size"      $drv_handle
+        set_property CONFIG.i-cache-baseaddr  "$ibase"      $drv_handle
+        set_property CONFIG.i-cache-highaddr  "$ihigh_base" $drv_handle
+        set_property CONFIG.i-cache-size      "$isize"      $drv_handle
         set_property CONFIG.i-cache-line-size "$icache_line_size" $drv_handle
     }
     if { [llength $dcache_size] != 0 } {
-        set_property CONFIG.d-cache-baseaddr  "$dcache_base"      $drv_handle
-        set_property CONFIG.d-cache-highaddr  "$dcache_high"      $drv_handle
-        set_property CONFIG.d-cache-size      "$dcache_size"      $drv_handle
+        set_property CONFIG.d-cache-baseaddr  "$dbase"      $drv_handle
+        set_property CONFIG.d-cache-highaddr  "$dhigh_base" $drv_handle
+        set_property CONFIG.d-cache-size      "$dsize"      $drv_handle
         set_property CONFIG.d-cache-line-size "$dcache_line_size" $drv_handle
     }
 
@@ -66,4 +72,20 @@ proc generate {drv_handle} {
     # create root node
     set master_root_node [gen_root_node $drv_handle]
     set nodes [gen_cpu_nodes $drv_handle]
+}
+
+proc check_64bit {base} {
+	if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
+		set temp $base
+		set temp [string trimleft [string trimleft $temp 0] x]
+		set len [string length $temp]
+		set rem [expr {${len} - 8}]
+		set high_base "0x[string range $temp $rem $len]"
+		set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+		set low_base [format 0x%08x $low_base]
+		set reg "$low_base $high_base"
+	} else {
+		set reg "$base"
+	}
+	return $reg
 }
