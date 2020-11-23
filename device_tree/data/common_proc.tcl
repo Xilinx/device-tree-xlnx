@@ -4803,6 +4803,11 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		return 0
 	}
 	set label $drv_handle
+	set label_len [string length $label]
+	if {$label_len >= 31} {
+		# As per the device tree specification the label length should be maximum of 31 characters
+		dtg_warning "the label \"$label\" length is $label_len characters which is greater than default 31 characters as per DT SPEC...user need to fix the label\n\r"
+	}
 	set dev_type [get_property CONFIG.dev_type $drv_handle]
 	if {[string_is_empty $dev_type] == 1} {
 		set dev_type [get_property IP_NAME [get_cell -hier $ip]]
