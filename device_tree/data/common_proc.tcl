@@ -3776,7 +3776,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_debug "not supported pl_clk:$pl_clk"
+						dtg_warning  "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"\n\r"
 				}
 			}
 		}
@@ -3803,7 +3803,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_debug "not supported pl_clk:$pl_clk"
+						dtg_warning  "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"\n\r"
 				}
 			}
 		}
@@ -3830,7 +3830,7 @@ proc gen_clk_property {drv_handle} {
 						set updat [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_debug "not supported pl_clk:$pl_clk"
+						dtg_warning  "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"\n\r"
 				}
 			}
 		}
