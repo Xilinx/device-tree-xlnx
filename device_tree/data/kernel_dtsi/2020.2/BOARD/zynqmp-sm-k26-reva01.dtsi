@@ -9,10 +9,10 @@
 
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
-#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
 #include "include/dt-bindings/phy/phy.h"
 
 / {
+	model = "ZynqMP K26 RevA";
 	compatible = "xlnx,zynqmp-sm-k26-revA", "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
 
 	aliases {
@@ -70,9 +70,8 @@
 
 &qspi { /* MIO 0-5 - U143 */
 	status = "okay";
-	is-dual = <1>;
 	flash@0 { /* MT25QU512A */
-		compatible = "m25p80", "jedec,spi-nor"; /* 64MB */
+		compatible = "mt25qu512a", "jedec,spi-nor"; /* 64MB */
 		#address-cells = <1>;
 		#size-cells = <1>;
 		reg = <0>;
@@ -123,8 +122,33 @@
 	};
 
 	/* da9062@60 - u170 - also at address 0x62 */
-	/* da9131@66 - u167 */
-	/* da9130@64 - u166 */
+	/* da9131@33 - u167 */
+	da9131: pmic@33 {
+		compatible = "dlg,da9131";
+		reg = <0x33>;
+		regulators {
+			da9131_buck1: buck1 {
+				regulator-name = "BUCK1";
+				regulator-boot-on;
+			};
+			da9131_buck2: buck2 {
+				regulator-name = "BUCK2";
+				regulator-boot-on;
+			};
+		};
+	};
+
+	/* da9130@32 - u166 */
+	da9130: pmic@32 {
+		compatible = "dlg,da9130";
+		reg = <0x32>;
+		regulators {
+			da9130_buck1: buck1 {
+				regulator-name = "BUCK1";
+				regulator-boot-on;
+			};
+		};
+	};
 	/* slg7x644091@70 - u168 */
 	/* slg7x644092@68 - u169 */
 	/* Also connected via JA1C as C23/C24 */
