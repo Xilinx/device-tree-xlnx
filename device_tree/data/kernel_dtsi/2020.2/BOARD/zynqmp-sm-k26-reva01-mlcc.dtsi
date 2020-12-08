@@ -315,3 +315,10 @@
 		};
 	};
 };
+
+&usb0 {
+	usb5744 {
+		compatible = "microchip,usb5744";
+		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
+	};
+};
