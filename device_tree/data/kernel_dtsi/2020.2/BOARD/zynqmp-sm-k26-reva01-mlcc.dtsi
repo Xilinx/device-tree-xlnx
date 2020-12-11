@@ -81,17 +81,17 @@
 		spi-max-frequency = <40000000>; /* 40MHz */
 		partition@0 {
 			label = "spi0-flash0";
-			reg = <0x0 0x40000000>;
+			reg = <0x0 0x4000000>;
 		};
 	};
 };
 
-&sdhci0 { /* MIO13-23 - 16GB emmmc MTFC16GAPALBH-IT - U133A*/
+&sdhci0 { /* MIO13-23 - 16GB emmc MTFC16GAPALBH-IT - U133A*/
 	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
-	xlnx,mio-bank = <0>;
+	xlnx,mio-bank = <1>;
 };
 
 &spi1 { /* MIO6, 9-11 */
