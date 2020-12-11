@@ -565,9 +565,6 @@ proc update_chosen {os_handle} {
 	#as the early params are defined in board dts files
 	return
     }
-    if {[string match -nocase $proctype "psu_cortexa53"]} {
-           append bootargs " clk_ignore_unused"
-    }
     hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
     set consoleip [get_property CONFIG.console_device $os_handle]
     if {![string match -nocase $consoleip "none"]} {
