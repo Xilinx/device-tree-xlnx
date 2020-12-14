@@ -13,7 +13,8 @@
 #include "include/dt-bindings/phy/phy.h"
 
 / {
-	compatible = "xlnx,zynqmp-sm-k26-revA", "xlnx,zynqmp-sm-k26";
+	compatible = "xlnx,zynqmp-sm-k26-revA", "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
+
 
 	aliases {
 		gpio0 = &gpio;
