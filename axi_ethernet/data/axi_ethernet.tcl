@@ -22,6 +22,8 @@ set rxethmem 0
 proc generate {drv_handle} {
     global rxethmem
     set rxethmem 0
+    global ddrv_handle
+    set ddrv_handle $drv_handle
     foreach i [get_sw_cores device_tree] {
         set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
         if {[file exists $common_tcl_file]} {
@@ -586,6 +588,7 @@ proc is_ethsupported_target {connected_ip} {
 }
 
 proc get_targetip {ip} {
+   global ddrv_handle
    if {[string_is_empty $ip] != 0} {
        return
    }
@@ -633,10 +636,10 @@ proc get_targetip {ip} {
                                   return $connected_ip
                          }
                    } else {
-                          dtg_warning "$drv_handle connected ip is NULL for the target intf $target_intf"
+                          dtg_warning "$ddrv_handle connected ip is NULL for the target intf $target_intf"
                    }
               } else {
-                      dtg_warning "$drv_handle target interface is NULL for the intf pin $intf"
+                      dtg_warning "$ddrv_handle target interface is NULL for the intf pin $intf"
               }
          }
       }
