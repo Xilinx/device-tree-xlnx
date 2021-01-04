@@ -3112,7 +3112,7 @@ proc get_in_connect_ip {ip intfpins} {
 			set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
 			if {[llength $connectip]} {
 			set extip [get_property IP_NAME $connectip]
-			if {[string match -nocase $extip "dfe_glitch_protect"]} {
+			if {[string match -nocase $extip "dfe_glitch_protect"] || [string match -nocase $extip "axi_interconnect"]} {
 				return
 			}
 			}
