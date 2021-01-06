@@ -694,6 +694,16 @@ proc update_alias {os_handle} {
 			}
 		}
 	}
+	set psi2clist ""
+	set pli2clist ""
+	set i2clen ""
+	set alias_node ""
+	set psuartlist ""
+	set pluartlist ""
+	set uartlen ""
+	set psspilist ""
+	set plspilist ""
+	set spilen ""
 
 	foreach drv_handle $all_drivers {
             if {[is_pl_ip $drv_handle] && $dt_overlay} {
@@ -718,6 +728,43 @@ proc update_alias {os_handle} {
             continue
         } else {
             set alias_str [get_property CONFIG.dtg.alias $drv_handle]
+		if {[string match -nocase $alias_str "i2c"]} {
+			set upate [lappend upate $drv_handle]
+			set i2clen [llength $upate]
+			set i2cps [is_ps_ip $drv_handle]
+			if {$i2cps} {
+				set psi2clist [lappend psi2clist $drv_handle]
+			}
+			set i2cpl [is_pl_ip $drv_handle]
+			if {$i2cpl} {
+				set pli2clist [lappend pli2clist $drv_handle]
+			}
+		}
+		if {[string match -nocase $alias_str "serial"]} {
+			set uartate [lappend uartate $drv_handle]
+			set uartlen [llength $uartate]
+			set uartps [is_ps_ip $drv_handle]
+			if {$uartps} {
+				set psuartlist [lappend psuartlist $drv_handle]
+			}
+			set uartpl [is_pl_ip $drv_handle]
+			if {$uartpl} {
+				set pluartlist [lappend pluartlist $drv_handle]
+			}
+		}
+		if {[string match -nocase $alias_str "spi"]} {
+			set spiat [lappend spiat $drv_handle]
+			set spilen [llength $spiat]
+			set spips [is_ps_ip $drv_handle]
+			if {$spips} {
+				set psspilist [lappend psspilist $drv_handle]
+			}
+			set spipl [is_pl_ip $drv_handle]
+			if {$spipl} {
+				set plspilist [lappend plspilist $drv_handle]
+			}
+		}
+
             set alias_count [get_os_dev_count alias_${alias_str}_count]
             set conf_name ${alias_str}${alias_count}
             set value [ps_node_mapping $drv_handle label]
@@ -734,6 +781,51 @@ proc update_alias {os_handle} {
             hsi::utils::set_os_parameter_value alias_${alias_str}_count [expr $alias_count + 1]
         }
     }
+	set i2c_pslen [llength $psi2clist]
+	for {set i 0} {$i < $i2c_pslen} {incr i} {
+		set drv_name [lindex $psi2clist $i]
+		set value [ps_node_mapping $drv_name label]
+		set name "i2c$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
+	set i2c_pllen [llength $pli2clist]
+	set i2clen1 [expr {$i2c_pslen + $i2c_pllen}]
+	for {set i $i2c_pslen} {$i < $i2clen1} {incr i} {
+		set drv_name [lindex $pli2clist [expr {$i - $i2c_pslen}]]
+		set value [ps_node_mapping $drv_name label]
+		set name "i2c$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
+	set uart_pslen [llength $psuartlist]
+	for {set i 0} {$i < $uart_pslen} {incr i} {
+		set drv_name [lindex $psuartlist $i]
+		set value [ps_node_mapping $drv_name label]
+		set name "serial$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
+	set uart_pllen [llength $pluartlist]
+	set uartlen1 [expr {$uart_pslen + $uart_pllen}]
+	for {set i $uart_pslen} {$i < $uartlen1} {incr i} {
+		set drv_name [lindex $pluartlist [expr {$i - $uart_pslen}]]
+		set value [ps_node_mapping $drv_name label]
+		set name "serial$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
+	set spi_pslen [llength $psspilist]
+	for {set i 0} {$i < $spi_pslen} {incr i} {
+		set drv_name [lindex $psspilist $i]
+		set value [ps_node_mapping $drv_name label]
+		set name "spi$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
+	set spi_pllen [llength $plspilist]
+	set spilen1 [expr {$spi_pslen + $spi_pllen}]
+	for {set i $spi_pslen} {$i < $spilen1} {incr i} {
+		set drv_name [lindex $plspilist [expr {$i - $spi_pslen}]]
+		set value [ps_node_mapping $drv_name label]
+		set name "spi$i"
+		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	}
 }
 
 # remove main memory node
