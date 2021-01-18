@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver axi_clk_wiz
 
-  OPTION supported_peripherals = (clk_wiz);
+  OPTION supported_peripherals = (clk_wiz clk_wizard);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_clk_wiz;
