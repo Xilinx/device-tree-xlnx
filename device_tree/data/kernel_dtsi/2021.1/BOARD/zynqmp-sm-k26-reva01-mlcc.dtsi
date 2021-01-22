@@ -65,8 +65,10 @@
 	};
 };
 
-&uart1 { /* MIO37/MIO38 */
+&uart1 { /* MIO36/MIO37 */
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1_default>;
 };
 
 &qspi { /* MIO 0-5 - U143 */
@@ -102,13 +104,16 @@
 	tpm@0 { /* slm9670 - U144 */
 		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
 		reg = <0>;
-		spi-max-frequency = <43000000>;
+		spi-max-frequency = <18500000>;
 	};
 };
 
 &i2c1 {
 	status = "okay";
 	clock-frequency = <400000>;
+	pinctrl-names = "default", "gpio";
+	pinctrl-0 = <&pinctrl_i2c1_default>;
+	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
 
@@ -236,6 +241,9 @@
 
 &sdhci1 {
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci1_default>;
+
 	/*
 	 * SD 3.0 requires level shifter and this property
 	 * should be removed if the board has level shifter and
@@ -248,6 +256,57 @@
 
 &pinctrl0 {
 	status = "okay";
+	pinctrl_uart1_default: uart1-default {
+		mux {
+			groups = "uart1_9_grp";
+			function = "uart1";
+		};
+
+		conf {
+			groups = "uart1_9_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+			drive-strength = <12>;
+		};
+
+		conf-rx {
+			pins = "MIO37";
+			bias-high-impedance;
+		};
+
+		conf-tx {
+			pins = "MIO36";
+			bias-disable;
+		};
+	};
+
+	pinctrl_i2c1_default: i2c1-default {
+		mux {
+			groups = "i2c1_6_grp";
+			function = "i2c1";
+		};
+
+		conf {
+			groups = "i2c1_6_grp";
+			bias-pull-up;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+	};
+
+	pinctrl_i2c1_gpio: i2c1-gpio {
+		mux {
+			groups = "gpio0_24_grp", "gpio0_25_grp";
+			function = "gpio0";
+		};
+
+		conf {
+			groups = "gpio0_24_grp", "gpio0_25_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+	};
+
 	pinctrl_gem3_default: gem3-default {
 		mux {
 			function = "ethernet3";
@@ -291,6 +350,57 @@
 			bias-disable;
 		};
 	};
+
+	pinctrl_usb0_default: usb0-default {
+		mux {
+			groups = "usb0_0_grp";
+			function = "usb0";
+		};
+
+		conf {
+			groups = "usb0_0_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+
+		conf-rx {
+			pins = "MIO52", "MIO53", "MIO55";
+			bias-high-impedance;
+		};
+
+		conf-tx {
+			pins = "MIO54", "MIO56", "MIO57", "MIO58", "MIO59",
+				"MIO60", "MIO61", "MIO62", "MIO63";
+				bias-disable;
+		};
+	};
+
+	pinctrl_sdhci1_default: sdhci1-default {
+		mux {
+			groups = "sdio1_0_grp";
+			function = "sdio1";
+		};
+
+		conf {
+			groups = "sdio1_0_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+			bias-disable;
+		};
+
+		mux-cd {
+			groups = "sdio1_cd_0_grp";
+			function = "sdio1_cd";
+		};
+
+		conf-cd {
+			groups = "sdio1_cd_0_grp";
+			bias-high-impedance;
+			bias-pull-up;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+	};
 };
 
 &gem3 {
@@ -318,6 +428,8 @@
 };
 
 &usb0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb0_default>;
 	usb5744 {
 		compatible = "microchip,usb5744";
 		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;

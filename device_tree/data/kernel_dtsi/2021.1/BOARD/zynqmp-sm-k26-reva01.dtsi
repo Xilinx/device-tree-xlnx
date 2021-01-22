@@ -65,7 +65,7 @@
 	};
 };
 
-&uart1 { /* MIO37/MIO38 */
+&uart1 { /* MIO36/MIO37 */
 	status = "okay";
 };
 
@@ -102,7 +102,7 @@
 	tpm@0 { /* slm9670 - U144 */
 		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
 		reg = <0>;
-		spi-max-frequency = <43000000>;
+		spi-max-frequency = <18500000>;
 	};
 };
 
