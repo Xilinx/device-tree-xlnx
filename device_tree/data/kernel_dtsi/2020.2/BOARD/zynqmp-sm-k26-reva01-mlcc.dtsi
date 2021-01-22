@@ -101,13 +101,16 @@
 	tpm@0 { /* slm9670 - U144 */
 		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
 		reg = <0>;
-		spi-max-frequency = <43000000>;
+		spi-max-frequency = <18500000>;
 	};
 };
 
 &i2c1 {
 	status = "okay";
 	clock-frequency = <400000>;
+	pinctrl-names = "default", "gpio";
+	pinctrl-0 = <&pinctrl_i2c1_default>;
+	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
 	
@@ -235,6 +238,9 @@
 
 &sdhci1 {
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci1_default>;
+
 	/*
 	 * SD 3.0 requires level shifter and this property
 	 * should be removed if the board has level shifter and
@@ -247,6 +253,58 @@
 
 &pinctrl0 {
 	status = "okay";
+
+	pinctrl_uart1_default: uart1-default {
+		mux {
+			groups = "uart1_9_grp";
+			function = "uart1";
+		};
+
+		conf {
+			groups = "uart1_9_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+			drive-strength = <12>;
+		};
+
+		conf-rx {
+			pins = "MIO37";
+			bias-high-impedance;
+		};
+
+		conf-tx {
+			pins = "MIO36";
+			bias-disable;
+		};
+	};
+
+	pinctrl_i2c1_default: i2c1-default {
+		mux {
+			groups = "i2c1_6_grp";
+			function = "i2c1";
+		};
+
+		conf {
+			groups = "i2c1_6_grp";
+			bias-pull-up;
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+	};
+
+	pinctrl_i2c1_gpio: i2c1-gpio {
+		mux {
+			groups = "gpio0_24_grp", "gpio0_25_grp";
+			function = "gpio0";
+		};
+
+		conf {
+			groups = "gpio0_24_grp", "gpio0_25_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+	};
+
 	pinctrl_gem3_default: gem3-default {
 		mux {
 			function = "ethernet3";
@@ -317,6 +375,9 @@
 };
 
 &usb0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb0_default>;
+
 	usb5744 {
 		compatible = "microchip,usb5744";
 		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
