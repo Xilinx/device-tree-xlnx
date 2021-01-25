@@ -543,6 +543,38 @@ proc gen_versal_clk {} {
 
 }
 
+proc gen_zynqmp_pinctrl {} {
+	set default_dts [get_property CONFIG.pcw_dts [get_os]]
+	set pinctrl_node [add_or_get_dt_node -n "&pinctrl0" -d $default_dts]
+	set periph_list [get_cells -hier]
+	foreach periph $periph_list {
+		set zynq_ultra_ps [get_property IP_NAME $periph]
+		if {[string match -nocase $zynq_ultra_ps "zynq_ultra_ps_e"] } {
+			set avail_param [list_property [get_cells -hier $periph]]
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__UART1__PERIPHERAL__IO"] >= 0} {
+				set uart1_io [get_property CONFIG.PSU__UART1__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $uart1_io "EMIO"]} {
+					set pinctrl_uart1_default [add_or_get_dt_node -n "uart1-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_uart1_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart1_default" "/delete-node/ conf" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart1_default" "/delete-node/ conf-rx" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart1_default" "/delete-node/ conf-tx" "" boolean
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__UART0__PERIPHERAL__IO"] >= 0} {
+				set uart0_io [get_property CONFIG.PSU__UART0__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $uart0_io "EMIO"]} {
+					set pinctrl_uart0_default [add_or_get_dt_node -n "uart0-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_uart0_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart0_default" "/delete-node/ conf" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart0_default" "/delete-node/ conf-rx" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_uart0_default" "/delete-node/ conf-tx" "" boolean
+				}
+			}
+		}
+	}
+}
+
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
@@ -564,6 +596,7 @@ proc generate {lib_handle} {
 		gen_zynqmp_ccf_clk
 		gen_versal_clk
 		gen_zynqmp_opp_freq
+		gen_zynqmp_pinctrl
 	}
     }
     gen_ext_axi_interface
