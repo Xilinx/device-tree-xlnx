@@ -65,7 +65,7 @@
 	};
 };
 
-&uart1 { /* MIO36/MIO37 */
+&uart1 { /* MIO37/MIO38 */
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1_default>;
@@ -84,7 +84,6 @@
 		partition@0 {
 			label = "spi0-flash0";
 			reg = <0x0 0x4000000>;
-
 		};
 	};
 };
@@ -116,7 +115,7 @@
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
-
+	
 	eeprom: eeprom@50 { /* u46 */
 		compatible = "atmel,24c64";
 		reg = <0x50>;
@@ -127,7 +126,7 @@
 		compatible = "atmel,24c64";
 		reg = <0x51>;
 	};
-
+	
 	u14: ina260@40 { /* u14 */
 		compatible = "ti,ina260";
 		#io-channel-cells = <1>;
@@ -252,10 +251,15 @@
 	no-1-8-v;
 	disable-wp;
 	xlnx,mio-bank = <1>;
+	clk-phase-sd-hs = <126>, <60>;
+	clk-phase-uhs-sdr25 = <120>, <60>;
+	clk-phase-uhs-ddr50 = <126>, <48>;
+
 };
 
 &pinctrl0 {
 	status = "okay";
+
 	pinctrl_uart1_default: uart1-default {
 		mux {
 			groups = "uart1_9_grp";
@@ -430,6 +434,7 @@
 &usb0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb0_default>;
+
 	usb5744 {
 		compatible = "microchip,usb5744";
 		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
