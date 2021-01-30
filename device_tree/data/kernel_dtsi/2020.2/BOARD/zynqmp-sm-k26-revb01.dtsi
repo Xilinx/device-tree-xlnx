@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * dts file for Xilinx ZynqMP K26 revA
+ * dts file for Xilinx ZynqMP K26 revB
  *
  * (C) Copyright 2020, Xilinx, Inc.
  *
@@ -10,17 +10,16 @@
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/phy/phy.h"
-#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
 
 / {
-	model = "ZynqMP K26 RevA";
-	compatible = "xlnx,zynqmp-sm-k26-revA", "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
+	model = "ZynqMP K26 RevB";
+	compatible = "xlnx,zynqmp-sm-k26-revB", "xlnx,zynqmp-sm-k26-revA",
+		     "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
 
 	aliases {
 		gpio0 = &gpio;
 		i2c0 = &i2c0;
 		i2c1 = &i2c1;
-		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 		rtc0 = &rtc;
 		serial0 = &uart0;
@@ -63,12 +62,6 @@
 			default-state = "on";
 		};
 	};
-};
-
-&uart1 { /* MIO37/MIO38 */
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart1_default>;
 };
 
 &qspi { /* MIO 0-5 - U143 */
@@ -156,17 +149,8 @@
 		partition@2250000 {
 			label = "User";
 			reg = <0x2250000 0x1db0000>; /* 29.5 MB */
-
 		};
 	};
-};
-
-&sdhci0 { /* MIO13-23 - 16GB emmc MTFC16GAPALBH-IT - U133A*/
-	status = "okay";
-	non-removable;
-	disable-wp;
-	bus-width = <8>;
-	xlnx,mio-bank = <0>;
 };
 
 &spi1 { /* MIO6, 9-11 */
@@ -183,12 +167,9 @@
 &i2c1 {
 	status = "okay";
 	clock-frequency = <400000>;
-	pinctrl-names = "default", "gpio";
-	pinctrl-0 = <&pinctrl_i2c1_default>;
-	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
-	
+
 	eeprom: eeprom@50 { /* u46 */
 		compatible = "atmel,24c64";
 		reg = <0x50>;
@@ -199,16 +180,10 @@
 		compatible = "atmel,24c64";
 		reg = <0x51>;
 	};
-	
-	u14: ina260@40 { /* u14 */
-		compatible = "ti,ina260";
-		#io-channel-cells = <1>;
-		label = "ina260-u14";
-		reg = <0x40>;
-	};
-	/* u27 - 0xe0 - STDP4320 DP/HDMI splitter */
 
-	/* da9062@60 - u170 - also at address 0x62 */
+	/* ND da9062@31 - u170 - also at address 0x31 */
+	/* missing 0 40 58 59 5c 5d 72 76 7E */
+
 	/* da9131@33 - u167 */
 	da9131: pmic@33 {
 		compatible = "dlg,da9131";
@@ -236,6 +211,7 @@
 			};
 		};
 	};
+
 	/* slg7x644091@70 - u168 */
 	/* slg7x644092@68 - u169 */
 	/* Also connected via JA1C as C23/C24 */
@@ -279,233 +255,4 @@
 			  "", "", "", "", "", /* 160 - 164 */
 			  "", "", "", "", "", /* 165 - 169 */
 			  "", "", "", ""; /* 170 - 174 */
-};
-
-&sata {
-	status = "okay";
-	/* SATA OOB timing settings */
-	ceva,p0-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
-	ceva,p0-comwake-params = /bits/ 8 <0x06 0x14 0x08 0x0E>;
-	ceva,p0-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
-	ceva,p0-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
-	ceva,p1-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
-	ceva,p1-comwake-params = /bits/ 8 <0x06 0x14 0x08 0x0E>;
-	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
-	ceva,p1-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
-	phy-names = "sata-phy";
-	phys = <&lane3 PHY_TYPE_SATA 1 2 125000000>;
-};
-
-&zynqmp_dpsub {
-	status = "okay";
-	phy-names = "dp-phy0", "dp-phy1";
-	phys = <&lane1 PHY_TYPE_DP 0 0 27000000>, <&lane0 PHY_TYPE_DP 1 0 27000000>;
-};
-
-&dwc3_0 {
-	status = "okay";
-	dr_mode = "host";
-	snps,usb3_lpm_capable;
-	phy-names = "usb3-phy";
-	phys = <&lane2 PHY_TYPE_USB3 0 1 26000000>;
-	maximum-speed = "super-speed";	
-};
-
-&sdhci1 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_sdhci1_default>;
-
-	/*
-	 * SD 3.0 requires level shifter and this property
-	 * should be removed if the board has level shifter and
-	 * need to work in UHS mode
-	 */
-	no-1-8-v;
-	disable-wp;
-	xlnx,mio-bank = <1>;
-};
-
-&pinctrl0 {
-	status = "okay";
-
-	pinctrl_uart1_default: uart1-default {
-		mux {
-			groups = "uart1_9_grp";
-			function = "uart1";
-		};
-
-		conf {
-			groups = "uart1_9_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-			drive-strength = <12>;
-		};
-
-		conf-rx {
-			pins = "MIO37";
-			bias-high-impedance;
-		};
-
-		conf-tx {
-			pins = "MIO36";
-			bias-disable;
-		};
-	};
-
-	pinctrl_i2c1_default: i2c1-default {
-		mux {
-			groups = "i2c1_6_grp";
-			function = "i2c1";
-		};
-
-		conf {
-			groups = "i2c1_6_grp";
-			bias-pull-up;
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-		};
-	};
-
-	pinctrl_i2c1_gpio: i2c1-gpio {
-		mux {
-			groups = "gpio0_24_grp", "gpio0_25_grp";
-			function = "gpio0";
-		};
-
-		conf {
-			groups = "gpio0_24_grp", "gpio0_25_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-		};
-	};
-
-	pinctrl_gem3_default: gem3-default {
-		mux {
-			function = "ethernet3";
-			groups = "ethernet3_0_grp";
-		};
-
-		conf {
-			groups = "ethernet3_0_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-		};
-
-		conf-rx {
-			pins = "MIO70", "MIO72", "MIO74";
-			bias-high-impedance;
-			low-power-disable;
-		};
-
-		conf-bootstrap {
-			pins = "MIO71", "MIO73", "MIO75";
-			bias-disable;
-			low-power-disable;
-		};
-
-		conf-tx {
-			pins = "MIO64", "MIO65", "MIO66",
-			       "MIO67", "MIO68", "MIO69";
-			bias-disable;
-			low-power-enable;
-		};
-
-		mux-mdio {
-			function = "mdio3";
-			groups = "mdio3_0_grp";
-		};
-
-		conf-mdio {
-			groups = "mdio3_0_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-			bias-disable;
-		};
-	};
-
-	pinctrl_usb0_default: usb0-default {
-		mux {
-			groups = "usb0_0_grp";
-			function = "usb0";
-		};
-
-		conf {
-			groups = "usb0_0_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-		};
-
-		conf-rx {
-			pins = "MIO52", "MIO53", "MIO55";
-			bias-high-impedance;
-		};
-
-		conf-tx {
-			pins = "MIO54", "MIO56", "MIO57", "MIO58", "MIO59",
-				"MIO60", "MIO61", "MIO62", "MIO63";
-				bias-disable;
-		};
-	};
-
-	pinctrl_sdhci1_default: sdhci1-default {
-		mux {
-			groups = "sdio1_0_grp";
-			function = "sdio1";
-		};
-
-		conf {
-			groups = "sdio1_0_grp";
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-			bias-disable;
-		};
-
-		mux-cd {
-			groups = "sdio1_cd_0_grp";
-			function = "sdio1_cd";
-		};
-
-		conf-cd {
-			groups = "sdio1_cd_0_grp";
-			bias-high-impedance;
-			bias-pull-up;
-			slew-rate = <SLEW_RATE_SLOW>;
-			io-standard = <IO_STANDARD_LVCMOS18>;
-		};
-	};
-};
-
-&gem3 {
-	status = "okay";
-	phy-handle = <&phy0>;
-	phy-mode = "rgmii-id";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_gem3_default>;
-
-	mdio: mdio {
-		#address-cells = <1>;
-		#size-cells = <0>;
-		reset-gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
-		reset-delay-us = <2>;
-
-		phy0: ethernet-phy@1 {
-			#phy-cells = <1>;
-			reg = <1>;
-			ti,rx-internal-delay = <0x8>;
-			ti,tx-internal-delay = <0x8>;
-			ti,fifo-depth = <0x01>;
-			ti,dp83867-rxctrl-strap-quirk;
-		};
-	};
-};
-
-&usb0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usb0_default>;
-
-	usb5744 {
-		compatible = "microchip,usb5744";
-		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
-	};
 };
