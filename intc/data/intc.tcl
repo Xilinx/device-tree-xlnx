@@ -25,6 +25,7 @@ proc generate {drv_handle} {
             break
         }
     }
+    set zocl [get_property CONFIG.dt_zocl [get_os]]
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,xps-intc-1.00.a"]
     set_drv_prop $drv_handle compatible "$compatible" stringlist
@@ -47,5 +48,10 @@ proc generate {drv_handle} {
         set kind_of_intr 0
     }
     set_property CONFIG.xlnx,kind-of-intr $kind_of_intr $drv_handle
-    set_drv_conf_prop $drv_handle C_NUM_INTR_INPUTS "xlnx,num-intr-inputs"
+    if {$zocl} {
+            set num_intr_inputs "0x20"
+            set_drv_prop $drv_handle "xlnx,num-intr-inputs" $num_intr_inputs int
+    } else {
+            set_drv_conf_prop $drv_handle C_NUM_INTR_INPUTS "xlnx,num-intr-inputs"
+    }
 }

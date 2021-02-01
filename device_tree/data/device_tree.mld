@@ -35,6 +35,8 @@ PARAMETER name = partial_image, desc = "Partial image Support", type = bool, def
 
 PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type = bool, default = false;
 
+PARAMETER name = dt_zocl, desc = "Enable ZOCL Accelerator platform support", type = bool, default = false;
+
 PARAMETER name = firmware_name, desc = "Device-tree Overlay Firmware name", type = string, default = "";
 
 PARAMETER name = remove_pl, desc = "Remove PL Support", type = bool, default = false;
