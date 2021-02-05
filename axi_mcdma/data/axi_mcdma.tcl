@@ -47,11 +47,14 @@ proc generate {drv_handle} {
 	}
 
 	set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
-	if { $axiethernetfound || $is_xxv == 1} {
+	set is_mrmac [is_mrmac_connected $drv_handle "M_AXIS_MM2S"]
+	if { $axiethernetfound || $is_xxv == 1 || $is_mrmac == 1} {
 		set compatstring "xlnx,eth-dma"
 		set_property compatible "$compatstring" $drv_handle
 	}
-	if { $axiethernetfound != 1 && $is_xxv != 1} {
+	if { $axiethernetfound != 1 && $is_xxv != 1 && $is_mrmac != 1} {
+		set ip_prop CONFIG.c_include_mm2s_dre
+		add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
 		set_drv_conf_prop $drv_handle c_addr_width xlnx,addrwidth
 		set baseaddr [get_baseaddr $mcdma_ip no_prefix]
 		set tx_chan [hsi::utils::get_ip_param_value $mcdma_ip C_INCLUDE_MM2S]
@@ -147,6 +150,31 @@ proc get_connected_ip {drv_handle dma_pin} {
 		# dma connected via interconnects
 		set dma_pin "M_AXIS"
 		get_connected_ip $connected_ip $dma_pin
+	}
+}
+
+proc is_mrmac_connected {drv_handle dma_pin} {
+	set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $drv_handle] $dma_pin]
+	if {[llength $intf]} {
+		set connected_ip [::hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] $intf]
+		if {[llength $connected_ip]} {
+			if {[string match -nocase [get_property IP_NAME $connected_ip] "axis_data_fifo"]} {
+				set mux_ip [::hsi::utils::get_connected_stream_ip [get_cells -hier $connected_ip] "M_AXIS"]
+				if {[llength $mux_ip]} {
+					if {[string match -nocase [get_property IP_NAME $mux_ip] "mrmac_10g_mux"]} {
+						set data_fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_ip] "tx_m_axis_tdata"]]
+						set data_fifo_per [::hsi::get_cells -of_objects $data_fifo_pin]
+						if {[string match -nocase [get_property IP_NAME $data_fifo_per] "axis_data_fifo"]} {
+							set fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $data_fifo_per] "m_axis_tdata"]]
+							set mrmac_per [::hsi::get_cells -of_objects $fifo_pin]
+							if {[string match -nocase [get_property IP_NAME $mrmac_per] "mrmac"]} {
+								return 1
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 

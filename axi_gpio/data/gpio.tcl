@@ -22,6 +22,10 @@ proc generate {drv_handle} {
 			break
 		}
 	}
+	set node [gen_peripheral_nodes $drv_handle]
+	if {$node == 0} {
+		return
+	}
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,xps-gpio-1.00.a"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
@@ -38,6 +42,20 @@ proc generate {drv_handle} {
 		"microblaze"   {
 			gen_dev_ccf_binding $drv_handle "s_axi_aclk"
 			set_drv_prop_if_empty $drv_handle "clock-names" "s_axi_aclk" stringlist
+		}
+	}
+	#Workaround: There is no unique way to differentiate the gt_ctrl, so hardcoding the size
+	#for the address 0xa4010000 to 0x40000
+	set ips [get_cells -hier -filter {IP_NAME == "mrmac"}]
+	if {[llength $ips]} {
+		set mem_ranges [hsi::utils::get_ip_mem_ranges [get_cells -hier $drv_handle]]
+		foreach mem_range $mem_ranges {
+			set base_addr [string tolower [get_property BASE_VALUE $mem_range]]
+			set high_addr [string tolower [get_property HIGH_VALUE $mem_range]]
+			if {[string match -nocase $base_addr "0xa4010000"]} {
+				set reg "0x0 0xa4010000 0x0 0x40000"
+				hsi::utils::add_new_dts_param "${node}" "reg" $reg inthexlist
+			}
 		}
 	}
 }

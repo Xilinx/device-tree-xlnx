@@ -4347,6 +4347,12 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 	foreach mem_handle ${ip_mem_handles} {
 	#	if {![regexp $ip_skip_list $mem_handle match]} {
 			set base [string tolower [get_property BASE_VALUE $mem_handle]]
+			set ips [get_cells -hier -filter {IP_NAME == "mrmac"}]
+			if {[llength $ips]} {
+				if {[string match -nocase $base "0xa4010000"] && $ip_name == "axi_gpio"} {
+					return
+				}
+			}
 			set high [string tolower [get_property HIGH_VALUE $mem_handle]]
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
@@ -4833,7 +4839,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		} {
 		return 0
 	}
-
+	if {[string match -nocase $ip_type "mrmac"]} {
+		set unit_addr "a4090000"
+	}
 	set default_dts [set_drv_def_dts $drv_handle]
 
 	set ps7_mapping [gen_ps7_mapping]
