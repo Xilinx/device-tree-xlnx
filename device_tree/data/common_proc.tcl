@@ -1171,6 +1171,10 @@ proc add_or_get_dt_node args {
 		foreach pattern ${search_pattern} {
 			foreach node ${dts_nodes} {
 				if {[regexp $pattern $node match]} {
+					if {[string match -nocase $node "port@0"] || [string match -nocase $node "port@1"]
+						|| [string match -nocase $node "port@2"]} {
+						continue
+					}
 					# create reference node
 					set found_node 1
 					set found_node_obj [get_node_object ${node} $tmp_dts_file]
