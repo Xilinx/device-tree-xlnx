@@ -123,7 +123,7 @@ proc generate {drv_handle} {
 			}
 		}
 	}
-
+	gen_gpio_reset $drv_handle $node
 }
 
 proc gen_frmbuf_node {outip drv_handle} {
@@ -145,4 +145,48 @@ proc gen_frmbuf_node {outip drv_handle} {
         hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
         set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $outip$drv_handle -p $vcap_port_node]
         hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" mipi_csirx_out$drv_handle reference
+}
+
+
+proc gen_gpio_reset {drv_handle node} {
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier [get_cells -hier $drv_handle]] "video_aresetn"]]
+	foreach pin $pins {
+		set sink_periph [::hsi::get_cells -of_objects $pin]
+		if {[llength $sink_periph]} {
+			set sink_ip [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $sink_ip "xlslice"]} {
+				set gpio [get_property CONFIG.DIN_FROM $sink_periph]
+				set pins [get_pins -of_objects [get_nets -of_objects [get_pins -of_objects $sink_periph "Din"]]]
+				foreach pin $pins {
+					set periph [::hsi::get_cells -of_objects $pin]
+					if {[llength $periph]} {
+						set ip [get_property IP_NAME $periph]
+						set proc_type [get_sw_proc_prop IP_NAME]
+						if {[string match -nocase $proc_type "psv_cortexa72"] } {
+							if {[string match -nocase $ip "versal_cips"]} {
+								# As versal has only bank0 for MIOs
+								set gpio [expr $gpio + 26]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio0 $gpio 1" reference
+								break
+							}
+						}
+						if {[string match -nocase $proc_type "psu_cortexa53"] } {
+							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
+								set gpio [expr $gpio + 78]
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+								break
+							}
+						}
+						if {[string match -nocase $ip "axi_gpio"]} {
+							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+						}
+					} else {
+						dtg_warning "$drv_handle peripheral is NULL for the $pin $periph"
+					}
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle peripheral is NULL for the $pin $sink_periph"
+		}
+	}
 }

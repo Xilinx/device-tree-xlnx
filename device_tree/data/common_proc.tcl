@@ -3090,6 +3090,16 @@ proc get_connect_ip {ip intfpins} {
 				break
 			}
 		}
+		set len [llength $connectip]
+		if {$len > 1} {
+			for {set i 0 } {$i < $len} {incr i} {
+				set ip [lindex $connectip $i]
+				if {[regexp -nocase "ila" $ip match]} {
+					continue
+				}
+				set connectip "$ip"
+			}
+		}
 		if {[llength $connectip]} {
 			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 			if {[llength $ip_mem_handles]} {
