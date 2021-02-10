@@ -13,9 +13,10 @@
 #include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
 
 / {
-	model = "ZynqMP K26 RevB";
-	compatible = "xlnx,zynqmp-sm-k26-revB", "xlnx,zynqmp-sm-k26-revA", "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
-
+	model = "ZynqMP K26 Rev1.0/B";
+	compatible = "xlnx,zynqmp-sm-k26-rev1.0",
+		     "xlnx,zynqmp-sm-k26-revB", "xlnx,zynqmp-sm-k26-revA",
+		     "xlnx,zynqmp-sm-k26", "xlnx,zynqmp";
 	aliases {
 		gpio0 = &gpio;
 		i2c0 = &i2c0;
