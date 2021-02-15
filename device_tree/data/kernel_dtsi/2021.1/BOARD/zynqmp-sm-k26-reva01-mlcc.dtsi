@@ -494,7 +494,7 @@
 &usb0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb0_default>;
-	usb5744 {
+	usbhub: usb5744 {
 		compatible = "microchip,usb5744";
 		reset-gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
 	};
