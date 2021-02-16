@@ -100,8 +100,10 @@ proc generate {drv_handle} {
 	set MAC_PORT0_RATE_C0 [get_property CONFIG.MAC_PORT0_RATE_C0 [get_cells -hier $drv_handle]]
 	if {[string match -nocase $MAC_PORT0_RATE_C0 "10GE"]} {
 		set number 10000
+		hsi::utils::add_new_dts_param "${node}" "xlnx,mrmac-rate" $number int
+	} else {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,mrmac-rate" $MAC_PORT0_RATE_C0 string
 	}
-	hsi::utils::add_new_dts_param "${node}" "xlnx,mrmac-rate" $number int
 	set MAC_PORT0_RATE_C1 [get_property CONFIG.MAC_PORT0_RATE_C1 [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,mac-port0-rate-c1" $MAC_PORT0_RATE_C1 string
 	set MAC_PORT0_RX_ETYPE_GCP_C0 [get_property CONFIG.MAC_PORT0_RX_ETYPE_GCP_C0 [get_cells -hier $drv_handle]]
@@ -447,41 +449,49 @@ proc generate {drv_handle} {
 	}
 
 	set port0_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "tx_timestamp_tod_0"]]
-	set sink_periph [::hsi::get_cells -of_objects $port0_pins]
-	if {[string match -nocase [get_property IP_NAME $sink_periph] "xlconcat"]} {
-		set intf "dout"
-		set intr1_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$intf"]
-		set sink_pins [::hsi::utils::get_sink_pins $intr1_pin]
-		set xl_per [::hsi::get_cells -of_objects $sink_pins]
-		if {[string match -nocase [get_property IP_NAME $xl_per] "axis_dwidth_converter"]} {
-			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per] "m_axis_tdata"]]
-			set axis_per [::hsi::get_cells -of_objects $port_pins]
-			if {[string match -nocase [get_property IP_NAME $axis_per] "axis_clock_converter"]} {
-				set tx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per] "M_AXIS"]
-				if {[llength $tx_ip]} {
-					hsi::utils::add_new_dts_param "$node" "axififo-connected" $tx_ip reference
+	if {[llength $port0_pins]} {
+		set sink_periph [::hsi::get_cells -of_objects $port0_pins]
+		if {[string match -nocase [get_property IP_NAME $sink_periph] "xlconcat"]} {
+			set intf "dout"
+			set intr1_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$intf"]
+			set sink_pins [::hsi::utils::get_sink_pins $intr1_pin]
+			set xl_per [::hsi::get_cells -of_objects $sink_pins]
+			if {[string match -nocase [get_property IP_NAME $xl_per] "axis_dwidth_converter"]} {
+				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per] "m_axis_tdata"]]
+				set axis_per [::hsi::get_cells -of_objects $port_pins]
+				if {[string match -nocase [get_property IP_NAME $axis_per] "axis_clock_converter"]} {
+					set tx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per] "M_AXIS"]
+					if {[llength $tx_ip]} {
+						hsi::utils::add_new_dts_param "$node" "axififo-connected" $tx_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "tx_timestamp_tod_0 connected pins are NULL...please check the design..."
 	}
 
 	set rxtod_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_timestamp_tod_0"]]
-	set rx_periph [::hsi::get_cells -of_objects $rxtod_pins]
-	if {[string match -nocase [get_property IP_NAME $rx_periph] "xlconcat"]} {
-		set intf "dout"
-		set in1_pin [::hsi::get_pins -of_objects $rx_periph -filter "NAME==$intf"]
-		set sink_pins [::hsi::utils::get_sink_pins $in1_pin]
-		set rxxl_per [::hsi::get_cells -of_objects $sink_pins]
-		if {[string match -nocase [get_property IP_NAME $rxxl_per] "axis_dwidth_converter"]} {
-			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rxxl_per] "m_axis_tdata"]]
-			set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
-				set rx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per] "M_AXIS"]
-				if {[llength $rx_ip]} {
-					hsi::utils::add_new_dts_param "$node" "xlnx,rxtsfifo" $rx_ip reference
+	if {[llength $rxtod_pins]} {
+		set rx_periph [::hsi::get_cells -of_objects $rxtod_pins]
+		if {[string match -nocase [get_property IP_NAME $rx_periph] "xlconcat"]} {
+			set intf "dout"
+			set in1_pin [::hsi::get_pins -of_objects $rx_periph -filter "NAME==$intf"]
+			set sink_pins [::hsi::utils::get_sink_pins $in1_pin]
+			set rxxl_per [::hsi::get_cells -of_objects $sink_pins]
+			if {[string match -nocase [get_property IP_NAME $rxxl_per] "axis_dwidth_converter"]} {
+				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rxxl_per] "m_axis_tdata"]]
+				set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
+				if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
+					set rx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per] "M_AXIS"]
+					if {[llength $rx_ip]} {
+						hsi::utils::add_new_dts_param "$node" "xlnx,rxtsfifo" $rx_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "rx_timestamp_tod_0 connected pins are NULL...please check the design..."
 	}
 
 	set handle ""
@@ -589,42 +599,52 @@ proc generate {drv_handle} {
 	}
 
 	set txtodport1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "tx_timestamp_tod_1"]]
-	set tod1_sink_periph [::hsi::get_cells -of_objects $txtodport1_pins]
-	if {[string match -nocase [get_property IP_NAME $tod1_sink_periph] "xlconcat"]} {
-		set intf "dout"
-		set in1_pin [::hsi::get_pins -of_objects $tod1_sink_periph -filter "NAME==$intf"]
-		set in1sink_pins [::hsi::utils::get_sink_pins $in1_pin]
-		set xl_per1 [::hsi::get_cells -of_objects $in1sink_pins]
-		if {[string match -nocase [get_property IP_NAME $xl_per1] "axis_dwidth_converter"]} {
-			set port1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per1] "m_axis_tdata"]]
-			set axis_per1 [::hsi::get_cells -of_objects $port1_pins]
-			if {[string match -nocase [get_property IP_NAME $axis_per1] "axis_clock_converter"]} {
-				set tx1_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per1] "M_AXIS"]
-				if {[llength $tx1_ip]} {
-					hsi::utils::add_new_dts_param "$mrmac1_node" "axififo-connected" $tx1_ip reference
+	if {[llength $txtodport1_pins]} {
+		set tod1_sink_periph [::hsi::get_cells -of_objects $txtodport1_pins]
+		if {[string match -nocase [get_property IP_NAME $tod1_sink_periph] "xlconcat"]} {
+			set intf "dout"
+			set in1_pin [::hsi::get_pins -of_objects $tod1_sink_periph -filter "NAME==$intf"]
+			set in1sink_pins [::hsi::utils::get_sink_pins $in1_pin]
+			set xl_per1 [::hsi::get_cells -of_objects $in1sink_pins]
+			if {[string match -nocase [get_property IP_NAME $xl_per1] "axis_dwidth_converter"]} {
+				set port1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per1] "m_axis_tdata"]]
+				set axis_per1 [::hsi::get_cells -of_objects $port1_pins]
+				if {[string match -nocase [get_property IP_NAME $axis_per1] "axis_clock_converter"]} {
+					set tx1_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per1] "M_AXIS"]
+					if {[llength $tx1_ip]} {
+						hsi::utils::add_new_dts_param "$mrmac1_node" "axififo-connected" $tx1_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "tx_timestamp_tod_1 connected pins are NULL...please check the design..."
 	}
 
+
 	set rxtod1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_timestamp_tod_1"]]
-	set rx_periph1 [::hsi::get_cells -of_objects $rxtod1_pins]
-	if {[string match -nocase [get_property IP_NAME $rx_periph1] "xlconcat"]} {
-		set intf "dout"
-		set inrx1_pin [::hsi::get_pins -of_objects $rx_periph1 -filter "NAME==$intf"]
-		set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx1_pin]
-		set rx_per [::hsi::get_cells -of_objects $rxtodsink_pins]
-		if {[string match -nocase [get_property IP_NAME $rx_per] "axis_dwidth_converter"]} {
-			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per] "m_axis_tdata"]]
-			set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
-				set rx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per] "M_AXIS"]
-				if {[llength $rx_ip]} {
-					hsi::utils::add_new_dts_param "$mrmac1_node" "xlnx,rxtsfifo" $rx_ip reference
+	if {[llength $rxtod1_pins]} {
+		set rx_periph1 [::hsi::get_cells -of_objects $rxtod1_pins]
+		if {[string match -nocase [get_property IP_NAME $rx_periph1] "xlconcat"]} {
+			set intf "dout"
+			set inrx1_pin [::hsi::get_pins -of_objects $rx_periph1 -filter "NAME==$intf"]
+			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx1_pin]
+			set rx_per [::hsi::get_cells -of_objects $rxtodsink_pins]
+			if {[string match -nocase [get_property IP_NAME $rx_per] "axis_dwidth_converter"]} {
+				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per] "m_axis_tdata"]]
+				set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
+				if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
+					set rx_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per] "M_AXIS"]
+					if {[llength $rx_ip]} {
+						hsi::utils::add_new_dts_param "$mrmac1_node" "xlnx,rxtsfifo" $rx_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "rx_timestamp_tod_1 connected pins are NULL...please check the design..."
 	}
+
 
 	if {[llength $handle]} {
 		hsi::utils::add_new_dts_param "$mrmac1_node" "xlnx,gtctrl" $handle reference
@@ -666,8 +686,10 @@ proc generate {drv_handle} {
 	set MAC_PORT1_RATE_C0 [get_property CONFIG.MAC_PORT1_RATE_C0 [get_cells -hier $drv_handle]]
 	if {[string match -nocase $MAC_PORT1_RATE_C0 "10GE"]} {
 		set number 10000
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mrmac-rate" $number int
+	} else {
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mrmac-rate" $MAC_PORT1_RATE_C0 string
 	}
-	hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mrmac-rate" $number int
 	set MAC_PORT1_RATE_C1 [get_property CONFIG.MAC_PORT1_RATE_C1 [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mac-port1-rate-c1" $MAC_PORT1_RATE_C1 string
 	set MAC_PORT1_RX_ETYPE_GCP_C0 [get_property CONFIG.MAC_PORT1_RX_ETYPE_GCP_C0 [get_cells -hier $drv_handle]]
@@ -951,42 +973,52 @@ proc generate {drv_handle} {
 	}
 
 	set txtodport2_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "tx_timestamp_tod_2"]]
-	set tod2_sink_periph [::hsi::get_cells -of_objects $txtodport2_pins]
-	if {[string match -nocase [get_property IP_NAME $tod2_sink_periph] "xlconcat"]} {
-		set intf "dout"
-		set in2_pin [::hsi::get_pins -of_objects $tod2_sink_periph -filter "NAME==$intf"]
-		set in2sink_pins [::hsi::utils::get_sink_pins $in2_pin]
-		set xl_per2 [::hsi::get_cells -of_objects $in2sink_pins]
-		if {[string match -nocase [get_property IP_NAME $xl_per2] "axis_dwidth_converter"]} {
-			set port2pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per2] "m_axis_tdata"]]
-			set axis_per2 [::hsi::get_cells -of_objects $port2pins]
-			if {[string match -nocase [get_property IP_NAME $axis_per2] "axis_clock_converter"]} {
-				set tx2_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per2] "M_AXIS"]
-				if {[llength $tx2_ip]} {
-					hsi::utils::add_new_dts_param "$mrmac2_node" "axififo-connected" $tx2_ip reference
+	if {[llength $txtodport2_pins]} {
+		set tod2_sink_periph [::hsi::get_cells -of_objects $txtodport2_pins]
+		if {[string match -nocase [get_property IP_NAME $tod2_sink_periph] "xlconcat"]} {
+			set intf "dout"
+			set in2_pin [::hsi::get_pins -of_objects $tod2_sink_periph -filter "NAME==$intf"]
+			set in2sink_pins [::hsi::utils::get_sink_pins $in2_pin]
+			set xl_per2 [::hsi::get_cells -of_objects $in2sink_pins]
+			if {[string match -nocase [get_property IP_NAME $xl_per2] "axis_dwidth_converter"]} {
+				set port2pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per2] "m_axis_tdata"]]
+				set axis_per2 [::hsi::get_cells -of_objects $port2pins]
+				if {[string match -nocase [get_property IP_NAME $axis_per2] "axis_clock_converter"]} {
+					set tx2_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per2] "M_AXIS"]
+					if {[llength $tx2_ip]} {
+						hsi::utils::add_new_dts_param "$mrmac2_node" "axififo-connected" $tx2_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "tx_timestamp_tod_2 connected pins are NULL...please check the design..."
 	}
 
+
 	set rxtod2_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_timestamp_tod_2"]]
-	set rx_periph2 [::hsi::get_cells -of_objects $rxtod2_pins]
-	if {[string match -nocase [get_property IP_NAME $rx_periph2] "xlconcat"]} {
-		set intf "dout"
-		set inrx2_pin [::hsi::get_pins -of_objects $rx_periph2 -filter "NAME==$intf"]
-		set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx2_pin]
-		set rx_per2 [::hsi::get_cells -of_objects $rxtodsink_pins]
-		if {[string match -nocase [get_property IP_NAME $rx_per2] "axis_dwidth_converter"]} {
-			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per2] "m_axis_tdata"]]
-			set rx_axis_per2 [::hsi::get_cells -of_objects $port_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_axis_per2] "axis_clock_converter"]} {
-				set rx_ip2 [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per2] "M_AXIS"]
-				if {[llength $rx_ip2]} {
-					hsi::utils::add_new_dts_param "$mrmac2_node" "xlnx,rxtsfifo" $rx_ip2 reference
+	if {[llength $rxtod2_pins]} {
+		set rx_periph2 [::hsi::get_cells -of_objects $rxtod2_pins]
+		if {[string match -nocase [get_property IP_NAME $rx_periph2] "xlconcat"]} {
+			set intf "dout"
+			set inrx2_pin [::hsi::get_pins -of_objects $rx_periph2 -filter "NAME==$intf"]
+			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx2_pin]
+			set rx_per2 [::hsi::get_cells -of_objects $rxtodsink_pins]
+			if {[string match -nocase [get_property IP_NAME $rx_per2] "axis_dwidth_converter"]} {
+				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per2] "m_axis_tdata"]]
+				set rx_axis_per2 [::hsi::get_cells -of_objects $port_pins]
+				if {[string match -nocase [get_property IP_NAME $rx_axis_per2] "axis_clock_converter"]} {
+					set rx_ip2 [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per2] "M_AXIS"]
+					if {[llength $rx_ip2]} {
+						hsi::utils::add_new_dts_param "$mrmac2_node" "xlnx,rxtsfifo" $rx_ip2 reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "rx_timestamp_tod_2 connected pins are NULL...please check the design..."
 	}
+
 	if {[llength $handle]} {
 		hsi::utils::add_new_dts_param "$mrmac2_node" "xlnx,gtctrl" $handle reference
 	}
@@ -1027,9 +1059,10 @@ proc generate {drv_handle} {
 	set MAC_PORT2_RATE_C0 [get_property CONFIG.MAC_PORT2_RATE_C0 [get_cells -hier $drv_handle]]
 	if {[string match -nocase $MAC_PORT2_RATE_C0 "10GE"]} {
 		set number 10000
-	}
-	hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mrmac-rate" $number int
- 
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mrmac-rate" $number int
+	} else {
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mrmac-rate" $MAC_PORT2_RATE_C0 string
+	}	
 	set MAC_PORT2_RATE_C1 [get_property CONFIG.MAC_PORT2_RATE_C1 [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mac-port2-rate-c1" $MAC_PORT2_RATE_C1 string
 	set MAC_PORT2_RX_ETYPE_GCP_C0 [get_property CONFIG.MAC_PORT2_RX_ETYPE_GCP_C0 [get_cells -hier $drv_handle]]
@@ -1285,41 +1318,51 @@ proc generate {drv_handle} {
 		}
 	}
 	set txtodport3_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "tx_timestamp_tod_3"]]
-	set tod3_sink_periph [::hsi::get_cells -of_objects $txtodport3_pins]
-	if {[string match -nocase [get_property IP_NAME $tod3_sink_periph] "xlconcat"]} {
-		set intf "dout"
-		set in3_pin [::hsi::get_pins -of_objects $tod3_sink_periph -filter "NAME==$intf"]
-		set in3sink_pins [::hsi::utils::get_sink_pins $in3_pin]
-		set xl_per3 [::hsi::get_cells -of_objects $in3sink_pins]
-		if {[string match -nocase [get_property IP_NAME $xl_per3] "axis_dwidth_converter"]} {
-			set port3pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per3] "m_axis_tdata"]]
-			set axis_per3 [::hsi::get_cells -of_objects $port3pins]
-			if {[string match -nocase [get_property IP_NAME $axis_per3] "axis_clock_converter"]} {
-				set tx3_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per3] "M_AXIS"]
-				if {[llength $tx3_ip]} {
-					hsi::utils::add_new_dts_param "$mrmac3_node" "axififo-connected" $tx3_ip reference
+	if {[llength $txtodport3_pins]} {
+		set tod3_sink_periph [::hsi::get_cells -of_objects $txtodport3_pins]
+		if {[string match -nocase [get_property IP_NAME $tod3_sink_periph] "xlconcat"]} {
+			set intf "dout"
+			set in3_pin [::hsi::get_pins -of_objects $tod3_sink_periph -filter "NAME==$intf"]
+			set in3sink_pins [::hsi::utils::get_sink_pins $in3_pin]
+			set xl_per3 [::hsi::get_cells -of_objects $in3sink_pins]
+			if {[string match -nocase [get_property IP_NAME $xl_per3] "axis_dwidth_converter"]} {
+				set port3pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per3] "m_axis_tdata"]]
+				set axis_per3 [::hsi::get_cells -of_objects $port3pins]
+				if {[string match -nocase [get_property IP_NAME $axis_per3] "axis_clock_converter"]} {
+					set tx3_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $axis_per3] "M_AXIS"]
+					if {[llength $tx3_ip]} {
+						hsi::utils::add_new_dts_param "$mrmac3_node" "axififo-connected" $tx3_ip reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "tx_timestamp_tod_3 connected pins are NULL...please check the design..."
 	}
+
 	set rxtod3_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_timestamp_tod_3"]]
-	set rx_periph3 [::hsi::get_cells -of_objects $rxtod3_pins]
-	if {[string match -nocase [get_property IP_NAME $rx_periph3] "xlconcat"]} {
-		set intf "dout"
-		set inrx3_pin [::hsi::get_pins -of_objects $rx_periph3 -filter "NAME==$intf"]
-		set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx3_pin]
-		set rx_per3 [::hsi::get_cells -of_objects $rxtodsink_pins]
-		if {[string match -nocase [get_property IP_NAME $rx_per3] "axis_dwidth_converter"]} {
-			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per3] "m_axis_tdata"]]
-			set rx_axis_per3 [::hsi::get_cells -of_objects $port_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_axis_per3] "axis_clock_converter"]} {
-				set rx_ip3 [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per3] "M_AXIS"]
-				if {[llength $rx_ip3]} {
-					hsi::utils::add_new_dts_param "$mrmac3_node" "xlnx,rxtsfifo" $rx_ip3 reference
+	if {[llength $rxtod3_pins]} {
+		set rx_periph3 [::hsi::get_cells -of_objects $rxtod3_pins]
+		if {[string match -nocase [get_property IP_NAME $rx_periph3] "xlconcat"]} {
+			set intf "dout"
+			set inrx3_pin [::hsi::get_pins -of_objects $rx_periph3 -filter "NAME==$intf"]
+			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx3_pin]
+			set rx_per3 [::hsi::get_cells -of_objects $rxtodsink_pins]
+			if {[string match -nocase [get_property IP_NAME $rx_per3] "axis_dwidth_converter"]} {
+				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per3] "m_axis_tdata"]]
+				set rx_axis_per3 [::hsi::get_cells -of_objects $port_pins]
+				if {[string match -nocase [get_property IP_NAME $rx_axis_per3] "axis_clock_converter"]} {
+					set rx_ip3 [hsi::utils::get_connected_stream_ip [get_cells -hier $rx_axis_per3] "M_AXIS"]
+					if {[llength $rx_ip3]} {
+						hsi::utils::add_new_dts_param "$mrmac3_node" "xlnx,rxtsfifo" $rx_ip3 reference
+					}
 				}
 			}
 		}
+	} else {
+		dtg_warning "rx_timestamp_tod_3 connected pins are NULL...please check the design..."
 	}
+
 
 	if {[llength $handle]} {
 		hsi::utils::add_new_dts_param "$mrmac3_node" "xlnx,gtctrl" $handle reference
@@ -1372,8 +1415,11 @@ proc generate {drv_handle} {
 	set MAC_PORT3_RATE_C0 [get_property CONFIG.MAC_PORT3_RATE_C0 [get_cells -hier $drv_handle]]
 	if {[string match -nocase $MAC_PORT3_RATE_C0 "10GE"]} {
 		set number 10000
+		hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mrmac-rate" $number int
+	} else {
+		hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mrmac-rate" $MAC_PORT3_RATE_C0 string
 	}
-	hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mrmac-rate" $number int
+		
 	set MAC_PORT3_RATE_C1 [get_property CONFIG.MAC_PORT3_RATE_C1 [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mac-port3-rate-c1" $MAC_PORT3_RATE_C1 string
 	set MAC_PORT3_RX_ETYPE_GCP_C0 [get_property CONFIG.MAC_PORT3_RX_ETYPE_GCP_C0 [get_cells -hier $drv_handle]]
