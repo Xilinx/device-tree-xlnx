@@ -571,6 +571,51 @@ proc gen_zynqmp_pinctrl {} {
 					hsi::utils::add_new_dts_param "$pinctrl_uart0_default" "/delete-node/ conf-tx" "" boolean
 				}
 			}
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__CAN1__PERIPHERAL__IO"] >= 0} {
+				set can1_io [get_property CONFIG.PSU__CAN1__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $can1_io "EMIO"]} {
+					set pinctrl_can1_default [add_or_get_dt_node -n "can1-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_can1_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_can1_default" "/delete-node/ conf" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_can1_default" "/delete-node/ conf-rx" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_can1_default" "/delete-node/ conf-tx" "" boolean
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__SD1__PERIPHERAL__IO"] >= 0} {
+				set sd1_io [get_property CONFIG.PSU__SD1__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $sd1_io "EMIO"]} {
+					set pinctrl_sdhci1_default [add_or_get_dt_node -n "sdhci1-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ conf" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ conf-cd" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ mux-cd" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ conf-wp" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_sdhci1_default" "/delete-node/ mux-wp" "" boolean
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__ENET3__PERIPHERAL__IO"] >= 0} {
+				set gem3_io [get_property CONFIG.PSU__ENET3__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $gem3_io "EMIO"]} {
+					set pinctrl_gem3_default [add_or_get_dt_node -n "gem3-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ conf" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ conf-rx" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ conf-tx" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ conf-mdio" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_gem3_default" "/delete-node/ mux-mdio" "" boolean
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PSU__I2C1__PERIPHERAL__IO"] >= 0} {
+				set i2c1_io [get_property CONFIG.PSU__I2C1__PERIPHERAL__IO [get_cells -hier $periph]]
+				if {[string match -nocase $i2c1_io "EMIO"]} {
+					set pinctrl_i2c1_default [add_or_get_dt_node -n "i2c1-default" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_i2c1_default" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_i2c1_default" "/delete-node/ conf" "" boolean
+					set pinctrl_i2c1_gpio [add_or_get_dt_node -n "i2c1-gpio" -d $default_dts -p $pinctrl_node]
+					hsi::utils::add_new_dts_param "$pinctrl_i2c1_gpio" "/delete-node/ mux" "" boolean
+					hsi::utils::add_new_dts_param "$pinctrl_i2c1_gpio" "/delete-node/ conf" "" boolean
+				}
+			}
 		}
 	}
 }
