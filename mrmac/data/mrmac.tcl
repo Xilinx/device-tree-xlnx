@@ -234,7 +234,6 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,gt-ch0-txprogdiv-freq-source-c1" $GT_CH0_TXPROGDIV_FREQ_SOURCE_C1 string
 
 	set base_addr [string tolower [get_property BASE_VALUE $mem_ranges]]
-	set base_addr 0xa4090000
 	set high_addr [string tolower [get_property HIGH_VALUE $mem_ranges]]
 	set mrmac0_highaddr_hex [format 0x%x [expr $base_addr + 0xFFF]]
 	generate_reg_property $node $base_addr $mrmac0_highaddr_hex
