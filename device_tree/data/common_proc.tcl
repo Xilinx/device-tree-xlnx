@@ -32,6 +32,7 @@ global or_id
 global or_cnt
 set or_id 0
 set or_cnt 0
+global set xlconcat_val [dict create]
 global set end_mappings [dict create]
 global set remote_mappings [dict create]
 global set port1_end_mappings [dict create]
@@ -6023,6 +6024,7 @@ proc is_orgate { intc_src_port ip_name} {
 proc get_psu_interrupt_id { ip_name port_name } {
     global or_id
     global or_cnt
+    global xlconcat_val
 
     set ret -1
     set periph ""
@@ -6214,10 +6216,29 @@ proc get_psu_interrupt_id { ip_name port_name } {
 		# check for direct connection or concat block connected
 		if { [string compare -nocase "$connected_ip" "xlconcat"] == 0 } {
 			set number [regexp -all -inline -- {[0-9]+} $sink_pin]
+			if {[info exists xlconcat_val] && [dict exists $xlconcat_val $sink_periph]} {
+				set intr_wid [dict get $xlconcat_val $sink_periph]
+				set number [expr $number + {$intr_wid - 1}]
+				puts "number:$number"
+			}
 			set dout "dout"
 			set concat_block 1
 			set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
 			set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
+			set sink_periph [::hsi::get_cells -of_objects $sink_pins]
+			set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
+			if {[string match -nocase "$connected_ip" "xlconcat"]} {
+				set intr_wid [::hsi::utils::get_port_width $sink_pins]
+				puts "intr_wid:$intr_wid"
+				dict set xlconcat_val $sink_periph $intr_wid
+				set num [regexp -all -inline -- {[0-9]+} $sink_pins]
+				set num1 [regexp -all -inline -- {[0-9]+} $sink_pin]
+				set number [expr {$num + $num1}]
+				set dout "dout"
+				set intr_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$dout"]
+				set sink_pins [::hsi::utils::get_sink_pins $intr_pin]
+			}
+
 			foreach pin $sink_pins {
 				set sink_pin $pin
 				if {[string match -nocase $sink_pin "IRQ0_F2P"]} {
