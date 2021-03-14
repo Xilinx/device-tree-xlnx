@@ -100,7 +100,7 @@
 
 &sdhci1 { /* J3 MIO26, MIO29 - MIO33 */
 	disable-wp;
-	xlnx,mio_bank = <1>; /* FIXME */
+	xlnx,mio-bank = <1>; /* FIXME */
 	no-1-8-v;
 };
 

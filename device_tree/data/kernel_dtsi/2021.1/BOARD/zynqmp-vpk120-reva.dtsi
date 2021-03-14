@@ -55,6 +55,13 @@
 	};
 };
 
+&psgtr {
+	status = "okay";
+	/* sgmii, usb3 */
+	clocks = <&si5332_1>, <&si5332_2>;
+	clock-names = "ref0", "ref1";
+};
+
 &qspi { /* MIO 0-5 */
 	status = "okay";
 	flash@0 {
@@ -467,8 +474,7 @@
 	snps,dis_u3_susphy_quirk;
 	maximum-speed = "super-speed";
 	phy-names = "usb3-phy";
-	/* phys = <&lane1 PHY_TYPE_USB3 0 1 26000000>; */
-	/* phys = <&psgtr 1 PHY_TYPE_USB3 0 1>; */
+	phys = <&psgtr 1 PHY_TYPE_USB3 0 1>;
 };
 
 &pinctrl0 {

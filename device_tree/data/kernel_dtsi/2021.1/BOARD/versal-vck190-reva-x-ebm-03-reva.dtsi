@@ -58,7 +58,7 @@
 };
 
 &sdhci1 { /* PMC_MIO26-36/51 */
-	xlnx,mio_bank = <1>;
+	xlnx,mio-bank = <1>;
 	no-1-8-v;
 };
 

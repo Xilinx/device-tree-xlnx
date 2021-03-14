@@ -79,7 +79,7 @@
 };
 
 &sdhci1 { /* U104 */
-	xlnx,mio_bank = <1>;
+	xlnx,mio-bank = <1>;
 	no-1-8-v;
 };
 

@@ -820,6 +820,15 @@
 			power-domains = <&zynqmp_firmware PD_QSPI>;
 		};
 
+		psgtr: phy@fd400000 {
+			compatible = "xlnx,zynqmp-psgtr-v1.1";
+			status = "disabled";
+			reg = <0x0 0xfd400000 0x0 0x40000>,
+			      <0x0 0xfd3d0000 0x0 0x1000>;
+			reg-names = "serdes", "siou";
+			#phy-cells = <4>;
+		};
+
 		rtc: rtc@ffa60000 {
 			compatible = "xlnx,zynqmp-rtc";
 			status = "disabled";
@@ -830,38 +839,6 @@
 			calibration = <0x8000>;
 		};
 
-		serdes: zynqmp_phy@fd400000 {
-			compatible = "xlnx,zynqmp-psgtr-v1.1";
-			status = "disabled";
-			reg = <0x0 0xfd400000 0x0 0x40000>,
-			      <0x0 0xfd3d0000 0x0 0x1000>;
-			reg-names = "serdes", "siou";
-			nvmem-cells = <&soc_revision>;
-			nvmem-cell-names = "soc_revision";
-			resets = <&zynqmp_reset ZYNQMP_RESET_SATA>, <&zynqmp_reset ZYNQMP_RESET_USB0_CORERESET>,
-				 <&zynqmp_reset ZYNQMP_RESET_USB1_CORERESET>, <&zynqmp_reset ZYNQMP_RESET_USB0_HIBERRESET>,
-				 <&zynqmp_reset ZYNQMP_RESET_USB1_HIBERRESET>, <&zynqmp_reset ZYNQMP_RESET_USB0_APB>,
-				 <&zynqmp_reset ZYNQMP_RESET_USB1_APB>, <&zynqmp_reset ZYNQMP_RESET_DP>,
-				 <&zynqmp_reset ZYNQMP_RESET_GEM0>, <&zynqmp_reset ZYNQMP_RESET_GEM1>,
-				 <&zynqmp_reset ZYNQMP_RESET_GEM2>, <&zynqmp_reset ZYNQMP_RESET_GEM3>;
-			reset-names = "sata_rst", "usb0_crst", "usb1_crst",
-				      "usb0_hibrst", "usb1_hibrst", "usb0_apbrst",
-				      "usb1_apbrst", "dp_rst", "gem0_rst",
-				      "gem1_rst", "gem2_rst", "gem3_rst";
-			lane0: lane0 {
-				#phy-cells = <4>;
-			};
-			lane1: lane1 {
-				#phy-cells = <4>;
-			};
-			lane2: lane2 {
-				#phy-cells = <4>;
-			};
-			lane3: lane3 {
-				#phy-cells = <4>;
-			};
-		};
-
 		sata: ahci@fd0c0000 {
 			compatible = "ceva,ahci-1v84";
 			status = "disabled";
@@ -869,6 +846,7 @@
 			interrupt-parent = <&gic>;
 			interrupts = <0 133 4>;
 			power-domains = <&zynqmp_firmware PD_SATA>;
+			resets = <&zynqmp_reset ZYNQMP_RESET_SATA>;
 			#stream-id-cells = <4>;
 		/*	iommus = <&smmu 0x4c0>, <&smmu 0x4c1>,
 				 <&smmu 0x4c2>, <&smmu 0x4c3>;*/
@@ -1100,7 +1078,7 @@
 			};
 		};
 
-		xlnx_dpdma: dma@fd4c0000 {
+		zynqmp_dpdma: dma-controller@fd4c0000 {
 			compatible = "xlnx,dpdma";
 			status = "disabled";
 			reg = <0x0 0xfd4c0000 0x0 0x1000>;
@@ -1149,14 +1127,14 @@
 
 			vid_layer: vid-layer {
 				dma-names = "vid0", "vid1", "vid2";
-				dmas = <&xlnx_dpdma 0>,
-				       <&xlnx_dpdma 1>,
-				       <&xlnx_dpdma 2>;
+				dmas = <&zynqmp_dpdma 0>,
+				       <&zynqmp_dpdma 1>,
+				       <&zynqmp_dpdma 2>;
 			};
 
 			gfx_layer: gfx-layer {
 				dma-names = "gfx0";
-				dmas = <&xlnx_dpdma 3>;
+				dmas = <&zynqmp_dpdma 3>;
 			};
 
 			/* dummy node to to indicate there's no child i2c device */
@@ -1170,13 +1148,13 @@
 
 			zynqmp_dp_snd_pcm0: zynqmp_dp_snd_pcm0 {
 				compatible = "xlnx,dp-snd-pcm";
-				dmas = <&xlnx_dpdma 4>;
+				dmas = <&zynqmp_dpdma 4>;
 				dma-names = "tx";
 			};
 
 			zynqmp_dp_snd_pcm1: zynqmp_dp_snd_pcm1 {
 				compatible = "xlnx,dp-snd-pcm";
-				dmas = <&xlnx_dpdma 5>;
+				dmas = <&zynqmp_dpdma 5>;
 				dma-names = "tx";
 			};
 
