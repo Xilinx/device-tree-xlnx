@@ -5033,9 +5033,6 @@ proc detect_bus_name {ip_drv} {
 			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 			return "amba_pl"
 		}
-		if {[string match -nocase $ip_drv "psu_acpu_gic"] || [string match -nocase $ip_drv "psv_acpu_gic"]} {
-			return "amba_apu"
-		}
 		return "amba"
 	}
 
