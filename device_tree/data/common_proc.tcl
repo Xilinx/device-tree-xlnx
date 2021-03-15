@@ -4201,6 +4201,8 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set intr_id -1
 	set intc ""
 	set intr_info ""
+	set intc_names ""
+	set intr_par   ""
 
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	if {[is_pl_ip $drv_handle] && $remove_pl} {
@@ -4317,7 +4319,26 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			}
 		}
 			append intr_names " " "$pin"
+			append intr_par   " " "$intc"
+			lappend intc_names "$intc" "$cur_intr_info"
 	}
+	if {[llength $intr_par] > 1 } {
+		set int_ext 0
+		set intc0 [lindex $intr_par 0]
+		for {set i 1} {$i < [llength $intr_par]} {incr i} {
+			set intc [lindex $intr_par $i]
+			if {![string match -nocase $intc0 $intc]} {
+				set int_ext 1
+			}
+		}
+		if {$int_ext == 1} {
+			set intc_names [string map {psu_acpu_gic gic} $intc_names]
+			set ref [lindex $intc_names 0]
+			append ref " [lindex $intc_names 1]>, <&[lindex $intc_names 2] [lindex $intc_names 3]>, <&[lindex $intc_names 4] [lindex $intc_names 5]>,<&[lindex $intc_names 6] [lindex $intc_names 7]>, <&[lindex $intc_names 8] [lindex $intc_names 9]"
+			set_drv_prop_if_empty $drv_handle "interrupts-extended" $ref reference
+		}
+	}
+
 	if {[string_is_empty $intr_info]} {
 		return -1
 	}
