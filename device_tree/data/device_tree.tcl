@@ -639,7 +639,12 @@ proc gen_zocl_node {} {
 	if {!$zocl} {
 		return
 	}
-	set bus_node "amba_pl"
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set bus_node "overlay2"
+	} else {
+		set bus_node "amba_pl"
+	}
 	set default_dts pl.dtsi
 	set zocl_node [add_or_get_dt_node -n "zyxclmm_drm" -d ${default_dts} -p $bus_node]
 	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "ps7_cortexa9"]} {
