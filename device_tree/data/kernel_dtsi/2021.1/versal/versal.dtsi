@@ -105,11 +105,13 @@
 		compatible = "xlnx,versal-fpga";
 	};
 
-	amba_apu: amba_apu {
+	amba: axi {
 		compatible = "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
+		interrupt-parent = <&gic>;
+		u-boot,dm-pre-reloc;
 
 		gic: interrupt-controller@f9000000 {
 			compatible = "arm,gic-v3";
@@ -120,7 +122,6 @@
 			reg = <0 0xf9000000 0 0x80000>, /* GICD */
 			      <0 0xf9080000 0 0x80000>; /* GICR */
 			interrupt-controller;
-			interrupt-parent = <&gic>;
 			interrupts = <1 9 4>;
 
 			gic_its: gic-its@f9020000 {
@@ -130,15 +131,6 @@
 				reg = <0 0xf9020000 0 0x20000>;
 			};
 		};
-	};
-
-	amba: amba {
-		compatible = "simple-bus";
-		#address-cells = <2>;
-		#size-cells = <2>;
-		ranges;
-		interrupt-parent = <&gic>;
-		u-boot,dm-pre-reloc;
 
 		apm: performance-monitor@f0920000 {
 			compatible = "xlnx,flexnoc-pm-2.7";
@@ -362,7 +354,6 @@
 			status = "disabled";
 			reg = <0x0 0xf6150000 0x0 0x2000>, <0x0 0xf6070000 0x0 0x20000>;
 			reg-names = "ddrmc_base", "ddrmc_noc_base";
-			interrupt-parent = <&gic>;
 			interrupts = <0 147 4>;
 			xlnx,mc-id = <0>;
 		};
@@ -372,7 +363,6 @@
 			status = "disabled";
 			reg = <0x0 0xf62c0000 0x0 0x2000>, <0x0 0xf6210000 0x0 0x20000>;
 			reg-names = "ddrmc_base", "ddrmc_noc_base";
-			interrupt-parent = <&gic>;
 			interrupts = <0 147 4>;
 			xlnx,mc-id = <1>;
 		};
@@ -382,7 +372,6 @@
 			status = "disabled";
 			reg = <0x0 0xf6430000 0x0 0x2000>, <0x0 0xf6380000 0x0 0x20000>;
 			reg-names = "ddrmc_base", "ddrmc_noc_base";
-			interrupt-parent = <&gic>;
 			interrupts = <0 147 4>;
 			xlnx,mc-id = <2>;
 		};
@@ -392,7 +381,6 @@
 			status = "disabled";
 			reg = <0x0 0xf65a0000 0x0 0x2000>, <0x0 0xf64f0000 0x0 0x20000>;
 			reg-names = "ddrmc_base", "ddrmc_noc_base";
-			interrupt-parent = <&gic>;
 			interrupts = <0 147 4>;
 			xlnx,mc-id = <3>;
 		};
@@ -598,7 +586,6 @@
 					<0 0 0 3 &pcie_intc_0 3>,
 					<0 0 0 4 &pcie_intc_0 4>;
 			interrupt-map-mask = <0 0 0 7>;
-			interrupt-parent = <&gic>;
 			interrupt-names = "misc";
 			interrupts = <0 72 4>;
 			ranges = <0x02000000 0x00000000 0xe0000000 0x0 0xe0000000 0x00000000 0x10000000>,
