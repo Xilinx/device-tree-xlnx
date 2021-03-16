@@ -303,6 +303,7 @@ proc gen_include_headers {} {
 			set power_list "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-clk.h"
 			set reset_list "xlnx-zynqmp-resets.h"
+			set dpdma_list "xlnx-zynqmp-dpdma.h"
 		}
 		set powerdir "$dir_path/include/dt-bindings/power"
 		set clockdir "$dir_path/include/dt-bindings/clock"
