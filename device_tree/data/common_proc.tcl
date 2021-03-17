@@ -1894,11 +1894,11 @@ proc update_endpoints {drv_handle} {
 								set sca_remo_in_end ""
 								switch $intlen {
 									"1" {
-										if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+										if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 											set sca_in_end [dict get $port1_broad_end_mappings $broad_ip]
 											puts "sca_in_end:$sca_in_end"
 										}
-										if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+										if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 											set sca_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 										}
 										if {[regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
@@ -1912,16 +1912,16 @@ proc update_endpoints {drv_handle} {
 
 									}
 									"2" {
-										if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+										if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 											set sca_in_end [dict get $port1_broad_end_mappings $broad_ip]
 										}
-										if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+										if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 											set sca_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 										}
-										if {[dict exists $port2_broad_end_mappings $broad_ip]} {
+										if {[info exists port1_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 											set sca_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 										}
-										if {[dict exists $broad_port2_remo_mappings $broad_ip]} {
+										if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 											set sca_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 										}
 										if {[regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
@@ -1942,24 +1942,24 @@ proc update_endpoints {drv_handle} {
 										}
 								}
 								"3" {
-									if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+									if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 										set sca_in_end [dict get $port1_broad_end_mappings $broad_ip]
 									}
-									if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+									if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 										set sca_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 									}
 
-									if {[dict exists $port2_broad_end_mappings $broad_ip]} {
+									if {[info exists port2_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 										set sca_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 									}
-									if {[dict exists $broad_port2_remo_mappings $broad_ip]} {
+									if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 										set sca_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 									}
 
-									if {[dict exists $port3_broad_end_mappings $broad_ip]} {
+									if {[info exists port3_broad_end_mappings] && [dict exists $port3_broad_end_mappings $broad_ip]} {
 										set sca_in2_end [dict get $port3_broad_end_mappings $broad_ip]
 									}
-									if {[dict exists $broad_port3_remo_mappings $broad_ip]} {
+									if {[info exists broad_port3_remo_mappings] && [dict exists $broad_port3_remo_mappings $broad_ip]} {
 										set sca_remo_in2_end [dict get $broad_port3_remo_mappings $broad_ip]
 									}
 									if {[regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
@@ -1988,30 +1988,30 @@ proc update_endpoints {drv_handle} {
 									}
 								}
 							"4" {
-								if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+								if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 									set sca_in_end [dict get $port1_broad_end_mappings $broad_ip]
 								}
-								if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+								if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 									set sca_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 								}
 
-								if {[dict exists $port2_broad_end_mappings $broad_ip]} {
+								if {[info exists port2_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 									set sca_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 								}
-								if {[dict exists $broad_port2_remo_mappings $broad_ip]} {
+								if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 									set sca_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 								}
 
-								if {[dict exists $port3_broad_end_mappings $broad_ip]} {
+								if {[info exists port3_broad_end_mappings] && [dict exists $port3_broad_end_mappings $broad_ip]} {
 									set sca_in2_end [dict get $port3_broad_end_mappings $broad_ip]
 								}
-								if {[dict exists $broad_port3_remo_mappings $broad_ip]} {
+								if {[info exists broad_port3_remo_mappings] && [dict exists $broad_port3_remo_mappings $broad_ip]} {
 									set sca_remo_in2_end [dict get $broad_port3_remo_mappings $broad_ip]
 								}
-								if {[dict exists $port4_broad_end_mappings $broad_ip]} {
+								if {[info exists port4_broad_end_mappings] && [dict exists $port4_broad_end_mappings $broad_ip]} {
 									set sca_in3_end [dict get $port4_broad_end_mappings $broad_ip]
 								}
-								if {[dict exists $broad_port4_remo_mappings $broad_ip]} {
+								if {[info exists broad_port4_remo_mappings] && [dict exists $broad_port4_remo_mappings $broad_ip]} {
 									set sca_remo_in3_end [dict get $broad_port4_remo_mappings $broad_ip]
 								}
 							}
@@ -2043,11 +2043,11 @@ proc update_endpoints {drv_handle} {
 					if {[llength $inip]} {
 						set sca_in_end ""
 						set sca_remo_in_end ""
-						if {[dict exists $end_mappings $inip]} {
+						if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 							set sca_in_end [dict get $end_mappings $inip]
 							puts "drv:$drv_handle inend:$sca_in_end"
 						}
-						if {[dict exists $remo_mappings $inip]} {
+						if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 							set sca_remo_in_end [dict get $remo_mappings $inip]
 							puts "drv:$drv_handle inremoend:$sca_remo_in_end"
 						}
@@ -2098,11 +2098,11 @@ proc update_endpoints {drv_handle} {
 					if {[llength $inip]} {
 						set csc_in_end ""
 						set csc_remo_in_end ""
-						if {[dict exists $end_mappings $inip]} {
+						if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 							set csc_in_end [dict get $end_mappings $inip]
 							puts "drv:$drv_handle inend:$csc_in_end"
 						}
-						if {[dict exists $remo_mappings $inip]} {
+						if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 							set csc_remo_in_end [dict get $remo_mappings $inip]
 							puts "drv:$drv_handle inremoend:$csc_remo_in_end"
 						}
@@ -2143,10 +2143,10 @@ proc update_endpoints {drv_handle} {
 							set mipi_remo_in_end ""
 							switch $intlen {
 								"1" {
-									if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+									if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 										set mipi_in_end [dict get $port1_broad_end_mappings $broad_ip]
 								}
-									if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+									if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 										set mipi_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 								}
 								if {[regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
@@ -2160,16 +2160,16 @@ proc update_endpoints {drv_handle} {
 
 								}
 								"2" {
-									if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+									if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 										set mipi_in_end [dict get $port1_broad_end_mappings $broad_ip]
 									}
-									if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+									if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 										set mipi_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 									}
-									if {[dict exists $port2_broad_end_mappings $broad_ip]} {
+									if {[info exists port2_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 										set mipi_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 									}
-									if {[dict exists $broad_port2_remo_mappings $broad_ip]} {
+									if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 										set mipi_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 									}
 									if {[regexp -nocase $drv_handle "$mipi_remo_in_end" match]} {
@@ -2200,35 +2200,35 @@ proc update_endpoints {drv_handle} {
 			if {[string match -nocase [get_property IP_NAME $demo_inip] "axis_switch"]} {
 				set demo_in_end ""
 				set demo_remo_in_end ""
-				if {[dict exists $port1_end_mappings $demo_inip]} {
+				if {[info exists port1_end_mappings] && [dict exists $port1_end_mappings $demo_inip]} {
 					set demo_in_end [dict get $port1_end_mappings $demo_inip]
 					puts "demo_in_end:$demo_in_end"
 				}
-				if {[dict exists $axis_port1_remo_mappings $demo_inip]} {
+				if {[info exists axis_port1_remo_mappings] && [dict exists $axis_port1_remo_mappings $demo_inip]} {
 					set demo_remo_in_end [dict get $axis_port1_remo_mappings $demo_inip]
 					puts "demo_remo_in_end:$demo_remo_in_end"
 				}
-				if {[dict exists $port2_end_mappings $demo_inip]} {
+				if {[info exists port2_end_mappings] && [dict exists $port2_end_mappings $demo_inip]} {
 					set demo_in1_end [dict get $port2_end_mappings $demo_inip]
 					puts "demo_in1_end:$demo_in1_end"
 				}
-				if {[dict exists $axis_port2_remo_mappings $demo_inip]} {
+				if {[info exists axis_port2-remo_mappings] && [dict exists $axis_port2_remo_mappings $demo_inip]} {
 					set demo_remo_in1_end [dict get $axis_port2_remo_mappings $demo_inip]
 					puts "demo_remo_in1_end:$demo_remo_in1_end"
 				}
-				if {[dict exists $port3_end_mappings $demo_inip]} {
+				if {[info exists port3_end_mappings] && [dict exists $port3_end_mappings $demo_inip]} {
 					set demo_in2_end [dict get $port3_end_mappings $demo_inip]
 					puts "demo_in2_end:$demo_in2_end"
 				}
-				if {[dict exists $axis_port3_remo_mappings $demo_inip]} {
+				if {[info exists axis_port3_remo_mappings] && [dict exists $axis_port3_remo_mappings $demo_inip]} {
 					set demo_remo_in2_end [dict get $axis_port3_remo_mappings $demo_inip]
 					puts "demo_remo_in2_end:$demo_remo_in2_end"
 				}
-				if {[dict exists $port4_end_mappings $demo_inip]} {
+				if {[info exists port4_end_mappings] && [dict exists $port4_end_mappings $demo_inip]} {
 					set demo_in3_end [dict get $port4_end_mappings $demo_inip]
 					puts "demo_in3_end:$demo_in3_end"
 				}
-				if {[dict exists $axis_port4_remo_mappings $demo_inip]} {
+				if {[info exists axis_port4_remo_mappings] && [dict exists $axis_port4_remo_mappings $demo_inip]} {
 					set demo_remo_in3_end [dict get $axis_port4_remo_mappings $demo_inip]
 					puts "demo_remo_in3_end:$demo_remo_in3_end"
 				}
@@ -2290,11 +2290,11 @@ proc update_endpoints {drv_handle} {
 				if {[llength $inip]} {
 					set demo_in_end ""
 					set demo_remo_in_end ""
-					if {[dict exists $end_mappings $inip]} {
+					if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 						set demo_in_end [dict get $end_mappings $inip]
 						puts "demo_in_end:$demo_in_end"
 					}
-					if {[dict exists $remo_mappings $inip]} {
+					if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 						set demo_remo_in_end [dict get $remo_mappings $inip]
 						puts "demo_remo_in_end:$demo_remo_in_end"
 					}
@@ -2337,11 +2337,11 @@ proc update_endpoints {drv_handle} {
 				if {[llength $inip]} {
 					set gamma_in_end ""
 					set gamma_remo_in_end ""
-					if {[dict exists $end_mappings $inip]} {
+					if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 						set gamma_in_end [dict get $end_mappings $inip]
 						puts "gamma_in_end:$gamma_in_end"
 					}
-					if {[dict exists $remo_mappings $inip]} {
+					if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 						set gamma_remo_in_end [dict get $remo_mappings $inip]
 						puts "gamma_remo_in_end:$gamma_remo_in_end"
 					}
@@ -2390,11 +2390,11 @@ proc update_endpoints {drv_handle} {
 		if {[llength $inip]} {
 			set dsitx_in_end ""
 			set dsitx_remo_in_end ""
-			if {[dict exists $end_mappings $inip]} {
+			if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 				set dsitx_in_end [dict get $end_mappings $inip]
 				puts "dsitx_in_end:$dsitx_in_end"
 			}
-			if {[dict exists $remo_mappings $inip]} {
+			if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 				set dsitx_remo_in_end [dict get $remo_mappings $inip]
 				puts "dsitx_remo_in_end:$dsitx_remo_in_end"
 			}
@@ -2441,11 +2441,11 @@ proc update_endpoints {drv_handle} {
 		if {[llength $inip]} {
 			set sditx_in_end ""
 			set sditx_remo_in_end ""
-			if {[dict exists $end_mappings $inip]} {
+			if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 				set sditx_in_end [dict get $end_mappings $inip]
 				puts "sditx_in_end:$sditx_in_end"
 			}
-			if {[dict exists $remo_mappings $inip]} {
+			if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 				set sditx_remo_in_end [dict get $remo_mappings $inip]
 				puts "sditx_remo_in_end:$sditx_remo_in_end"
 			}
@@ -2492,11 +2492,11 @@ proc update_endpoints {drv_handle} {
 		if {[llength $inip]} {
 			set hdmitx_in_end ""
 			set hdmitx_remo_in_end ""
-			if {[dict exists $end_mappings $inip]} {
+			if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 				set hdmitx_in_end [dict get $end_mappings $inip]
 				puts "hdmitx_in_end:$hdmitx_in_end"
 			}
-			if {[dict exists $remo_mappings $inip]} {
+			if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 				set hdmitx_remo_in_end [dict get $remo_mappings $inip]
 				puts "hdmitx_remo_in_end:$hdmitx_remo_in_end"
 			}
@@ -2529,28 +2529,28 @@ proc update_endpoints {drv_handle} {
 		if {[string match -nocase [get_property IP_NAME $broad_ip] "axis_broadcaster"]} {
 			set scd_in_end ""
 			set scd_remo_in_end ""
-			if {[dict exists $port1_broad_end_mappings $broad_ip]} {
+			if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
 				set scd_in_end [dict get $port1_broad_end_mappings $broad_ip]
 			}
-			if {[dict exists $broad_port1_remo_mappings $broad_ip]} {
+			if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 				set scd_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 			}
-			if {[dict exists $port2_broad_end_mappings $broad_ip]} {
+			if {[info exists port2_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 				set scd_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 			}
-			if {[dict exists $broad_port2_remo_mappings $broad_ip]} {
+			if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 				set scd_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 			}
-			if {[dict exists $port3_broad_end_mappings $broad_ip]} {
+			if {[info exists port3_broad_end_mappings] && [dict exists $port3_broad_end_mappings $broad_ip]} {
 				set scd_in2_end [dict get $port3_broad_end_mappings $broad_ip]
 			}
-			if {[dict exists $broad_port3_remo_mappings $broad_ip]} {
+			if {[info exists broad_port3_remo_mappings] && [dict exists $broad_port3_remo_mappings $broad_ip]} {
 				set scd_remo_in2_end [dict get $broad_port3_remo_mappings $broad_ip]
 			}
-			if {[dict exists $port4_broad_end_mappings $broad_ip]} {
+			if {[info exists port4_broad_end_mappings] && [dict exists $port4_broad_end_mappings $broad_ip]} {
 				set scd_in3_end [dict get $port4_broad_end_mappings $broad_ip]
 			}
-			if {[dict exists $broad_port4_remo_mappings $broad_ip]} {
+			if {[info exists broad_port4_remo_mappings] && [dict exists $broad_port4_remo_mappings $broad_ip]} {
 				set scd_remo_in3_end [dict get $broad_port4_remo_mappings $broad_ip]
 			}
 			if {[regexp -nocase $drv_handle "$scd_remo_in_end" match]} {
@@ -2603,10 +2603,10 @@ proc update_endpoints {drv_handle} {
 				if {[llength $inip]} {
 					set scd_in_end ""
 					set scd_remo_in_end ""
-					if {[dict exists $end_mappings $inip]} {
+					if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 						set scd_in_end [dict get $end_mappings $inip]
 					}
-					if {[dict exists $remo_mappings $inip]} {
+					if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 						set scd_remo_in_end [dict get $remo_mappings $inip]
 					}
 					if {[llength $scd_remo_in_end]} {
@@ -2641,10 +2641,10 @@ proc update_endpoints {drv_handle} {
 		if {[llength $inip]} {
 			set tpg_in_end ""
 			set tpg_remo_in_end ""
-			if {[dict exists $end_mappings $inip]} {
+			if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 				set tpg_in_end [dict get $end_mappings $inip]
 			}
-			if {[dict exists $remo_mappings $inip]} {
+			if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 				set tpg_remo_in_end [dict get $remo_mappings $inip]
 			}
 			if {[llength $tpg_remo_in_end]} {
@@ -2685,11 +2685,11 @@ enechange"
 						if {[llength $inip]} {
 							set axis_switch_in_end ""
 							set axis_switch_remo_in_end ""
-							if {[dict exists $end_mappings $inip]} {
+							if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 								set axis_switch_in_end [dict get $end_mappings $inip]
 								puts "drv:$ip inend:$axis_switch_in_end"
 							}
-							if {[dict exists $remo_mappings $inip]} {
+							if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 								set axis_switch_remo_in_end [dict get $remo_mappings $inip]
 								puts "drv:$ip inremoend:$axis_switch_remo_in_end"
 							}
@@ -2740,11 +2740,11 @@ enechange"
 				if {[llength $inip]} {
 					set axis_broad_in_end ""
 					set axis_broad_remo_in_end ""
-					if {[dict exists $end_mappings $inip]} {
+					if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
 						set axis_broad_in_end [dict get $end_mappings $inip]
 						puts "drv:$ip inend:$axis_broad_in_end"
 					}
-					if {[dict exists $remo_mappings $inip]} {
+					if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
 						set axis_broad_remo_in_end [dict get $remo_mappings $inip]
 						puts "drv:$ip inremoend:$axis_broad_remo_in_end"
 					}
