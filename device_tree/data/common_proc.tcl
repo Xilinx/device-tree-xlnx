@@ -4869,7 +4869,12 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	}
 	# TODO: more ignore ip list?
 	set ip_type [get_property IP_NAME $ip]
-	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc dfx_decoupler"
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc dfx_decoupler"
+	} else {
+		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+	}
 	if {[string match -nocase $ip_type "psu_pcie"]} {
 		set pcie_config [get_property CONFIG.C_PCIE_MODE [get_cells -hier $drv_handle]]
 		if {[string match -nocase $pcie_config "Endpoint Device"]} {
