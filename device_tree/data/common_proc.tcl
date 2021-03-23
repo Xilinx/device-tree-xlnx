@@ -2234,7 +2234,7 @@ proc update_endpoints {drv_handle} {
 				}
 				set drv [split $demo_remo_in_end "-"]
 				set handle [lindex $drv 0]
-				if {[regexp -nocase $drv_handle "$demo_remo_in_end" match]} {
+				if {[info exists demo_remo_in_end] && [regexp -nocase $drv_handle "$demo_remo_in_end" match]} {
 					if {[llength $demo_remo_in_end]} {
 						set demosaic_node [add_or_get_dt_node -n "endpoint" -l $demo_remo_in_end -p $port_node]
 					}
@@ -2243,7 +2243,7 @@ proc update_endpoints {drv_handle} {
 					}
 					puts "****DEMO_END1****"
 				}
-				if {[regexp -nocase $drv_handle "$demo_remo_in1_end" match]} {
+				if {[info exists demo_remo_in1_end] && [regexp -nocase $drv_handle "$demo_remo_in1_end" match]} {
 					if {[llength $demo_remo_in1_end]} {
 						set demosaic_node1 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in1_end -p $port_node]
 					}
@@ -2252,7 +2252,7 @@ proc update_endpoints {drv_handle} {
 					}
 					puts "****DEMO_END2****"
 				}
-				if {[regexp -nocase $drv_handle "$demo_remo_in2_end" match]} {
+				if {[info exists demo_remo_in2_end] && [regexp -nocase $drv_handle "$demo_remo_in2_end" match]} {
 					if {[llength $demo_remo_in2_end]} {
 						set demosaic_node2 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in2_end -p $port_node]
 					}
@@ -2261,7 +2261,7 @@ proc update_endpoints {drv_handle} {
 					}
 					puts "****DEMO_END3****"
 				}
-				if {[regexp -nocase $drv_handle "$demo_remo_in3_end" match]} {
+				if {[info exists demo_remo_in3_end] && [regexp -nocase $drv_handle "$demo_remo_in3_end" match]} {
 					if {[llength $demo_remo_in3_end]} {
 						set demosaic_node3 [add_or_get_dt_node -n "endpoint" -l $demo_remo_in3_end -p $port_node]
 					}
