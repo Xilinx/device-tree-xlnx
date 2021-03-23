@@ -2149,7 +2149,7 @@ proc update_endpoints {drv_handle} {
 									if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 										set mipi_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 								}
-								if {[regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
+								if {[info exists sca_remo_in_end] && [regexp -nocase $drv_handle "$sca_remo_in_end" match]} {
 									if {[llength $mipi_remo_in_end]} {
 										set mipi_node [add_or_get_dt_node -n "endpoint" -l $mipi_remo_in_end -p $port_node]
 									}
@@ -2172,7 +2172,7 @@ proc update_endpoints {drv_handle} {
 									if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
 										set mipi_remo_in1_end [dict get $broad_port2_remo_mappings $broad_ip]
 									}
-									if {[regexp -nocase $drv_handle "$mipi_remo_in_end" match]} {
+									if {[info exists mipi_remo_in_end] && [regexp -nocase $drv_handle "$mipi_remo_in_end" match]} {
 										if {[llength $mipi_remo_in_end]} {
 											set mipi_node [add_or_get_dt_node -n "endpoint" -l $mipi_remo_in_end -p $port_node]
 									}
@@ -2180,7 +2180,7 @@ proc update_endpoints {drv_handle} {
 										hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $mipi_in_end reference
 									}
 									}
-									if {[regexp -nocase $drv_handle "$mipi_remo_in1_end" match]} {
+									if {[info exists mipi_remo_in1_end] && [regexp -nocase $drv_handle "$mipi_remo_in1_end" match]} {
 										if {[llength $mipi_remo_in1_end]} {
 											set mipi_node [add_or_get_dt_node -n "endpoint" -l $mipi_remo_in1_end -p $port_node]
 									}
@@ -2212,7 +2212,7 @@ proc update_endpoints {drv_handle} {
 					set demo_in1_end [dict get $port2_end_mappings $demo_inip]
 					puts "demo_in1_end:$demo_in1_end"
 				}
-				if {[info exists axis_port2-remo_mappings] && [dict exists $axis_port2_remo_mappings $demo_inip]} {
+				if {[info exists axis_port2_remo_mappings] && [dict exists $axis_port2_remo_mappings $demo_inip]} {
 					set demo_remo_in1_end [dict get $axis_port2_remo_mappings $demo_inip]
 					puts "demo_remo_in1_end:$demo_remo_in1_end"
 				}
@@ -2553,7 +2553,7 @@ proc update_endpoints {drv_handle} {
 			if {[info exists broad_port4_remo_mappings] && [dict exists $broad_port4_remo_mappings $broad_ip]} {
 				set scd_remo_in3_end [dict get $broad_port4_remo_mappings $broad_ip]
 			}
-			if {[regexp -nocase $drv_handle "$scd_remo_in_end" match]} {
+			if {[info exists scd_remo_in_end] && [regexp -nocase $drv_handle "$scd_remo_in_end" match]} {
 				if {[llength $scd_remo_in_end]} {
 					set scd_node [add_or_get_dt_node -n "endpoint" -l $scd_remo_in_end -p $port_node]
 				}
@@ -2561,7 +2561,7 @@ proc update_endpoints {drv_handle} {
 					hsi::utils::add_new_dts_param "$scd_node" "remote-endpoint" $scd_in_end reference
 				}
 			}
-			if {[regexp -nocase $drv_handle "$scd_remo_in1_end" match]} {
+			if {[info exists scd_remo_in1_end] && [regexp -nocase $drv_handle "$scd_remo_in1_end" match]} {
 				if {[llength $scd_remo_in1_end]} {
 					set scd_node [add_or_get_dt_node -n "endpoint" -l $scd_remo_in1_end -p $port_node]
 				}
@@ -2569,7 +2569,7 @@ proc update_endpoints {drv_handle} {
 					hsi::utils::add_new_dts_param "$scd_node" "remote-endpoint" $scd_in1_end reference
 				}
 			}
-			if {[regexp -nocase $drv_handle "$scd_remo_in2_end" match]} {
+			if {[info exists scd_remo_in2_end] && [regexp -nocase $drv_handle "$scd_remo_in2_end" match]} {
 				if {[llength $scd_remo_in2_end]} {
 					set scd_node [add_or_get_dt_node -n "endpoint" -l $scd_remo_in2_end -p $port_node]
 				}
@@ -2577,7 +2577,7 @@ proc update_endpoints {drv_handle} {
 					hsi::utils::add_new_dts_param "$scd_node" "remote-endpoint" $scd_in2_end reference
 				}
 			}
-			if {[regexp -nocase $drv_handle "$scd_remo_in3_end" match]} {
+			if {[info exists scd_remo_in3_end] && [regexp -nocase $drv_handle "$scd_remo_in3_end" match]} {
 				if {[llength $scd_remo_in3_end]} {
 					set scd_node [add_or_get_dt_node -n "endpoint" -l $scd_remo_in3_end -p $port_node]
 				}
