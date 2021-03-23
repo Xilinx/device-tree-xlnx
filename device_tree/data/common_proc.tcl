@@ -2678,6 +2678,7 @@ enechange"
 					if {[lsearch  -nocase $valid_mmip_list $inipname] >= 0} {
 						set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
 						set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
+						gen_axis_switch_clk_property $ip $default_dts $rt_node
 						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 						hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 						set port_node [add_or_get_dt_node -n "port" -l axis_switch_port0$ip -u 0 -p $ports_node]
@@ -3571,6 +3572,261 @@ proc gen_dfx_clk_property {drv_handle dts_file child_node dfx_node} {
 			set refs [lindex $updat 0]
 			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]"
 			hsi::utils::add_new_dts_param "${dfx_node}" "clocks" "$refs" reference
+		}
+	}
+}
+
+proc gen_axis_switch_clk_property {drv_handle dts_file node} {
+	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	if {[is_pl_ip $drv_handle] && $remove_pl} {
+		return 0
+	}
+	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+	set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+	if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
+		return 0
+	}
+	set clocks ""
+	set axi 0
+	set is_clk_wiz 0
+	set is_pl_clk 0
+	set updat ""
+	global bus_clk_list
+	set clocknames ""
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "microblaze"]} {
+		return
+	}
+	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
+	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+	foreach clk $clk_pins {
+		set ip [get_cells -hier $drv_handle]
+		set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] $clk]]
+		set valid_clk_list "clk_out0 clk_out1 clk_out2 clk_out3 clk_out4 clk_out5 clk_out6 clk_out7 clk_out8 clk_out9"
+		set pl_clk ""
+		set clkout ""
+		foreach pin $pins {
+			if {[lsearch $valid_clk_list $pin] >= 0} {
+				set clkout $pin
+				set is_clk_wiz 1
+				set periph [::hsi::get_cells -of_objects $pin]
+			}
+		}
+		if {[llength $clkout]} {
+			set number [regexp -all -inline -- {[0-9]+} $clkout]
+			set clk_wiz [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
+			set axi_clk "s_axi_aclk"
+			foreach clk1 $clk_wiz {
+				if {[regexp $axi_clk $clk1 match]} {
+					set axi 1
+				}
+			}
+			if {[string match -nocase $axi "0"]} {
+				dtg_warning "no s_axi_aclk for clockwizard IP block: \" $periph\"\n\r"
+				set pins [get_pins -of_objects [get_cells -hier $periph] -filter TYPE==clk]
+				set clk_list "pl_clk*"
+				set clk_pl ""
+				set num ""
+				foreach clk_wiz_pin $pins {
+					set clk_wiz_pins [get_pins -of_objects [get_nets -of_objects $clk_wiz_pin]]
+					foreach pin $clk_wiz_pins {
+						if {[regexp $clk_list $pin match]} {
+							set clk_pl $pin
+						}
+					}
+				}
+				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
+				if {[llength $clk_freq] == 0} {
+					dtg_warning "clock frequency for the $clk is NULL of IP block: \" $drv_handle\"\n\r"
+					continue
+				}
+				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+				# if clk_freq is float convert it to int
+				set clk_freq [expr int($clk_freq)]
+				set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+				if {![string equal $clk_freq ""]} {
+					if {[lsearch $bus_clk_list $clk_freq] < 0} {
+						set bus_clk_list [lappend bus_clk_list $clk_freq]
+					}
+					set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+						-d ${dts_file} -p ${bus_node}]
+					set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+					set updat [lappend updat misc_clk_${bus_clk_cnt}]
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+					hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+				}
+			}
+			if {![string match -nocase $axi "0"]} {
+				switch $number {
+					"1" {
+						set peri "$periph 0"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"2" {
+						set peri "$periph 1"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"3" {
+						set peri "$periph 2"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"4" {
+						set peri "$periph 3"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"5" {
+						set peri "$periph 4"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"6" {
+						set peri "$periph 5"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+					"7" {
+						set peri "$periph 6"
+						set clocks [lappend clocks $peri]
+						set updat [lappend updat $peri]
+					}
+				}
+			}
+		}
+		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+			set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
+		}
+		foreach pin $pins {
+			if {[lsearch $clklist $pin] >= 0} {
+				set pl_clk $pin
+				set is_pl_clk 1
+			}
+		}
+		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			switch $pl_clk {
+				"pl_clk0" {
+					set pl_clk0 "versal_clk 65"
+					set clocks [lappend clocks $pl_clk0]
+					set updat  [lappend updat $pl_clk0]
+				}
+				"pl_clk1" {
+						set pl_clk1 "versal_clk 66"
+						set clocks [lappend clocks $pl_clk1]
+						set updat  [lappend updat $pl_clk1]
+				}
+				"pl_clk2" {
+						set pl_clk2 "versal_clk 67"
+						set clocks [lappend clocks $pl_clk2]
+						set updat [lappend updat $pl_clk2]
+				}
+				"pl_clk3" {
+						set pl_clk3 "versal_clk 68"
+						set clocks [lappend clocks $pl_clk3]
+						set updat [lappend updat $pl_clk3]
+				}
+				default {
+						dtg_debug "not supported pl_clk:$pl_clk"
+				}
+			}
+		}
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			switch $pl_clk {
+				"pl_clk0" {
+						set pl_clk0 "zynqmp_clk 71"
+						set clocks [lappend clocks $pl_clk0]
+						set updat  [lappend updat $pl_clk0]
+				}
+				"pl_clk1" {
+						set pl_clk1 "zynqmp_clk 72"
+						set clocks [lappend clocks $pl_clk1]
+						set updat  [lappend updat $pl_clk1]
+				}
+				"pl_clk2" {
+						set pl_clk2 "zynqmp_clk 73"
+						set clocks [lappend clocks $pl_clk2]
+						set updat [lappend updat $pl_clk2]
+				}
+				"pl_clk3" {
+						set pl_clk3 "zynqmp_clk 74"
+						set clocks [lappend clocks $pl_clk3]
+						set updat [lappend updat $pl_clk3]
+				}
+				default {
+					dtg_debug "not supported pl_clk:$pl_clk"
+				}
+			}
+		}
+		if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
+			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
+			if {[llength $clk_freq] == 0} {
+				dtg_warning "clock frequency for the $clk is NULL of IP block: \"$drv_handle\"\n\r"
+				continue
+			}
+			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+			# if clk_freq is float convert it to int
+			set clk_freq [expr int($clk_freq)]
+			set iptype [get_property IP_NAME [get_cells -hier $drv_handle]]
+			if {![string equal $clk_freq ""]} {
+				if {[lsearch $bus_clk_list $clk_freq] < 0} {
+					set bus_clk_list [lappend bus_clk_list $clk_freq]
+				}
+				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
+				set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
+				-d ${dts_file} -p ${bus_node}]
+				set clk_refs [lappend clk_refs misc_clk_${bus_clk_cnt}]
+				set updat [lappend updat misc_clk_${bus_clk_cnt}]
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+				hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
+			}
+		}
+		append clocknames " " "$clk"
+		set is_pl_clk 0
+		set is_clk_wiz 0
+		set axi 0
+	}
+	hsi::utils::add_new_dts_param "${node}" "clock-names" "$clocknames" stringlist
+	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+	set len [llength $updat]
+	switch $len {
+		"1" {
+			set refs [lindex $updat 0]
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"2" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"3" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"4" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"5" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"6" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
+		}
+		"7" {
+			set refs [lindex $updat 0]
+			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]"
+			hsi::utils::add_new_dts_param "${node}" "clocks" "$refs" reference
 		}
 	}
 }
