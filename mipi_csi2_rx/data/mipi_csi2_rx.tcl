@@ -32,13 +32,18 @@ proc generate {drv_handle} {
 	if {[string match -nocase $dphy_en_reg_if "true"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,dphy-present" "" boolean
 	}
+	set en_vcx [get_property CONFIG.C_EN_VCX [get_cells -hier $drv_handle]]
+	if {[string match -nocase $en_vcx "true"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,en-vcx" "" boolean
+	}
+	set en_csi_v2_0 [get_property CONFIG.C_EN_CSI_V2_0 [get_cells -hier $drv_handle]]
+	if {[string match -nocase $en_csi_v2_0 "true"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,en-csi-v2-0" "" boolean
+	}
 	set dphy_lanes [get_property CONFIG.C_DPHY_LANES [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-lanes" $dphy_lanes int
 	for {set lane 1} {$lane <= $dphy_lanes} {incr lane} {
 		lappend lanes $lane
-	}
-	if {[llength $lanes]} {
-		hsi::utils::add_new_dts_param "${node}" "data-lanes" $lanes int
 	}
 	set en_csi_v2_0 [get_property CONFIG.C_EN_CSI_V2_0 [get_cells -hier $drv_handle]]
 	set en_vcx [get_property CONFIG.C_EN_VCX [get_cells -hier $drv_handle]]
@@ -54,7 +59,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vc" $cmn_vc int
 	}
 	set cmn_pxl_format [get_property CONFIG.CMN_PXL_FORMAT [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,csi-pxl-format" $cmn_pxl_format string
+	gen_pixel_format $node $cmn_pxl_format
 	set csi_en_activelanes [get_property CONFIG.C_CSI_EN_ACTIVELANES [get_cells -hier $drv_handle]]
 	if {[string match -nocase $csi_en_activelanes "true"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,en-active-lanes" "" boolean
@@ -71,21 +76,24 @@ proc generate {drv_handle} {
 	set ports_node [add_or_get_dt_node -n "ports" -l mipi_csi_ports$drv_handle -p $node]
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-	set port_node [add_or_get_dt_node -n "port" -l mipi_csi_port0$drv_handle -u 0 -p $ports_node]
-	hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+	set port_node [add_or_get_dt_node -n "port" -l mipi_csi_port0$drv_handle -u 1 -p $ports_node]
+	hsi::utils::add_new_dts_param "$port_node" "reg" 1 int
 	hsi::utils::add_new_dts_param "${port_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format and video-width user needs to fill */" "" comment
 	hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 12 int
 	hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 8 int
 	hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
 
-	set port1_node [add_or_get_dt_node -n "port" -l mipi_csi_port1$drv_handle -u 1 -p $ports_node]
-	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+	set port1_node [add_or_get_dt_node -n "port" -l mipi_csi_port1$drv_handle -u 0 -p $ports_node]
+	hsi::utils::add_new_dts_param "$port1_node" "reg" 0 int
 	hsi::utils::add_new_dts_param "${port1_node}" "/* Fill cfa-pattern=rggb for raw data types, other fields video-format,video-width user needs to fill */" "" comment
 	hsi::utils::add_new_dts_param "${port1_node}" "/* User need to add something like remote-endpoint=<&out> under the node csiss_in:endpoint */" "" comment
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-format" 12 int
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" 8 int
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 	set csiss_rx_node [add_or_get_dt_node -n "endpoint" -l mipi_csi_in$drv_handle -p $port1_node]
+	if {[llength $lanes]} {
+		hsi::utils::add_new_dts_param "${csiss_rx_node}" "data-lanes" $lanes int
+	}
 
 	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
 	if {[llength $outip]} {
@@ -124,6 +132,60 @@ proc generate {drv_handle} {
 		}
 	}
 	gen_gpio_reset $drv_handle $node
+}
+
+proc gen_pixel_format {node pxl_format} {
+	set pixel_format ""
+	switch $pxl_format {
+		"YUV4228B" {
+			set pixel_format 0x1e
+		}
+		"YUV42210B" {
+			set pixel_format 0x1f
+		}
+		"RGB444" {
+			set pixel_format 0x20
+		}
+		"RGB555" {
+			set pixel_format 0x21
+		}
+		"RGB565" {
+			set pixel_format 0x22
+		}
+		"RGB666" {
+			set pixel_format 0x23
+		}
+		"RGB888" {
+			set pixel_format 0x24
+		}
+		"RAW6" {
+			set pixel_format 0x28
+		}
+		"RAW7" {
+			set pixel_format 0x29
+		}
+		"RAW8" {
+			set pixel_format 0x2a
+		}
+		"RAW10" {
+			set pixel_format 0x2b
+		}
+		"RAW12" {
+			set pixel_format 0x2c
+		}
+		"RAW14" {
+			set pixel_format 0x2d
+		}
+		"RAW16" {
+			set pixel_format 0x2e
+		}
+		"RAW20" {
+			set pixel_format 0x2f
+		}
+	}
+	if {[llength $pixel_format]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,csi-pxl-format" $pixel_format hex
+	}
 }
 
 proc gen_frmbuf_node {outip drv_handle} {
@@ -166,19 +228,19 @@ proc gen_gpio_reset {drv_handle node} {
 							if {[string match -nocase $ip "versal_cips"]} {
 								# As versal has only bank0 for MIOs
 								set gpio [expr $gpio + 26]
-								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio0 $gpio 1" reference
+								hsi::utils::add_new_dts_param "$node" "video-reset-gpios" "gpio0 $gpio 1" reference
 								break
 							}
 						}
 						if {[string match -nocase $proc_type "psu_cortexa53"] } {
 							if {[string match -nocase $ip "zynq_ultra_ps_e"]} {
 								set gpio [expr $gpio + 78]
-								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio $gpio 1" reference
+								hsi::utils::add_new_dts_param "$node" "video-reset-gpios" "gpio $gpio 1" reference
 								break
 							}
 						}
 						if {[string match -nocase $ip "axi_gpio"]} {
-							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+							hsi::utils::add_new_dts_param "$node" "video-reset-gpios" "$periph $gpio 0 1" reference
 						}
 					} else {
 						dtg_warning "$drv_handle peripheral is NULL for the $pin $periph"

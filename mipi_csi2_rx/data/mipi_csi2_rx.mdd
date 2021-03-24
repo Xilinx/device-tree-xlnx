@@ -20,6 +20,5 @@ BEGIN driver mipi_csi2_rx
    OPTION supported_os_types = (DTS);
    OPTION driver_state = ACTIVE;
    OPTION NAME = mipi_csi2_rx;
-   DTGPARAM name = dtg.ip_params, type = boolean;
 
 END driver
