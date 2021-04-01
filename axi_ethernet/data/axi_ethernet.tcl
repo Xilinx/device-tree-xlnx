@@ -357,6 +357,7 @@ proc generate {drv_handle} {
 		}
                 set eth_clkname_len [llength $eth_clk_names]
                 set i 0
+                set dclk ""
                 while {$i < $eth_clkname_len} {
                    set clkname [lindex $eth_clk_names $i]
                    for {set corenum 0} {$corenum < $num_cores} {incr corenum} {
@@ -386,38 +387,62 @@ proc generate {drv_handle} {
               set_property "clock-names" $null $drv_handle
               set_property "clocks" $null $drv_handle
               if {$ip_name == "xxv_ethernet"  && $core== 0} {
+		    if {[llength $dclk]} {
                     lappend clknames "$core_clk_0" "$dclk" "$axi_aclk_0"
+		    } else {
+                    lappend clknames "$core_clk_0" "$axi_aclk_0"
+		    }
                     append clknames1 "$clknames" "$clk_names"
                     set index0 [lindex $clk_list $axi_index_0]
                     regsub -all "\>||\t" $index0 {} index0
+		    if {[llength $dclk]} {
                     append clkvals  "[lindex $clk_list $index_0], [lindex $clk_list $dclk_index], $index0>, <&$clks"
+		    } else {
+                    append clkvals  "[lindex $clk_list $index_0], $index0>, <&$clks"
+			}
                     set_property "clocks" $clkvals $drv_handle
                     set_property "clock-names" $clknames1 $drv_handle
                     set clknames1 ""
              }
              if {$ip_name == "xxv_ethernet" && $core == 1} {
+		   if {[llength $dclk]} {
                    lappend clknames1 "$core_clk_1" "$dclk" "$axi_aclk_1"
+		   } else {
+                   lappend clknames1 "$core_clk_1" "$axi_aclk_1"
+		   }
                    append clk_names1 "$clknames1" "$clk_names"
                    set index1 [lindex $clk_list $axi_index_1]
                    regsub -all "\>||\t" $index1 {} index1
                    set ini1 [lindex $clk_list $index_1]
                    regsub -all " " $ini1 "" ini1
                    regsub -all "\<&||\t" $ini1 {} ini1
+		   if {[llength $dclk]} {
                    append clkvals1  "$ini1, [lindex $clk_list $dclk_index], $index1>, <&$clks"
+		   } else {
+                   append clkvals1  "$ini1, $index1>, <&$clks"
+		   }
                    hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals1 reference
                    hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names1 stringlist
                    set clk_names1 ""
                    set clkvals1 ""
              }
              if {$ip_name == "xxv_ethernet" && $core == 2} {
+		  if {[llength $dclk]} {
                   lappend clknames2 "$core_clk_2" "$dclk" "$axi_aclk_2"
+		  } else {
+                  lappend clknames2 "$core_clk_2" "$axi_aclk_2"
+		  }
                   append clk_names2 "$clknames2" "$clk_names"
                   set index2 [lindex $clk_list $axi_index_2]
                   regsub -all "\>||\t" $index2 {} index2
                   set ini2 [lindex $clk_list $index_2]
                   regsub -all " " $ini2 "" ini2
                   regsub -all "\<&||\t" $ini2 {} ini2
+		  if {[llength $dclk]} {
                   append clkvals2  "$ini2, [lindex $clk_list $dclk_index],[lindex $clk_list $axi_index_2], <&$clks"
+		  } else {
+                  append clkvals2  "$ini2, [lindex $clk_list $axi_index_2], <&$clks"
+		  }
                   append clk_label2 $drv_handle "_" $core
                   hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals2 reference
                   hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names2 stringlist
@@ -425,14 +450,22 @@ proc generate {drv_handle} {
                   set clkvals2 ""
              }
              if {$ip_name == "xxv_ethernet" && $core == 3} {
+		 if {[llength $dclk]} {
                  lappend clknames3 "$core_clk_3" "$dclk" "$axi_aclk_3"
+		 } else {
+                 lappend clknames3 "$core_clk_3" "$axi_aclk_3"
+		 }
                  append  clk_names3 "$clknames3" "$clk_names"
                  set index3 [lindex $clk_list $axi_index_3]
                  regsub -all "\>||\t" $index3 {} index3
                  set ini [lindex $clk_list $index_3]
                  regsub -all " " $ini "" ini
                  regsub -all "\<&||\t" $ini {} ini
+		 if {[llength $dclk]} {
                  append clkvals3 "$ini, [lindex $clk_list $dclk_index], [lindex $clk_list $axi_index_3]>, <&$clks"
+		 } else {
+                 append clkvals3 "$ini, [lindex $clk_list $axi_index_3]>, <&$clks"
+		 }
                  append clk_label3 $drv_handle "_" $core
                  hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals3 reference
                  hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names3 stringlist
