@@ -4592,7 +4592,9 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			set intc_names [string map {psu_acpu_gic gic} $intc_names]
 			set ref [lindex $intc_names 0]
 			append ref " [lindex $intc_names 1]>, <&[lindex $intc_names 2] [lindex $intc_names 3]>, <&[lindex $intc_names 4] [lindex $intc_names 5]>,<&[lindex $intc_names 6] [lindex $intc_names 7]>, <&[lindex $intc_names 8] [lindex $intc_names 9]"
-			set_drv_prop_if_empty $drv_handle "interrupts-extended" $ref reference
+			if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "v_hdmi_tx_ss"]} {
+				set_drv_prop_if_empty $drv_handle "interrupts-extended" $ref reference
+			}
 		}
 	}
 
