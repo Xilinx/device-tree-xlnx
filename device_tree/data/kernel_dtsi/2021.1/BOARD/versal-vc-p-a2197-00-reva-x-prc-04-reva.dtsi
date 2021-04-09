@@ -37,7 +37,6 @@
 };
 
 &gem1 {
-	status = "okay";
 	phy-handle = <&phy1>; /* u175 */
 	phy-mode = "rgmii-id"; /* RTL8211DN */
 	phy1: phy@1 {
@@ -45,16 +44,7 @@
 	};
 };
 
-&gpio0 {
-	status = "okay";
-};
-
-&gpio1 {
-	status = "okay";
-};
-
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	eeprom_versal: eeprom@51 { /* U153 */
 		compatible = "st,24c128", "atmel,24c128";
@@ -63,7 +53,6 @@
 };
 
 &i2c1 {
-	status = "okay";
 	clock-frequency = <400000>;
 	eeprom: eeprom@51 { /* U155 */
 		compatible = "st,24c128", "atmel,24c128";
@@ -72,7 +61,6 @@
 };
 
 &qspi {
-	status = "okay"; /* u93 and u92 and u161 and u160 */
 	num-cs = <1>;
 	is-dual = <0>;
 	is-stacked = <1>;
@@ -104,16 +92,7 @@
 	no-1-8-v;
 };
 
-&serial0 { /* MIO35 - MIO37 */
-	status = "okay";
-};
-
-&serial1 { /* MIO4 - MIO7 RS232 */
-	status = "okay";
-};
-
 &spi0 {
-	status = "okay";
 	num-cs = <1>;
 
 	flash@0 { /* U171 - IS25LP016B - 16Mb */
@@ -131,13 +110,11 @@
 };
 
 &usb0 {
-	status = "okay";
 	xlnx,usb-polarity = <0x0>;
 	xlnx,usb-reset-mode = <0x0>;
 };
 
 &dwc3_0 { /* USB 2.0 host - U99 */
-	status = "okay";
 	dr_mode = "host";
 	maximum-speed = "high-speed";
 	snps,dis_u2_susphy_quirk;

@@ -82,12 +82,7 @@
 	};
 };
 
-&uart1 { /* MIO36/MIO37 */
-	status = "okay";
-};
-
 &qspi { /* MIO 0-5 - U143 */
-	status = "okay";
 	flash@0 { /* MT25QU512A */
 		compatible = "mt25qu512a", "jedec,spi-nor"; /* 64MB */
 		#address-cells = <1>;
@@ -179,7 +174,6 @@
 };
 
 &sdhci0 { /* MIO13-23 - 16GB emmc MTFC16GAPALBH-IT - U133A*/
-	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
@@ -187,7 +181,6 @@
 };
 
 &spi1 { /* MIO6, 9-11 */
-	status = "okay";
 	label = "TPM";
 	num-cs = <1>;
 	tpm@0 { /* slm9670 - U144 */
@@ -198,7 +191,6 @@
 };
 
 &i2c1 {
-	status = "okay";
 	clock-frequency = <400000>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
@@ -255,7 +247,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "QSPI_CLK", "QSPI_DQ1", "QSPI_DQ2", "QSPI_DQ3", "QSPI_DQ0", /* 0 - 4 */
 			  "QSPI_CS_B", "SPI_CLK", "LED1", "LED2", "SPI_CS_B", /* 5 - 9 */
 			  "SPI_MISO", "SPI_MOSI", "FWUEN", "EMMC_DAT0", "EMMC_DAT1", /* 10 - 14 */

@@ -35,12 +35,7 @@
         status = "okay";
 };
 
-&serial0 {
-	status = "okay";
-};
-
 &gem0 {
-	status = "okay";
 	phy-handle = <&phy0>; /* u9 */
 	phy-mode = "rgmii-id";
 	phy0: phy@1 { /* Marvell 88E1512; U9 */
@@ -63,13 +58,11 @@
 };
 
 &usb0 {
-	status = "okay";
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_0 { /* U4 */
-	status = "okay";
 	dr_mode = "peripheral";
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
@@ -77,7 +70,6 @@
 };
 
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	/* U12 Catalyst EEPROM - AT24 should be equivalent */
 	eeprom_versal: eeprom@51 {
@@ -89,7 +81,6 @@
 };
 
 &spi0 {
-	status = "okay";
 	num-cs = <1>;
 
 	flash@0 { /* U18 */
@@ -107,7 +98,6 @@
 };
 
 &spi1 {
-	status = "okay";
 	num-cs = <3>;	/* FIXME - check SPI1_SS0-2_B */
 
 	flash@0 { /* U19 */

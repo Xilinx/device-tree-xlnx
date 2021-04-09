@@ -35,17 +35,7 @@
         status = "okay";
 };
 
-/* SMAP via cc108 */
-&can0 {
-	status = "okay";
-};
-
-&can1 {
-	status = "okay";
-};
-
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	/* Must be enabled via J90/J91 */
 	eeprom_versal: eeprom@51 { /* U2 - 128kb RM24C128DS */
@@ -55,7 +45,6 @@
 };
 
 &qspi {
-	status = "okay"; /* u7 */
 	num-cs = <0x1>;
 	is-dual = <0x1>;
 	spi-rx-bus-width = <4>;
@@ -76,10 +65,6 @@
 	};
 };
 
-&serial0 {
-	status = "okay";
-};
-
 &sdhci0 { /* J99 MIO28 - MIO33 */
 	xlnx,mio-bank = <1>; /* FIXME */
 	no-1-8-v;
@@ -94,7 +79,6 @@
 };
 
 &spi0 {
-	status = "okay";
 	num-cs = <1>;
 
 	flash@0 { /* U6 - IS25LQ032B - 16Mb */

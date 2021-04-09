@@ -32,27 +32,7 @@
 /* PMC_MIO 0 -12 - configuration header QSPI/OSPI/EMMC */
 /* FIXME PMC_MIO37 ZU4_TRIGGER/PMC_MIO37/38 PCIE */
 
-&can1 { /* MIO40-41 */
-	status = "okay";
-};
-
 &dcc {
-	status = "okay";
-};
-
-&rtc {
-	status = "okay";
-};
-
-&gpio0 {
-	status = "okay";
-};
-
-&gpio1 {
-	status = "okay";
-};
-
-&watchdog {
 	status = "okay";
 };
 
@@ -61,12 +41,7 @@
 	no-1-8-v;
 };
 
-&serial0 { /* PMC_MIO42/43 */
-	status = "okay";
-};
-
 &gem0 { /* PMC_MIO_48, LPD_MIO0-11/24/25 */
-	status = "okay";
 	phy-handle = <&phy1>; /* u128 */
 	phy-mode = "rgmii-id";
 	phy1: phy@1 {
@@ -86,29 +61,24 @@
 };
 
 &gem1 { /* PMC_MIO_49, LPD_MIO12-23 */
-	status = "okay";
 	phy-handle = <&phy2>; /* u134 */
 	phy-mode = "rgmii-id";
 };
 
 &i2c0 { /* PMC_MIO46/47 */
-	status = "okay";
 	clock-frequency = <400000>;
 };
 
 &i2c1 { /* PMC_MIO44/45 */
-	status = "okay";
 	clock-frequency = <400000>;
 };
 
 &usb0 { /* PMC_MIO13_500 - PMC_MIO25 USB 2.0 */
-	status = "okay";
 	xlnx,usb-polarity = <0x0>;
 	xlnx,usb-reset-mode = <0x0>;
 };
 
 &dwc3_0 { /* USB 2.0 host */
-	status = "okay";
 	dr_mode = "host";
 	maximum-speed = "high-speed";
 	snps,dis_u2_susphy_quirk;

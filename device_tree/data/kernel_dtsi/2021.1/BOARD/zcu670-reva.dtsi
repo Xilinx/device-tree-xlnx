@@ -118,7 +118,6 @@
 };
 
 &gem3 {
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "rgmii-id";
 	phy0: ethernet-phy@c {
@@ -131,7 +130,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "QSPI_LWR_CLK", "QSPI_LWR_DQ1", "QSPI_LWR_DQ2", "QSPI_LWR_DQ3", "QSPI_LWR_DQ0", /* 0 - 4 */
 		  "QSPI_LWR_CS_B", "", "QSPI_UPR_CS_B", "QSPI_UPR_DQ0", "QSPI_UPR_DQ1", /* 5 - 9 */
 		  "QSPI_UPR_DQ2", "QSPI_UPR_DQ3", "QSPI_UPR_CLK", "PS_GPIO2", "I2C0_SCL", /* 10 - 14 */
@@ -171,7 +169,6 @@
 };
 
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
@@ -337,7 +334,6 @@
 };
 
 &i2c1 {
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
@@ -551,7 +547,6 @@
 };
 
 &qspi {
-	status = "okay";
 	is-dual = <1>;
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* U11 and U12 MT25QU02GCBBE12 2Gb */
@@ -566,7 +561,6 @@
 
 /* SD1 with level shifter */
 &sdhci1 {
-	status = "okay";
 	disable-wp;
 	/*
 	 * This property should be removed for supporting UHS mode
@@ -575,14 +569,12 @@
 };
 
 &psgtr {
-	status = "okay";
 	/* hspc_dp4, hspc_dp5, usb3, hspc_dp6 */
 	clocks = <&si5381_6>;
 	clock-names = "ref2";
 };
 
 &dwc3_0 {
-	status = "okay";
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";

@@ -44,7 +44,6 @@
 };
 
 &sdhci0 { /* emmc MIO 13-23 16GB */
-	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
@@ -52,12 +51,10 @@
 };
 
 &uart0 { /* uart0 MIO38-39 */
-	status = "okay";
 	u-boot,dm-pre-reloc;
 };
 
 &gem0 { /* eth MDIO 76/77 */
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii";
 	is-internal-pcspma;
@@ -72,7 +69,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "", "", "", "", "", /* 0 - 4 */
 		  "", "", "", "", "", /* 5 - 9 */
 		  "", "", "", "EMMC_DAT0", "EMMC_DAT1", /* 10 - 14 */
@@ -112,7 +108,6 @@
 };
 
 &i2c0 { /* MIO 34-35 - can't stay here */
-	status = "okay";
 	clock-frequency = <400000>;
 	scl-gpios = <&gpio 34 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 35 GPIO_ACTIVE_HIGH>;
@@ -285,13 +280,11 @@
 };
 
 &usb0 { /* USB0 MIO52-63 */
-	status = "okay";
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_0 {
-	status = "okay";
 	dr_mode = "peripheral";
 	maximum-speed = "high-speed";
 };

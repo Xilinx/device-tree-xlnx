@@ -56,14 +56,12 @@
 };
 
 &psgtr {
-	status = "okay";
 	/* sgmii, usb3 */
 	clocks = <&si5332_1>, <&si5332_2>;
 	clock-names = "ref0", "ref1";
 };
 
 &qspi { /* MIO 0-5 */
-	status = "okay";
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* mt25qu512abb8e12 512Mib */
 		#address-cells = <1>;
@@ -80,7 +78,6 @@
 };
 
 &sdhci0 { /* emmc MIO 13-23 - with some settings MTFC16GAPALBH 16GB */
-	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
@@ -88,12 +85,10 @@
 };
 
 &uart0 { /* uart0 MIO38-39 */
-	status = "okay";
 	u-boot,dm-pre-reloc;
 };
 
 &gem0 {
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii"; /* DTG generates this properly 1512 */
 	is-internal-pcspma;
@@ -105,7 +100,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "QSPI_CLK", "QSPI_DQ1", "QSPI_DQ2", "QSPI_DQ3", "QSPI_DQ0", /* 0 - 4 */
 		  "QSPI_CS_B", "", "", "SYSCTLR_GPIO", "SYSCTLR_LED", /* 5 - 9 */
 		  "SYSCTLR_PB", "PMC_ZU4_TRIGGER", "", "EMMC_DAT0", "EMMC_DAT1", /* 10 - 14 */
@@ -145,7 +139,6 @@
 };
 
 &i2c0 { /* MIO 34-35 - can't stay here */
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
@@ -354,7 +347,6 @@
 };
 
 &i2c1 { /* i2c1 MIO 36-37 */
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
@@ -462,13 +454,11 @@
 };
 
 &usb0 { /* MIO52 - MIO63 */
-	status = "okay";
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_0 {
-	status = "okay";
 	dr_mode = "peripheral";
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;

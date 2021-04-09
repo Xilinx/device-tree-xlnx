@@ -42,7 +42,6 @@
 };
 
 &qspi {
-	status = "okay";
 	is-dual = <1>;
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* 32MB */
@@ -56,7 +55,6 @@
 };
 
 &sdhci0 { /* emmc MIO 13-23 - with some settings  16GB */
-	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
@@ -64,12 +62,10 @@
 };
 
 &uart0 { /* uart0 MIO38-39 */
-	status = "okay";
 	u-boot,dm-pre-reloc;
 };
 
 &uart1 { /* uart1 MIO40-41 */
-	status = "okay";
 	u-boot,dm-pre-reloc;
 };
 
@@ -81,7 +77,6 @@
 };
 
 &gem0 {
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii"; /* DTG generates this properly  1512 */
 	phy-reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>;
@@ -95,7 +90,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "SCLK_OUT", "MISO_MO1", "MO2", "MO3", "MOSI_MIO0", /* 0 - 4 */
 		  "N_SS_OUT", "", "SYS_CTRL0", "SYS_CTRL1", "SYS_CTRL2", /* 5 - 9 */
 		  "SYS_CTRL3", "SYS_CTRL4", "SYS_CTRL5", "EMMC_DAT0", "EMMC_DAT1", /* 10 - 14 */
@@ -135,7 +129,6 @@
 };
 
 &i2c0 { /* MIO 34-35 - can't stay here */
-	status = "okay";
 	clock-frequency = <400000>;
 	i2c-mux@74 { /* u46 */
 		compatible = "nxp,pca9548";
@@ -299,7 +292,6 @@
 /* TODO samtec J212G/H via J242 */
 /* TODO teensy via U30 PCA9543A bus 1 */
 &i2c1 { /* i2c1 MIO 36-37 */
-	status = "okay";
 	clock-frequency = <400000>;
 
 	/* Must be enabled via J242 */
@@ -448,13 +440,11 @@
 };
 
 &usb0 {
-	status = "okay";
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_0 {
-	status = "okay";
 	dr_mode = "host";
 	/* dr_mode = "peripheral"; */
 	maximum-speed = "high-speed";

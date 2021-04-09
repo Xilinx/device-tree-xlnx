@@ -29,24 +29,7 @@
 	status = "okay";
 };
 
-&gpio0 {
-	status = "okay";
-};
-
-&gpio1 {
-	status = "okay";
-};
-
-&serial0 {
-	status = "okay";
-};
-
-&serial1 {
-	status = "disabled"; /* communication with MSP432 */
-};
-
 &ospi {
-	status = "okay";
 	bus-num = <2>;
 	num-cs = <1>;
 	#stream-id-cells = <1>;

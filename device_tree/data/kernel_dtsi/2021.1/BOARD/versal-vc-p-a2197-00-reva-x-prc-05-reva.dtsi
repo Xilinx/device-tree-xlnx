@@ -36,7 +36,6 @@
 };
 
 &gem0 {
-	status = "okay";
 	phy-handle = <&phy1>;
 	phy-mode = "rgmii-id";
 	phy1: phy@1 { /* 88e1510 */
@@ -50,21 +49,11 @@
 };
 
 &gem1 {
-	status = "okay";
 	phy-handle = <&phy2>;
 	phy-mode = "rgmii-id";
 };
 
-&gpio0 {
-	status = "okay";
-};
-
-&gpio1 {
-	status = "okay";
-};
-
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	eeprom_versal: eeprom@51 {
 		compatible = "st,24c128", "atmel,24c128";
@@ -73,7 +62,6 @@
 };
 
 &qspi {
-	status = "okay";
 	num-cs = <0x1>;
 	spi-tx-bus-width = <1>;
 	spi-rx-bus-width = <4>;
@@ -106,18 +94,12 @@
 	no-1-8-v;
 };
 
-&serial0 {
-	status = "okay";
-};
-
 &usb0 {
-	status = "okay";
 	xlnx,usb-polarity = <0x0>;
 	xlnx,usb-reset-mode = <0x0>;
 };
 
 &dwc3_0 { /* USB 2.0 host - U99 */
-	status = "okay";
 	dr_mode = "host";
 	maximum-speed = "high-speed";
 	snps,dis_u2_susphy_quirk;

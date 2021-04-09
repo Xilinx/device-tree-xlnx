@@ -39,7 +39,6 @@
 };
 
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 
 	i2c-mux@75 {
@@ -219,7 +218,6 @@
 };
 
 &qspi {
-	status = "okay";
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* 32MB */
 		#address-cells = <1>;
@@ -232,7 +230,6 @@
 };
 
 &sdhci1 {
-	status = "okay";
 	/*
 	 * This property should be removed for supporting UHS mode
 	 */

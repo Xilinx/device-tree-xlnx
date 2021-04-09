@@ -122,7 +122,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "QSPI_LWR_CLK", "QSPI_LWR_DQ1", "QSPI_LWR_DQ2", "QSPI_LWR_DQ3", "QSPI_LWR_DQ0", /* 0 - 4 */
 		  "QSPI_LWR_CS_B", "", "QSPI_UPR_CS_B", "QSPI_UPR_DQ0", "QSPI_UPR_DQ1", /* 5 - 9 */
 		  "QSPI_UPR_DQ2", "QSPI_UPR_DQ3", "QSPI_UPR_CLK", "PS_GPIO2", "I2C0_SCL", /* 10 - 14 */
@@ -162,7 +161,6 @@
 };
 
 &i2c0 {
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
@@ -328,7 +326,6 @@
 };
 
 &i2c1 {
-	status = "okay";
 	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
@@ -592,7 +589,6 @@
 };
 
 &psgtr {
-	status = "okay";
 	/* pcie, sata, usb3, dp */
 	clocks = <&si5341 0 5>, <&si5341 0 3>, <&si5341 0 2>, <&si5341 0 0>;
 	clock-names = "ref0", "ref1", "ref2", "ref3";

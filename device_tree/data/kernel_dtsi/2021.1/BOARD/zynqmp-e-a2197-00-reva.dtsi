@@ -146,19 +146,16 @@
 };
 
 &uart0 { /* uart0 MIO38-39 */
-	status = "okay";
 	u-boot,dm-pre-reloc;
 };
 
 &sdhci1 { /* sd1 MIO45-51 cd in place */
-	status = "okay";
 	no-1-8-v;
 	disable-wp;
 	xlnx,mio-bank = <1>;
 };
 
 &gem0 {
-	status = "okay";
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii";
 	is-internal-pcspma;
@@ -168,7 +165,6 @@
 };
 
 &gpio {
-	status = "okay";
 	gpio-line-names = "", "", "", "", "", /* 0 - 4 */
 		  "", "", "DC_SYS_CTRL0", "DC_SYS_CTRL1", "DC_SYS_CTRL2", /* 5 - 9 */
 		  "DC_SYS_CTRL3", "ZU4_TRIGGER", "SYSCTLR_PB", "", "", /* 10 - 14 */
@@ -208,7 +204,6 @@
 };
 
 &i2c0 { /* MIO 34-35 - can't stay here */
-	status = "okay";
 	clock-frequency = <400000>;
 	i2c-mux@74 { /* u33 */
 		compatible = "nxp,pca9548";
@@ -473,7 +468,6 @@
 };
 
 &i2c1 { /* i2c1 MIO 36-37 */
-	status = "okay";
 	clock-frequency = <400000>;
 
 	i2c-mux@74 { /* u35 */
@@ -608,14 +602,3 @@
 	};
 };
 
-&xilinx_ams {
-	status = "okay";
-};
-
-&ams_ps {
-	status = "okay";
-};
-
-&ams_pl {
-	status = "okay";
-};

@@ -392,7 +392,6 @@
 };
 
 &psgtr {
-	status = "okay";
 	/* nc, sata, usb3, dp */
 	clocks = <&clock_8t49n287_5>, <&clock_8t49n287_2>, <&clock_8t49n287_3>;
 	clock-names = "ref1", "ref2", "ref3";
