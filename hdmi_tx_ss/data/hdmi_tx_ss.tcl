@@ -31,6 +31,8 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
 	set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
+	set vid_interface [get_property CONFIG.C_VID_INTERFACE [get_cells -hier $drv_handle]]
+	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-interface" $vid_interface int
 
 	set phy_names ""
 	set phys ""
