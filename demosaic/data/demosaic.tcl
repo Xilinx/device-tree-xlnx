@@ -49,6 +49,10 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 
 	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	set outipname [get_property IP_NAME $outip]
+	set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut
+                             v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem                             v_mix v_multi_scaler v_scenechange"
+	if {[lsearch  -nocase $valid_mmip_list $outipname] >= 0} {
 	foreach ip $outip {
 		if {[llength $ip]} {
 			set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
@@ -80,6 +84,7 @@ proc generate {drv_handle} {
 		} else {
 			dtg_warning "$drv_handle pin m_axis_video is not connected..check your design"
 		}
+	}
 	}
 	gen_gpio_reset $drv_handle $node
 }
