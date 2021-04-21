@@ -59,7 +59,7 @@ proc generate {drv_handle} {
 	if {[llength $use_gt_ch4_hdmi]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-gt-ch4-hdmi" $use_gt_ch4_hdmi int
 	}
-	for {set ch 0} {$ch <= $tx_no_of_channels} {incr ch} {
+	for {set ch 0} {$ch < $tx_no_of_channels} {incr ch} {
 		set phy_node [add_or_get_dt_node -n "vphy_lane@$ch" -l vphy_lane$ch -p $node]
 		hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
 	}
