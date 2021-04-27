@@ -627,6 +627,19 @@ proc update_system_dts_include {include_file} {
 	set_cur_working_dts $cur_dts
 }
 
+proc get_rp_rm_for_drv {drv_handle} {
+	set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+	puts "pr_regions:$pr_regions"
+	foreach pr_region $pr_regions {
+		set inst [hsi::current_hw_instance [hsi::get_cells -hier $pr_region]]
+		set drv [hsi::get_cells $drv_handle]
+		::hsi::current_hw_instance
+		if {[llength $drv] != 0} {
+			return $inst
+		}
+	}
+}
+
 proc set_drv_def_dts {drv_handle} {
 	# optional dts control by adding the following line in mdd file
 	# PARAMETER name = def_dts, default = ps.dtsi, type = string;
@@ -640,7 +653,7 @@ proc set_drv_def_dts {drv_handle} {
 	global bus_clk_list
 	if {[string_is_empty $default_dts]} {
 		if {[is_pl_ip $drv_handle]} {
-			set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+			set RpRm [get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm "" RpRm
 			if {[llength $RpRm]} {
 				set default_dts "$RpRm.dtsi"
@@ -654,7 +667,7 @@ proc set_drv_def_dts {drv_handle} {
 	}
 	set default_dts [set_cur_working_dts $default_dts]
 	if {$dt_overlay } {
-		set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+		set RpRm [get_rp_rm_for_drv $drv_handle]
 		if {[llength $RpRm]} {
 			if {$partial_image} {
 				regsub -all { } $RpRm "" RpRm
@@ -718,6 +731,7 @@ proc set_drv_def_dts {drv_handle} {
 			set targets "fpga_full"
 		}
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		if 0 {
 		set ips [get_cells -hier -filter {IP_NAME == "dfx_decoupler"}]
 		set dfx_node ""
 		foreach ip $ips {
@@ -824,6 +838,8 @@ proc set_drv_def_dts {drv_handle} {
 		}
 
 		if {![llength $dfx_node] && ![llength $dfx_sm_node]} {
+		}
+		}
 		set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 		if {[llength $pr_regions]} {
 			set pr_len [llength $pr_regions]
@@ -834,7 +850,6 @@ proc set_drv_def_dts {drv_handle} {
 				hsi::utils::add_new_dts_param "${pr_node}" "#size-cells" 2 int
 				hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
 			}
-		}
 		}
 		hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 		hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
@@ -849,7 +864,7 @@ proc set_drv_def_dts {drv_handle} {
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
-			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.pdi" string
+			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
 		}
 	}
 	}
@@ -865,7 +880,7 @@ proc set_drv_def_dts {drv_handle} {
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		}
 		set child_name "__overlay__"
-		set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+		set RpRm [get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
 			if {$partial_image} {
@@ -891,6 +906,21 @@ proc set_drv_def_dts {drv_handle} {
 					}
 				}
 				hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
+				if {[llength $pr_regions]} {
+					set pr_len [llength $pr_regions]
+					for {set pr 0} {$pr < $pr_len} {incr pr} {
+						set pr0 [lindex $pr_regions $pr]
+						set intf_pins [::hsi::get_intf_pins -of_objects $pr0]
+						foreach intf $intf_pins {
+							set connectip [get_connected_stream_ip [get_cells -hier $pr0] $intf]
+							if {[llength $connectip]} {
+								if {[string match -nocase [get_property IP_NAME $connectip] "dfx_decoupler"]} {
+									hsi::utils::add_new_dts_param $child_node2 "fpga-bridges" "$connectip" reference
+								}
+							}
+						}
+					}
+				}
 				set hw_name [get_property CONFIG.firmware_name [get_os]]
 				set rprmpartial ""
 				if {![llength $hw_name]} {
@@ -899,7 +929,7 @@ proc set_drv_def_dts {drv_handle} {
 					} else {
 						set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
 					}
-					set RpRm1 [hsi::utils::get_rp_rm_for_drv $drv_handle]
+					set RpRm1 [get_rp_rm_for_drv $drv_handle]
 					regsub -all { } $RpRm1 "_" RpRm
 					if {[llength $RpRm]} {
 						set bitfiles_len [llength $hw_name]
@@ -919,7 +949,13 @@ proc set_drv_def_dts {drv_handle} {
 			}
 		} else {
 			set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
-			set targets "fpga_full"
+			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+			if {[string match -nocase $proctype "psv_cortexa72"]} {
+				set targets "fpga"
+			}
+			if {[string match -nocase $proctype "psu_cortexa53"]} {
+				set targets "fpga_full"
+			}
 			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 			if {[llength $pr_regions]} {
@@ -978,7 +1014,7 @@ proc set_drv_def_dts {drv_handle} {
 			} else {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
 			}
-                        set RpRm1 [hsi::utils::get_rp_rm_for_drv $drv_handle]
+                        set RpRm1 [get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm1 "_" RpRm
 			if {[llength $RpRm]} {
 				set bitfiles_len [llength $hw_name]
@@ -4176,7 +4212,7 @@ proc gen_clk_property {drv_handle} {
 						}
 					}
 				}
-				set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+				set RpRm [get_rp_rm_for_drv $drv_handle]
 				regsub -all { } $RpRm "" RpRm
 				if {[llength $RpRm]} {
 					set dts_file "$RpRm.dtsi"
@@ -4389,7 +4425,7 @@ proc gen_clk_property {drv_handle} {
 			}
 		}
 		if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
-			set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
+			set RpRm [get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm "" RpRm
 			if {[llength $RpRm]} {
 				set dts_file "$RpRm.dtsi"
@@ -5425,7 +5461,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set ip_type [get_property IP_NAME $ip]
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc dfx_decoupler"
+		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
 	} else {
 		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
 	}
@@ -5662,7 +5698,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			set targets "amba"
 			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 			set child_name "__overlay__"
-			set RpRm [hsi::utils::get_rp_rm_for_drv $ip_drv]
+			set RpRm [get_rp_rm_for_drv $ip_drv]
 			regsub -all { } $RpRm "" RpRm
 			if {[llength $RpRm]} {
 				set bus_node [add_or_get_dt_node -l "overlay1_$RpRm" -n $child_name -p $fpga_node]
@@ -5966,7 +6002,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		set targets "amba"
 		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 		set child_name "__overlay__"
-		set RpRm [hsi::utils::get_rp_rm_for_drv $ip_drv]
+		set RpRm [get_rp_rm_for_drv $ip_drv]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
 			set default_dts "$RpRm.dtsi"

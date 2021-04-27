@@ -15,9 +15,8 @@
 OPTION psf_version = 3.0;
 
 BEGIN driver pr_decoupler
-  OPTION supported_peripherals = (pr_decoupler);
+  OPTION supported_peripherals = (pr_decoupler dfx_decoupler);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = pr_decoupler;
-  DTGPARAM name = compatible, default = "xlnx,pr_decoupler", type = stringlist;
 END driver

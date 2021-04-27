@@ -60,11 +60,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${ai_part_node}" "reg" "0 0 50 9" intlist
 	hsi::utils::add_new_dts_param "${ai_part_node}" "xlnx,partition-id" "${ai_part_nid}" intlist
 
-
 	set ai_clk_node [add_or_get_dt_node -n "aie_core_ref_clk_0" -l "aie_core_ref_clk_0" -p ${bus_node}]
 	set clk_freq [get_property CONFIG.AIE_CORE_REF_CTRL_FREQMHZ [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${ai_clk_node}" "compatible" "fixed-clock" stringlist
 	hsi::utils::add_new_dts_param "${ai_clk_node}" "#clock-cells" 0 int
         hsi::utils::add_new_dts_param "${ai_clk_node}" "clock-frequency" $clk_freq int
-
 }
