@@ -3177,6 +3177,16 @@ proc get_broad_in_ip {ip} {
 					set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 					foreach intf $master_intf {
 						set connectip [get_connected_stream_ip [get_cells -hier $connectip] $intf]
+						set len [llength $connectip]
+						if {$len > 1} {
+							for {set i 0 } {$i < $len} {incr i} {
+							set ip [lindex $connectip $i]
+							if {[regexp -nocase "ila" $ip match]} {
+								continue
+							}
+							set connectip "$ip"
+							}
+						}
 						foreach connect $connectip {
 							if {[string match -nocase [get_property IP_NAME $connectip] "axis_broadcaster"]} {
 								return $connectip
