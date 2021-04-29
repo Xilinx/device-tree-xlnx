@@ -66,6 +66,7 @@ proc generate {drv_handle} {
     set new_label ""
     set clk_label ""
     set connected_ip ""
+    set eth_node ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
                if {$dt_overlay} {
@@ -74,12 +75,15 @@ proc generate {drv_handle} {
                     set bus_node "amba_pl"
                }
                set dts_file [current_dt_tree]
-               set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
-               regsub -all {^0x} $base_addr {} base_addr
-               append new_label $drv_handle "_" $core
-               append clk_label $drv_handle "_" $core
-               set eth_node [add_or_get_dt_node -n "ethernet" -l "$new_label" -u $base_addr -d $dts_file -p $bus_node]
-               generate_reg_property $eth_node $ip_mem_handles $core
+	       set ipmem_len [llength $ip_mem_handles]
+	       if {$ipmem_len > 1} {
+                  set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
+                  regsub -all {^0x} $base_addr {} base_addr
+                  append new_label $drv_handle "_" $core
+                  append clk_label $drv_handle "_" $core
+                  set eth_node [add_or_get_dt_node -n "ethernet" -l "$new_label" -u $base_addr -d $dts_file -p $bus_node]
+                  generate_reg_property $eth_node $ip_mem_handles $core
+	       }
           }
     if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet" && $ip_name != "usxgmii"} {
     foreach n "AXI_STR_RXD m_axis_rxd" {
@@ -159,7 +163,7 @@ proc generate {drv_handle} {
       set_property xlnx,rxmem "$rxethmem" $drv_handle
       if {$ip_name == "xxv_ethernet"  && $core != 0} {
           set intf [get_intf_pins -of_objects $eth_ip "axis_rx_${core}"]
-          if {[llength $intf]} {
+          if {[llength $intf] && [llength $eth_node]} {
                 set connected_ip [get_connectedip $intf]
                 if {![string_is_empty $connected_ip]} {
                       hsi::utils::add_new_dts_param $eth_node "axistream-connected" "$connected_ip" reference
@@ -210,7 +214,7 @@ proc generate {drv_handle} {
     if {[llength $clk] } {
         set freq [get_property CLK_FREQ $clk]
         set_property clock-frequency "$freq" $drv_handle
-        if {$ip_name == "xxv_ethernet"} {
+        if {$ip_name == "xxv_ethernet" && [llength $eth_node]} {
              hsi::utils::add_new_dts_param $eth_node "clock-frequency" "$freq" int
         }
     }
@@ -240,7 +244,7 @@ proc generate {drv_handle} {
 		gen_phy_node $mdio_node $phy_name $phya $drv_handle
 	  }
     }
-    if {$ip_name == "xxv_ethernet" && $core != 0} {
+    if {$ip_name == "xxv_ethernet" && $core != 0 && [llength $eth_node]} {
         append new_label "_" mdio
         set mdionode [add_or_get_dt_node -l "$new_label" -n mdio -p $eth_node]
         hsi::utils::add_new_dts_param "${mdionode}" "#address-cells" 1 int ""
@@ -260,7 +264,7 @@ proc generate {drv_handle} {
        set compatible [get_comp_str $drv_handle]
        set compatible [append compatible " " "xlnx,xxv-ethernet-1.0"]
        set_property compatible "$compatible" $drv_handle
-       if { $core!= 0} {
+       if { $core!= 0 && [llength $eth_node]} {
            hsi::utils::add_new_dts_param $eth_node "compatible" $compatible stringlist
            hsi::utils::add_new_dts_param $eth_node "phy-mode" $phytype string
        }
@@ -300,7 +304,7 @@ proc generate {drv_handle} {
                 set i [expr 0x$i]
             }
             set_property xlnx,channel-ids $id $drv_handle
-            if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+            if {$ip_name == "xxv_ethernet"  && $core!= 0 && [llength $eth_node]} {
                   hsi::utils::add_new_dts_param $eth_node "xlnx,num-queues" $numqueues noformating
                   hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id stringlist
             }
@@ -321,7 +325,7 @@ proc generate {drv_handle} {
 		set intr_names $int_names
 	    }
             if {![string_is_empty $intr_parent]} {
-                if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+                if {$ip_name == "xxv_ethernet"  && $core!= 0 && [llength $eth_node]} {
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-parent" $intr_parent reference
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-names" $intr_names stringlist
@@ -404,7 +408,7 @@ proc generate {drv_handle} {
                     set_property "clock-names" $clknames1 $drv_handle
                     set clknames1 ""
              }
-             if {$ip_name == "xxv_ethernet" && $core == 1} {
+             if {$ip_name == "xxv_ethernet" && $core == 1 && [llength $eth_node]} {
 		   if {[llength $dclk]} {
                    lappend clknames1 "$core_clk_1" "$dclk" "$axi_aclk_1"
 		   } else {
@@ -426,7 +430,7 @@ proc generate {drv_handle} {
                    set clk_names1 ""
                    set clkvals1 ""
              }
-             if {$ip_name == "xxv_ethernet" && $core == 2} {
+             if {$ip_name == "xxv_ethernet" && $core == 2 && [llength $eth_node]} {
 		  if {[llength $dclk]} {
                   lappend clknames2 "$core_clk_2" "$dclk" "$axi_aclk_2"
 		  } else {
@@ -449,7 +453,7 @@ proc generate {drv_handle} {
                   set clk_names2 ""
                   set clkvals2 ""
              }
-             if {$ip_name == "xxv_ethernet" && $core == 3} {
+             if {$ip_name == "xxv_ethernet" && $core == 3 && [llength $eth_node]} {
 		 if {[llength $dclk]} {
                  lappend clknames3 "$core_clk_3" "$dclk" "$axi_aclk_3"
 		 } else {
@@ -475,7 +479,7 @@ proc generate {drv_handle} {
 	  }
         }
     }
-    if {$ip_name == "xxv_ethernet"  && $core!= 0} {
+    if {$ip_name == "xxv_ethernet"  && $core!= 0 && [llength $eth_node]} {
               gen_drv_prop_eth_ip $drv_handle $eth_node
     }
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
