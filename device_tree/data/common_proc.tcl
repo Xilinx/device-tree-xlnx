@@ -1141,7 +1141,7 @@ proc add_or_get_dt_node args {
 		foreach node ${dts_nodes} {
 			if {[regexp $pattern $node match]} {
 				if {[dt_node_def_checking $node_label $node_name $node_unit_addr $node] == 0} {
-					error "$pattern :: $node_label : $node_name @ $node_unit_addr, is differ to the node object $node"
+					dtg_warning "$pattern :: $node_label : $node_name @ $node_unit_addr, is differ to the node object $node"
 				}
 				set node [update_dt_parent ${node} ${parent_obj} ${dts_file}]
 				set_cur_working_dts ${cur_working_dts}
@@ -2992,13 +2992,18 @@ proc gen_axis_switch {ip} {
 	set intf1 [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 	set iip [get_connected_stream_ip [get_cells -hier $inip] $intf1]
 	set inip [get_in_connect_ip $ip $intf]
-	set bus_node "amba_pl"
-	set switch_node [add_or_get_dt_node -n "axis_switch" -l $ip -u 0 -p $bus_node]
+	set routing_mode [get_property CONFIG.ROUTING_MODE [get_cells -hier $ip]]
+	set default_dts [set_drv_def_dts $ip]
+	set bus_node [add_or_get_bus_node $ip $default_dts]
+	if {$routing_mode == 1} {
+		set switch_node [add_or_get_dt_node -n "axis_switch" -l $ip -u 0 -p $bus_node]
+	} else {
+		set switch_node [add_or_get_dt_node -n "axis_switch_$ip" -l $ip -u 0 -p $bus_node]
+	}
 	set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $switch_node]
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
-	set routing_mode [get_property CONFIG.ROUTING_MODE [get_cells -hier $ip]]
 	hsi::utils::add_new_dts_param "$switch_node" "xlnx,routing-mode" $routing_mode int
 	set num_si [get_property CONFIG.NUM_SI [get_cells -hier $ip]]
 	hsi::utils::add_new_dts_param "$switch_node" "xlnx,num-si-slots" $num_si int
