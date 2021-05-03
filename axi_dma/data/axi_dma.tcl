@@ -135,7 +135,12 @@ proc add_dma_channel {drv_handle parent_node xdma addr mode devid} {
 
 
     add_cross_property_to_dtnode $drv_handle [format "CONFIG.C_INCLUDE_%s_DRE" $mode] $dma_channel "xlnx,include-dre" boolean
-    set datawidth  [get_property CONFIG.C_M_AXI_MM2S_DATA_WIDTH [get_cells -hier $drv_handle]]
+    if {[string match -nocase $mode "MM2S"]} {
+         set datawidth  [get_property CONFIG.C_M_AXI_MM2S_DATA_WIDTH [get_cells -hier $drv_handle]]
+    }
+    if {[string match -nocase $mode "S2MM"]} {
+         set datawidth  [get_property CONFIG.C_S_AXIS_S2MM_TDATA_WIDTH [get_cells -hier $drv_handle]]
+    }
     hsi::utils::add_new_dts_param $dma_channel "xlnx,datawidth" $datawidth hexint
 
     set num_channles [get_property CONFIG.c_num_mm2s_channels [get_cells -hier $drv_handle]]
