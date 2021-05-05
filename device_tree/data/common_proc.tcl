@@ -630,12 +630,15 @@ proc update_system_dts_include {include_file} {
 proc get_rp_rm_for_drv {drv_handle} {
 	set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 	puts "pr_regions:$pr_regions"
+	set rmName ""
 	foreach pr_region $pr_regions {
+		set rmName [get_property RECONFIG_MODULE_NAME [hsi::get_cells -hier $pr_region]]
 		set inst [hsi::current_hw_instance [hsi::get_cells -hier $pr_region]]
 		set drv [hsi::get_cells $drv_handle]
 		::hsi::current_hw_instance
 		if {[llength $drv] != 0} {
-			return $inst
+			append rprm "$inst" "_" "$rmName"
+			return $rprm
 		}
 	}
 }
