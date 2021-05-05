@@ -840,6 +840,11 @@ proc update_alias {os_handle} {
     if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
          return
     }
+    set no_alias [get_property CONFIG.no_alias [get_os]]
+    if {$no_alias} {
+    #Don't generate the alias node when no_alias is set to true
+	return
+    }
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set all_labels [get_all_dt_labels]
