@@ -342,7 +342,7 @@
 			groups = "i2c1_1_grp";
 			bias-pull-up;
 			slew-rate = <1>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 
@@ -355,7 +355,7 @@
 		conf {
 			groups = "gpio0_4_grp", "gpio0_5_grp";
 			slew-rate = <1>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 
@@ -369,7 +369,7 @@
 			groups = "pmu0_8_grp";
 			bias-pull-up;
 			slew-rate = <1>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 };
