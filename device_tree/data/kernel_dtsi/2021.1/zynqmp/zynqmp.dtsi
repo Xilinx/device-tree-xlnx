@@ -798,6 +798,8 @@
 					<0x0 0x0 0x0 0x2 &pcie_intc 0x2>,
 					<0x0 0x0 0x0 0x3 &pcie_intc 0x3>,
 					<0x0 0x0 0x0 0x4 &pcie_intc 0x4>;
+			#stream-id-cells = <1>;
+			iommus = <&smmu 0x4d0>;
 			power-domains = <&zynqmp_firmware PD_PCIE>;
 			pcie_intc: legacy-interrupt-controller {
 				interrupt-controller;
@@ -1101,7 +1103,7 @@
 			power-domains = <&zynqmp_firmware PD_DP>;
 			dma-channels = <6>;
 			#stream-id-cells = <1>;
-			/* iommus = <&smmu 0xce4>; */
+			iommus = <&smmu 0xce4>;
 			#dma-cells = <1>;
 		};
 
@@ -1116,7 +1118,7 @@
 			interrupts = <0 119 4>;
 			interrupt-parent = <&gic>;
 			#stream-id-cells = <1>;
-			/* iommus = <&smmu 0xce3>; */
+			iommus = <&smmu 0xce3>;
 			clock-names = "dp_apb_clk", "dp_aud_clk", "dp_vtc_pixel_clk_in";
 			power-domains = <&zynqmp_firmware PD_DP>;
 			resets = <&zynqmp_reset ZYNQMP_RESET_DP>;
