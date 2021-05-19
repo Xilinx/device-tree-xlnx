@@ -352,13 +352,6 @@ proc gen_board_info {} {
 			update_system_dts_include [file tail $dtsi_file]
 			return
 		}
-		set dts_name [string tolower [lindex $override 1]]
-		if {[string match -nocase $dts_name "template"]} {
-			return
-		}
-		if {[llength $dts_name] == 0} {
-			return
-		}
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
 		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set include_list "include*"
@@ -392,6 +385,13 @@ proc gen_board_info {} {
 					file copy -force $file $pinctrldir
 				}
 			}
+		}
+		set dts_name [string tolower [lindex $override 1]]
+		if {[string match -nocase $dts_name "template"]} {
+			return
+		}
+		if {[llength $dts_name] == 0} {
+			return
 		}
 		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 		set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
