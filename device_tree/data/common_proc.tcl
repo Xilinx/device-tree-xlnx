@@ -5158,9 +5158,6 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		} {
 		return 0
 	}
-	if {[string match -nocase $ip_type "mrmac"]} {
-		set unit_addr "a4090000"
-	}
 	set default_dts [set_drv_def_dts $drv_handle]
 
 	set ps7_mapping [gen_ps7_mapping]
