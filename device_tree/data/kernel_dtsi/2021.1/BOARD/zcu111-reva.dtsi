@@ -753,8 +753,8 @@
 };
 
 &psgtr {
-	/* nc, sata, usb3, dp */
-	clocks = <&si5341 0 3>, <&si5341 0 2>, <&si5341 0 0>;
+	/* nc, dp, usb3, sata */
+	clocks = <&si5341 0 0>, <&si5341 0 2>, <&si5341 0 3>;
 	clock-names = "ref1", "ref2", "ref3";
 };
 
