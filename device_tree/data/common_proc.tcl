@@ -229,7 +229,6 @@ proc get_intr_id {drv_handle intr_port_name} {
 		set intc [::hsi::utils::get_interrupt_parent $drv_handle $pin]
 		if {[string_is_empty $intc] == 1} {continue}
 		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
-			set intc [get_property IP_NAME $intc]
 			if {[llength $intc] > 1} {
 				foreach intr_cntr $intc {
 					if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
@@ -265,7 +264,7 @@ proc get_intr_id {drv_handle intr_port_name} {
 			} elseif {[string match "[get_property IP_NAME $intc]" "axi_intc"] } {
 				set cur_intr_info "$intr_id $intr_type"
 			}
-		} elseif {[string match -nocase $intc "psu_acpu_gic"]|| [string match -nocase $intc "psv_acpu_gic"]} {
+		} elseif {[string match -nocase $intc "psu_acpu_gic"]|| [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"]} {
 		    set cur_intr_info "0 $intr_id $intr_type"
 		} else {
 			set cur_intr_info "$intr_id $intr_type"
