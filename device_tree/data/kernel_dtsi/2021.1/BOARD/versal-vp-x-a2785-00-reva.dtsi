@@ -31,7 +31,6 @@
 };
 
 &qspi { /* PMC_MIO_500 0 - 12 */
-	status = "okay"; /* u93 and u92 */
 	num-cs = <1>;
 	is-dual = <1>;
 	spi-rx-bus-width = <4>;
@@ -53,13 +52,11 @@
 };
 
 &usb0 { /* PMC_MIO_500 13 - 25 USB 2.0 */
-	status = "okay";
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_0 { /* USB 2.0 host */
-	status = "okay";
 	dr_mode = "host";
 	maximum-speed = "high-speed"; /* FIXME */
 	snps,dis_u2_susphy_quirk;
@@ -68,7 +65,6 @@
 };
 
 &sdhci1 { /* PMC_MIO_501 26 - 36/51 */
-	status = "okay";
 	xlnx,mio-bank = <1>;
 	no-1-8-v;
 };
@@ -76,19 +72,16 @@
 /* PWM via MIO 41/FAN TACH MIO 49 - FIXME */
 
 &i2c0 { /* PMC_MIO46/47 */
-	status = "okay";
 	clock-frequency = <400000>;
 };
 
 &i2c1 { /* PMC_MIO44/45 */
-	status = "okay";
 	clock-frequency = <400000>;
 };
 
 /* PCIe at MIO 38/39/40/50 */
 
 &gem0 { /* PMC_MIO_48 - reset, LPD_MIO0-11 , mdio LPD_MIO24/25 */
-	status = "okay";
 	phy-handle = <&phy1>; /* u198 */
 	phy-mode = "rgmii-id";
 	phy1: phy@1 {
