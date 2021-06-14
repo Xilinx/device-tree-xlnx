@@ -161,6 +161,39 @@ proc generate {drv_handle} {
         set mdio_node [gen_mdio1_node $drv_handle $node]
         gen_phy_node $mdio_node $phy_name $phya
     }
+    if {[string match -nocase $proc_type "ps7_cortexa9"] } {
+           if {[string match -nocase $node "&gem1"]} {
+                set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
+                set port0_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $zynq_periph] "ENET1_MDIO_O"]]
+                set sink_periph [::hsi::get_cells -of_objects $port0_pins]
+                if {[llength $sink_periph]} {
+                    set ip_name [get_property IP_NAME $sink_periph]
+                }
+                if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+                    set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $sink_periph] "phyaddr"]]
+                    if {[llength $pin]} {
+                        set periph [::hsi::get_cells -of_objects $pin]
+                    }
+                    if {[llength $periph]} {
+                        set val [get_property CONFIG.CONST_VAL $periph]
+                        set inhex [format %x $val]
+                        set_drv_prop $drv_handle phy-handle "phy$inhex" reference
+                        set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+                        hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
+                        set phy_type [get_property CONFIG.Standard $sink_periph]
+                        set is_sgmii [get_property CONFIG.c_is_sgmii $sink_periph]
+                        if {$phy_type == "1000BASEX"} {
+                             hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x5 int
+                        } elseif { $is_sgmii == "true"} {
+                             hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x4 int
+                        } else {
+                             dtg_warning "unsupported phytype:$phy_type"
+                        }
+                    }
+               }
+          }
+    }
+
 	set ip_name " "
 	if {[string match -nocase $proc_type "psu_cortexa53"] } {
 		if {[string match -nocase $node "&gem0"]} {
