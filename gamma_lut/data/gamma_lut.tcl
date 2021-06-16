@@ -60,10 +60,10 @@ proc generate {drv_handle} {
 					gen_frmbuf_wr_node $outip $drv_handle
 				}
 			} else {
-				if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
+				if {[string match -nocase [get_property IP_NAME $outip] "system_ila"]} {
 					continue
 				}
-				set connectip [get_connect_ip $ip $master_intf]
+				set connectip [get_connect_ip $outip $master_intf]
 				if {[llength $connectip]} {
 					set gammanode [add_or_get_dt_node -n "endpoint" -l gamma_out$drv_handle -p $port1_node]
 					gen_endpoint $drv_handle "gamma_out$drv_handle"
