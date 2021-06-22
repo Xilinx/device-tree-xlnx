@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal a2197 RevA System Controller
  *
- * (C) Copyright 2019, Xilinx, Inc.
+ * (C) Copyright 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -16,7 +16,7 @@
 		     "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = <&eeprom>;
+		nvmem0 = <&eeprom>;
 	};
 
 	ref_clk: ref_clk {
@@ -143,10 +143,6 @@
 		io-channels = <&mgtyvccaux 0>, <&mgtyvccaux 1>, <&mgtyvccaux 2>, <&mgtyvccaux 3>;
 	};
 
-};
-
-&uart0 { /* uart0 MIO38-39 */
-	u-boot,dm-pre-reloc;
 };
 
 &sdhci1 { /* sd1 MIO45-51 cd in place */

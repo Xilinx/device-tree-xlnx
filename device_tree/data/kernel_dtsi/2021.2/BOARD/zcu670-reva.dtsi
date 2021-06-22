@@ -19,7 +19,7 @@
 		     "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = &eeprom;
+		nvmem0 = &eeprom;
 	};
 
 	gpio-keys {

@@ -12,12 +12,9 @@
 	compatible = "xlnx,zynqmp-a2197-revA", "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = <&eeprom1 &eeprom0 &eeprom0>;
+		nvmem0 = &eeprom1;
+		nvmem1 = &eeprom0;
 	};
-};
-
-&uart0 { /* uart0 MIO38-39 */
-	u-boot,dm-pre-reloc;
 };
 
 &i2c0 {

@@ -39,7 +39,7 @@
 	};
 
 	chosen {
-		xlnx,eeprom = &eeprom;
+		nvmem0 = &eeprom;
 	};
 
 	ina226-u76 {

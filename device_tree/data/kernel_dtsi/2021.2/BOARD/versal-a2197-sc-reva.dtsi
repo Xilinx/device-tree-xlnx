@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal a2197 RevA System Controller
  *
- * (C) Copyright 2019, Xilinx, Inc.
+ * (C) Copyright 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -13,8 +13,7 @@
 	compatible = "xlnx,versal-sc-revA", "xlnx,versal-sc", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = &eeprom; /* FIXME */
-		/* xlnx,fmc-eeprom = FIXME */
+		nvmem0 = &eeprom; 
 	};
 
 	/* SC Bank 43

@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP
  *
- * (C) Copyright 2014 - 2020, Xilinx, Inc.
+ * (C) Copyright 2014 - 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  *
@@ -156,8 +156,7 @@
 				compatible = "xlnx,zynqmp-power";
 				interrupt-parent = <&gic>;
 				interrupts = <0 35 4>;
-				mboxes = <&ipi_mailbox_pmu1 0>,
-					 <&ipi_mailbox_pmu1 1>;
+				mboxes = <&ipi_mailbox_pmu1 0>, <&ipi_mailbox_pmu1 1>;
 				mbox-names = "tx", "rx";
 			};
 
@@ -277,19 +276,6 @@
 	};
 
 
-	smmu: smmu@fd800000 {
-		compatible = "arm,mmu-500";
-		reg = <0x0 0xfd800000 0x0 0x20000>;
-		#iommu-cells = <1>;
-		status = "disabled";
-		#global-interrupts = <1>;
-		interrupt-parent = <&gic>;
-		interrupts = <0 155 4>,
-			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
-			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
-			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
-			<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>;
-	};
 
 	amba: axi {
 		compatible = "simple-bus";
@@ -841,7 +827,7 @@
 			interrupt-parent = <&gic>;
 			interrupts = <0 26 4>, <0 27 4>;
 			interrupt-names = "alarm", "sec";
-			calibration = <0x8000>;
+			calibration = <0x7FFF>;
 		};
 
 		sata: ahci@fd0c0000 {
@@ -869,8 +855,6 @@
 			#stream-id-cells = <1>;
 			iommus = <&smmu 0x870>;
 			power-domains = <&zynqmp_firmware PD_SD_0>;
-			nvmem-cells = <&soc_revision>;
-			nvmem-cell-names = "soc_revision";
 			#clock-cells = <1>;
 			clock-output-names = "clk_out_sd0", "clk_in_sd0";
 		};
@@ -887,10 +871,22 @@
 			#stream-id-cells = <1>;
 			iommus = <&smmu 0x871>;
 			power-domains = <&zynqmp_firmware PD_SD_1>;
-			nvmem-cells = <&soc_revision>;
-			nvmem-cell-names = "soc_revision";
 			#clock-cells = <1>;
 			clock-output-names = "clk_out_sd1", "clk_in_sd1";
+		};
+
+		smmu: smmu@fd800000 {
+			compatible = "arm,mmu-500";
+			reg = <0x0 0xfd800000 0x0 0x20000>;
+			#iommu-cells = <1>;
+			status = "disabled";
+			#global-interrupts = <1>;
+			interrupt-parent = <&gic>;
+			interrupts = <0 155 4>,
+				<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
+				<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
+				<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>,
+				<0 155 4>, <0 155 4>, <0 155 4>, <0 155 4>;
 		};
 
 		spi0: spi@ff040000 {
@@ -993,8 +989,6 @@
 			reset-names = "usb_crst", "usb_hibrst", "usb_apbrst";
 			reset-gpio = <&modepin_gpio 1 0>;
 			ranges;
-			nvmem-cells = <&soc_revision>;
-			nvmem-cell-names = "soc_revision";
 
 			dwc3_0: dwc3@fe200000 {
 				compatible = "snps,dwc3";
@@ -1028,8 +1022,6 @@
 			reset-names = "usb_crst", "usb_hibrst", "usb_apbrst";
 
 			ranges;
-			nvmem-cells = <&soc_revision>;
-			nvmem-cell-names = "soc_revision";
 
 			dwc3_1: dwc3@fe300000 {
 				compatible = "snps,dwc3";

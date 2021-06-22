@@ -7,8 +7,6 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
-#include "include/dt-bindings/phy/phy.h"
-
 / {
 	model = "ZynqMP ZC1232 RevA";
 	compatible = "xlnx,zynqmp-zc1232-revA", "xlnx,zynqmp-zc1232", "xlnx,zynqmp";

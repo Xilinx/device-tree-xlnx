@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal a2197 RevA System Controller on MGT
  *
- * (C) Copyright 2019, Xilinx, Inc.
+ * (C) Copyright 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -14,7 +14,7 @@
 			"xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = <&eeprom>;
+		nvmem0 = <&eeprom>;
 	};
 
 	ina226-u74 {
@@ -48,10 +48,6 @@
 	disable-wp;
 	bus-width = <8>;
 	xlnx,mio-bank = <0>;
-};
-
-&uart0 { /* uart0 MIO38-39 */
-	u-boot,dm-pre-reloc;
 };
 
 &gem0 { /* eth MDIO 76/77 */

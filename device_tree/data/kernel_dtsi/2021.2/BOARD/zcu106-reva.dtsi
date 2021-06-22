@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP ZCU106
  *
- * (C) Copyright 2016 - 2020, Xilinx, Inc.
+ * (C) Copyright 2016 - 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -38,7 +38,7 @@
 	};
 
 	chosen {
-		xlnx,eeprom = &eeprom;
+		nvmem0 = &eeprom;
 	};
 
 	ina226-u76 {
@@ -974,4 +974,5 @@
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
 	phys = <&psgtr 2 PHY_TYPE_USB3 0 2>;
+	maximum-speed = "super-speed";
 };

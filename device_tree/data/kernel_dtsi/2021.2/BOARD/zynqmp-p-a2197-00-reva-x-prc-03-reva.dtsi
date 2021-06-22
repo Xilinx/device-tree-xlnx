@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP System Controller X-PRC-03 revA (SE3)
  *
- * (C) Copyright 2019, Xilinx, Inc.
+ * (C) Copyright 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -15,8 +15,7 @@
 				"xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = <&eeprom>; /* FIXME */
-		/* xlnx,fmc-eeprom = FIXME */
+		nvmem0 = <&eeprom>; 
 	};
 
 	ref_clk: ref_clk {
@@ -67,14 +66,6 @@
 	disable-wp;
 	bus-width = <8>;
 	xlnx,mio-bank = <0>;
-};
-
-&uart0 { /* uart0 MIO38-39 */
-	u-boot,dm-pre-reloc;
-};
-
-&uart1 { /* uart1 MIO40-41 */
-	u-boot,dm-pre-reloc;
 };
 
 &sdhci1 { /* sd1 MIO45-51 cd in place */

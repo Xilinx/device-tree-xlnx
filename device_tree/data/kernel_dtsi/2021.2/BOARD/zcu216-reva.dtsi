@@ -16,7 +16,7 @@
 	compatible = "xlnx,zynqmp-zcu216-revA", "xlnx,zynqmp-zcu216", "xlnx,zynqmp";
 
 	chosen {
-		xlnx,eeprom = <&eeprom>;
+		nvmem0 = <&eeprom>;
 	};
 
 	gpio-keys {
@@ -623,4 +623,5 @@
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
 	phys = <&psgtr 2 PHY_TYPE_USB3 0 2>;
+	maximum-speed = "super-speed";
 };
