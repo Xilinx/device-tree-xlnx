@@ -25,8 +25,11 @@ proc generate {drv_handle} {
             break
         }
     }
+    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     set ip [get_cells -hier $drv_handle]
     set consoleip [get_property CONFIG.console_device [get_os]]
+    set config_baud [get_property CONFIG.dt_setbaud [get_os]]
+
     set port_number 0
     if {[string match -nocase "$ip" "$consoleip"] == 0} {
         set serial_count [hsi::utils::get_os_parameter_value "serial_count"]
@@ -46,7 +49,17 @@ proc generate {drv_handle} {
         } else {
             set baud "115200"
         }
-        hsi::utils::set_os_parameter_value "console" "ttyPS0,$baud"
+	if {$config_baud} {
+		hsi::utils::set_os_parameter_value "console" "ttyPS0,$config_baud"
+		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			set_drv_prop $drv_handle "current-speed" $config_baud int
+		}
+	} else {
+		hsi::utils::set_os_parameter_value "console" "ttyPS0,$baud"
+		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			set_drv_prop $drv_handle "current-speed" $baud int
+		}
+	}
     }
     set_property CONFIG.port-number $port_number $drv_handle
     set uboot_prop [get_property IP_NAME [get_cells -hier $drv_handle]]

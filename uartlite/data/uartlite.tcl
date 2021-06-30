@@ -30,15 +30,20 @@ proc generate {drv_handle} {
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,xps-uartlite-1.00.a"]
     set_drv_prop $drv_handle compatible "$compatible" stringlist
+    set config_baud [get_property CONFIG.dt_setbaud [get_os]]
     set ip [get_cells -hier $drv_handle]
     set consoleip [get_property CONFIG.console_device [get_os]]
     if { [string match -nocase $consoleip $ip] } {
         set ip_type [get_property IP_NAME $ip]
-        if { [string match -nocase $ip_type] } {
-            hsi::utils::set_os_parameter_value "console" "ttyUL0,115200"
-        } else {
-            hsi::utils::set_os_parameter_value "console" "ttyUL0,[hsi::utils::get_ip_param_value $ip C_BAUDRATE]"
-        }
+	if {!$config_baud} {
+		if { [string match -nocase $ip_type] } {
+			hsi::utils::set_os_parameter_value "console" "ttyUL0,115200"
+		} else {
+			hsi::utils::set_os_parameter_value "console" "ttyUL0,[hsi::utils::get_ip_param_value $ip C_BAUDRATE]"
+		}
+	} else {
+		hsi::utils::set_os_parameter_value "console" "ttyUL0,$config_baud"
+	}
     }
 
     set_drv_conf_prop $drv_handle C_BAUDRATE current-speed int
