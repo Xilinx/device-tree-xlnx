@@ -25,6 +25,6 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,timer-syncer-1588-1.0"]
+	set compatible [append compatible " " "xlnx,timer-syncer-1588-2.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 }
