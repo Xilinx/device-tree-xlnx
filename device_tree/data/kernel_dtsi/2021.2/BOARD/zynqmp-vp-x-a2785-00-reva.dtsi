@@ -320,6 +320,8 @@
 &usb0 { /* MIO52 - MIO63 */
 	xlnx,usb-polarity = <0>;
 	xlnx,usb-reset-mode = <0>;
+	phy-names = "usb3-phy";
+	phys = <&psgtr 1 PHY_TYPE_USB3 0 1>;
 };
 
 &dwc3_0 {
@@ -327,8 +329,6 @@
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
 	maximum-speed = "super-speed";
-	phy-names = "usb3-phy";
-	phys = <&psgtr 1 PHY_TYPE_USB3 0 1>;
 };
 
 &pinctrl0 {
