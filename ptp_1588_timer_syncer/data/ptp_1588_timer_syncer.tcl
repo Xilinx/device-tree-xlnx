@@ -25,6 +25,18 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,timer-syncer-1588-2.0"]
+	set ip_ver     [get_comp_ver $drv_handle]
+	if {[string match -nocase $ip_ver "2.0"]} {
+		set compatible [append compatible " " "xlnx,timer-syncer-1588-2.0"]
+	} elseif {[string match -nocase $ip_ver "1.0"]} {
+		set compatible [append compatible " " "xlnx,timer-syncer-1588-1.0"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
+}
+
+proc get_comp_ver {drv_handle} {
+	set slave [get_cells -hier ${drv_handle}]
+        set vlnv [split [get_property VLNV $slave] ":"]
+        set ver [lindex $vlnv 3]
+	return $ver
 }
