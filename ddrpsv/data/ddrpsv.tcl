@@ -174,21 +174,25 @@ proc generate_reg_property {base high} {
 			set high_base "0x[string range $temp $rem $len]"
 			set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
 			set low_base [format 0x%08x $low_base]
-			if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
-				set temp $size
-				set temp [string trimleft [string trimleft $temp 0] x]
-				set len [string length $temp]
-				set rem [expr {${len} - 8}]
-				set high_size "0x[string range $temp $rem $len]"
-				set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
-				set low_size [format 0x%08x $low_size]
-				set reg "$low_base $high_base $low_size $high_size"
-			} else {
-				set reg "$low_base $high_base 0x0 $size"
-			}
 		} else {
-			set reg "0x0 $base 0x0 $size"
+			set high_base $base
+			set low_base 0x0
 		}
-	} 
+		if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+			set temp $size
+			set temp [string trimleft [string trimleft $temp 0] x]
+			set len [string length $temp]
+			set rem [expr {${len} - 8}]
+			set high_size "0x[string range $temp $rem $len]"
+			set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+			set low_size [format 0x%08x $low_size]
+		} else {
+			set high_size $size
+			set low_size 0x0
+		}
+		set reg "$low_base $high_base $low_size $high_size"
+	} else {
+		set reg "0x0 $base 0x0 $size"
+	}
 	return $reg
 }
