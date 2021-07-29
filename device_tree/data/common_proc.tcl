@@ -3892,12 +3892,13 @@ proc gen_clk_property {drv_handle} {
 	set updat ""
 	global bus_clk_list
 	set clocknames ""
-
+	dtg_verbose "gen_clk_property:$drv_handle"
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "microblaze"]} {
 		return
 	}
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
+	dtg_verbose "clk_pins:$clk_pins"
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc mrmac"
 	if {[lsearch $ignore_list $ip] >= 0 } {
@@ -4054,10 +4055,19 @@ proc gen_clk_property {drv_handle} {
 				}
 			}
 		}
-		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psu_cortexa53"] } {
 			set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
 		} elseif {[string match -nocase $proctype "ps7_cortexa9"]} {
 			set clklist "FCLK_CLK0 FCLK_CLK1 FCLK_CLK2 FCLK_CLK3"
+		}
+		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			set ver [get_comp_ver $versal_periph]
+			if {$ver >= 3.0} {
+				set clklist "pl0_ref_clk pl1_ref_clk pl2_ref_clk pl3_ref_clk"
+			} else {
+				set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
+			}
 		}
 		foreach pin $pins {
 			if {[lsearch $clklist $pin] >= 0} {
@@ -4066,6 +4076,35 @@ proc gen_clk_property {drv_handle} {
 			}
 		}
 		if {[string match -nocase $proctype "psv_cortexa72"]} {
+			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			set ver [get_comp_ver $versal_periph]
+			if {$ver >= 3.0} {
+			switch $pl_clk {
+				"pl0_ref_clk" {
+						set pl_clk0 "versal_clk 65"
+						set clocks [lappend clocks $pl_clk0]
+						set updat  [lappend updat $pl_clk0]
+				}
+				"pl1_ref_clk" {
+						set pl_clk1 "versal_clk 66"
+						set clocks [lappend clocks $pl_clk1]
+						set updat  [lappend updat $pl_clk1]
+				}
+				"pl2_ref_clk" {
+						set pl_clk2 "versal_clk 67"
+						set clocks [lappend clocks $pl_clk2]
+						set updat [lappend updat $pl_clk2]
+				}
+				"pl3_ref_clk" {
+						set pl_clk3 "versal_clk 68"
+						set clocks [lappend clocks $pl_clk3]
+						set updat [lappend updat $pl_clk3]
+				}
+				default {
+						dtg_warning  "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"\n\r"
+				}
+			}
+			} else {
 			switch $pl_clk {
 				"pl_clk0" {
 						set pl_clk0 "versal_clk 65"
@@ -4080,16 +4119,17 @@ proc gen_clk_property {drv_handle} {
 				"pl_clk2" {
 						set pl_clk2 "versal_clk 67"
 						set clocks [lappend clocks $pl_clk2]
-						set updat [lappend updat $pl_clk2]
+						set updat  [lappend updat  $pl_clk2]
 				}
 				"pl_clk3" {
 						set pl_clk3 "versal_clk 68"
 						set clocks [lappend clocks $pl_clk3]
-						set updat [lappend updat $pl_clk3]
+						set updat  [lappend updat $pl_clk3]
 				}
 				default {
-						dtg_warning  "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"\n\r"
+						dtg_warning "Clock pin \"$clk\" of IP block \"$drv_handle\" is not connected to any of the pl_clk\"n\r"
 				}
+			}
 			}
 		}
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
@@ -4295,6 +4335,12 @@ proc gen_clk_property {drv_handle} {
 
 proc overwrite_clknames {clknames drv_handle} {
 	set_drv_prop $drv_handle "clock-names" $clknames stringlist
+}
+proc get_comp_ver {drv_handle} {
+	set slave [get_cells -hier ${drv_handle}]
+	set vlnv  [split [get_property VLNV $slave] ":"]
+	set ver   [lindex $vlnv 3]
+	return $ver
 }
 
 proc get_comp_str {drv_handle} {
