@@ -53,7 +53,6 @@ proc generate {drv_handle} {
     } else {
         dtg_warning "$drv_handle connected ip is NULL for the pin M_AXIS_MM2S"
     }
-
     set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
 
     if { $axiethernetfound || $is_xxv == 1} {
@@ -109,6 +108,10 @@ proc generate {drv_handle} {
 	set inhex [format %x $addr_width]
 	append addrwidth "/bits/ 8 <0x$inhex>"
 	hsi::utils::add_new_dts_param "$node" "xlnx,addrwidth" $addrwidth noformating
+	set num_queues [get_property CONFIG.c_num_mm2s_channels $dma_ip]
+	set inhex [format %x $num_queues]
+	append numqueues "/bits/ 16 <0x$inhex>"
+	hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
     }
     incr dma_count
     hsi::utils::set_os_parameter_value "dma_count" $dma_count
@@ -275,6 +278,12 @@ proc get_connected_ip {drv_handle dma_pin} {
     } elseif {[lsearch -nocase $valid_eth_list $iptype] >= 0 } {
         # dma connected to 10G/25G MAC, 1G or 10G
         return 1
+    } elseif {[string match -nocase $iptype "axis_add_tuser"]|| [string match -nocase $iptype "axis_duplicate_master_out"]} {
+		set dma_pin "mas_0"
+		get_connected_ip $connected_ip $dma_pin
+    } elseif {[string match -nocase $iptype "axis_switch"]} {
+		set dma_pin "M00_AXIS"
+		get_connected_ip $connected_ip $dma_pin
     } else {
         # dma connected via interconnects
         set dma_pin "M_AXIS"

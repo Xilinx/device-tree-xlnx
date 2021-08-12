@@ -50,9 +50,21 @@ proc generate {drv_handle} {
 			}
 		}
 		if { [string match -nocase $interrupt_names ""] } {
+			if {[string match -nocase $irq "irq_out"]} {
+				set irq "irq-out"
+			}
+			if {[string match -nocase $irq "err_out"]} {
+				set irq "err-out"
+			}
 			set interrupt_names "$irq"
 			set interrupts "$intr_info"
 		} else {
+			if {[string match -nocase $irq "irq_out"]} {
+				set irq "irq-out"
+			}
+			if {[string match -nocase $irq "err_out"]} {
+				set irq "err-out"
+			}
 			append interrupt_names " " "$irq"
 			append interrupts " " "$intr_info"
 		}

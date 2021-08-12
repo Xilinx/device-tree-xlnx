@@ -242,21 +242,17 @@ proc gen_ext_axi_interface {}  {
 	}
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "psu_cortexa53"]} {
-		set ext_axi_intf [get_mem_ranges -of_objects [get_cells psu_cortexa53_0] -filter {INSTANCE ==""}]
+		set ext_axi_intf [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]] -filter {INSTANCE ==""}]
 		set hsi_version [get_hsi_version]
 		set ver [split $hsi_version "."]
 		set version [lindex $ver 0]
+		set intf_count 0
 		foreach drv_handle $ext_axi_intf {
 			set base [string tolower [get_property BASE_VALUE $drv_handle]]
 			set high [string tolower [get_property HIGH_VALUE $drv_handle]]
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
-			set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-			if {$dt_overlay} {
-				set bus_node "overlay2"
-			} else {
-				set bus_node "amba_pl"
-			}
-			set default_dts pl.dtsi
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 			if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 				set temp $base
 				set temp [string trimleft [string trimleft $temp 0] x]
@@ -281,10 +277,47 @@ proc gen_ext_axi_interface {}  {
 				set reg "0x0 $base 0x0 $size"
 			}
 			regsub -all {^0x} $base {} base
-			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle -u $base -d $default_dts -p $bus_node]
+			set ext_int_node [add_or_get_dt_node -n $drv_handle -l $drv_handle$intf_count -u $base -d $default_dts -p $root_node]
 			hsi::utils::add_new_dts_param $ext_int_node "reg" "$reg" intlist
+			incr intf_count
 			if {$version >= 2018} {
 				hsi::utils::add_new_dts_param "${ext_int_node}" "/* This is a external AXI interface, user may need to update the entries */" "" comment
+			}
+		}
+	}
+}
+
+proc gen_include_headers {} {
+	foreach i [get_sw_cores device_tree] {
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
+		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
+		set include_list "include*"
+		set dir_path "./"
+		if {[string match -nocase $proctype "psu_cortexa53"]} {
+			set power_list "xlnx-zynqmp-power.h"
+			set clock_list "xlnx-zynqmp-clk.h"
+			set reset_list "xlnx-zynqmp-resets.h"
+		} else {
+			set power_list "xlnx-versal-power.h"
+			set clock_list "xlnx-versal-clk.h"
+			set reset_list "xlnx-zynqmp-resets.h"
+		}
+		set powerdir "$dir_path/include/dt-bindings/power"
+		set clockdir "$dir_path/include/dt-bindings/clock"
+		set resetdir "$dir_path/include/dt-bindings/reset"
+		file mkdir $powerdir
+		file mkdir $clockdir
+		file mkdir $resetdir
+		if {[file exists $include_dtsi]} {
+			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
+				if {[string first $power_list $file]!= -1} {
+					file copy -force $file $powerdir
+				} elseif {[string first $clock_list $file] != -1} {
+					file copy -force $file $clockdir
+				} elseif {[string first $reset_list $file] != -1} {
+					file copy -force $file $resetdir
+				}
 			}
 		}
 	}
@@ -324,11 +357,11 @@ proc gen_board_info {} {
 		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set include_list "include*"
 		set dir_path "./"
-		set gpio_list "gpio*"
-		set intr_list "interrupt-*"
-		set phy_list  "phy*"
-		set input_list "input*"
-		set pinctrl_list "pinctrl*"
+		set gpio_list "gpio.h"
+		set intr_list "irq.h"
+		set phy_list  "phy.h"
+		set input_list "input.h"
+		set pinctrl_list "pinctrl-zynqmp.h"
 		set gpiodir "$dir_path/include/dt-bindings/gpio"
 		set phydir "$dir_path/include/dt-bindings/phy"
 		set intrdir "$dir_path/include/dt-bindings/interrupt-controller"
@@ -341,21 +374,22 @@ proc gen_board_info {} {
 		file mkdir $pinctrldir
 		if {[file exists $include_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
-				if {[regexp $gpio_list $file match]} {
+				if {[string first $gpio_list $file] != -1} {
 					file copy -force $file $gpiodir
-				} elseif {[regexp $phy_list $file match]} {
+				} elseif {[string first $phy_list $file] != -1} {
 					file copy -force $file $phydir
-				} elseif {[regexp $intr_list $file match]} {
+				} elseif {[string first $intr_list $file] != -1} {
 					file copy -force $file $intrdir
-				} elseif {[regexp $input_list $file match]} {
+				} elseif {[string first $input_list $file] != -1} {
 					file copy -force $file $inputdir
-				} elseif {[regexp $pinctrl_list $file match]} {
+				} elseif {[string first $pinctrl_list $file] != -1} {
 					file copy -force $file $pinctrldir
 				}
 			}
 		}
 		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-		if {[string match -nocase $mainline_ker "v4.17"]} {
+		set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+		if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
 			set mainline_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${mainline_ker}/board"]
 			if {[file exists $mainline_dtsi]} {
 				set mainline_board_file 0
@@ -390,11 +424,6 @@ proc gen_board_info {} {
 				}
 				set default_dts [get_property CONFIG.master_dts [get_os]]
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-				set valid_axi_list "kc705-full kc705-lite ac701-full ac701-lite"
-				set valid_no_axi_list "kcu105 zc702 zc706 zc1751-dc1 zc1751-dc2 zedboard"
-				if {[lsearch -nocase $valid_axi_list $dts_name] >= 0 || [string match -nocase $dts_name "kcu705"]} {
-					hsi::utils::add_new_dts_param "${root_node}" hard-reset-gpios "reset_gpio 0 1" reference
-				}
 			} else {
 				puts "File not found\n\r"
 			}
@@ -426,6 +455,34 @@ proc gen_zynqmp_ccf_clk {} {
 
 }
 
+proc gen_versal_clk {} {
+	set default_dts [get_property CONFIG.pcw_dts [get_os]]
+	set ref_node [add_or_get_dt_node -n "&ref_clk" -d $default_dts]
+	set pl_alt_ref_node [add_or_get_dt_node -n "&pl_alt_ref_clk" -d $default_dts]
+	set periph_list [get_cells -hier]
+	foreach periph $periph_list {
+		set versal_ps [get_property IP_NAME $periph]
+		if {[string match -nocase $versal_ps "versal_cips"] } {
+			set avail_param [list_property [get_cells -hier $periph]]
+			if {[lsearch -nocase $avail_param "CONFIG.PMC_REF_CLK_FREQMHZ"] >= 0} {
+				set freq [get_property CONFIG.PMC_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+				if {![string match -nocase $freq "33.333"]} {
+					dtg_warning "Frequency $freq used instead of 33.333"
+					hsi::utils::add_new_dts_param "${ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+			if {[lsearch -nocase $avail_param "CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ"] >= 0} {
+				set freq [get_property CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+				if {![string match -nocase $freq "33.333"]} {
+					dtg_warning "Frequency $freq used instead of 33.333"
+					hsi::utils::add_new_dts_param "${pl_alt_ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+				}
+			}
+		}
+	}
+
+}
+
 proc generate {lib_handle} {
     add_skeleton
     foreach drv_handle [get_drivers] {
@@ -438,12 +495,14 @@ proc generate {lib_handle} {
         gen_clk_property $drv_handle
     }
     gen_board_info
+    gen_include_headers
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 	if {[string match -nocase $mainline_ker "none"]} {
 		gen_sata_laneinfo
 		gen_zynqmp_ccf_clk
+		gen_versal_clk
 	}
     }
     gen_ext_axi_interface
@@ -456,6 +515,7 @@ proc post_generate {os_handle} {
     gen_dev_conf
     foreach drv_handle [get_drivers] {
         gen_peripheral_nodes $drv_handle
+	update_endpoints $drv_handle
     }
     global zynq_soc_dt_tree
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
@@ -558,7 +618,8 @@ proc update_cpu_node {os_handle} {
 
 proc update_alias {os_handle} {
     set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-    if {[string match -nocase $mainline_ker "v4.17"]} {
+    set valid_mainline_kernel_list "v4.17 v4.18 v4.19 v5.0 v5.1 v5.2 v5.3 v5.4"
+    if {[lsearch $valid_mainline_kernel_list $mainline_ker] >= 0 } {
          return
     }
     set default_dts [get_property CONFIG.master_dts [get_os]]

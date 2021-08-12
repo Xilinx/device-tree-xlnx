@@ -70,17 +70,17 @@ proc generate_secure_memory {drv_handle} {
     set slave [get_cells -hier ${drv_handle}]
     set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
     set firstelement [lindex $ip_mem_handles 0]
-    set index [lsearch [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] [get_cells $firstelement]]
-    set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+    set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] [get_cells $firstelement]]
+    set avail_param [list_property [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
     set addr_64 "0"
     set size_64 "0"
     if {[lsearch -nocase $avail_param "TRUSTZONE"] >= 0} {
         foreach bank ${ip_mem_handles} {
-            set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+            set state [get_property TRUSTZONE [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
             if {[string match -nocase $state "NonSecure"]} {
-                set index [lsearch -start $index [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] [get_cells -hier $bank]]
-                set base [get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
-                set high [get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier psu_cortexa53_0]] $index]]
+                set index [lsearch -start $index [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] [get_cells -hier $bank]]
+                set base [get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
+                set high [get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $index]]
                 set mem_size [format 0x%x [expr {${high} - ${base} + 1}]]
                 if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
                     set addr_64 "1"

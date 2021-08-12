@@ -11,7 +11,6 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
-
 proc generate {drv_handle} {
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
@@ -115,9 +114,12 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$node" "xlnx,max-height" $max_rows int
 	set max_cols [get_property CONFIG.MAX_COLS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "$node" "xlnx,max-width" $max_cols int
+	gen_gpio_reset $drv_handle $node
 
-	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "ap_rst_n"]
-	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] "ap_rst_n"]]
+}
+
+proc gen_gpio_reset {drv_handle node} {
+	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier [get_cells -hier $drv_handle]] "ap_rst_n"]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
 		if {[llength $sink_periph]} {
@@ -149,12 +151,12 @@ proc generate {drv_handle} {
 							hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
 						}
 					} else {
-						dtg_warning "$drv_handle: peripheral is NULL for the $pin $periph"
+						dtg_warning "$drv_handle peripheral is NULL for the $pin $periph"
 					}
 				}
 			}
 		} else {
-			dtg_warning "$drv_handle: peripheral is NULL for the $pin $sink_periph"
+			dtg_warning "$drv_handle peripheral is NULL for the $pin $sink_periph"
 		}
 	}
 }

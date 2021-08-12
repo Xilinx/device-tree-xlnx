@@ -31,13 +31,15 @@ OPTION COMPILE_BSP = FALSE;
 
 PARAMETER name = dtg_version, desc = "DTG version", default = "2014.4";
 
+PARAMETER name = partial_image, desc = "Partial image Support", type = bool, default = false;
+
 PARAMETER name = dt_overlay, desc = "Enable Device-tree Overlay support", type = bool, default = false;
 
 PARAMETER name = firmware_name, desc = "Device-tree Overlay Firmware name", type = string, default = "";
 
 PARAMETER name = remove_pl, desc = "Remove PL Support", type = bool, default = false;
 
-PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, values = ("none" = none, "v4.17" = v4.17), default = none;
+PARAMETER name = mainline_kernel, desc = "Kernel mainline version", type = enum, values = ("none" = none, "v4.17" = v4.17, "v4.18" = v4.18, "v4.19" = v4.19, "v5.0" = v5.0, "v5.1" = v5.1, "v5.2" = v5.2, "v5.3" = v5.3, "v5.4" = v5.4), default = none;
 
 PARAMETER name = overlay_custom_dts, desc = "Overlay custom dts filename", type = string, default ="";
 
@@ -47,7 +49,7 @@ PARAMETER name = console_device, desc = "Instance name of IP core for boot conso
 
 PARAMETER name = periph_type_overrides, desc = "List of peripheral type overrides", type = string, default = "";
 PARAMETER name = main_memory, desc = "Name of Main Memory used with PetaLinux", type = peripheral_instance, range = (ps7_ddr, psu_ddr, mpmc, mig_7series, axi_emc), default = none;
-PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.4" = 2014.4, "2015.1" = 2015.1, "2015.2" = 2015.2, "2015.3" = 2015.3, "2015.4" = 2015.4, "2016.1" = 2016.1, "2016.2" = 2016.2, "2016.3" = 2016.3, "2016.4" = 2016.4, "2017.1" = 2017.1, "2017.2" = 2017.2, "2017.3" = 2017.3, "2017.4" = 2017.4, "2018.1" = 2018.1, "2018.2" = 2018.2, "2018.3" = 2018.3, "2019.1" = 2019.1, "2019.2" = 2019.2), default = 2019.2;
+PARAMETER name = kernel_version, desc = "Target kernel version", type = enum, values = ("2014.4" = 2014.4, "2015.1" = 2015.1, "2015.2" = 2015.2, "2015.3" = 2015.3, "2015.4" = 2015.4, "2016.1" = 2016.1, "2016.2" = 2016.2, "2016.3" = 2016.3, "2016.4" = 2016.4, "2017.1" = 2017.1, "2017.2" = 2017.2, "2017.3" = 2017.3, "2017.4" = 2017.4, "2018.1" = 2018.1, "2018.2" = 2018.2, "2018.3" = 2018.3, "2019.1" = 2019.1, "2019.2" = 2019.2, "2020.1" = 2020.1, "2020.2" = 2020.2), default = 2020.2;
 PARAMETER name = pcw_dts, desc = "Target dts filename for PCW configurations", type = string, default = pcw.dtsi;
 PARAMETER name = master_dts, desc = "Master dts filename", type = string, default = system-top.dts;
 END OS

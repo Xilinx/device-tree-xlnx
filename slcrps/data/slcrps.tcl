@@ -27,7 +27,8 @@ proc generate {drv_handle} {
 
 proc gen_clocks_node {parent_node} {
     set clocks_child_name "clkc"
-    set clkc_node [add_or_get_dt_node -l $clocks_child_name -n $clocks_child_name -u 100 -p $parent_node]
+    set dts_file [get_property CONFIG.pcw_dts [get_os]]
+    set clkc_node [add_or_get_dt_node -l $clocks_child_name -n $clocks_child_name -u 100 -d $dts_file -p $parent_node]
 
     if {[catch {set ps_clk_freq [get_property CONFIG.C_INPUT_CRYSTAL_FREQ_HZ [get_cells -hier ps7_clockc_0]]} msg]} {
         set ps_clk_freq ""

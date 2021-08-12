@@ -23,12 +23,19 @@ proc generate {drv_handle} {
 
 	set slave [get_cells -hier $drv_handle]
 	set qspi_mode [hsi::utils::get_ip_param_value $slave "C_QSPI_MODE"]
+	set is_stacked 0
 	if { $qspi_mode == 2} {
 		set is_dual 1
-	} else {
+	} elseif { $qspi_mode == 1} {
+		set is_dual 0
+		set is_stacked 1
+	} elseif { $qspi_mode == 0} {
 		set is_dual 0
 	}
 	set_property CONFIG.is-dual $is_dual $drv_handle
+	if {$is_stacked} {
+		set_property CONFIG.is-stacked $is_stacked $drv_handle
+	}
 	set bus_width [get_property CONFIG.C_QSPI_BUS_WIDTH [get_cells -hier $drv_handle]]
 
 	switch $bus_width {

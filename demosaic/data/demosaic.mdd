@@ -20,5 +20,6 @@ BEGIN driver demosaic
    OPTION supported_os_types = (DTS);
    OPTION driver_state = ACTIVE;
    OPTION NAME = demosaic;
+   DTGPARAM name = dtg.ip_params, type = boolean;
 
 END driver

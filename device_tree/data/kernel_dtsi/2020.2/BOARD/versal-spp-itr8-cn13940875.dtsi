@@ -1,0 +1,308 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal
+ *
+ * (C) Copyright 2017 - 2019, Xilinx, Inc.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+/ {
+	compatible = "xlnx,versal-spp-itr8-cn13940875", "xlnx,versal-spp-itr8", "xlnx,versal";
+	model = "Xilinx Versal SPP ITR8 HW 4.0";
+	
+	aliases {
+		serial0 = &serial0;
+		ethernet0 = &gem0;
+		ethernet1 = &gem1;
+		spi0 = &qspi;
+		spi1 = &ospi;
+		spi2 = &spi0;
+		spi3 = &spi1;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+		usb0 = &usb0;
+	};
+	
+	memory@0 {
+		device_type = "memory";
+		reg = <0 0 0 0x80000000>;
+	};
+	chosen {
+		bootargs = "rdinit=/bin/sh console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused maxcpus=1";
+		stdout-path = "serial0:115200";
+	};
+	
+	clk25: clk25 {
+		u-boot,dm-pre-reloc;
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <25000000>;
+	};
+
+	clk100: clk100 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+	};
+
+	clk125: clk125 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <125000000>;
+	};
+
+	clk200: clk200 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <200000000>;
+	};
+};
+
+&timer {
+	clock-frequency = <2720000>;
+};
+
+&serial0 {
+	status = "okay";
+	clocks = <&clk25 &clk25>;
+};
+
+&lpd_dma_chan0 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan1 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan2 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan3 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan4 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan5 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan6 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&lpd_dma_chan7 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&usb0 {
+	status = "okay";
+	clocks = <&clk125 &clk125>;
+};
+
+&dwc3_0 {
+	status = "okay";
+	dr_mode = "host";
+	snps,usb3_lpm_capable;
+	phy-names = "usb3-phy";
+	maximum-speed = "high-speed";
+};
+
+&gem0 {
+	status = "okay";
+	clocks = <&clk125 &clk125 &clk125 &clk125>;
+	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
+        phy0: phy@0 {
+		reg = <0x0>;
+		max-speed = <100>;
+		ti,rx-internal-delay = <0xb>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <0x1>;
+		ti,dp83867-rxctrl-strap-quirk;
+	};
+};
+
+&gem1 {
+	status = "okay";
+	clocks = <&clk125 &clk125 &clk125 &clk125>;
+	phy-handle = <&phy1>;
+	phy-mode = "rgmii-id";
+        phy1: phy@1 {
+		reg = <0x1>;
+		max-speed = <100>;
+		ti,rx-internal-delay = <0xb>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <0x1>;
+		ti,dp83867-rxctrl-strap-quirk;
+	};
+};
+
+&sdhci0 {
+	status = "okay";
+	clocks = <&clk25 &clk25>;
+	xlnx,mio_bank = <0>;
+};
+
+&sdhci1 {
+	status = "okay";
+	clocks = <&clk25 &clk25>;
+	xlnx,mio_bank = <0>;
+};
+
+&qspi {
+	status = "okay";
+	num-cs = <0x1>;
+	reg = <0x0 0xf1030000 0x0 0x1000>;
+	clocks = <&clk125 &clk125>;
+	is-dual = <1>;
+	spi-rx-bus-width = <4>;
+	spi-tx-bus-width = <4>;
+	
+	flash@0 {
+		compatible = "n25q512a", "micron,m25p80", "spi-flash";
+		reg = <0x0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <4>;
+		spi-max-frequency = <108000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			partition@0 {
+				label = "qspi-fsbl-uboot-boot.bin";
+				reg = <0x0 0x6400000>;
+			};
+			partition@6400000 {
+				label = "qspi-linux";
+				reg = <0x6400000 0x500000>;
+			};
+			partition@6900000 {
+				label = "qspi-device-tree";
+				reg = <0x6900000 0x20000>;
+			};
+			partition@6920000 {
+				label = "qspi-rootfs";
+				reg = <0x6920000 0x5E0000>;
+			};
+			partition@7f40000 {
+				label = "qspi-bootenv";
+				reg = <0x7f40000 0x40000>;
+			};
+		};
+	};
+};
+
+&ospi {
+	status = "disabled";
+	clocks = <&clk125 &clk125>;
+	bus-num = <2>;
+	num-cs = <1>;
+	cdns,fifo-depth = <508>;
+	cdns,fifo-width = <4>;
+	cdns,is-dma = <1>;
+	cdns,is-stig-pgm = <1>;
+	cdns,trigger-address = <0x00000000>;
+	flash@0 {
+		compatible = "n25q512a", "micron,m25p80", "spi-flash";
+		reg = <0x0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <8>;
+		spi-max-frequency = <108000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "qspi-fsbl-uboot";
+				reg = <0x0 0x100000>;
+			};
+			partition@100000 {
+				label = "qspi-linux";
+				reg = <0x100000 0x500000>;
+			};
+			partition@600000 {
+				label = "qspi-device-tree";
+				reg = <0x600000 0x20000>;
+			};
+			partition@620000 {
+				label = "qspi-rootfs";
+				reg = <0x620000 0x5E0000>;
+			};
+		};
+	};
+};
+
+&spi0 {
+	status = "okay";
+	clocks = <&clk125 &clk125>;
+	num-cs = <1>;
+
+	flash@0 {
+		compatible = "m25p80", "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <0x0>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "spi0-flash0";
+				reg = <0x0 0x100000>;
+			};
+		};
+	};
+};
+
+&spi1 {
+	status = "okay";
+	clocks = <&clk125 &clk125>;
+	num-cs = <3>;
+
+	flash@0 {
+		compatible = "m25p80", "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <0x0>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "spi1-flash0";
+				reg = <0x0 0x84000>;
+			};
+		};
+	};
+};
+
+&i2c0 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};
+
+&i2c1 {
+	status = "okay";
+	clocks = <&clk100 &clk100>;
+};

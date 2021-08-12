@@ -35,6 +35,12 @@ proc generate {drv_handle} {
     }
 
     set node [gen_peripheral_nodes $drv_handle]
+    set hw_design [hsi::current_hw_design]
+    set board_name ""
+    if {[llength $hw_design]} {
+        set board [split [get_property BOARD $hw_design] ":"]
+        set board_name [lindex $board 1]
+    }
     update_eth_mac_addr $drv_handle
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,axi-ethernet-1.00.a"]
@@ -55,6 +61,7 @@ proc generate {drv_handle} {
     }
     set new_label ""
     set clk_label ""
+    set connected_ip ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
                set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
@@ -214,6 +221,9 @@ proc generate {drv_handle} {
 
 
     set phytype [string tolower [get_property CONFIG.PHY_TYPE $eth_ip]]
+    if {$phytype == "rgmii" && $board_name == "kc705"} {
+        set phytype "rgmii-rxid"
+    }
     set_property phy-mode "$phytype" $drv_handle
     if {$phytype == "sgmii" || $phytype == "1000basex"} {
 	  set phytype "sgmii"
@@ -222,8 +232,8 @@ proc generate {drv_handle} {
 	  set phya [lindex $phynode 0]
 	  if { $phya != "-1"} {
 		set phy_name "[lindex $phynode 1]"
-	        set_drv_prop $drv_handle phy-handle "$phy_name" reference
-		gen_phy_node $mdio_node $phy_name $phya
+	        set_drv_prop $drv_handle phy-handle "$drv_handle$phy_name" reference
+		gen_phy_node $mdio_node $phy_name $phya $drv_handle
 	  }
     }
     if {$ip_name == "xxv_ethernet" && $core != 0} {
@@ -269,10 +279,10 @@ proc generate {drv_handle} {
     set version [lindex $ver 0]
     if {![string_is_empty $connected_ip]} {
         set connected_ipname [get_property IP_NAME $connected_ip]
-        if {$connected_ipname == "axi_mcdma"} {
+        if {$connected_ipname == "axi_mcdma" || $connected_ipname == "axi_dma"} {
             set num_queues [get_property CONFIG.c_num_mm2s_channels $connected_ip]
             set inhex [format %x $num_queues]
-            append numqueues "/bits/ 16 <0x$inhex>"
+            set numqueues "/bits/ 16 <0x$inhex>"
             hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
             if {$version < 2018} {
                 dtg_warning "quotes to be removed or use 2018.1 version for $node param xlnx,num-queues"
@@ -287,33 +297,38 @@ proc generate {drv_handle} {
             set_property xlnx,channel-ids $id $drv_handle
             if {$ip_name == "xxv_ethernet"  && $core!= 0} {
                   hsi::utils::add_new_dts_param $eth_node "xlnx,num-queues" $numqueues noformating
-                  hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id intlist
+                  hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id stringlist
             }
             set intr_val [get_property CONFIG.interrupts $target_handle]
             set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
             set int_names  [get_property CONFIG.interrupt-names $target_handle]
-            append intr_names " " "$int_names"
             if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
                 set intr_val1 [get_property CONFIG.interrupts $drv_handle]
                 lappend intr_val1 $intr_val
-            }
+		set intr_name [get_property CONFIG.interrupt-names $drv_handle]
+		append intr_names " " $intr_name " " $int_names
+            } else {
+		set intr_names $int_names
+	    }
+
             set default_dts [get_property CONFIG.pcw_dts [get_os]]
             set node [add_or_get_dt_node -n "&$drv_handle" -d $default_dts]
             if {![string_is_empty $intr_parent]} {
-                if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
-                    regsub -all "\{||\t" $intr_val1 {} intr_val1
-                    regsub -all "\}||\t" $intr_val1 {} intr_val1
-                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
-                } else {
-                    hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
-                }
-                hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
-                hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
                 if {$ip_name == "xxv_ethernet"  && $core!= 0} {
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-parent" $intr_parent reference
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-names" $intr_names stringlist
-                }
+                } else {
+			if { $hasbuf == "true" && $ip_name == "axi_ethernet"} {
+				regsub -all "\{||\t" $intr_val1 {} intr_val1
+				regsub -all "\}||\t" $intr_val1 {} intr_val1
+				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
+			} else {
+				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
+			}
+			hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
+			hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
+		}
             }
         }
         if {$connected_ipname == "axi_dma" || $connected_ipname == "axi_mcdma"} {
@@ -532,8 +547,9 @@ proc gen_phy_node args {
     set mdio_node [lindex $args 0]
     set phy_name [lindex $args 1]
     set phya [lindex $args 2]
+    set drv  [lindex $args 3]
 
-    set phy_node [add_or_get_dt_node -l ${phy_name} -n phy -u $phya -p $mdio_node]
+    set phy_node [add_or_get_dt_node -l $drv$phy_name -n phy -u $phya -p $mdio_node]
     hsi::utils::add_new_dts_param "${phy_node}" "reg" $phya int
     hsi::utils::add_new_dts_param "${phy_node}" "device_type" "ethernet-phy" string
 

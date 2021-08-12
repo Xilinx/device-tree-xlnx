@@ -11,7 +11,6 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
-
 proc generate {drv_handle} {
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
@@ -27,86 +26,66 @@ proc generate {drv_handle} {
 	set compatible [get_comp_str $drv_handle]
 	set compatible [append compatible " " "xlnx,v-smpte-uhdsdi-rx-ss"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-	set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports -p $node]
+
+	set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports$drv_handle -p $node]
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
-	if {![llength $connected_ip]} {
-		dtg_warning "$drv_handle pin VIDEO_OUT is not connected...check your design"
-	}
-	foreach connect_ip $connected_ip {
-		if {[llength $connect_ip]} {
-			set connected_ip_type [get_property IP_NAME $connect_ip]
-			if {[string match -nocase $connected_ip_type "system_ila"]} {
+	set port_node [add_or_get_dt_node -n "port" -l sdirx_port$drv_handle -u 0 -p $ports_node]
+	hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
+	hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
+	hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
+	hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
+
+	set sdirxip [get_connected_stream_ip [get_cells -hier $drv_handle] "VIDEO_OUT"]
+	foreach ip $sdirxip {
+		if {[llength $ip]} {
+			if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
 				continue
 			}
-			if {[string match -nocase $connected_ip_type "axis_subset_converter"]} {
-				set connect_ip [hsi::utils::get_connected_stream_ip $connect_ip "M_AXIS"]
-			}
-			if {[llength $connect_ip]} {
-				set connected_ip_type [get_property IP_NAME $connect_ip]
-			}
-			if {[string match -nocase $connected_ip_type "v_frmbuf_wr"] || [string match -nocase $connected_ip_type "axi_vdma"]} {
-				set port_node [add_or_get_dt_node -n "port" -l sdirx_port -u 0 -p $ports_node]
-				hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
-				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
-				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
-				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-				set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l sdi_rx_out -p $port_node]
-				hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" vcap_sdirx_in reference
-				set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-				if {$dt_overlay} {
-					set bus_node "overlay2"
-				} else {
-					set bus_node "amba_pl"
+			set intfpins [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
+			if {[llength $ip_mem_handles]} {
+				set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
+				set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l sdirx_out$drv_handle -p $port_node]
+				gen_endpoint $drv_handle "sdirx_out$drv_handle"
+				hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" $ip$drv_handle reference
+				gen_remoteendpoint $drv_handle $ip$drv_handle
+				if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"]} {
+					gen_frmbuf_wr_node $ip $drv_handle
 				}
-				set dts_file [current_dt_tree]
-				set vcapsdirx_count [hsi::utils::get_os_parameter_value "vcapsdirx_count"]
-				if { [llength $vcapsdirx_count] == 0 } {
-					set vcapsdirx_count 0
-				}
-				if {$vcapsdirx_count != 0} {
-					dtg_warning "Design might consists of two similar pipelines...user may need to add the input and output port"
-					return
-				}
-				set vcap_sdirx [add_or_get_dt_node -n "vcap_sdirx" -d $dts_file -p $bus_node]
-				incr vcapsdirx_count
-				hsi::utils::set_os_parameter_value "vcapsdirx_count" $vcapsdirx_count
-				hsi::utils::add_new_dts_param $vcap_sdirx "compatible" "xlnx,video" string
-				hsi::utils::add_new_dts_param $vcap_sdirx "dmas" "$connect_ip 0" reference
-				hsi::utils::add_new_dts_param $vcap_sdirx "dma-names" "port0" string
-				set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports -p $vcap_sdirx]
-				hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-				set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port -u 0 -p $vcap_ports_node]
-				hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
-				hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
-				set vcap_sdirx_in_node [add_or_get_dt_node -n "endpoint" -l vcap_sdirx_in -p $vcap_port_node]
-				hsi::utils::add_new_dts_param "$vcap_sdirx_in_node" "remote-endpoint" sdi_rx_out reference
-			}
-			if {[string match -nocase $connected_ip_type "v_mix"]} {
-				set sdi_port_node [add_or_get_dt_node -n "port" -l encoder_sdi_port -u 0 -p $ports_node]
-				hsi::utils::add_new_dts_param "$sdi_port_node" "reg" 0 int
-				set sdi_encoder_node [add_or_get_dt_node -n "endpoint" -l sdi_encoder -p $sdi_port_node]
-				hsi::utils::add_new_dts_param "$sdi_encoder_node" "remote-endpoint" mixer_crtc reference
-			}
-			if {[string match -nocase $connected_ip_type "v_proc_ss"]} {
-				set ports_node [add_or_get_dt_node -n "ports" -l sdirx_ports -p $node]
-				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-				set port_node [add_or_get_dt_node -n "port" -l sdirx_port -u 0 -p $ports_node]
-				hsi::utils::add_new_dts_param "${port_node}" "/* Fill the fields xlnx,video-format and xlnx,video-width based on user requirement */" "" comment
-				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-format" 0 int
-				hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" 10 int
-				hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-				set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l sdi_rx_out -p $port_node]
-				set topology [get_property CONFIG.C_TOPOLOGY $connect_ip]
-				if {$topology == 0} {
-					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" scaler_in reference
-				} else {
-					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" csc_in reference
+			} else {
+				set connectip [get_connect_ip $ip $intfpins]
+				if {[llength $connectip]} {
+					set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l sdirx_out$drv_handle -p $port_node]
+					gen_endpoint $drv_handle "sdirx_out$drv_handle"
+					hsi::utils::add_new_dts_param "$sdi_rx_node" "remote-endpoint" $connectip$drv_handle reference
+					gen_remoteendpoint $drv_handle $connectip$drv_handle
+					if {[string match -nocase [get_property IP_NAME $connectip] "axi_vdma"] || [string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+						gen_frmbuf_wr_node $connectip $drv_handle
+					}
 				}
 			}
 		}
 	}
+}
+
+proc gen_frmbuf_wr_node {outip drv_handle} {
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set bus_node "overlay2"
+	} else {
+		set bus_node "amba_pl"
+	}
+        set vcap [add_or_get_dt_node -n "vcap_sdirx$drv_handle" -p $bus_node]
+        hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
+        hsi::utils::add_new_dts_param $vcap "dmas" "$outip 0" reference
+        hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
+        set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports$drv_handle -p $vcap]
+        hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
+        hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
+        set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
+        hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
+        hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+        set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $outip$drv_handle -p $vcap_port_node]
+        hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" sdirx_out$drv_handle reference
 }

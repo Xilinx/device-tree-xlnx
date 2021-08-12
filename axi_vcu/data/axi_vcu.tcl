@@ -57,25 +57,31 @@ proc generate {drv_handle} {
 
     # Generate child encoder
     set ver [get_ipdetails $drv_handle "ver"]
-    set encoder_node [add_or_get_dt_node -l "encoder" -n "al5e@$baseaddr" -p $node]
-    set encoder_comp "al,al5e-${ver}"
-    set encoder_comp [append encoder_comp " al,al5e"]
-    hsi::utils::add_new_dts_param "${encoder_node}" "compatible" $encoder_comp stringlist
-    set encoder_reg "0x0 0x$baseaddr 0x0 0x10000"
-    hsi::utils::add_new_dts_param "${encoder_node}" "reg" $encoder_reg int
-    hsi::utils::add_new_dts_param "${encoder_node}" "interrupts" $intr_val int
-    hsi::utils::add_new_dts_param "${encoder_node}" "interrupt-parent" $intr_parent reference
+    set encoder_enable [get_property CONFIG.ENABLE_ENCODER [get_cells -hier $drv_handle]]
+    if {[string match -nocase $encoder_enable "TRUE"]} {
+        set encoder_node [add_or_get_dt_node -l "encoder" -n "al5e@$baseaddr" -p $node]
+        set encoder_comp "al,al5e-${ver}"
+        set encoder_comp [append encoder_comp " al,al5e"]
+        hsi::utils::add_new_dts_param "${encoder_node}" "compatible" $encoder_comp stringlist
+        set encoder_reg "0x0 0x$baseaddr 0x0 0x10000"
+        hsi::utils::add_new_dts_param "${encoder_node}" "reg" $encoder_reg int
+        hsi::utils::add_new_dts_param "${encoder_node}" "interrupts" $intr_val int
+        hsi::utils::add_new_dts_param "${encoder_node}" "interrupt-parent" $intr_parent reference
+    }
     # Fenerate child decoder
-    set decoder_offset 0x20000
-    set decoder_reg [format %08x [expr 0x$baseaddr + $decoder_offset]]
-    set decoder_node [add_or_get_dt_node -l "decoder" -n "al5d@$decoder_reg" -p $node]
-    set decoder_comp "al,al5d-${ver}"
-    set decoder_comp [append decoder_comp " al,al5d"]
-    hsi::utils::add_new_dts_param "${decoder_node}" "compatible" $decoder_comp stringlist
-    set decoder_reg "0x0 0x$decoder_reg 0x0 0x10000"
-    hsi::utils::add_new_dts_param "${decoder_node}" "reg" $decoder_reg int
-    hsi::utils::add_new_dts_param "${decoder_node}" "interrupts" $intr_val int
-    hsi::utils::add_new_dts_param "${decoder_node}" "interrupt-parent" $intr_parent reference
+    set decoder_enable [get_property CONFIG.ENABLE_DECODER [get_cells -hier $drv_handle]]
+    if {[string match -nocase $decoder_enable "TRUE"]} {
+        set decoder_offset 0x20000
+        set decoder_reg [format %08x [expr 0x$baseaddr + $decoder_offset]]
+        set decoder_node [add_or_get_dt_node -l "decoder" -n "al5d@$decoder_reg" -p $node]
+        set decoder_comp "al,al5d-${ver}"
+        set decoder_comp [append decoder_comp " al,al5d"]
+        hsi::utils::add_new_dts_param "${decoder_node}" "compatible" $decoder_comp stringlist
+        set decoder_reg "0x0 0x$decoder_reg 0x0 0x10000"
+        hsi::utils::add_new_dts_param "${decoder_node}" "reg" $decoder_reg int
+        hsi::utils::add_new_dts_param "${decoder_node}" "interrupts" $intr_val int
+        hsi::utils::add_new_dts_param "${decoder_node}" "interrupt-parent" $intr_parent reference
+    }
     set clknames "pll_ref aclk vcu_core_enc vcu_core_dec vcu_mcu_enc vcu_mcu_dec"
     overwrite_clknames $clknames $drv_handle
     set ip [get_cells -hier $drv_handle]
