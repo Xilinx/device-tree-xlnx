@@ -542,6 +542,26 @@ proc gen_versal_clk {} {
 	foreach periph $periph_list {
 		set versal_ps [get_property IP_NAME $periph]
 		if {[string match -nocase $versal_ps "versal_cips"] } {
+			set ver [get_comp_ver $periph]
+			if {$ver < 3.0} {
+				set avail_param [list_property [get_cells -hier $periph]]
+				if {[lsearch -nocase $avail_param "CONFIG.PMC_REF_CLK_FREQMHZ"] >= 0} {
+					set freq [get_property CONFIG.PMC_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+					if {![string match -nocase $freq "33.333"]} {
+						dtg_warning "Frequency $freq used instead of 33.333"
+						hsi::utils::add_new_dts_param "${ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+					}
+				}
+				if {[lsearch -nocase $avail_param "CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ"] >= 0} {
+					set freq [get_property CONFIG.PMC_PL_ALT_REF_CLK_FREQMHZ [get_cells -hier $periph]]
+					if {![string match -nocase $freq "33.333"]} {
+						dtg_warning "Frequency $freq used instead of 33.333"
+						hsi::utils::add_new_dts_param "${pl_alt_ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+					}
+				}
+			}
+		}
+		if {[string match -nocase $versal_ps "pspmc"] } {
 			set avail_param [list_property [get_cells -hier $periph]]
 			if {[lsearch -nocase $avail_param "CONFIG.PMC_REF_CLK_FREQMHZ"] >= 0} {
 				set freq [get_property CONFIG.PMC_REF_CLK_FREQMHZ [get_cells -hier $periph]]
