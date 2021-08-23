@@ -25,7 +25,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,axi-frmbuf-rd-v2.1"]
+	set compatible [append compatible " " "xlnx,axi-frmbuf-rd-v2.2"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	set_drv_conf_prop $drv_handle C_S_AXI_CTRL_ADDR_WIDTH xlnx,s-axi-ctrl-addr-width
@@ -102,6 +102,10 @@ proc generate {drv_handle} {
 	set has_y_uv10_420 [get_property CONFIG.HAS_Y_UV10_420 [get_cells -hier $drv_handle]]
 	if {$has_y_uv10_420 == 1} {
 		append vid_formats " " "xv15"
+	}
+	set has_y_u_v8 [get_property CONFIG.HAS_Y_U_V8 [get_cells -hier $drv_handle]]
+	if {$has_y_u_v8 == 1} {
+		append vid_formats " " "y_u_v8"
 	}
 	if {![string match $vid_formats ""]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vid-formats" $vid_formats stringlist
