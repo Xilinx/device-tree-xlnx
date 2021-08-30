@@ -103,6 +103,15 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $outip$drv_handle reference
 			gen_remoteendpoint $drv_handle "$outip$drv_handle"
 		}
+		if {[string match -nocase [get_property IP_NAME $outip] "axis_switch"]} {
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
+			if {[llength $ip_mem_handles]} {
+				set mipi_node [add_or_get_dt_node -n "endpoint" -l mipi_csirx_out$drv_handle -p $port_node]
+				gen_axis_switch_in_endpoint $drv_handle "mipi_csirx_out$drv_handle"
+				hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $outip$drv_handle reference
+				gen_axis_switch_in_remo_endpoint $drv_handle "$outip$drv_handle"
+			}
+		}
 	}
 	foreach ip $outip {
 		if {[llength $ip]} {
@@ -120,6 +129,15 @@ proc generate {drv_handle} {
 			} else {
 				set connectip [get_connect_ip $ip $intfpins]
 				if {[llength $connectip]} {
+					if {[string match -nocase [get_property IP_NAME $connectip] "axis_switch"]} {
+						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
+						if {[llength $ip_mem_handles]} {
+							set mipi_node [add_or_get_dt_node -n "endpoint" -l mipi_csirx_out$drv_handle -p $port_node]
+							gen_axis_switch_in_endpoint $drv_handle "mipi_csirx_out$drv_handle"
+							hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $connectip$drv_handle reference
+							gen_axis_switch_in_remo_endpoint $drv_handle "$connectip$drv_handle"
+						}
+					} else {
 					set csi_rx_node [add_or_get_dt_node -n "endpoint" -l mipi_csirx_out$drv_handle -p $port_node]
 					gen_endpoint $drv_handle "mipi_csirx_out$drv_handle"
 					hsi::utils::add_new_dts_param "$csi_rx_node" "remote-endpoint" $connectip$drv_handle reference
@@ -130,6 +148,7 @@ proc generate {drv_handle} {
 				}
 			}
 		}
+	}
 	}
 	gen_gpio_reset $drv_handle $node
 }
