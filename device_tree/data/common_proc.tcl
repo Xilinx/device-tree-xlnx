@@ -2885,7 +2885,7 @@ enechange"
 					if {[llength $inip]} {
 						set axis_switch_in_end ""
 						set axis_switch_remo_in_end ""
-						if {[dict exists $axis_switch_in_end_mappings $inip]} {
+						if {[info exists axis_switch_in_end_mappings] && [dict exists $axis_switch_in_end_mappings $inip]} {
 							set axis_switch_in_end [dict get $axis_switch_in_end_mappings $inip]
 							dtg_verbose "drv:$ip inend:$axis_switch_in_end"
 						}

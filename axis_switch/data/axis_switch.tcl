@@ -47,8 +47,9 @@ proc generate {drv_handle} {
 	set ip [get_cells -hier $drv_handle]
         foreach intf $master_intf {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+		if {[llength $connectip]} {
 		set outipname [get_property IP_NAME $connectip]
-		set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
+		set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_uhdsdi_audio i2s_receiver mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
 		if {[lsearch  -nocase $valid_mmip_list $outipname] >= 0} {
                         set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 			incr count
@@ -72,6 +73,7 @@ proc generate {drv_handle} {
                                 hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
                                 gen_axis_switch_port2_remote_endpoint $ip $connectip$ip
 			}
+		}
 		}
 	}
 }
