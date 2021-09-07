@@ -21,5 +21,6 @@ BEGIN driver axi_mcdma
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_mcdma;
   DTGPARAM name = dtg.ip_params, type = boolean;
+  DTGPARAM name = "#dma-cells", type = int, default = 1;
 
 END driver
