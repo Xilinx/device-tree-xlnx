@@ -6140,6 +6140,10 @@ proc gen_cpu_nodes {drv_handle} {
 	set bus_node [add_or_get_bus_node $drv_handle $default_dts]
 	set cpu_no 0
 	foreach cpu ${processor_list} {
+		# Generate the node only for the single core
+		if {$cpu_no >= 1} {
+			break
+		}
 		set bus_label [get_property NODE_LABEL $bus_node]
 		set cpu_node [add_or_get_dt_node -n ${dev_type} -l ${cpu} -u ${cpu_no} -d ${default_dts} -p ${cpu_root_node}]
 		hsi::utils::add_new_dts_param "${cpu_node}" "bus-handle" $bus_label reference
