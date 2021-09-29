@@ -30,6 +30,11 @@ proc generate {drv_handle} {
 	if { ![string match -nocase $atg_mode "AXI4"] } {
 		return 0
 	}
+	set atg_mode_l2 [get_property "CONFIG.C_ATG_MODE_L2" [get_cells -hier $drv_handle]]
+	# There are no interrupt lines for static mode
+	if { [string match -nocase $atg_mode_l2 "Static"] } {
+		return 0
+	}
 	set proc_type [get_sw_proc_prop IP_NAME]
 	# set up interrupt-names
 	set intr_list "irq_out err_out"
