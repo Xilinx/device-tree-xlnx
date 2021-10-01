@@ -178,7 +178,8 @@ proc generate {drv_handle} {
                         set val [get_property CONFIG.CONST_VAL $periph]
                         set inhex [format %x $val]
                         set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-                        set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+                        set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -d $default_dts -p $node]
                         hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
                         set phy_type [get_property CONFIG.Standard $sink_periph]
                         set is_sgmii [get_property CONFIG.c_is_sgmii $sink_periph]
@@ -210,7 +211,8 @@ proc generate {drv_handle} {
 					set val [get_property CONFIG.CONST_VAL $sink_periph]
 					set inhex [format %x $val]
 					set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+					set default_dts [get_property CONFIG.pcw_dts [get_os]]
+					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -d $default_dts -p $node]
 					hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
 					set phy_type [get_property CONFIG.Standard $connected_ip]
 					set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
@@ -238,7 +240,8 @@ proc generate {drv_handle} {
 					set val [get_property CONFIG.CONST_VAL $sink_periph]
 					set inhex [format %x $val]
 					set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+					set default_dts [get_property CONFIG.pcw_dts [get_os]]
+					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -d $default_dts -p $node]
 					hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
 					set phy_type [get_property CONFIG.Standard $connected_ip]
 					set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
@@ -266,7 +269,8 @@ proc generate {drv_handle} {
 					set val [get_property CONFIG.CONST_VAL $sink_periph]
 					set inhex [format %x $val]
 					set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+					set default_dts [get_property CONFIG.pcw_dts [get_os]]
+					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -d $default_dts -p $node]
 					hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
 					set phy_type [get_property CONFIG.Standard $connected_ip]
 					set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
@@ -294,7 +298,8 @@ proc generate {drv_handle} {
 					set val [get_property CONFIG.CONST_VAL $sink_periph]
 					set inhex [format %x $val]
 					set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+					set default_dts [get_property CONFIG.pcw_dts [get_os]]
+					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -d $default_dts -p $node]
 					hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
 					set phy_type [get_property CONFIG.Standard $connected_ip]
 					set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
