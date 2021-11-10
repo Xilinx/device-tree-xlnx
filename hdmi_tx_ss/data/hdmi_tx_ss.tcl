@@ -115,8 +115,12 @@ proc generate {drv_handle} {
 	set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier [get_cells -hier $drv_handle]] "acr_cts"]]
 	foreach pin $pins {
 		set sink_periph [::hsi::get_cells -of_objects $pin]
-		if {[string match -nocase "[get_property IP_NAME $sink_periph]" "hdmi_acr_ctrl"]} {
-			hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-hdmi-acr-ctrl" $sink_periph reference
+		if {[llength $sink_periph]} {
+			if {[string match -nocase "[get_property IP_NAME $sink_periph]" "hdmi_acr_ctrl"]} {
+				hsi::utils::add_new_dts_param "$node" "xlnx,xlnx-hdmi-acr-ctrl" $sink_periph reference
+			}
+		} else {
+			dtg_warning "$drv_handle peripheral is NULL for the $pin $sink_periph"
 		}
 	}
 }
