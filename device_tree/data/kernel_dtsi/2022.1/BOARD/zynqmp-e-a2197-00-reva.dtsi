@@ -17,6 +17,9 @@
 
 	chosen {
 		nvmem0 = <&eeprom>;
+		nvmem1 = &eeprom_ebm;
+		nvmem2 = &eeprom_fmc1;
+		nvmem3 = &eeprom_fmc2;
 	};
 
 	ref_clk: ref_clk {
@@ -492,6 +495,10 @@
 				silabs,skip-recall;
 			};
 			/* and connector J212D */
+			eeprom_ebm: eeprom@52 { /* x-ebm module */
+				compatible = "st,24c128", "atmel,24c128";
+				reg = <0x52>;
+			};
 		};
 		fmc1: i2c@1 { /* FMCP1_IIC */
 			#address-cells = <1>;
@@ -499,6 +506,10 @@
 			reg = <1>;
 			/* FIXME connection to Samtec J51C */
 			/* expected eeprom 0x50 FMC cards */
+			eeprom_fmc1: eeprom@50 {
+				compatible = "st,24c128", "atmel,24c128";
+				reg = <0x50>;
+			};
 		};
 		fmc2: i2c@2 { /* FMCP2_IIC */
 			#address-cells = <1>;
@@ -506,6 +517,10 @@
 			reg = <2>;
 			/* FIXME connection to Samtec J53C */
 			/* expected eeprom 0x50 FMC cards */
+			eeprom_fmc2: eeprom@50 {
+				compatible = "st,24c128", "atmel,24c128";
+				reg = <0x50>;
+			};
 		};
 		i2c@3 { /* DDR4_DIMM1 */
 			#address-cells = <1>;

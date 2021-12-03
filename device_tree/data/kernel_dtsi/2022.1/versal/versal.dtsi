@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal
  *
- * (C) Copyright 2017 - 2019, Xilinx, Inc.
+ * (C) Copyright 2017 - 2021, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -349,6 +349,16 @@
 			#size-cells = <0>;
 		};
 
+		i2c2: i2c@f1000000 {
+			compatible = "cdns,i2c-r1p14", "cdns,i2c-r1p10";
+			status = "disabled";
+			reg = <0 0xf1000000 0 0x1000>;
+			interrupts = <0 123 4>;
+			clock-frequency = <400000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
 		mc0: memory-controller@f6150000	{
 			compatible = "xlnx,versal-ddrmc-edac";
 			status = "disabled";
@@ -394,7 +404,7 @@
 			calibration = <0x7FFF>;
 		};
 
-		sdhci0: sdhci@f1040000 {
+		sdhci0: mmc@f1040000 {
 			compatible = "xlnx,versal-8.9a", "arasan,sdhci-8.9a";
 			status = "disabled";
 			reg = <0 0xf1040000 0 0x10000>;
@@ -408,7 +418,7 @@
 			/* dma-coherent; */
 		};
 
-		sdhci1: sdhci@f1050000 {
+		sdhci1: mmc@f1050000 {
 			compatible = "xlnx,versal-8.9a", "arasan,sdhci-8.9a";
 			status = "disabled";
 			reg = <0 0xf1050000 0 0x10000>;
