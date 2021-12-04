@@ -415,6 +415,17 @@
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
 	xlnx,mio-bank = <1>;
 	disable-wp;
+	bus-width = <4>;
+	cd-gpios = <&gpio 45 GPIO_ACTIVE_LOW>;
+	cd-debounce-delay-ms = <500>;
+	max-frequency = <100000000>;
+	cap-sd-highspeed;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-ddr50;
+	keep-power-in-suspend;
+	status = "okay";
 };
 
 &uart0 {
