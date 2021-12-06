@@ -23,6 +23,7 @@
 #define PM_DEV_SPI_1				(0x1822401cU)
 #define PM_DEV_I2C_0				(0x1822401dU)
 #define PM_DEV_I2C_1				(0x1822401eU)
+#define PM_DEV_I2C_PMC                          (0x1822402dU)
 #define PM_DEV_CAN_FD_0				(0x1822401fU)
 #define PM_DEV_CAN_FD_1				(0x18224020U)
 #define PM_DEV_UART_0				(0x18224021U)
