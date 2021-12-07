@@ -299,20 +299,24 @@ proc gen_include_headers {} {
 			set clock_list "xlnx-zynqmp-clk.h"
 			set reset_list "xlnx-zynqmp-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
+			set gpio_list "gpio.h"
 		} else {
 			set power_list "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-clk.h"
 			set reset_list "xlnx-zynqmp-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
+			set gpio_list "gpio.h"
 		}
 		set powerdir "$dir_path/include/dt-bindings/power"
 		set clockdir "$dir_path/include/dt-bindings/clock"
 		set resetdir "$dir_path/include/dt-bindings/reset"
 		set dpdmadir "$dir_path/include/dt-bindings/dma"
+		set gpiodir "$dir_path/include/dt-bindings/gpio"
 		file mkdir $powerdir
 		file mkdir $clockdir
 		file mkdir $resetdir
 		file mkdir $dpdmadir
+		file mkdir $gpiodir
 		if {[file exists $include_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
 				if {[string first $power_list $file]!= -1} {
@@ -323,6 +327,8 @@ proc gen_include_headers {} {
 					file copy -force $file $resetdir
 				} elseif {[string first $dpdma_list $file] != -1} {
 					file copy -force $file $dpdmadir
+				} elseif {[string first $gpio_list $file] != -1} {
+					file copy -force $file $gpiodir
 				}
 			}
 		}
