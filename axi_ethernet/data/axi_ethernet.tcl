@@ -158,7 +158,8 @@ proc generate {drv_handle} {
      } else {
         set port_pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $eth_ip] "tx_ptp_tag_field_in_0"]]
 	if {[llength $port_pins]} {
-                set periph [::hsi::get_cells -of_objects $port_pins]
+            set periph [::hsi::get_cells -of_objects $port_pins]
+            if {[llength $periph]} {
                 if {[string match -nocase [get_property IP_NAME $periph] "xlslice"]} {
                      set intf "Din"
                      set in1_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intf"]
@@ -173,31 +174,34 @@ proc generate {drv_handle} {
                               }
                           }
                      }
-              }
+                }
+            }
         }
     }
     set rxfifo_port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $eth_ip] "rx_ptp_tstamp_out_0"]]
     if {[llength $rxfifo_port_pins]} {
         set periph [::hsi::get_cells -of_objects $rxfifo_port_pins]
-        if {[string match -nocase [get_property IP_NAME $periph] "xlconcat"]} {
-            set intf "dout"
-            set in1_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intf"]
-            set sink_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $periph] $in1_pin]]
-            if {[llength $sink_pins]} {
-                 set per [::hsi::get_cells -of_objects $sink_pins]
-                 if {[string match -nocase [get_property IP_NAME $per] "axis_dwidth_converter"]} {
-                      set con_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $per] "M_AXIS"]
-                      if {[llength $con_ip]} {
-                          if {[string match -nocase [get_property IP_NAME $con_ip] "axis_clock_converter"]} {
-                              set rxtsfifo_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $con_ip] "M_AXIS"]
-                              if {[llength $rxtsfifo_ip]} {
-                                  set_drv_prop $drv_handle xlnx,rxtsfifo "$rxtsfifo_ip" reference
-                              }
-                          }
-                     }
-                 }
+        if {[llength $periph]} {
+            if {[string match -nocase [get_property IP_NAME $periph] "xlconcat"]} {
+                set intf "dout"
+                set in1_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intf"]
+                set sink_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $periph] $in1_pin]]
+                if {[llength $sink_pins]} {
+                    set per [::hsi::get_cells -of_objects $sink_pins]
+                    if {[string match -nocase [get_property IP_NAME $per] "axis_dwidth_converter"]} {
+                        set con_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $per] "M_AXIS"]
+                        if {[llength $con_ip]} {
+                            if {[string match -nocase [get_property IP_NAME $con_ip] "axis_clock_converter"]} {
+                                set rxtsfifo_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $con_ip] "M_AXIS"]
+                                if {[llength $rxtsfifo_ip]} {
+                                    set_drv_prop $drv_handle xlnx,rxtsfifo "$rxtsfifo_ip" reference
+                                }
+                            }
+                        }
+                    }
+                }
             }
-         }
+        }
     }
     if {![string_is_empty $connected_ip]} {
       set_property axistream-connected "$connected_ip" $drv_handle
