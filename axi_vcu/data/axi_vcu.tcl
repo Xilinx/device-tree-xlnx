@@ -82,7 +82,7 @@ proc generate {drv_handle} {
         hsi::utils::add_new_dts_param "${decoder_node}" "interrupts" $intr_val int
         hsi::utils::add_new_dts_param "${decoder_node}" "interrupt-parent" $intr_parent reference
     }
-    set clknames "pll_ref aclk vcu_core_enc vcu_core_dec vcu_mcu_enc vcu_mcu_dec"
+    set clknames "pll_ref aclk vcu_core_enc vcu_mcu_enc vcu_core_dec vcu_mcu_dec"
     overwrite_clknames $clknames $drv_handle
     set ip [get_cells -hier $drv_handle]
     set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $ip] "vcu_resetn"]]

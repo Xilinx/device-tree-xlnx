@@ -4437,13 +4437,13 @@ proc gen_clk_property {drv_handle} {
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 	if {[string match -nocase $ip "vcu"]} {
 		set vcu_label $drv_handle
-		set vcu_clk1 "$drv_handle 1"
+		set vcu_clk1 "$drv_handle 0"
 		set updat [lappend updat $vcu_clk1]
-		set vcu_clk2 "$drv_handle 2"
+		set vcu_clk2 "$drv_handle 1"
 		set updat [lappend updat $vcu_clk2]
-		set vcu_clk3 "$drv_handle 3"
+		set vcu_clk3 "$drv_handle 2"
 		set updat [lappend updat $vcu_clk3]
-		set vcu_clk4 "$drv_handle 4"
+		set vcu_clk4 "$drv_handle 3"
 		set updat [lappend updat $vcu_clk4]
 		set len [llength $updat]
 		set refs [lindex $updat 0]
