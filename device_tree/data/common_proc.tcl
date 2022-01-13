@@ -4899,9 +4899,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	if { [string match -nocase $intc "psu_acpu_gic"] || [string match -nocase $intc "psv_acpu_gic"]} {
 		set intc "gic"
 	}
-	set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $intc]
-	if {$index != -1 } {
+	if {$intc == "gic"} {
 		set_drv_prop $drv_handle interrupt-parent $intc reference
+	} else {
+		set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $intc]
+		if {$index != -1 } {
+			set_drv_prop $drv_handle interrupt-parent $intc reference
+		}
 	}
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		set msi_rx_pin_en [get_property CONFIG.msi_rx_pin_en [get_cells -hier $drv_handle]]
