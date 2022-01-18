@@ -26,14 +26,6 @@ proc generate {drv_handle} {
 	set master_dts_obj [get_dt_trees ${master_dts}]
 	set_cur_working_dts $master_dts
 	set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
-	set addr [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
-	regsub -all {^0x} $addr {} addr
-	set memory_node [add_or_get_dt_node -n memory -l "memory$drv_handle" -u $addr -p $parent_node]
-	if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
-		set dev_type memory
-	}
-	if {[string_is_empty $dev_type]} {set dev_type memory}
-	hsi::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
 	set is_ddr_low_0 0
 	set is_ddr_low_1 0
 	set is_ddr_low_2 0
@@ -126,38 +118,45 @@ proc generate {drv_handle} {
 	switch $len {
 		"1" {
 			set reg_val [lindex $updat 0]
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"2" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"3" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"4" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"5" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"6" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
 		"7" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]"
-			hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 		}
+	}
+
+	if {[llength $reg_val]} {
+		set higheraddr [expr [lindex $reg_val 0] << 32]
+		set loweraddr [lindex $reg_val 1]
+		set baseaddr [format 0x%x [expr {${higheraddr} + ${loweraddr}}]]
+		regsub -all {^0x} $baseaddr {} baseaddr
+		set memory_node [add_or_get_dt_node -n memory -l "memory$drv_handle" -u $baseaddr -p $parent_node]
+		if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
+			set dev_type memory
+		}
+		if {[string_is_empty $dev_type]} {set dev_type memory}
+		hsi::utils::add_new_dts_param "${memory_node}" "device_type" $dev_type string
+		hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_val inthexlist
 	}
 }
 
