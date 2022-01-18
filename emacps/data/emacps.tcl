@@ -161,6 +161,7 @@ proc generate {drv_handle} {
         set mdio_node [gen_mdio1_node $drv_handle $node]
         gen_phy_node $mdio_node $phy_name $phya
     }
+    set ip_name " "
     if {[string match -nocase $proc_type "ps7_cortexa9"] } {
            if {[string match -nocase $node "&gem1"]} {
                 set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
@@ -169,7 +170,7 @@ proc generate {drv_handle} {
                 if {[llength $sink_periph]} {
                     set ip_name [get_property IP_NAME $sink_periph]
                 }
-                if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+                if {[llength $ip_name] && [string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
                     set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $sink_periph] "phyaddr"]]
                     if {[llength $pin]} {
                         set periph [::hsi::get_cells -of_objects $pin]
@@ -194,14 +195,13 @@ proc generate {drv_handle} {
           }
     }
 
-	set ip_name " "
 	if {[string match -nocase $proc_type "psu_cortexa53"] } {
 		if {[string match -nocase $node "&gem0"]} {
 			set connected_ip [hsi::utils::get_connected_stream_ip $zynq_periph "MDIO_ENET0"]
 			if {[llength $connected_ip]} {
 				set ip_name [get_property IP_NAME $connected_ip]
 			}
-			if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+			if {[llength $ip_name] && [string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
 				set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $connected_ip] "phyaddr"]]
 				if {[llength $pin]} {
 					set sink_periph [::hsi::get_cells -of_objects $pin]
@@ -229,7 +229,7 @@ proc generate {drv_handle} {
 			if {[llength $connected_ip]} {
 				set ip_name [get_property IP_NAME $connected_ip]
 			}
-			if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+			if {[llength $ip_name] && [string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
 				set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $connected_ip] "phyaddr"]]
 				if {[llength $pin]} {
 					set sink_periph [::hsi::get_cells -of_objects $pin]
@@ -257,7 +257,7 @@ proc generate {drv_handle} {
 			if {[llength $connected_ip]} {
 				set ip_name [get_property IP_NAME $connected_ip]
 			}
-			if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+			if {[llength $ip_name] && [string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
 				set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $connected_ip] "phyaddr"]]
 				if {[llength $pin]} {
 					set sink_periph [::hsi::get_cells -of_objects $pin]
@@ -285,7 +285,7 @@ proc generate {drv_handle} {
 			if {[llength $connected_ip]} {
 				set ip_name [get_property IP_NAME $connected_ip]
 			}
-			if {[string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
+			if {[llength $ip_name] && [string match -nocase $ip_name "gig_ethernet_pcs_pma"]} {
 				set pin [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $connected_ip] "phyaddr"]]
 				if {[llength $pin]} {
 					set sink_periph [::hsi::get_cells -of_objects $pin]
