@@ -156,10 +156,10 @@ proc generate {drv_handle} {
 proc gen_pixel_format {node pxl_format} {
 	set pixel_format ""
 	switch $pxl_format {
-		"YUV4228B" {
-			set pixel_format 0x1e
+		"YUV422_8bit" {
+			set pixel_format 0x18
 		}
-		"YUV42210B" {
+		"YUV422_10bit" {
 			set pixel_format 0x1f
 		}
 		"RGB444" {
