@@ -12,6 +12,37 @@
 # GNU General Public License for more details.
 #
 
+proc generate_aie_array_device_info {node drv_handle bus_node} {
+	set aie_array_id 0
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,ai-engine-v2.0"]
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
+
+	append shimrows "/bits/ 8 <0 1>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,shim-rows" $shimrows noformating
+	append corerows "/bits/ 8 <1 8>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,core-rows" $corerows noformating
+	set power_domain "&versal_firmware 0x18224072"
+	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
+	hsi::utils::add_new_dts_param "${node}" "#address-cells" "2" intlist
+	hsi::utils::add_new_dts_param "${node}" "#size-cells" "2" intlist
+	hsi::utils::add_new_dts_param "${node}" "ranges" "" boolean
+
+	set ai_clk_node [add_or_get_dt_node -n "aie_core_ref_clk_0" -l "aie_core_ref_clk_0" -p ${bus_node}]
+	set clk_freq [get_property CONFIG.AIE_CORE_REF_CTRL_FREQMHZ [get_cells -hier $drv_handle]]
+	set clk_freq [expr ${clk_freq} * 1000000]
+	hsi::utils::add_new_dts_param "${ai_clk_node}" "compatible" "fixed-clock" stringlist
+	hsi::utils::add_new_dts_param "${ai_clk_node}" "#clock-cells" 0 int
+	hsi::utils::add_new_dts_param "${ai_clk_node}" "clock-frequency" $clk_freq int
+
+	set clocks "aie_core_ref_clk_0"
+	set_drv_prop $drv_handle clocks "$clocks" reference
+	hsi::utils::add_new_dts_param "${node}" "clock-names" "aclk0" stringlist
+
+	return ${node}
+}
+
+
 proc generate {drv_handle} {
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
@@ -36,33 +67,32 @@ proc generate {drv_handle} {
 	} else {
 		set bus_node "amba_pl"
 	}
-	set clocks "aie_core_ref_clk_0"
-	set_drv_prop $drv_handle clocks "$clocks" reference
-	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,ai-engine-v1.0"]
-	set_drv_prop $drv_handle compatible "$compatible" stringlist
+
+	generate_aie_array_device_info ${node} ${drv_handle} ${bus_node}
+
+	set ip [get_cells -hier $drv_handle]
+	set unit_addr [get_baseaddr ${ip} no_prefix]
+	set aperture_id 0
+	set aperture_node [add_or_get_dt_node -n "aie_aperture" -u "${unit_addr}" -l "aie_aperture_${aperture_id}" -p ${node}]
+
+	set reg [get_property CONFIG.reg ${drv_handle}]
+	hsi::utils::add_new_dts_param "${aperture_node}" "reg" $reg noformat
+
 	set intr_names "interrupt1"
 	lappend intr_names "interrupt2"
 	lappend intr_names "interrupt3"
 	set intr_num "0x0 0x94 0x4>, <0x0 0x95 0x4>, <0x0 0x96 0x4"
 	set power_domain "&versal_firmware 0x18224072"
-	hsi::utils::add_new_dts_param "${node}" "interrupt-names" $intr_names stringlist
-	hsi::utils::add_new_dts_param ${node} "interrupts" $intr_num intlist
-	hsi::utils::add_new_dts_param "${node}" "interrupt-parent" gic reference
-	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
-	hsi::utils::add_new_dts_param "${node}" "#address-cells" "2" intlist
-	hsi::utils::add_new_dts_param "${node}" "#size-cells" "2" intlist
 
-	# Add one AI engine partition child node
-	set ai_part_id 0
-	set ai_part_nid 1
-	set ai_part_node [add_or_get_dt_node -n "aie_partition" -u "${ai_part_id}" -l "aie_partition${ai_part_id}" -p ${node}]
-	hsi::utils::add_new_dts_param "${ai_part_node}" "reg" "0 0 50 9" intlist
-	hsi::utils::add_new_dts_param "${ai_part_node}" "xlnx,partition-id" "${ai_part_nid}" intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-names" $intr_names stringlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "interrupts" $intr_num intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-parent" gic reference
+	hsi::utils::add_new_dts_param "${aperture_node}" "power-domains" $power_domain intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "#address-cells" "2" intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "#size-cells" "2" intlist
 
-	set ai_clk_node [add_or_get_dt_node -n "aie_core_ref_clk_0" -l "aie_core_ref_clk_0" -p ${bus_node}]
-	set clk_freq [get_property CONFIG.AIE_CORE_REF_CTRL_FREQMHZ [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${ai_clk_node}" "compatible" "fixed-clock" stringlist
-	hsi::utils::add_new_dts_param "${ai_clk_node}" "#clock-cells" 0 int
-        hsi::utils::add_new_dts_param "${ai_clk_node}" "clock-frequency" $clk_freq int
+	set aperture_nodeid 0x18800000
+	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,columns" "0 50" intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,node-id" "${aperture_nodeid}" intlist
+
 }
