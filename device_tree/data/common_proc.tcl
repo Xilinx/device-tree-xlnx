@@ -627,49 +627,29 @@ proc update_system_dts_include {include_file} {
 	set_cur_working_dts $cur_dts
 }
 
-proc get_partial_pdi {drv_handle} {
+proc get_rp_rm_for_drv {drv_handle} {
 	set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 	set rmName ""
 	foreach pr_region $pr_regions {
 		set rmName [get_property RECONFIG_MODULE_NAME [hsi::get_cells -hier $pr_region]]
-		puts "rmName:$rmName"
 		set inst [hsi::current_hw_instance [hsi::get_cells -hier $pr_region]]
 		set drv [hsi::get_cells $drv_handle]
 		::hsi::current_hw_instance
 		if {[llength $drv] != 0} {
-			set path [get_property PATH [hsi::current_hw_design]]
-			puts "path:$path"
-			set norm [file dirname $path]
-			puts "norm:$norm"
-			foreach file [glob -tails -directory $norm *.xsa] {
-				puts "file:$file"
-				set filelist [exec zipinfo -1 $norm/$file]
-				if {[lsearch $filelist $rmName.hwh] >= 0} {
-					foreach list1 $filelist {
-						if {[regexp ".pdi" "$list1" match]} {
-							return $list1
-						}
-					}
-				}
-			}
+			append rpName "$inst" "_" "$rmName"
+			return $rpName
+
 		}
 	}
 }
 
-proc get_rp_rm_for_drv {drv_handle} {
-	set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
-	puts "pr_regions:$pr_regions"
-	set rmName ""
-	foreach pr_region $pr_regions {
-		set rmName [get_property RECONFIG_MODULE_NAME [hsi::get_cells -hier $pr_region]]
-		set inst [hsi::current_hw_instance [hsi::get_cells -hier $pr_region]]
-		set drv [hsi::get_cells $drv_handle]
-		::hsi::current_hw_instance
-		if {[llength $drv] != 0} {
-			append rprm "$inst" "_" "$rmName"
-			return $rprm
-		}
-	}
+proc get_rm_names {drv_handle} {
+        set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+        set rm_names {}
+        foreach pr_region $pr_regions {
+                set rm_name [get_property RECONFIG_MODULE_NAME [hsi::get_cells -hier $pr_region]]
+        }
+        return $rm_name
 }
 
 proc set_drv_def_dts {drv_handle} {
@@ -893,10 +873,16 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
 		} else {
 			set hw_name [get_property CONFIG.firmware_name [get_os]]
+			set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
+			set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
+
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
+			hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
+			hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
+
 		}
 	}
 	}
@@ -959,7 +945,13 @@ proc set_drv_def_dts {drv_handle} {
 					if {[string match -nocase $proctype "psu_cortexa53"]} {
 						set hw_name [::hsi::get_hw_files -filter "TYPE == partial_bit"]
 					} else {
-						set rprmpartial [get_partial_pdi $drv_handle]
+						append RmName_prop [get_rm_names $drv_handle] "_" "PDI_FILE"
+						set rprmpartial [file tail [get_property $RmName_prop [hsi::current_hw_design]]]
+						append uid_prop [get_rm_names $drv_handle] "_" "HW_DESIGN_ID"
+						set UID [get_property $uid_prop [hsi::current_hw_design]]
+						append pid_prop [get_rm_names $drv_handle] "_" "HW_PARENT_ID"
+						set PID [get_property $pid_prop [hsi::current_hw_design]]
+
 					}
 					set RpRm1 [get_rp_rm_for_drv $drv_handle]
 					regsub -all { } $RpRm1 "_" RpRm
@@ -977,6 +969,9 @@ proc set_drv_def_dts {drv_handle} {
 				if {[llength $rprmpartial]} {
 					puts "rprmpartial:$rprmpartial"
 					hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+					hsi::utils::add_new_dts_param "${child_node2}" "uid" $UID int
+					hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
+
 				}
 			}
 		} else {
