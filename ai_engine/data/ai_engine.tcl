@@ -18,10 +18,14 @@ proc generate_aie_array_device_info {node drv_handle bus_node} {
 	set compatible [append compatible " " "xlnx,ai-engine-v2.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 
+	append aiegen "/bits/ 8 <0x1>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,aie-gen" $aiegen noformating
 	append shimrows "/bits/ 8 <0 1>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,shim-rows" $shimrows noformating
 	append corerows "/bits/ 8 <1 8>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,core-rows" $corerows noformating
+	append memrows "/bits/ 8 <0 0>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,mem-rows" $memrows noformating
 	set power_domain "&versal_firmware 0x18224072"
 	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
 	hsi::utils::add_new_dts_param "${node}" "#address-cells" "2" intlist
