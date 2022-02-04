@@ -880,9 +880,12 @@ proc set_drv_def_dts {drv_handle} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
-			hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
-			hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
-
+			if {[llength $UID]} {
+				hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
+			}
+			if {[llength $PID]} {
+				hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
+			}
 		}
 	}
 	}
@@ -969,8 +972,12 @@ proc set_drv_def_dts {drv_handle} {
 				if {[llength $rprmpartial]} {
 					puts "rprmpartial:$rprmpartial"
 					hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
-					hsi::utils::add_new_dts_param "${child_node2}" "uid" $UID int
-					hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
+					if {[llength $UID]} {
+						hsi::utils::add_new_dts_param "${child_node2}" "uid" $UID int
+					}
+					if {[llength $PID]} {
+						hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
+					}
 
 				}
 			}
