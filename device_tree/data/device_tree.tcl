@@ -335,6 +335,27 @@ proc gen_include_headers {} {
 	}
 }
 
+proc gen_include_dtfile {args} {
+	set kernel_dtsi [lindex $args 0]
+	set fp [open $kernel_dtsi r]
+	set file_data [read $fp]
+	set data [split $file_data "\n"]
+	set include_regexp {^#include \".*\.dts.*\"$}
+	foreach line $data {
+		if {[regexp $include_regexp $line matched]} {
+			set include_dt [lindex [split $line " "] 1]
+			regsub -all " |\t|;|\"" $include_dt {} include_dt
+			foreach file [glob [file normalize [file dirname ${kernel_dtsi}]/*]] {
+				# NOTE: ./ works only if we did not change our directory
+				if {[regexp $include_dt $file match]} {
+					file copy -force $file ./
+                                        break
+				}
+			}
+		}
+	}
+}
+
 proc gen_board_info {} {
     # periph_type_overrides = {BOARD KC705 full/lite} or {BOARD ZYNQ} or {BOARD ZC1751 ES2/ES1}
     set overrides [get_property CONFIG.periph_type_overrides [get_os]]
@@ -429,6 +450,8 @@ proc gen_board_info {} {
 						file copy -force $file ./
 						update_system_dts_include [file tail $file]
 						set valid_board_file 1
+						gen_include_dtfile "${file}"
+						break
 					}
 				}
 				if {$valid_board_file == 0} {
