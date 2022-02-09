@@ -115,6 +115,7 @@ proc generate {drv_handle} {
 		set updat [lappend updat $reg_val_6]
 	}
 	set len [llength $updat]
+	set reg_val ""
 	switch $len {
 		"1" {
 			set reg_val [lindex $updat 0]
