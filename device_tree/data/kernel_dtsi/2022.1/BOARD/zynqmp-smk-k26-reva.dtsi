@@ -16,6 +16,7 @@
 	compatible = "xlnx,zynqmp-smk-k26-rev1", "xlnx,zynqmp-smk-k26-revB",
 		     "xlnx,zynqmp-smk-k26-revA", "xlnx,zynqmp-smk-k26",
 		     "xlnx,zynqmp";
+
 	aliases {
 		gpio0 = &gpio;
 		i2c0 = &i2c0;
@@ -51,13 +52,13 @@
 
 	leds {
 		compatible = "gpio-leds";
-		ds35 {
+		ds35-led {
 			label = "heartbeat";
 			gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 		};
 
-		ds36 {
+		ds36-led {
 			label = "vbus_det";
 			gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
@@ -79,13 +80,17 @@
 	};
 };
 
+&modepin_gpio {
+	label = "modepin";
+};
+
 &qspi { /* MIO 0-5 - U143 */
 	flash@0 { /* MT25QU512A */
 		compatible = "mt25qu512a", "jedec,spi-nor"; /* 64MB */
 		#address-cells = <1>;
 		#size-cells = <1>;
 		reg = <0>;
-		spi-tx-bus-width = <1>;
+		spi-tx-bus-width = <4>;
 		spi-rx-bus-width = <4>;
 		spi-max-frequency = <40000000>; /* 40MHz */
 		partition@0 {
@@ -175,6 +180,7 @@
 	disable-wp;
 	bus-width = <8>;
 	xlnx,mio-bank = <0>;
+	assigned-clock-rates = <187498123>;
 };
 
 &spi1 { /* MIO6, 9-11 */
@@ -188,17 +194,20 @@
 };
 
 &i2c1 {
+	u-boot,dm-pre-reloc;
 	clock-frequency = <400000>;
 	scl-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
 
 	eeprom: eeprom@50 { /* u46 - also at address 0x58 */
+		u-boot,dm-pre-reloc;
 		compatible = "st,24c64", "atmel,24c64"; /* st m24c64 */
 		reg = <0x50>;
 		/* WP pin EE_WP_EN connected to slg7x644092@68 */
 	};
 
 	eeprom_cc: eeprom@51 { /* required by spec - also at address 0x59 */
+		u-boot,dm-pre-reloc;
 		compatible = "st,24c64", "atmel,24c64"; /* st m24c64 */
 		reg = <0x51>;
 	};
