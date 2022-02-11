@@ -196,6 +196,7 @@ proc generate {drv_handle} {
     }
 
 	if {[string match -nocase $proc_type "psu_cortexa53"] } {
+		set sink_periph ""
 		if {[string match -nocase $node "&gem0"]} {
 			set connected_ip [hsi::utils::get_connected_stream_ip $zynq_periph "MDIO_ENET0"]
 			if {[llength $connected_ip]} {
