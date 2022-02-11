@@ -287,7 +287,7 @@
 		};
 
 		gem0: ethernet@ff0c0000 {
-			compatible = "cdns,versal-gem";
+			compatible = "cdns,versal-gem", "cdns,gem";
 			status = "disabled";
 			reg = <0 0xff0c0000 0 0x1000>;
 			interrupts = <0 56 4>, <0 56 4>;
@@ -300,7 +300,7 @@
 		};
 
 		gem1: ethernet@ff0d0000 {
-			compatible = "cdns,versal-gem";
+			compatible = "cdns,versal-gem", "cdns,gem";
 			status = "disabled";
 			reg = <0 0xff0d0000 0 0x1000>;
 			interrupts = <0 58 4>, <0 58 4>;
@@ -481,7 +481,6 @@
 			status = "disabled";
 			reg = <0 0xf1010000 0 0x10000 0 0xc0000000 0 0x20000000>;
 			interrupts = <0 124 4>, <0 124 4>;
-			clock-names = "ref_clk", "pclk";
 			cdns,fifo-depth = <256>;
 			cdns,fifo-width = <4>;
 			cdns,is-dma = <1>;
