@@ -349,6 +349,7 @@ proc gen_include_dtfile {args} {
 				# NOTE: ./ works only if we did not change our directory
 				if {[regexp $include_dt $file match]} {
 					file copy -force $file ./
+					gen_include_dtfile "$file"
                                         break
 				}
 			}
