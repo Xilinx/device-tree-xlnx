@@ -16,7 +16,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver sysmon
 
-  OPTION supported_peripherals = (psv_pmc_sysmon);
+  OPTION supported_peripherals = (psv_pmc_sysmon slv1_psv_pmc_sysmon slv2_psv_pmc_sysmon slv3_psv_pmc_sysmon);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = sysmonpsv;
