@@ -258,7 +258,7 @@ proc gen_gpio_reset {drv_handle node topology} {
 			if {[llength $sink_periph]} {
 				set sink_ip [get_property IP_NAME $sink_periph]
 				if {[string match -nocase $sink_ip "axi_gpio"]} {
-					hsi::utils::add_new_dts_param "$node" "reset-gpios" "$sink_periph 0 0 1" reference
+					hsi::utils::add_new_dts_param "$node" "reset-gpios" "$sink_periph 0 1" reference
 				}
 				if {[string match -nocase $sink_ip "xlslice"]} {
 					set gpio [get_property CONFIG.DIN_FROM $sink_periph]
@@ -283,7 +283,7 @@ proc gen_gpio_reset {drv_handle node topology} {
 								}
 							}
 							if {[string match -nocase $ip "axi_gpio"]} {
-								hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+								hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 1" reference
 							}
 						} else {
 							dtg_warning "peripheral is NULL for the $pin $periph"
