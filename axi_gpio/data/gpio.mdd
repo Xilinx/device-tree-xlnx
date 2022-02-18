@@ -24,6 +24,6 @@ BEGIN driver gpio
   DTGPARAM name = dtg.ip_params, type = boolean;
   DTGPARAM name = gpio-controller, type = boolean;
   DTGPARAM name = compatible, default = "xlnx,xps-gpio-1.00.a", type = stringlist;
-  DTGPARAM name = "#gpio-cells", default = 3, type = int;
+  DTGPARAM name = "#gpio-cells", default = 2, type = int;
   DTGPARAM name = dtg.device_type, default = gpio, type = string;
 END driver
