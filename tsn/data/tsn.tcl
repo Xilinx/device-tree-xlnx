@@ -291,7 +291,7 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 	hsi::utils::add_new_dts_param "${ep_node}" "compatible" "xlnx,tsn-ep" string
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "${ep_node}" "xlnx,channel-ids" $id string
-	set mac_addr "00 0A 35 00 01 10"
+	set mac_addr "00 0A 35 00 01 05"
 	hsi::utils::add_new_dts_param $ep_node "local-mac-address" ${mac_addr} bytelist
 	hsi::utils::add_new_dts_param "$ep_node" "xlnx,eth-hasnobuf" "" boolean
 	global tsn_ex_ep_node
@@ -299,7 +299,11 @@ proc gen_ep_node {periph ep_addr ep_size numqueues parent_node drv_handle proc_t
 	if {[string match -nocase $tsn_ex_ep "true"]} {
 		set tsn_ex_ep_node [add_or_get_dt_node -n "tsn_ex_ep" -l $tsn_ex_ep_node -p $parent_node]
 		hsi::utils::add_new_dts_param "${tsn_ex_ep_node}" "compatible" "xlnx,tsn-ex-ep" string
-		set mac_addr "00 0A 35 00 01 0d"
+		set mac_addr "00 0A 35 00 01 06"
+		set en_pkt_switch [get_property CONFIG.EN_EP_PKT_SWITCH $eth_ip]
+		if {[string match -nocase $en_pkt_switch "true"]} {
+				hsi::utils::add_new_dts_param "$tsn_ex_ep_node" "packet-switch" 1 int
+		}
 		hsi::utils::add_new_dts_param $tsn_ex_ep_node "local-mac-address" ${mac_addr} bytelist
 		hsi::utils::add_new_dts_param "$tsn_ex_ep_node" "tsn,endpoint" $tsn_ep_node reference
 	}
