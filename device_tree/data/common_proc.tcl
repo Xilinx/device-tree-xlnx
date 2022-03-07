@@ -4969,7 +4969,9 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	if { [string match -nocase $intc "psu_acpu_gic"] || [string match -nocase $intc "psv_acpu_gic"]} {
 		set intc "gic"
 	}
-	if {$intc == "gic"} {
+	if { $intc == "gic" && ([string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"])} {
+		set_drv_prop $drv_handle interrupt-parent $intc reference
+	} elseif { $intc == "intc" && [string match -nocase $proctype "ps7_cortexa9" ] } {
 		set_drv_prop $drv_handle interrupt-parent $intc reference
 	} else {
 		set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $intc]
