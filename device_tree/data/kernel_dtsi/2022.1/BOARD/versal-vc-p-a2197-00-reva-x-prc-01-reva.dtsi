@@ -1,23 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * dts file for Xilinx Versal
+ * dts file for Xilinx Versal X-PRC-01 revA (SE1)
  *
  * (C) Copyright 2019, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "versal-vc-p-a2197-00-reva.dtsi"
+
 / {
 	compatible = "xlnx,versal-vc-p-a2197-00-revA-x-prc-01-revA",
 		     "xlnx,versal-vc-p-a2197-00-revA",
 		     "xlnx,versal-vc-p-a2197-00",
 		     "xlnx,versal-vc-p-a2197", "xlnx,versal";
-	model = "Xilinx Versal A2197 Processor board revA-x-prc-01 revA QSPI";
+	model = "Xilinx Versal A2197 Processor board revA - x-prc-01 revA QSPI";
 
-        chosen {
+	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
-                stdout-path = "serial0:115200";
-        };
+		stdout-path = "serial0:115200";
+	};
 
 	aliases {
 		serial0 = &serial0;
@@ -29,11 +31,6 @@
 		usb0 = &usb0;
 		rtc0 = &rtc;
 	};
-
-};
-
-&dcc {
-        status = "okay";
 };
 
 &qspi {
@@ -57,13 +54,8 @@
 	};
 };
 
-&sdhci0 {
-	no-1-8-v;
-};
-
 &sdhci1 { /* U104 */
 	xlnx,mio-bank = <1>;
-	no-1-8-v;
 };
 
 &gem0 {
@@ -81,7 +73,7 @@
 		ti,rx-internal-delay = <0xb>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <1>;
-		ti,dp83867-rxctrl-strap-quirk; /* FIXME -  Remove if board is fixed */
+		ti,dp83867-rxctrl-strap-quirk; /* FIXME - Remove if board is fixed */
 	};
 };
 

@@ -7,12 +7,14 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "versal-vc-p-a2197-00-reva.dtsi"
+
 / {
 	compatible = "xlnx,versal-vc-p-a2197-00-revA-x-prc-04-revA",
 		     "xlnx,versal-vc-p-a2197-00-revA",
 		     "xlnx,versal-vc-p-a2197-00",
 		     "xlnx,versal-vc-p-a2197", "xlnx,versal";
-	model = "Xilinx Versal A2197 Processor board revA-x-prc-04 revA QSPI";
+	model = "Xilinx Versal A2197 Processor board revA - x-prc-04 revA";
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
@@ -30,10 +32,6 @@
 		spi1 = &spi0;
 		usb0 = &usb0;
 	};
-};
-
-&dcc {
-	status = "okay";
 };
 
 &gem1 {
@@ -82,14 +80,9 @@
 	};
 };
 
-&sdhci0 {
-	no-1-8-v;
-};
-
 &sdhci1 { /* J3 MIO26, MIO29 - MIO33 */
 	disable-wp;
 	xlnx,mio-bank = <1>; /* FIXME */
-	no-1-8-v;
 };
 
 &spi0 {
@@ -122,4 +115,3 @@
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
 };
-
