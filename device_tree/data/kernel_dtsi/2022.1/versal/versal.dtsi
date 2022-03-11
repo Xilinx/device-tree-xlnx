@@ -535,6 +535,7 @@
 			compatible = "xlnx,versal-sysmon";
 			#address-cells = <2>;
 			#size-cells = <2>;
+			status = "disabled";
 			reg = <0x1 0x09270000 0x0 0x4000>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
@@ -543,6 +544,7 @@
 			compatible = "xlnx,versal-sysmon";
 			#address-cells = <2>;
 			#size-cells = <2>;
+			status = "disabled";
 			reg = <0x1 0x11270000 0x0 0x4000>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
@@ -550,6 +552,7 @@
 			compatible = "xlnx,versal-sysmon";
 			#address-cells = <2>;
 			#size-cells = <2>;
+			status = "disabled";
 			reg = <0x1 0x19270000 0x0 0x4000>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
