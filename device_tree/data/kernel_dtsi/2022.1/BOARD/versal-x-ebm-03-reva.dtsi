@@ -7,10 +7,8 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
-#include <dt-bindings/gpio/gpio.h>
-
+#include "include/dt-bindings/gpio/gpio.h"
 /* U97 MT35XU02G */
-status = "okay";
 compatible = "xlnx,versal-ospi-1.0", "cadence,qspi", "cdns,qspi-nor";
 bus-num = <2>;
 num-cs = <1>;
