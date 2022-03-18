@@ -85,6 +85,10 @@
 	label = "modepin";
 };
 
+&ttc0 {
+	#pwm-cells = <1>;
+};
+
 &pinctrl0 {
         status = "okay";
         pinctrl_sdhci0_default: sdhci0-default {
