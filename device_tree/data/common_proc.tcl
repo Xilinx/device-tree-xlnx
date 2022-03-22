@@ -631,6 +631,10 @@ proc get_rp_rm_for_drv {drv_handle} {
 	set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 	set rmName ""
 	foreach pr_region $pr_regions {
+		set is_dfx [get_property CONFIG.ENABLE_DFX [hsi::get_cells -hier $pr_region]]
+		if {[llength $is_dfx] && $is_dfx == 0} {
+			return ""
+		}
 		set rmName [get_property RECONFIG_MODULE_NAME [hsi::get_cells -hier $pr_region]]
 		set inst [hsi::current_hw_instance [hsi::get_cells -hier $pr_region]]
 		set drv [hsi::get_cells $drv_handle]
