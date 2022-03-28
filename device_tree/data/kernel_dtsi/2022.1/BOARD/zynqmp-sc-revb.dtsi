@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP Generic System Controller
  *
- * (C) Copyright 2021, Xilinx, Inc.
+ * (C) Copyright 2021-2022, Xilinx, Inc.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */
@@ -42,6 +42,11 @@
 		#clock-cells = <0>;
 		clock-frequency = <26000000>;
 	};
+	pwm-fan {
+		compatible = "pwm-fan";
+		pwms = <&ttc0 2 40000 0>;
+	};
+
 };
 
 &gpio {
@@ -230,6 +235,10 @@
 	disable-wp;
 	bus-width = <8>;
 	xlnx,mio-bank = <0>;
+};
+
+&ttc0 {
+	#pwm-cells = <3>;
 };
 
 &usb0 {
