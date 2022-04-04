@@ -492,9 +492,9 @@ proc generate {drv_handle} {
                   regsub -all " " $ini2 "" ini2
                   regsub -all "\<&||\t" $ini2 {} ini2
 		  if {[llength $dclk]} {
-                  append clkvals2  "$ini2, [lindex $clk_list $dclk_index],[lindex $clk_list $axi_index_2], <&$clks"
+                  append clkvals2  "$ini2, [lindex $clk_list $dclk_index],[lindex $clk_list $axi_index_2]>, <&$clks"
 		  } else {
-                  append clkvals2  "$ini2, [lindex $clk_list $axi_index_2], <&$clks"
+                  append clkvals2  "$ini2, [lindex $clk_list $axi_index_2]>, <&$clks"
 		  }
                   append clk_label2 $drv_handle "_" $core
                   hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals2 reference
