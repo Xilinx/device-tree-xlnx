@@ -1245,7 +1245,9 @@ proc add_or_get_dt_node args {
 	set_cur_working_dts ${dts_file}
 	foreach pattern "^${node_name}$" {
 		foreach node ${dts_nodes} {
-			if {[regexp $pattern $node match]} {
+			# As there was cpu timer node already in dtsi file skipping to add ttc timer
+			# to pcw.dtsi even if ip available. This check will skip that.
+			if {[regexp $pattern $node match] && ![string match -nocase ${node_name} "timer"]} {
 				set_cur_working_dts ${dts_file}
 				set node [update_dt_parent ${node} ${parent_obj} ${dts_file}]
 				set_cur_working_dts ${cur_working_dts}
