@@ -508,19 +508,6 @@ proc gen_zynqmp_ccf_clk {} {
 
 }
 
-proc gen_fpga_pwrdomain {} {
-	set default_dts [get_property CONFIG.pcw_dts [get_os]]
-	set fpga_full   [add_or_get_dt_node -n "&fpga_full" -d $default_dts]
-	set hw_design [hsi::current_hw_design]
-	if {[llength $hw_design]} {
-		set device [get_property DEVICE $hw_design]
-		if {[string match -nocase $device "xck26"]} {
-			set power_domains "zynqmp_firmware PD_PL"
-                        hsi::utils::add_new_dts_param "${fpga_full}" "power-domains" "$power_domains" reference
-		}
-	}
-}
-
 proc gen_zynqmp_opp_freq {} {
 	set default_dts [get_property CONFIG.pcw_dts [get_os]]
 	set cpu_opp_table [add_or_get_dt_node -n "&cpu_opp_table" -d $default_dts]
@@ -781,7 +768,6 @@ proc generate {lib_handle} {
 		gen_zynqmp_opp_freq
 		gen_zynqmp_pinctrl
 		gen_zocl_node
-		gen_fpga_pwrdomain
 	}
     }
     if {[string match -nocase $proctype "ps7_cortexa9"]} {
