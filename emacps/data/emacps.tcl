@@ -166,7 +166,10 @@ proc generate {drv_handle} {
            if {[string match -nocase $node "&gem1"]} {
                 set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
                 set port0_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $zynq_periph] "ENET1_MDIO_O"]]
-                set sink_periph [::hsi::get_cells -of_objects $port0_pins]
+                set sink_periph ""
+                if {[llength $port0_pins]} {
+                    set sink_periph [::hsi::get_cells -of_objects $port0_pins]
+                }
                 if {[llength $sink_periph]} {
                     set ip_name [get_property IP_NAME $sink_periph]
                 }
