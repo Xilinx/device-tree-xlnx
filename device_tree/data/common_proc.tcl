@@ -947,17 +947,13 @@ proc set_drv_def_dts {drv_handle} {
 					}
 				}
 				set hw_name [get_property CONFIG.firmware_name [get_os]]
-				set rprmpartial ""
+				set rprmpartial $hw_name
 				if {![llength $hw_name]} {
 					if {[string match -nocase $proctype "psu_cortexa53"]} {
 						set hw_name [::hsi::get_hw_files -filter "TYPE == partial_bit"]
 					} else {
 						append RmName_prop [get_rm_names $drv_handle] "_" "PDI_FILE"
 						set rprmpartial [file tail [get_property $RmName_prop [hsi::current_hw_design]]]
-						append uid_prop [get_rm_names $drv_handle] "_" "HW_DESIGN_ID"
-						set UID [get_property $uid_prop [hsi::current_hw_design]]
-						append pid_prop [get_rm_names $drv_handle] "_" "HW_PARENT_ID"
-						set PID [get_property $pid_prop [hsi::current_hw_design]]
 
 					}
 					set RpRm1 [get_rp_rm_for_drv $drv_handle]
@@ -976,11 +972,17 @@ proc set_drv_def_dts {drv_handle} {
 				if {[llength $rprmpartial]} {
 					puts "rprmpartial:$rprmpartial"
 					hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
-					if {[llength $UID]} {
-						hsi::utils::add_new_dts_param "${child_node2}" "uid" $UID int
-					}
-					if {[llength $PID]} {
-						hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
+					if {[string match -nocase $proctype "psv_cortexa72"]} {
+						append uid_prop [get_rm_names $drv_handle] "_" "HW_DESIGN_ID"
+						set UID [get_property $uid_prop [hsi::current_hw_design]]
+						append pid_prop [get_rm_names $drv_handle] "_" "HW_PARENT_ID"
+						set PID [get_property $pid_prop [hsi::current_hw_design]]
+						if {[llength $UID]} {
+							hsi::utils::add_new_dts_param "${child_node2}" "uid" $UID int
+						}
+						if {[llength $PID]} {
+							hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
+						}
 					}
 
 				}
