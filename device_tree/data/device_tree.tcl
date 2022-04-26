@@ -389,16 +389,19 @@ proc gen_board_info {} {
 		set phy_list  "phy.h"
 		set input_list "input.h"
 		set pinctrl_list "pinctrl-zynqmp.h"
+		set tidp_list "ti-dp83867.h"
 		set gpiodir "$dir_path/include/dt-bindings/gpio"
 		set phydir "$dir_path/include/dt-bindings/phy"
 		set intrdir "$dir_path/include/dt-bindings/interrupt-controller"
 		set inputdir "$dir_path/include/dt-bindings/input"
 		set pinctrldir "$dir_path/include/dt-bindings/pinctrl"
+		set tidpdir "$dir_path/include/dt-bindings/net"
 		file mkdir $phydir
 		file mkdir $gpiodir
 		file mkdir $intrdir
 		file mkdir $inputdir
 		file mkdir $pinctrldir
+		file mkdir $tidpdir
 		if {[file exists $include_dtsi]} {
 			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
 				if {[string first $gpio_list $file] != -1} {
@@ -411,6 +414,8 @@ proc gen_board_info {} {
 					file copy -force $file $inputdir
 				} elseif {[string first $pinctrl_list $file] != -1} {
 					file copy -force $file $pinctrldir
+				} elseif {[string first $tidp_list $file] != -1} {
+					file copy -force $file $tidpdir
 				}
 			}
 		}
