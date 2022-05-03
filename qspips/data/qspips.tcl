@@ -26,8 +26,13 @@ proc generate {drv_handle} {
 	set pspmc [get_cells -hier -filter {IP_NAME =~ "*pspmc*"}]
 	if {[string compare -nocase $pspmc ""] != 0} {
 		set fbclk [get_property CONFIG.PMC_QSPI_FBCLK [get_cells -hier -filter {IP_NAME =~ "*pspmc*"}]]
-		if {[regexp "ENABLE 1" $fbclk matched]} {
-			hsi::utils::add_new_property $drv_handle fbclk int 1
+		if {[regexp "ENABLE 0" $fbclk matched]} {
+			set node [gen_peripheral_nodes $drv_handle]
+			if {$node == 0} {
+				return
+			}
+			hsi::utils::add_new_dts_param "${node}" "/* hw design is missing feedback clock that's why spi-max-frequency is 40MHz */" "" comment
+                        hsi::utils::add_new_property $drv_handle spi-max-frequency int 40000000
 		}
 
 	}
