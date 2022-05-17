@@ -1959,37 +1959,37 @@ proc gen_axis_port4_endpoint {drv_handle value} {
 	set val [dict get $port4_end_mappings $drv_handle]
 }
 
-proc gen_broad_port1_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port1 {drv_handle value} {
         global port1_broad_end_mappings
         dict append port1_broad_end_mappings $drv_handle $value
         set val [dict get $port1_broad_end_mappings $drv_handle]
 }
 
-proc gen_broad_port2_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port2 {drv_handle value} {
         global port2_broad_end_mappings
         dict append port2_broad_end_mappings $drv_handle $value
         set val [dict get $port2_broad_end_mappings $drv_handle]
 }
 
-proc gen_broad_port3_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port3 {drv_handle value} {
         global port3_broad_end_mappings
         dict append port3_broad_end_mappings $drv_handle $value
         set val [dict get $port3_broad_end_mappings $drv_handle]
 }
 
-proc gen_broad_port4_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port4 {drv_handle value} {
         global port4_broad_end_mappings
         dict append port4_broad_end_mappings $drv_handle $value
         set val [dict get $port4_broad_end_mappings $drv_handle]
 }
 
-proc gen_broad_port5_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port5 {drv_handle value} {
         global port5_broad_end_mappings
         dict append port5_broad_end_mappings $drv_handle $value
         set val [dict get $port5_broad_end_mappings $drv_handle]
 }
 
-proc gen_broad_port6_endpoint {drv_handle value} {
+proc gen_broad_endpoint_port6 {drv_handle value} {
         global port6_broad_end_mappings
         dict append port6_broad_end_mappings $drv_handle $value
         set val [dict get $port6_broad_end_mappings $drv_handle]
@@ -3095,37 +3095,37 @@ proc gen_axis_port4_remoteendpoint {drv_handle value} {
 	set val [dict get $axis_port4_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port1_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port1 {drv_handle value} {
         global broad_port1_remo_mappings
         dict append broad_port1_remo_mappings $drv_handle $value
         set val [dict get $broad_port1_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port2_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port2 {drv_handle value} {
         global broad_port2_remo_mappings
         dict append broad_port2_remo_mappings $drv_handle $value
         set val [dict get $broad_port2_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port3_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port3 {drv_handle value} {
         global broad_port3_remo_mappings
         dict append broad_port3_remo_mappings $drv_handle $value
         set val [dict get $broad_port3_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port4_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port4 {drv_handle value} {
         global broad_port4_remo_mappings
         dict append broad_port4_remo_mappings $drv_handle $value
         set val [dict get $broad_port4_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port5_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port5 {drv_handle value} {
         global broad_port5_remo_mappings
         dict append broad_port5_remo_mappings $drv_handle $value
         set val [dict get $broad_port5_remo_mappings $drv_handle]
 }
 
-proc gen_broad_port6_remoteendpoint {drv_handle value} {
+proc gen_broad_remoteendpoint_port6 {drv_handle value} {
         global broad_port6_remo_mappings
         dict append broad_port6_remo_mappings $drv_handle $value
         set val [dict get $broad_port6_remo_mappings $drv_handle]
@@ -3154,6 +3154,10 @@ proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
 
 proc gen_broadcaster {ip} {
 	dtg_verbose "+++++++++gen_broadcaster:$ip"
+	set count 0
+	set inputip ""
+	set outip ""
+	set connectip ""
 	set compatible [get_comp_str $ip]
 	set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 	set inip [get_connected_stream_ip [get_cells -hier $ip] $intf]
@@ -3168,7 +3172,6 @@ proc gen_broadcaster {ip} {
 	set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
 	set broad 10
 	hsi::utils::set_os_parameter_value "broad" $broad
-	set count 0
 	foreach intf $master_intf {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
 		if {[llength $connectip]} {
@@ -3192,96 +3195,22 @@ proc gen_broadcaster {ip} {
 				}
 			}
 			incr count
-		}
-		if {$count == 1} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port1$ip -u 1 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 1 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out1$ip -p $port_node]
-				gen_broad_port1_endpoint $ip "axis_broad_out1$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port1_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out1$ip"
-				}
+			set port_node [add_or_get_dt_node -n "port" -l axis_broad_port$count$ip -u $count -p $ports_node]
+			hsi::utils::add_new_dts_param "$port_node" "reg" $count int
+			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out$count$ip -p $port_node]
+			if {$count <= $count-1} {
+				gen_broad_endpoint_port$count $ip "axis_broad_out$count$ip"
 			}
-		}
-		if {$count == 2} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port2$ip -u 2 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 2 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out2$ip -p $port_node]
-				gen_broad_port2_endpoint $ip "axis_broad_out2$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port2_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out2$ip"
-				}
+			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
+			if {$count <= $count-1} {
+				gen_broad_remoteendpoint_port$count $ip $connectip$ip
 			}
+			append inputip " " $connectip
+			append outip " " $connectip$ip
 		}
-		if {$count == 3} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port3$ip -u 3 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 3 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out3$ip -p $port_node]
-				gen_broad_port3_endpoint $ip "axis_broad_out3$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port3_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out3$ip"
-				}
-			}
-		}
-		if {$count == 4} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port4$ip -u 4 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 4 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out4$ip -p $port_node]
-				gen_broad_port4_endpoint $ip "axis_broad_out4$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port4_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out4$ip"
-				}
-			}
-		}
-		if {$count == 5} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port5$ip -u 5 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 5 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out5$ip -p $port_node]
-				gen_broad_port5_endpoint $ip "axis_broad_out5$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port5_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out5$ip"
-				}
-			}
-		}
-		if {$count == 6} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port6$ip -u 6 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 6 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out6$ip -p $port_node]
-				gen_broad_port6_endpoint $ip "axis_broad_out6$ip"
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				gen_broad_port6_remoteendpoint $ip $connectip$ip
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out6$ip"
-				}
-			}
-		}
-		if {$count == 7} {
-			if {[llength $connectip]} {
-				set port_node [add_or_get_dt_node -n "port" -l axis_broad_port7$ip -u 7 -p $ports_node]
-				hsi::utils::add_new_dts_param "$port_node" "reg" 7 int
-				set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out7$ip -p $port_node]
-				hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-				if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-					gen_broad_frmbuf_wr_node $connectip $connectip$ip "axis_broad_out7$ip"
-				}
-			}
-		}
+	}
+	if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+		gen_broad_frmbuf_wr_node $inputip $outip $ip $count
 	}
 }
 
@@ -3362,25 +3291,45 @@ proc gen_axis_switch {ip} {
 	}
 }
 
-proc gen_broad_frmbuf_wr_node {connectip outip drv_handle} {
+proc gen_broad_frmbuf_wr_node {inputip outip drv_handle count} {
         set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
         if {$dt_overlay} {
                 set bus_node "overlay2"
         } else {
                 set bus_node "amba_pl"
         }
-        set vcap [add_or_get_dt_node -n vcap$drv_handle -p $bus_node]
+        set vcap [add_or_get_dt_node -n "vcapaxis_broad_out1$drv_handle" -p $bus_node]
         hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
-        hsi::utils::add_new_dts_param $vcap "dmas" "$connectip 0" reference
-        hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
-        set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports$drv_handle -p $vcap]
+	set inputip [split $inputip " "]
+	set j 0
+	foreach ip $inputip {
+		if {[llength $ip]} {
+			if {$j < $count} {
+				append dmasip "<&$ip 0>," " "
+			}
+		}
+		incr j
+	}
+	append dmasip "<&$ip 0>"
+        hsi::utils::add_new_dts_param $vcap "dmas" "$dmasip" string
+	set prt ""
+	for {set i 0} {$i < $count} {incr i} {
+		append prt " " "port$i"
+	}
+        hsi::utils::add_new_dts_param $vcap "dma-names" $prt stringlist
+        set vcap_ports_node [add_or_get_dt_node -n "ports" -l "vcap_portsaxis_broad_out1$drv_handle" -p $vcap]
         hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
         hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
-        set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
-        hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
-        hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
-        set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $outip -p $vcap_port_node]
-        hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" $drv_handle reference
+	set outip [split $outip " "]
+	set b 0
+	for {set a 1} {$a <= $count} {incr a} {
+		set vcap_port_node [add_or_get_dt_node -n "port" -l "vcap_portaxis_broad_out$a$drv_handle" -u "$b" -p "$vcap_ports_node"]
+		hsi::utils::add_new_dts_param "$vcap_port_node" "reg" $b int
+		hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+		set vcap_in_node [add_or_get_dt_node -n "endpoint" -l [lindex $outip $a] -p "$vcap_port_node"]
+		hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" axis_broad_out$a$drv_handle reference
+		incr b
+	}
 }
 
 proc get_connect_ip {ip intfpins} {
