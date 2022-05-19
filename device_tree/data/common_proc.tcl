@@ -857,6 +857,7 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		}
 		set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+		set classic_soc [get_property CONFIG.classic_soc [get_os]]
 		if {[llength $pr_regions]} {
 			set pr_len [llength $pr_regions]
 			for {set pr 0} {$pr < $pr_len} {incr pr} {
@@ -884,7 +885,9 @@ proc set_drv_def_dts {drv_handle} {
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
-			hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
+			if {!$classic_soc} {
+				hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
+			}
 			if 0 {
 			if {[llength $UID]} {
 				hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
@@ -921,19 +924,35 @@ proc set_drv_def_dts {drv_handle} {
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 				set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${default_dts} -p ${root_node}]
 				set child_node2 [add_or_get_dt_node -l "overlay0$RpRm" -n $child_name -d $default_dts -p $fpga_node]
+				set classic_soc [get_property CONFIG.classic_soc [get_os]]
+				if {$classic_soc} {
+					hsi::utils::add_new_dts_param "${child_node2}" "#address-cells" 2 int
+					hsi::utils::add_new_dts_param "${child_node2}" "#size-cells" 2 int
+				}
 				set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
 					for {set pr 0} {$pr < $pr_len} {incr pr} {
 						set pr1 [lindex $pr_regions $pr]
 						if {[regexp $pr1 $RpRm match]} {
-							set targets "fpga_PR$pr"
+							if {$classic_soc} {
+								set targets "fpga"
+								set prnode [add_or_get_dt_node -l "fpgaPR$pr" -n "fpga-PR$pr" -p ${child_node2}]
+								hsi::utils::add_new_dts_param  "${prnode}" "compatible"  "fpga-region" string
+								hsi::utils::add_new_dts_param "${prnode}" "#address-cells" 2 int
+								hsi::utils::add_new_dts_param "${prnode}" "#size-cells" 2 int
+								hsi::utils::add_new_dts_param "${prnode}" "ranges" "" boolean
+							} else {
+								set targets "fpgaPR$pr"
+							}
 							hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 							break
 						}
 					}
 				}
-				hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
+				if {!$classic_soc} {
+					hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
+				}
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
 					for {set pr 0} {$pr < $pr_len} {incr pr} {
