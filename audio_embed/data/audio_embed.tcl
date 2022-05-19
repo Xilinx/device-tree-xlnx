@@ -47,13 +47,19 @@ proc generate {drv_handle} {
 	}
 	set connected_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_DATA"]
 	if {[llength $connected_ip] != 0} {
-		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+		set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $connected_ip]
+		if {$index != -1 } {
+			hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connected_ip reference
+		}
 	} else {
 		dtg_warning "$drv_handle connected ip is NULL for the pin S_AXIS_DATA"
 	}
 	set connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "M_AXIS_DATA"]
 	if {[llength $connect_ip] != 0} {
-		hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
+		set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $connect_ip]
+		if {$index != -1 } {
+			hsi::utils::add_new_dts_param "$node" "xlnx,snd-pcm" $connect_ip reference
+		}
 	} else {
 		dtg_warning "$drv_handle connected ip is NULL for the pin M_AXIS_DATA"
 	}
