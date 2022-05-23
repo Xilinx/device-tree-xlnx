@@ -878,23 +878,19 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
 		} else {
 			set hw_name [get_property CONFIG.firmware_name [get_os]]
-			if 0 {
 			set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
 			set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
-			}
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
 			if {!$classic_soc} {
 				hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
 			}
-			if 0 {
 			if {[llength $UID]} {
 				hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
 			}
 			if {[llength $PID]} {
 				hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
-			}
 			}
 		}
 	}
@@ -995,7 +991,6 @@ proc set_drv_def_dts {drv_handle} {
 					puts "rprmpartial:$rprmpartial"
 					hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
 					if {[string match -nocase $proctype "psv_cortexa72"]} {
-						if 0 {
 						append uid_prop [get_rm_names $drv_handle] "_" "HW_DESIGN_ID"
 						set UID [get_property $uid_prop [hsi::current_hw_design]]
 						append pid_prop [get_rm_names $drv_handle] "_" "HW_PARENT_ID"
@@ -1005,7 +1000,6 @@ proc set_drv_def_dts {drv_handle} {
 						}
 						if {[llength $PID]} {
 							hsi::utils::add_new_dts_param "${child_node2}" "pid" $PID int
-						}
 						}
 					}
 
