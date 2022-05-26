@@ -931,16 +931,7 @@ proc set_drv_def_dts {drv_handle} {
 					for {set pr 0} {$pr < $pr_len} {incr pr} {
 						set pr1 [lindex $pr_regions $pr]
 						if {[regexp $pr1 $RpRm match]} {
-							if {$classic_soc} {
-								set targets "fpga"
-								set prnode [add_or_get_dt_node -l "fpgaPR$pr" -n "fpga-PR$pr" -p ${child_node2}]
-								hsi::utils::add_new_dts_param  "${prnode}" "compatible"  "fpga-region" string
-								hsi::utils::add_new_dts_param "${prnode}" "#address-cells" 2 int
-								hsi::utils::add_new_dts_param "${prnode}" "#size-cells" 2 int
-								hsi::utils::add_new_dts_param "${prnode}" "ranges" "" boolean
-							} else {
-								set targets "fpgaPR$pr"
-							}
+							set targets "fpga_PR$pr"
 							hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 							break
 						}
