@@ -97,16 +97,18 @@
 	mdio: mdio {
 		#address-cells = <1>;
 		#size-cells = <0>;
-		reset-gpios = <&gpio 77 GPIO_ACTIVE_LOW>;
-		reset-delay-us = <2>;
 
 		phy0: ethernet-phy@1 {
 			#phy-cells = <1>;
+			compatible = "ethernet-phy-id2000.a231";
 			reg = <1>;
 			ti,rx-internal-delay = <0x8>;
 			ti,tx-internal-delay = <0xa>;
 			ti,fifo-depth = <0x1>;
 			ti,dp83867-rxctrl-strap-quirk;
+			reset-gpios = <&gpio 77 GPIO_ACTIVE_LOW>;
+			reset-assert-us = <100>;
+			reset-deassert-us = <280>;
 		};
 	};
 };
