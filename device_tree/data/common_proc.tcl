@@ -672,7 +672,7 @@ proc set_drv_def_dts {drv_handle} {
 			set RpRm [get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm "" RpRm
 			if {[llength $RpRm]} {
-				set default_dts "$RpRm.dtsi"
+				set default_dts "pl-partial-$RpRm.dtsi"
 			} else {
 				set default_dts "pl.dtsi"
 			}
@@ -689,7 +689,7 @@ proc set_drv_def_dts {drv_handle} {
 				regsub -all { } $RpRm "" RpRm
 				set partial_imag imag
 				append RpRm1 $RpRm $partial_imag
-				set defaultdts1 "$RpRm1.dtsi"
+				set defaultdts1 "pl-partial-$RpRm1.dtsi"
 				set defdt [create_dt_tree -dts_file $defaultdts1]
 				set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $defdt
@@ -724,7 +724,7 @@ proc set_drv_def_dts {drv_handle} {
 					set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
 				}
 				hsi::utils::add_new_dts_param "${child_node1}" "firmware-name" "$hw_name.bin" string
-				if {[string match -nocase $default_dts "$RpRm.dtsi"]} {
+				if {[string match -nocase $default_dts "pl-partial-$RpRm.dtsi"]} {
 					set_property DTS_VERSION "/dts-v1/;\n/plugin/" $default_dts
 					set child_node " "
 				}
@@ -914,7 +914,7 @@ proc set_drv_def_dts {drv_handle} {
                                 puts "frag0 ret"
 			} else {
 				set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-				set default_dts "$RpRm.dtsi"
+				set default_dts "pl-partial-$RpRm.dtsi"
 				set master_dts_obj [get_dt_trees ${default_dts}]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
@@ -4215,7 +4215,7 @@ proc gen_clk_property {drv_handle} {
 				set RpRm [get_rp_rm_for_drv $drv_handle]
 				regsub -all { } $RpRm "" RpRm
 				if {[llength $RpRm]} {
-					set dts_file "$RpRm.dtsi"
+					set dts_file "pl-partial-$RpRm.dtsi"
 				} else {
 					set dts_file "pl.dtsi"
 				}
@@ -4428,7 +4428,7 @@ proc gen_clk_property {drv_handle} {
 			set RpRm [get_rp_rm_for_drv $drv_handle]
 			regsub -all { } $RpRm "" RpRm
 			if {[llength $RpRm]} {
-				set dts_file "$RpRm.dtsi"
+				set dts_file "pl-partial-$RpRm.dtsi"
 			} else {
 				set dts_file "pl.dtsi"
                         }
@@ -6015,7 +6015,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		set RpRm [get_rp_rm_for_drv $ip_drv]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
-			set default_dts "$RpRm.dtsi"
+			set default_dts "pl-partial-$RpRm.dtsi"
 			set bus_node [add_or_get_dt_node -l "overlay2_$RpRm" -n $child_name -p $fpga_node]
 		} else {
 			set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
