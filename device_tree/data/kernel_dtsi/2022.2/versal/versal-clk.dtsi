@@ -8,6 +8,7 @@
  */
 #include "include/dt-bindings/clock/xlnx-versal-clk.h"
 #include "include/dt-bindings/power/xlnx-versal-power.h"
+#include "include/dt-bindings/reset/xlnx-versal-resets.h"
 / {
 	pl_alt_ref_clk: pl_alt_ref_clk {
 		u-boot,dm-pre-reloc;
@@ -62,6 +63,10 @@
 				mboxes = <&ipi_mailbox_pmu1 0>,
 					 <&ipi_mailbox_pmu1 1>;
 				mbox-names = "tx", "rx";
+			};
+			versal_reset: reset-controller {
+				compatible = "xlnx,versal-reset";
+				#reset-cells = <1>;
 			};
 			versal_sec_cfg: versal-sec-cfg {
 				compatible = "xlnx,versal-sec-cfg";
@@ -297,6 +302,7 @@
 &usb0 {
 	clocks = <&versal_clk USB0_BUS_REF>, <&versal_clk USB3_DUAL_REF>;
 	power-domains = <&versal_firmware PM_DEV_USB_0>;
+	resets = <&versal_reset VERSAL_RST_USB_0>;
 };
 
 &watchdog {

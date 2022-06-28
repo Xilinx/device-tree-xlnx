@@ -303,7 +303,7 @@ proc gen_include_headers {} {
 		} else {
 			set power_list "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-clk.h"
-			set reset_list "xlnx-zynqmp-resets.h"
+			set reset_list "xlnx-versal-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
 			set gpio_list "gpio.h"
 		}

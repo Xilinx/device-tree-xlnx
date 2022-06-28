@@ -112,7 +112,6 @@
 			reg = <0x0 0xffa80000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 60 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x210>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -125,7 +124,6 @@
 			reg = <0x0 0xffa90000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 61 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x212>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -138,7 +136,6 @@
 			reg = <0x0 0xffaa0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 62 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x214>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -225,7 +222,6 @@
 			reg = <0x0 0xffab0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 63 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x216>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -238,7 +234,6 @@
 			reg = <0x0 0xffac0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 64 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x218>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -251,7 +246,6 @@
 			reg = <0x0 0xffad0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 65 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x21a>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -264,7 +258,6 @@
 			reg = <0x0 0xffae0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 66 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x21c>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -277,7 +270,6 @@
 			reg = <0x0 0xffaf0000 0x0 0x1000>;
 			interrupt-parent = <&gic>;
 			interrupts = <0 67 4>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x21e>; */
 			xlnx,bus-width = <64>;
 			clocks = <&clk100 &clk100>;
@@ -293,7 +285,6 @@
 			clocks = <&clk2 &clk125 &clk125 &clk125>;
 			#address-cells = <0x1>;
 			#size-cells = <0x0>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x234>; */
 
 			phy-handle = <&phy0>;
@@ -319,7 +310,6 @@
 			clocks = <&clk2 &clk125 &clk125 &clk125>;
 			#address-cells = <0x1>;
 			#size-cells = <0x0>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x235>; */
 
 			phy-handle = <&phy1>;
@@ -374,7 +364,6 @@
 			reg = <0x0 0xf1030000 0x0 0x1000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x244>; */
 			clocks = <&clk125 &clk125>;
 			is-dual = <1>;
@@ -485,7 +474,6 @@
 			clocks = <&clk25 &clk25>;
 			xlnx,device_id = <0>;
 			xlnx,mio_bank = <0>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x242>; */
 		};
 
@@ -499,7 +487,6 @@
 			clocks = <&clk25 &clk25>;
 			xlnx,device_id = <1>;
 			xlnx,mio_bank = <0>;
-			#stream-id-cells = <1>;
 			/* iommus = <&smmu 0x243>; */
 		};
 
@@ -519,7 +506,6 @@
 				reg = <0x0 0xfe200000 0x0 0x10000>;
 				interrupt-parent = <&gic>;
 				interrupts = <0x0 0x16 0x4>, <0x0 0x45 0x4>;
-				#stream-id-cells = <1>;
 				/* iommus = <&smmu 0x230>; */
 				dr_mode = "host";
 				maximum-speed = "high-speed";
