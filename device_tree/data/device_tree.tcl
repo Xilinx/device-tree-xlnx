@@ -152,9 +152,10 @@ proc gen_sata_laneinfo {} {
 		set slane 0
 		set freq {}
 		set ip_type [get_property IP_TYPE [get_cells $ip]]
-		if {$ip_type eq ""} {
-			set ps $ip
-		}
+		#if {$ip_type eq ""} {
+		#	set ps $ip
+		#}
+		set ps $ip
 	}
 
 	set param0 "/bits/ 8 <0x18 0x40 0x18 0x28>"
