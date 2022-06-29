@@ -764,7 +764,7 @@ proc generate {lib_handle} {
     gen_board_info
     gen_include_headers
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
 	if {[string match -nocase $mainline_ker "none"]} {
 		gen_sata_laneinfo
@@ -824,6 +824,10 @@ proc update_chosen {os_handle} {
 	#as the early params are defined in board dts files
 	return
     }
+    if {[string match -nocase $proctype "psx_cortexa78"]} {
+	#as the early params are defined in board dts files
+	return
+    }
     hsi::utils::add_new_dts_param "${chosen_node}" "bootargs" "$bootargs" string
     set consoleip [get_property CONFIG.console_device $os_handle]
     if {![string match -nocase $consoleip "none"]} {
@@ -842,6 +846,9 @@ proc update_cpu_node {os_handle} {
     if {[string match -nocase $proctype "psv_cortexa72"] } {
         set current_proc "psv_cortexa72_"
         set total_cores 2
+    } elseif {[string match -nocase $proctype "psx_cortexa78"] } {
+        set current_proc "psx_cortexa78_"
+        set total_cores 16
     } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
         set current_proc "psu_cortexa53_"
         set total_cores 4
@@ -865,6 +872,19 @@ proc update_cpu_node {os_handle} {
         }
         set a72cores [llength $pnames]
         if {[string match -nocase $a72cores $total_cores]} {
+	     return
+        }
+    }
+    if {[string match -nocase $proctype "psx_cortexa78"]} {
+        set procs [get_cells -hier -filter {IP_TYPE==PROCESSOR}]
+        set pnames ""
+	foreach proc_name $procs {
+              if {[regexp "psx_cortexa78*" $proc_name match]} {
+	             append pnames " " $proc_name
+              }
+        }
+        set a78cores [llength $pnames]
+        if {[string match -nocase $a78cores $total_cores]} {
 	     return
         }
     }
@@ -914,6 +934,8 @@ proc update_alias {os_handle} {
 		set pos [lsearch $all_drivers "psu_qspi*"]
 	} elseif {[string match -nocase $proctype "psv_cortexa72"]} {
 		set pos [lsearch $all_drivers "psv_pmc_qspi*"]
+	} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
+		set pos [lsearch $all_drivers "psx_pmc_qspi*"]
 	} else {
 		set pos [lsearch $all_drivers "psu_qspi*"]
 	}

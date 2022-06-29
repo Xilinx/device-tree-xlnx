@@ -28,7 +28,7 @@ proc generate {drv_handle} {
 	set ip_name [get_property IP_NAME $nvme_ip]
 
 	if {[string match -nocase $proc_type "psu_cortexa53"] ||
-            [string match -nocase $proc_type "psv_cortexa72"]} {
+            [string match -nocase $proc_type "psv_cortexa72"] || [string match -nocase $proc_type "psx_cortexa78"]} {
 		hsi::utils::add_new_dts_param $node "#address-cells" 2 int
 		hsi::utils::add_new_dts_param $node "#size-cells" 2 int
 		hsi::utils::add_new_dts_param "${node}" "ranges" "" boolean

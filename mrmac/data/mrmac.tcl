@@ -1806,6 +1806,7 @@ proc generate_reg_property {node base high} {
 	set size [format 0x%x [expr {${high} - ${base} + 1}]]
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 		if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 			set temp $base
 			set temp [string trimleft [string trimleft $temp 0] x]
@@ -2018,7 +2019,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 						}
 				}
 			}
-			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"]} {
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 				set clklist "pl_clk0 pl_clk1 pl_clk2 pl_clk3"
 			} elseif {[string match -nocase $proctype "ps7_cortexa9"]} {
 				set clklist "FCLK_CLK0 FCLK_CLK1 FCLK_CLK2 FCLK_CLK3"

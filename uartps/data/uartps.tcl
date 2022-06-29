@@ -51,12 +51,12 @@ proc generate {drv_handle} {
         }
 	if {$config_baud} {
 		hsi::utils::set_os_parameter_value "console" "ttyPS0,$config_baud"
-		if {[string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			set_drv_prop $drv_handle "current-speed" $config_baud int
 		}
 	} else {
 		hsi::utils::set_os_parameter_value "console" "ttyPS0,$baud"
-		if {[string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			set_drv_prop $drv_handle "current-speed" $baud int
 		}
 	}
