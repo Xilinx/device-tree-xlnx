@@ -100,7 +100,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node0 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node0 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node0" "xlnx,layer-streaming" "" boolean
 							set layer0_video_format [get_property CONFIG.VIDEO_FORMAT [get_cells -hier $drv_handle]]
@@ -129,7 +131,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
@@ -162,7 +166,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
@@ -195,7 +201,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
@@ -230,7 +238,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
@@ -265,7 +275,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
@@ -300,7 +312,9 @@ proc generate {drv_handle} {
 						} else {
 							set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connected_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
 							set inip [get_in_connect_ip $connected_ip $master_intf]
-							hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							if {[llength $inip]} {
+								hsi::utils::add_new_dts_param $mixer_node1 "dmas" "$inip 0" reference
+							}
 							hsi::utils::add_new_dts_param $mixer_node1 "dma-names" "dma0" string
 							hsi::utils::add_new_dts_param "$mixer_node1" "xlnx,layer-streaming" "" boolean
 						}
