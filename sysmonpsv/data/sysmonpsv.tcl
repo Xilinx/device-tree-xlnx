@@ -26,8 +26,8 @@ proc generate {drv_handle} {
     if {$node == 0} {
 	return
     }
-    hsi::utils::add_new_dts_param $node "#address-cells" 1 int
-    hsi::utils::add_new_dts_param $node "#size-cells" 0 int
+    hsi::utils::add_new_dts_param $node "#address-cells" 2 int
+    hsi::utils::add_new_dts_param $node "#size-cells" 2 int
 
     for {set supply_num 0} {$supply_num < 160} {incr supply_num} {
 	    set meas "C_MEAS_${supply_num}"
