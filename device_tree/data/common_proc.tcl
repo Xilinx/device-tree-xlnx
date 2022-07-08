@@ -1110,7 +1110,7 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		}
 		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
-		if {[llength $overlay_custom_dts]} {
+		if {[llength $overlay_custom_dts] && ![llength $RpRm]} {
 			update_overlay_custom_dts_include $default_dts
 			set dts_file pl-custom.dtsi
 			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
