@@ -352,7 +352,7 @@ proc generate {drv_handle} {
                 append id ",\"" $i
                 set i [expr 0x$i]
             }
-            set_property xlnx,channel-ids $id $drv_handle
+            set_drv_prop $drv_handle "xlnx,channel-ids" $id stringlist
             if {$ip_name == "xxv_ethernet"  && $core!= 0 && [llength $eth_node]} {
                   hsi::utils::add_new_dts_param $eth_node "xlnx,num-queues" $numqueues noformating
                   hsi::utils::add_new_dts_param $eth_node "xlnx,channel-ids" $id stringlist
