@@ -615,11 +615,6 @@ proc update_system_dts_include {include_file} {
 				append cur_inc_list "," $include_file
 				set field [split $cur_inc_list ","]
 				set cur_inc_list [lsort -decreasing $field]
-				if {[string match -nocase $proctype "psx_cortexa78"]} {
-					set cur_inc_list [lsort -increasing $field]
-				} else {
-					set cur_inc_list [lsort -decreasing $field]
-				}
 				set cur_inc_list [join $cur_inc_list ","]
 			}
 		}
