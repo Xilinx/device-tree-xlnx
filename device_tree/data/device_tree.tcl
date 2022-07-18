@@ -301,14 +301,14 @@ proc gen_include_headers {} {
 			set reset_list "xlnx-zynqmp-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
 			set gpio_list "gpio.h"
-		} elseif {[string match -nocase $proctype "psv_cortexa72"]} {
-			set power_list "xlnx-versal-power.h"
+		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
+			set power_list "xlnx-versal-net-power.h"
 			set clock_list "xlnx-versal-clk.h"
 			set reset_list "xlnx-versal-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
 			set gpio_list "gpio.h"
-		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
-			set power_list "xlnx-versal-net-power.h"
+		} else {
+			set power_list "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-clk.h"
 			set reset_list "xlnx-versal-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
