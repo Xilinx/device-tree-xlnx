@@ -391,6 +391,12 @@
 			xlnx,mc-id = <3>;
 		};
 
+		ocm: memory-controller@ff960000 {
+			compatible = "xlnx,zynqmp-ocmc-1.0";
+			reg = <0x0 0xff960000 0x0 0x1000>;
+			interrupts = <0 10 4>;
+		};
+
 		rtc: rtc@f12a0000 {
 			compatible = "xlnx,zynqmp-rtc";
 			status = "disabled";
@@ -594,6 +600,7 @@
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
 				snps,refclk_fladj;
+				clock-names = "ref";
 				snps,mask_phy_reset;
 				/* dma-coherent; */
 			};
