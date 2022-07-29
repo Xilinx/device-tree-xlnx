@@ -4735,6 +4735,15 @@ proc gen_mb_interrupt_property {cpu_handle {intr_port_name ""}} {
 	}
 	set cpin [hsi::utils::get_interrupt_sources [get_cells -hier $cpu_handle]]
 	set intc [get_cells -of_objects $cpin]
+        if { [::hsi::utils::is_intr_cntrl $intc] != 1 } {
+		set intf_pins [::hsi::get_intf_pins -of_objects $intc]
+		foreach intp $intf_pins {
+			set connectip [get_connected_stream_ip [get_cells -hier $intc] $intp]
+			if { [::hsi::utils::is_intr_cntrl $connectip] == 1 } {
+				set intc $connectip
+			}
+		}
+	}
 	if {[string_is_empty $intc]} {
 		error "no interrupt controller found"
 	}
