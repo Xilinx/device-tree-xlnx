@@ -265,6 +265,16 @@ proc gen_gpio_reset {drv_handle node} {
 						dtg_warning "$drv_handle peripheral is NULL for the $pin $periph"
 					}
 				}
+			} else {
+				# If no axi-slice connected b/w axi_gpio and reset pin
+				# add video-reset-gpios property with gpio number 0
+				if {[string match -nocase $sink_ip "axi_gpio"]} {
+					set gpio "0"
+					set periph [::hsi::get_cells -of_objects $pin]
+					if {[llength $gpio]} {
+						hsi::utils::add_new_dts_param "$node" "video-reset-gpios" "$periph $gpio 1" reference
+					}
+				}
 			}
 		} else {
 			dtg_warning "$drv_handle peripheral is NULL for the $pin $sink_periph"
