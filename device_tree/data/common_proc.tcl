@@ -888,7 +888,7 @@ proc set_drv_def_dts {drv_handle} {
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
-			if {[!$classic_soc]} {
+			if {!$classic_soc} {
 				hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
 			}
 		}
