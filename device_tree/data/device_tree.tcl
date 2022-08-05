@@ -755,6 +755,24 @@ proc gen_zocl_node {} {
 		}
 	}
 	}
+	set decouplers [get_cells -hier -filter {IP_NAME == "dfx_decoupler"}]
+	set count 1
+	foreach decoupler $decouplers {
+		if { $count == 1 } {
+			hsi::utils::add_new_dts_param "$zocl_node" "xlnx,pr-decoupler" "" boolean
+		} else {
+			#zocl driver not supporting multiple decouplers so display warning.
+			dtg_warning "Multiple dfx_decoupler IPs found in the design,\
+				using pr-isolation-addr from [lindex [split $decouplers " "] 0] IP"
+			break
+		}
+		set baseaddr [get_property CONFIG.C_BASEADDR [get_cells -hier $decoupler]]
+		if {[llength $baseaddr]} {
+			set baseaddr "0x0 $baseaddr"
+			hsi::utils::add_new_dts_param "$zocl_node" "xlnx,pr-isolation-addr" "$baseaddr" intlist
+		}
+		incr count
+	}
 }
 
 proc generate {lib_handle} {
