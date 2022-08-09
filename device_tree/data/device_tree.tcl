@@ -142,6 +142,13 @@ proc extract_dts_name {override value} {
     return $var
 }
 
+proc gen_edac_node {} {
+	set dts_file [get_property CONFIG.pcw_dts [get_os]]
+	set edac_node [add_or_get_dt_node -n &xilsem_edac -d $dts_file]
+	if { [get_property CONFIG.SEM_MEM_SCAN [get_cells -hier -filter {IP_NAME == "pspmc"}]] || [get_property CONFIG.SEM_NPI_SCAN [get_cells -hier -filter {IP_NAME == "pspmc"}]] } {
+		hsi::utils::add_new_dts_param "${edac_node}" "status" "okay" string
+	}
+}
 proc gen_sata_laneinfo {} {
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	if {$remove_pl} {
@@ -798,6 +805,7 @@ proc generate {lib_handle} {
 		gen_zynqmp_opp_freq
 		gen_zynqmp_pinctrl
 		gen_zocl_node
+		gen_edac_node
 	}
     }
     if {[string match -nocase $proctype "ps7_cortexa9"]} {
