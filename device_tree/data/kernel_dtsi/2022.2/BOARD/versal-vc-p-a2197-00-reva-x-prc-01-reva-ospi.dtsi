@@ -9,6 +9,7 @@
 
 #include "versal-vc-p-a2197-00-reva-x-prc-01-reva.dtsi"
 #include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/reset/xlnx-versal-resets.h"
 
 / {
 	compatible = "xlnx,versal-vc-p-a2197-00-revA-x-prc-01-revA",
@@ -29,6 +30,7 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	reset-gpios = <&gpio1 0xc GPIO_ACTIVE_HIGH>;
+	reset-names = "qspi";
 	resets = <&versal_reset VERSAL_RST_OSPI>;
 
 	flash@0 {
