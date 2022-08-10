@@ -56,5 +56,12 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,sim-mode" $sim_mode string
 	set video_interface [get_property CONFIG.VIDEO_INTERFACE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,video-interface" $video_interface int
+	set vtcip [get_cells -hier -filter {IP_NAME == "v_tc"}]
+	if {[llength $vtcip]} {
+		set baseaddr [get_property CONFIG.C_BASEADDR [get_cells -hier $vtcip]]
+		if {[llength $baseaddr]} {
+			hsi::utils::add_new_dts_param "${node}" "xlnx,vtc-offset" "$baseaddr" int
+		}
+	}
 }
 
