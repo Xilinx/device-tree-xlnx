@@ -152,6 +152,23 @@ proc gen_edac_node {} {
 		}
 	}
 }
+
+proc gen_ddrmc_node {} {
+	set dts_file [get_property CONFIG.pcw_dts [get_os]]
+	set ddrmc [get_cells -hier -filter {IP_NAME == "noc_mc_ddr4"}]
+	if {[llength $ddrmc]} {
+		set i 0
+		foreach mc $ddrmc {
+			set ddrmc_node [add_or_get_dt_node -n &mc$i -d $dts_file]
+			if { [get_property CONFIG.MC_ECC $mc] } {
+				hsi::utils::add_new_dts_param "${ddrmc_node}" "status" "okay" string
+			}
+			incr i
+		}
+	}
+
+}
+
 proc gen_sata_laneinfo {} {
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	if {$remove_pl} {
@@ -822,6 +839,7 @@ proc generate {lib_handle} {
 		gen_zocl_node
 		if {[string match -nocase $proctype "psv_cortexa72"]} {
 			gen_edac_node
+			gen_ddrmc_node
 		}
 	}
     }
