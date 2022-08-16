@@ -21,6 +21,5 @@ BEGIN driver i3cpsx
   OPTION driver_state = ACTIVE;
   OPTION NAME = i3cpsx;
   DTGPARAM name = clock-frequency, type = int , default = 400000;
-  DTGPARAM name = dtg.alias , type = reference, default = i3c;
 
 END driver
