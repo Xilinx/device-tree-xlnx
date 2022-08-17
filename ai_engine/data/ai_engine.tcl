@@ -18,13 +18,51 @@ proc generate_aie_array_device_info {node drv_handle bus_node} {
 	set compatible [append compatible " " "xlnx,ai-engine-v2.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 
-	append aiegen "/bits/ 8 <0x1>"
+	#set default values for S80 device
+	set hw_gen "AIE"
+	set aie_rows_start 1
+	set aie_rows_num 8
+	set mem_rows_start 0
+	set mem_rows_num 0
+	set shim_rows_start 0
+	set shim_rows_num 1
+
+	# override the above default values if AIE primitives are available in
+	# xsa
+	set aie_prop [hsi::get_hw_primitives aie]
+	if {$aie_prop != ""} {
+		puts "INFO: Reading AIE hardware properties from XSA."
+
+		set hw_gen [get_property HWGEN [hsi::get_hw_primitives aie]]
+		set aie_rows [get_property AIETILEROWS [hsi::get_hw_primitives aie]]
+		set mem_rows [get_property MEMTILEROW [hsi::get_hw_primitives aie]]
+		set shim_rows [get_property SHIMROW [hsi::get_hw_primitives aie]]
+
+		set aie_rows_start [lindex [split $aie_rows ":"] 0]
+		set aie_rows_num [lindex [split $aie_rows ":"] 1]
+		set mem_rows_start [lindex [split $mem_rows ":"] 0]
+		if {$mem_rows_start==-1} {
+			set mem_rows_start 0
+		}
+		set mem_rows_num [lindex [split $mem_rows ":"] 1]
+		set shim_rows_start [lindex [split $shim_rows ":"] 0]
+		set shim_rows_num [lindex [split $shim_rows ":"] 1]
+
+	} else {
+		dtg_warning "$drv_handle: AIE hardware properties are not available in XSA, using defaults."
+	}
+
+	if {$hw_gen=="AIE"} {
+		append aiegen "/bits/ 8 <0x1>"
+	} elseif {$hw_gen=="AIEML"} {
+		append aiegen "/bits/ 8 <0x2>"
+	}
 	hsi::utils::add_new_dts_param "${node}" "xlnx,aie-gen" $aiegen noformating
-	append shimrows "/bits/ 8 <0 1>"
+	append shimrows "/bits/ 8 <${shim_rows_start} ${shim_rows_num}>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,shim-rows" $shimrows noformating
-	append corerows "/bits/ 8 <1 8>"
+	append corerows "/bits/ 8 <${aie_rows_start} ${aie_rows_num}>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,core-rows" $corerows noformating
-	append memrows "/bits/ 8 <0 0>"
+	append memrows "/bits/ 8 <$mem_rows_start $mem_rows_num>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,mem-rows" $memrows noformating
 	set power_domain "&versal_firmware 0x18224072"
 	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
