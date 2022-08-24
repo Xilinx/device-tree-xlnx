@@ -88,4 +88,16 @@ proc generate {drv_handle} {
 			        hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-type" 7 int
 			}
 	}
+	set gt_direction [get_property CONFIG.C_GT_DIRECTION [get_cells -hier $drv_handle]]
+	switch $gt_direction {
+			"SIMPLEX_TX" {
+				hsi::utils::add_new_dts_param "${node}" "xlnx,gt-direction" 1  int
+			}
+			"SIMPLEX_RX" {
+				hsi::utils::add_new_dts_param "${node}" "xlnx,gt-direction" 2  int
+			}
+			"DUPLEX" {
+				hsi::utils::add_new_dts_param "${node}" "xlnx,gt-direction" 3  int
+			}
+	}
 }
