@@ -937,6 +937,9 @@ proc set_drv_def_dts {drv_handle} {
 						set pr1 [lindex $pr_regions $pr]
 						if {[regexp $pr1 $RpRm match]} {
 							set targets "fpga_PR$pr"
+							if {$classic_soc} {
+								set targets "fpga"
+							}
 							hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 							break
 						}
