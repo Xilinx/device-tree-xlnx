@@ -4816,7 +4816,6 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	set intr_info ""
 	set intc_names ""
 	set intr_par   ""
-
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
 	if {[is_pl_ip $drv_handle] && $remove_pl} {
 		return 0
@@ -6466,7 +6465,6 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 	if { [llength $intr_pin_name] == 0 } {
 		return $intr_cntrl
 	}
-
 	if { [llength $periph_name] != 0 } {
 	# This is the case where IP pin is interrupting
 	set periph [::hsi::get_cells -hier -filter "NAME==$periph_name"]
@@ -6493,6 +6491,8 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 			} elseif { [llength $sink_periph ] && [::hsi::utils::is_intr_cntrl $sink_periph] == 1 } {
 				lappend intr_cntrl $sink_periph
 			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "microblaze"] } {
+				lappend intr_cntrl $sink_periph
+			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "tmr_voter"] } {
 				lappend intr_cntrl $sink_periph
 			} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "dfx_decoupler"] } {
 				set intr [get_pins -of_objects $sink_periph -filter {TYPE==INTERRUPT&&DIRECTION==O}]
