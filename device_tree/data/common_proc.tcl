@@ -5795,10 +5795,15 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 				 lappend intr_cntrl [get_intr_cntrl_name $sink_periph "s_intf_0_INTERRUPT"]
 			}
 			if {[llength $intr_cntrl] > 1} {
+				set finded 0
 				foreach intc $intr_cntrl {
 					if { [::hsi::utils::is_ip_interrupting_current_proc $intc] } {
 						set intr_cntrl $intc
+						set finded 1
 					}
+				}
+				if { $finded == 0 } {
+					set intr_cntrl [lindex $intr_cntrl 0]
 				}
 			}
 		}
