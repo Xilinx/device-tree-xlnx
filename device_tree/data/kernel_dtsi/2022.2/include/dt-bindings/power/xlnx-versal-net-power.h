@@ -6,17 +6,30 @@
 #ifndef _DT_BINDINGS_VERSAL_NET_POWER_H
 #define _DT_BINDINGS_VERSAL_NET_POWER_H
 
-#define PM_DEV_USB_0				(0X1821C032U)
-#define PM_DEV_USB_1				(0X1821C033U)
-#define PM_DEV_SPI_0				(0X1821C02DU)
-#define PM_DEV_SPI_1				(0X1821C02EU)
-#define PM_DEV_UART_0				(0X1821C02BU)
-#define PM_DEV_UART_1				(0X1821C02CU)
-#define PM_DEV_OSPI				(0X1821C030U)
-#define PM_DEV_QSPI				(0X1821C02FU)
-#define PM_DEV_SDIO_0				(0X1821C031U)
-#define PM_DEV_SDIO_1				(0X1821C03EU)
-#define PM_RST_USB0				(0XC104079U)
-#define PM_RST_USB1				(0XC10407AU)
+#include "include/dt-bindings/power/xlnx-versal-power.h"
+
+#define PM_DEV_USB_1				(0x182240D7U)
+
+/* Remove Versal specific node IDs */
+#undef PM_DEV_RPU0_0
+#undef PM_DEV_RPU0_1
+#undef PM_DEV_OCM_0
+#undef PM_DEV_OCM_1
+#undef PM_DEV_OCM_2
+#undef PM_DEV_OCM_3
+#undef PM_DEV_TCM_0_A
+#undef PM_DEV_TCM_1_A
+#undef PM_DEV_TCM_0_B
+#undef PM_DEV_TCM_1_B
+#undef PM_DEV_SWDT_FPD
+#undef PM_DEV_ADMA_0
+#undef PM_DEV_ADMA_1
+#undef PM_DEV_ADMA_2
+#undef PM_DEV_ADMA_3
+#undef PM_DEV_ADMA_4
+#undef PM_DEV_ADMA_5
+#undef PM_DEV_ADMA_6
+#undef PM_DEV_ADMA_7
+#undef PM_DEV_AI
 
 #endif

@@ -330,8 +330,10 @@ proc gen_include_headers {} {
 			set gpio_list "gpio.h"
 		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
 			set power_list "xlnx-versal-net-power.h"
+		        set power_base_file "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-clk.h"
-			set reset_list "xlnx-versal-resets.h"
+			set reset_list "xlnx-versal-net-resets.h"
+		        set reset_base_file "xlnx-versal-resets.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
 			set gpio_list "gpio.h"
 		} else {
@@ -363,7 +365,11 @@ proc gen_include_headers {} {
 					file copy -force $file $dpdmadir
 				} elseif {[string first $gpio_list $file] != -1} {
 					file copy -force $file $gpiodir
-				}
+				} elseif {[string first $power_base_file $file] != -1} {
+                                        file copy -force $file $powerdir
+                                } elseif {[string first $reset_base_file $file] != -1} {
+                                        file copy -force $file $resetdir
+                                }
 			}
 		}
 	}
