@@ -322,6 +322,8 @@ proc gen_include_headers {} {
 		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set include_list "include*"
 		set dir_path "./"
+		set power_base_file ""
+		set reset_base_file ""
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			set power_list "xlnx-zynqmp-power.h"
 			set clock_list "xlnx-zynqmp-clk.h"
