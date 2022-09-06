@@ -13,7 +13,8 @@
 #
 
 proc set_pcie_ranges {drv_handle proctype} {
-	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "qdma"] \
+		|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		set axibar_num [get_ip_property $drv_handle "CONFIG.axibar_num"]
 	} else {
 		set axibar_num [get_ip_property $drv_handle "CONFIG.AXIBAR_NUM"]
@@ -26,7 +27,11 @@ proc set_pcie_ranges {drv_handle proctype} {
 	set high_64bit 0x00000000
 	set ranges ""
 	for {set x 0} {$x < $axibar_num} {incr x} {
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "qdma"] \
+			|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] \
+			|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] \
+			|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"] \
+			} {
 			set axi_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar_%d" $x]]
 			set pcie_baseaddr [get_ip_property $drv_handle [format "CONFIG.axibar2pciebar_%d" $x]]
 			set axi_highaddr [get_ip_property $drv_handle [format "CONFIG.axibar_highaddr_%d" $x]]
@@ -51,7 +56,9 @@ proc set_pcie_ranges {drv_handle proctype} {
 			set range_type 0x43000000
 		}
 
-		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
+		if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "qdma"] \
+			|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] \
+			|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
 			if {[regexp -nocase {([0-9a-f]{9})} "$pcie_baseaddr" match]} {
 				set temp $pcie_baseaddr
 				set temp [string trimleft [string trimleft $temp 0] x]
@@ -93,28 +100,69 @@ proc set_pcie_ranges {drv_handle proctype} {
 	set_property CONFIG.ranges $ranges $drv_handle
 }
 
+proc get_reg_prop {highaddr baseaddr proctype} {
+	set reg ""
+	set size [format 0x%X [expr $highaddr -$baseaddr + 1]]
+	if {[regexp -nocase {0x([0-9a-f]{9})} "$baseaddr" match]} {
+		set temp $baseaddr
+		set temp [string trimleft [string trimleft $temp 0] x]
+		set len [string length $temp]
+		set rem [expr {${len} - 8}]
+		set high_base "0x[string range $temp $rem $len]"
+		set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+		set low_base [format 0x%08x $low_base]
+		set reg "$low_base $high_base 0x0 $size"
+	} else {
+		if {[string match -nocase $proctype "microblaze"] } {
+			set reg "$baseaddr $size"
+		} else {
+			set reg "0x0 $baseaddr 0x0 $size"
+		}
+	}
+	return $reg
+}
+
 proc set_pcie_reg {drv_handle proctype} {
-	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] || [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"] \
+		|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "axi_pcie3"] \
+		|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "pcie_dma_versal"]} {
 		set baseaddr [get_ip_property $drv_handle CONFIG.baseaddr]
 		set highaddr [get_ip_property $drv_handle CONFIG.highaddr]
-		set size [format 0x%X [expr $highaddr -$baseaddr + 1]]
-		if {[regexp -nocase {0x([0-9a-f]{9})} "$baseaddr" match]} {
-			set temp $baseaddr
-			set temp [string trimleft [string trimleft $temp 0] x]
-			set len [string length $temp]
-			set rem [expr {${len} - 8}]
-			set high_base "0x[string range $temp $rem $len]"
-			set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
-			set low_base [format 0x%08x $low_base]
-			set reg "$low_base $high_base 0x0 $size"
-		} else {
-			if {[string match -nocase $proctype "microblaze"] } {
-				set reg "$baseaddr $size"
-			} else {
-				set reg "0x0 $baseaddr 0x0 $size"
+		set reg [get_reg_prop $highaddr $baseaddr $proctype]
+		if {[llength $reg]} {
+			set_property CONFIG.reg $reg $drv_handle
+		}
+	} elseif {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "qdma"]} {
+		set mem_ranges [hsi::utils::get_ip_mem_ranges $drv_handle]
+		set reg ""
+		set reg_names ""
+		foreach mem_range $mem_ranges {
+			set baseaddr [string tolower [get_property BASE_VALUE $mem_range]]
+			set highaddr [string tolower [get_property HIGH_VALUE $mem_range]]
+			set slave_intf [string tolower [get_property SLAVE_INTERFACE $mem_range]]
+			dtg_verbose "slave_intf:$slave_intf"
+			set reg_prop ""
+			if {[string match -nocase $slave_intf "s_axi_lite"]} {
+				set reg_prop [get_reg_prop $highaddr $baseaddr $proctype]
+				append reg_names " " "cfg"
+			} elseif {[string match -nocase $slave_intf "s_axi_lite_csr"]} {
+				set reg_prop [get_reg_prop $highaddr $baseaddr $proctype]
+				append reg_names " " "breg"
+			}
+			if {[llength $reg_prop]} {
+				if {![llength $reg]} {
+					set reg "$reg_prop"
+				} else {
+					append reg ">, <" "$reg_prop"
+				}
 			}
 		}
-		set_property CONFIG.reg $reg $drv_handle
+		if {[llength $reg]} {
+			set_property CONFIG.reg $reg $drv_handle
+		}
+		if {[llength $reg_names]} {
+			hsi::utils::add_new_property $drv_handle "reg-names" stringlist "$reg_names"
+		}
 	} else {
 		set baseaddr [get_ip_property $drv_handle CONFIG.BASEADDR]
 		set highaddr [get_ip_property $drv_handle CONFIG.HIGHADDR]
@@ -160,6 +208,9 @@ proc generate {drv_handle} {
 			set intr_names "misc msi0 msi1"
 			set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
 		}
+	}
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "qdma"]} {
+		hsi::utils::add_new_property $drv_handle "compatible" stringlist "xlnx,qdma-host-3.00"
 	}
 	set_pcie_reg $drv_handle $proctype
 	set_pcie_ranges $drv_handle $proctype
