@@ -322,7 +322,8 @@ proc generate {drv_handle} {
        set compatible [get_comp_str $drv_handle]
        set compatible [append compatible " " "xlnx,xxv-usxgmii-ethernet-1.0"]
        set_property compatible $compatible $drv_handle
-       hsi::utils::add_new_dts_param $node "xlnx,phy-type" 7 int
+       # phy-mode is usxgmii in this case ip_name also same
+       set_property phy-mode "$ip_name" $drv_handle
        hsi::utils::add_new_dts_param $node "xlnx,usxgmii-rate" 1000 int
    }
     set ips [get_cells -hier $drv_handle]
