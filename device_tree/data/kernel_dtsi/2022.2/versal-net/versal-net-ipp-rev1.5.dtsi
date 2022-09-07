@@ -9,6 +9,7 @@
 
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/power/xlnx-versal-net-power.h"
+#include "include/dt-bindings/reset/xlnx-versal-net-resets.h"
 
 / {
 	compatible = "xlnx,versal-net-ipp-1.5", "xlnx,versal-net-spp-2.1.0", "xlnx,versal-net-spp", "xlnx,versal-net";
@@ -305,7 +306,7 @@
 		};
 
 		gem0: ethernet@f19e0000 {
-			compatible = "cdns,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
 			status = "okay";
 			reg = <0 0xf19e0000 0 0x1000>;
 			interrupts = <0 39 4>, <0 39 4>;
@@ -326,7 +327,7 @@
 		};
 
 		gem1: ethernet@f19f0000 {
-			compatible = "cdns,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
 			status = "okay";
 			reg = <0 0xf19f0000 0 0x1000>;
 			interrupts = <0 41 4>, <0 41 4>;
@@ -622,11 +623,11 @@
 			#size-cells = <2>;
 			clocks = <&clk60>, <&clk60>;
 			power-domains = <&versal_net_firmware PM_DEV_USB_0>;
-			resets = <&versal_net_reset PM_RST_USB0>;
+			resets = <&versal_net_reset VERSAL_RST_USB_0>;
 			xlnx,usb-polarity = <0>;
 			xlnx,usb-reset-mode = <0>;
 
-			dwc3@f1b00000  {
+			dwc3_0: dwc3@f1b00000  {
 				compatible = "snps,dwc3";
 				status = "okay";
 				reg = <0 0xf1b00000 0 0x10000>;
@@ -654,11 +655,11 @@
 			#size-cells = <2>;
 			clocks = <&clk60 &clk60>;
 			power-domains = <&versal_net_firmware PM_DEV_USB_1>;
-			resets = <&versal_net_reset PM_RST_USB1>;
+			resets = <&versal_net_reset VERSAL_RST_USB_1>;
 			xlnx,usb-polarity = <0x00>;
 			xlnx,usb-reset-mode = <0x00>;
 
-			dwc3@f1c00000  {
+			dwc3_1: dwc3@f1c00000  {
 				compatible = "snps,dwc3";
 				status = "okay";
 				reg = <0x0 0xf1c00000 0x0 0x10000>;

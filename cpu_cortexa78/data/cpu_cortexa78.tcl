@@ -14,7 +14,8 @@
 
 proc generate {drv_handle} {
 	global dtsi_fname
-	set dtsi_fname "versal-net/versal-net-ipp-rev1.5.dtsi"
+	# copied board file inplace of versal-net.dtsi as no dts in uboot
+	set dtsi_fname "versal-net/versal-net-ipp-rev1.9.dtsi"
 
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
