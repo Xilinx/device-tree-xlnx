@@ -12,6 +12,8 @@
 # GNU General Public License for more details.
 #
 
+variable aie_array_cols_start
+variable aie_array_cols_num
 proc generate_aie_array_device_info {node drv_handle bus_node} {
 	set aie_array_id 0
 	set compatible [get_comp_str $drv_handle]
@@ -26,28 +28,36 @@ proc generate_aie_array_device_info {node drv_handle bus_node} {
 	set mem_rows_num 0
 	set shim_rows_start 0
 	set shim_rows_num 1
+	set ::aie_array_cols_start 0
+	set ::aie_array_cols_num 50
 
 	# override the above default values if AIE primitives are available in
 	# xsa
-	set aie_prop [hsi::get_hw_primitives aie]
-	if {$aie_prop != ""} {
-		puts "INFO: Reading AIE hardware properties from XSA."
+	set CommandExists [ namespace which hsi::get_hw_primitives]
+	if {$CommandExists != ""} {
+		set aie_prop [hsi::get_hw_primitives aie]
+		if {$aie_prop != ""} {
+			puts "INFO: Reading AIE hardware properties from XSA."
 
-		set hw_gen [get_property HWGEN [hsi::get_hw_primitives aie]]
-		set aie_rows [get_property AIETILEROWS [hsi::get_hw_primitives aie]]
-		set mem_rows [get_property MEMTILEROW [hsi::get_hw_primitives aie]]
-		set shim_rows [get_property SHIMROW [hsi::get_hw_primitives aie]]
+			set hw_gen [get_property HWGEN [hsi::get_hw_primitives aie]]
+			set aie_rows [get_property AIETILEROWS [hsi::get_hw_primitives aie]]
+			set mem_rows [get_property MEMTILEROW [hsi::get_hw_primitives aie]]
+			set shim_rows [get_property SHIMROW [hsi::get_hw_primitives aie]]
+			set ::aie_array_cols_num [get_property AIEARRAYCOLUMNS [hsi::get_hw_primitives aie]]
 
-		set aie_rows_start [lindex [split $aie_rows ":"] 0]
-		set aie_rows_num [lindex [split $aie_rows ":"] 1]
-		set mem_rows_start [lindex [split $mem_rows ":"] 0]
-		if {$mem_rows_start==-1} {
-			set mem_rows_start 0
+			set aie_rows_start [lindex [split $aie_rows ":"] 0]
+			set aie_rows_num [lindex [split $aie_rows ":"] 1]
+			set mem_rows_start [lindex [split $mem_rows ":"] 0]
+			if {$mem_rows_start==-1} {
+				set mem_rows_start 0
+			}
+			set mem_rows_num [lindex [split $mem_rows ":"] 1]
+			set shim_rows_start [lindex [split $shim_rows ":"] 0]
+			set shim_rows_num [lindex [split $shim_rows ":"] 1]
+
+		} else {
+			dtg_warning "$drv_handle: AIE hardware properties are not available in XSA, using defaults."
 		}
-		set mem_rows_num [lindex [split $mem_rows ":"] 1]
-		set shim_rows_start [lindex [split $shim_rows ":"] 0]
-		set shim_rows_num [lindex [split $shim_rows ":"] 1]
-
 	} else {
 		dtg_warning "$drv_handle: AIE hardware properties are not available in XSA, using defaults."
 	}
@@ -134,7 +144,7 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${aperture_node}" "#size-cells" "2" intlist
 
 	set aperture_nodeid 0x18800000
-	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,columns" "0 50" intlist
+	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,columns" "$::aie_array_cols_start $::aie_array_cols_num" intlist
 	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,node-id" "${aperture_nodeid}" intlist
 
 }
