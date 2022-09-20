@@ -15,6 +15,17 @@
 	model = "ZynqMP zc1751-xm015-dc1 RevA";
 	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem3;
+                i2c0 = &i2c1;
+                mmc0 = &sdhci0;
+                mmc1 = &sdhci1;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                spi0 = &qspi;
+                usb0 = &usb0;
+        };
+
 	clock_si5338_0: clk27 {	/* u55 SI5338-GM */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;

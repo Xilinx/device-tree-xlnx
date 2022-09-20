@@ -15,6 +15,19 @@
 	model = "ZynqMP ZCU104 RevA";
 	compatible = "xlnx,zynqmp-zcu104-revA", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem3;
+                i2c0 = &i2c1;
+                mmc0 = &sdhci1;
+                nvmem0 = &eeprom;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &uart1;
+                serial2 = &dcc;
+                spi0 = &qspi;
+                usb0 = &usb0;
+        };
+
 	clock_8t49n287_5: clk125 {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;

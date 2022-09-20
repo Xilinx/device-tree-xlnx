@@ -13,6 +13,17 @@
 / {
 	model = "ZynqMP zc1751-xm016-dc2 RevA";
 	compatible = "xlnx,zynqmp-zc1751", "xlnx,zynqmp";
+
+	aliases {
+                ethernet0 = &gem2;
+                i2c0 = &i2c0;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &uart1;
+                spi0 = &spi0;
+                spi1 = &spi1;
+                usb0 = &usb1;
+        };
 };
 
 &can0 {

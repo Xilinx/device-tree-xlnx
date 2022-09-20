@@ -15,6 +15,19 @@
 	model = "ZynqMP ZCU104 RevC";
 	compatible = "xlnx,zynqmp-zcu104-revC", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem3;
+                i2c0 = &i2c1;
+                mmc0 = &sdhci1;
+                nvmem0 = &eeprom;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &uart1;
+                serial2 = &dcc;
+                spi0 = &qspi;
+                usb0 = &usb0;
+        };
+
 	chosen {
 		nvmem0 = &eeprom;
 	};

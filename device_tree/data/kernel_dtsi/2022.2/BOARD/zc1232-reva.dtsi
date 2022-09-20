@@ -10,6 +10,12 @@
 / {
 	model = "ZynqMP ZC1232 RevA";
 	compatible = "xlnx,zynqmp-zc1232-revA", "xlnx,zynqmp-zc1232", "xlnx,zynqmp";
+
+	 aliases {
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+        };
 };
 
 &qspi {

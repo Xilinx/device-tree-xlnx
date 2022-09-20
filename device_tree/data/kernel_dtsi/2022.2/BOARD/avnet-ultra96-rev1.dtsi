@@ -19,6 +19,20 @@
 		     "xlnx,zynqmp-zcu100-revC", "xlnx,zynqmp-zcu100",
 		     "xlnx,zynqmp";
 
+	aliases {
+                i2c0 = &i2c1;
+                rtc0 = &rtc;
+                serial0 = &uart1;
+                serial1 = &uart0;
+                serial2 = &dcc;
+                spi0 = &spi0;
+                spi1 = &spi1;
+                usb0 = &usb0;
+                usb1 = &usb1;
+                mmc0 = &sdhci0;
+                mmc1 = &sdhci1;
+        };
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;

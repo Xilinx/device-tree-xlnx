@@ -8,6 +8,15 @@
 	model = "Zynq ZC702 Development Board";
 	compatible = "xlnx,zynq-zc702", "xlnx,zynq-7000";
 
+	aliases {
+                ethernet0 = &gem0;
+                i2c0 = &i2c0;
+                serial0 = &uart1;
+                spi0 = &qspi;
+                mmc0 = &sdhci0;
+                usb0 = &usb0;
+        };
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;

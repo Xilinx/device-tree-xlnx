@@ -12,6 +12,15 @@
 	model = "ZynqMP ZCU1285 RevA";
 	compatible = "xlnx,zynqmp-zcu1285-revA", "xlnx,zynqmp-zcu1285", "xlnx,zynqmp";
 
+	aliases {
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+                mmc0 = &sdhci1;
+                ethernet0 = &gem1; /* EMIO */
+                i2c = &i2c0; /* EMIO */
+        };
+
 	ina226-u60 {
 		compatible = "iio-hwmon";
 		io-channels = <&u60 0>, <&u60 1>, <&u60 2>, <&u60 3>;

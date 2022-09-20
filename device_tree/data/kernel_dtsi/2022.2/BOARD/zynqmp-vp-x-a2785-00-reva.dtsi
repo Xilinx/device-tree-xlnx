@@ -17,6 +17,19 @@
 	compatible = "xlnx,zynqmp-vp-x-a2785-00-revA",
 		     "xlnx,zynqmp-vp-x-a2785-00", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem0;
+                i2c0 = &i2c0;
+                i2c1 = &i2c1;
+                mmc0 = &sdhci0;
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+                usb0 = &usb0;
+                usb1 = &usb1;
+                nvmem0 = &eeprom;
+        };
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;

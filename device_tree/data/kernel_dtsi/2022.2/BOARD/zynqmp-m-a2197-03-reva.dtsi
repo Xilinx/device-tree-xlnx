@@ -14,6 +14,22 @@
 	compatible = "xlnx,zynqmp-m-a2197-03-revA", "xlnx,zynqmp-a2197-revA",
 		     "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem0;
+                i2c0 = &i2c0;
+                i2c1 = &i2c1;
+                mmc0 = &sdhci0;
+                mmc1 = &sdhci1;
+                nvmem0 = &eeprom;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &uart1;
+                serial2 = &dcc;
+                usb0 = &usb0;
+                usb1 = &usb1;
+                spi0 = &qspi;
+        };
+
 	chosen {
 		nvmem0 = <&eeprom>;
 	};

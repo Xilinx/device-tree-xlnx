@@ -13,6 +13,14 @@
 	model = "ZynqMP ZCU1275 RevB";
 	compatible = "xlnx,zynqmp-zcu1275-revB", "xlnx,zynqmp-zcu1275",
 		     "xlnx,zynqmp";
+
+	aliases {
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+                mmc0 = &sdhci1;
+                ethernet0 = &gem1;
+        };
 };
 
 &qspi {

@@ -17,6 +17,19 @@
 	compatible = "xlnx,zynqmp-vpk120-revA",
 		     "xlnx,zynqmp-vpk120", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem0;
+                i2c0 = &i2c0;
+                i2c1 = &i2c1;
+                mmc0 = &sdhci0;
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+                usb0 = &usb0;
+                usb1 = &usb1;
+                nvmem0 = &eeprom;
+        };
+
 	si570_user1_fmc_clk: si570_user1_fmc_clk {
 		status = "okay";
 		compatible = "xlnx,fclk";

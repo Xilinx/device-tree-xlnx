@@ -16,6 +16,19 @@
 	model = "ZynqMP ZCU111 RevA";
 	compatible = "xlnx,zynqmp-zcu111-revA", "xlnx,zynqmp-zcu111", "xlnx,zynqmp";
 
+	aliases {
+                ethernet0 = &gem3;
+                i2c0 = &i2c0;
+                i2c1 = &i2c1;
+                mmc0 = &sdhci1;
+                nvmem0 = &eeprom;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &dcc;
+                spi0 = &qspi;
+                usb0 = &usb0;
+        };
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;

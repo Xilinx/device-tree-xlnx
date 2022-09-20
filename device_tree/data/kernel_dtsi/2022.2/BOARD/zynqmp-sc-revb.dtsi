@@ -16,6 +16,23 @@
 	model = "ZynqMP Generic System Controller";
 	compatible = "xlnx,zynqmp-sc-revB", "xlnx,zynqmp-sc", "xlnx,zynqmp";
 
+	aliases {
+                i2c0 = &i2c0;
+                i2c1 = &i2c1;
+                mmc0 = &sdhci0;
+                mmc1 = &sdhci1;
+                nvmem0 = &eeprom;
+                rtc0 = &rtc;
+                serial0 = &uart0;
+                serial1 = &uart1;
+                serial2 = &dcc;
+                spi0 = &qspi;
+                spi1 = &spi0;
+                spi2 = &spi1;
+                usb0 = &usb0;
+                usb1 = &usb1;
+        };
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;

@@ -11,6 +11,13 @@
 	model = "Versal System Controller on a2197 board RevA";
 	compatible = "xlnx,zynqmp-a2197-revA", "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
+	aliases {
+                i2c0 = &i2c0;
+                nvmem0 = &eeprom1;
+                nvmem1 = &eeprom0;
+                serial0 = &uart0;
+        };
+
 	chosen {
 		nvmem0 = &eeprom1;
 		nvmem1 = &eeprom0;
