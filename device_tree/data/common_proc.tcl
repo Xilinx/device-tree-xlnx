@@ -2018,6 +2018,73 @@ proc gen_broad_endpoint_port6 {drv_handle value} {
         set val [dict get $port6_broad_end_mappings $drv_handle]
 }
 
+proc get_endpoint_mapping {inip mappings} {
+	#search the inip in mappings and return value if found
+	set endpoint ""
+	if {[dict exists $mappings $inip]} {
+		set endpoint [dict get $mappings $inip]
+	}
+	return "$endpoint"
+}
+
+proc add_endpoint_mapping {drv_handle port_node in_end remo_in_end} {
+	#Add the endpoint/remote-endpoint for given drv_handle
+	if {[regexp -nocase $drv_handle "$remo_in_end" match]} {
+		if {[llength $remo_in_end]} {
+			set node [add_or_get_dt_node -n "endpoint" -l $remo_in_end -p $port_node]
+		}
+		if {[llength $in_end]} {
+			hsi::utils::add_new_dts_param "$node" "remote-endpoint" $in_end reference
+		}
+	}
+}
+
+proc update_axis_switch_endpoints {inip port_node drv_handle} {
+	#Read all the non memorymapped axis_switch global variables to get the
+	#inip value corresponding to drv_handle
+	global port1_end_mappings
+	global port2_end_mappings
+	global port3_end_mappings
+	global port4_end_mappings
+	global axis_port1_remo_mappings
+	global axis_port2_remo_mappings
+	global axis_port3_remo_mappings
+	global axis_port4_remo_mappings
+	if {[info exists port1_end_mappings] && [info exists axis_port1_remo_mappings]} {
+		set in1_end [get_endpoint_mapping $inip $port1_end_mappings]
+		set remo_in1_end [get_endpoint_mapping $inip $axis_port1_remo_mappings]
+	}
+	if {[info exists port2_end_mappings] && [info exists axis_port2_remo_mappings]} {
+		set in2_end [get_endpoint_mapping $inip $port2_end_mappings]
+		set remo_in2_end [get_endpoint_mapping $inip $axis_port2_remo_mappings]
+	}
+	if {[info exists port3_end_mappings] && [info exists axis_port3_remo_mappings]} {
+		set in3_end [get_endpoint_mapping $inip $port3_end_mappings]
+		set remo_in3_end [get_endpoint_mapping $inip $axis_port3_remo_mappings]
+	}
+	if {[info exists port4_end_mappings] && [info exists axis_port4_remo_mappings]} {
+		set in4_end [get_endpoint_mapping $inip $port4_end_mappings]
+		set remo_in4_end [get_endpoint_mapping $inip $axis_port4_remo_mappings]
+	}
+
+	if {[info exists remo_in1_end] && [info exists in1_end]} {
+		dtg_verbose "$port_node $remo_in1_end"
+		add_endpoint_mapping $drv_handle $port_node $in1_end $remo_in1_end
+	}
+	if {[info exists remo_in2_end] && [info exists in2_end]} {
+		dtg_verbose "$port_node $remo_in2_end"
+		add_endpoint_mapping $drv_handle $port_node $in2_end $remo_in2_end
+	}
+	if {[info exists remo_in3_end] && [info exists in3_end]} {
+		dtg_verbose "$port_node $remo_in3_end"
+		add_endpoint_mapping $drv_handle $port_node $in3_end $remo_in3_end
+	}
+	if {[info exists remo_in4_end] && [info exists in4_end]} {
+		dtg_verbose "$port_node $remo_in4_end"
+		add_endpoint_mapping $drv_handle $port_node $in4_end $remo_in4_end
+	}
+}
+
 proc update_endpoints {drv_handle} {
 	global end_mappings
 	global remo_mappings
@@ -2075,10 +2142,20 @@ proc update_endpoints {drv_handle} {
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
 
 			set scaninip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis"]
+			# Get next IN IP if axis_slice connected
+			if {[llength "$scaninip"] && \
+				[string match -nocase [get_property IP_NAME $scaninip] "axis_register_slice"]} {
+				set intf "S_AXIS"
+				set scaninip [get_connected_stream_ip [get_cells -hier $scaninip] "$intf"]
+			}
 			foreach inip $scaninip {
 				if {[llength $inip]} {
 					set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
 					if {![llength $ip_mem_handles]} {
+						# Add endpoints if IN IP is axis_switch and non memory mapped
+						if {[string match -nocase [get_property IP_NAME $inip] "axis_switch"]} {
+							update_axis_switch_endpoints $inip $port_node $drv_handle
+						}
 						set broad_ip [get_broad_in_ip $inip]
 						if {[llength $broad_ip]} {
 							if {[string match -nocase [get_property IP_NAME $broad_ip] "axis_broadcaster"]} {
@@ -2730,6 +2807,7 @@ proc update_endpoints {drv_handle} {
 			dtg_warning "$drv_handle pin VIDEO_IN is not connected...check your design"
 		}
 		set inip ""
+		set axis_sw_nm ""
 		foreach inip $hdmitx_in_ip {
 			if {[llength $inip]} {
 				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $hdmitx_in_ip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
@@ -2743,7 +2821,21 @@ proc update_endpoints {drv_handle} {
 					if {[string match -nocase [get_property IP_NAME $inip] "system_ila"]} {
 						continue
 					}
-					set inip [get_in_connect_ip $inip $master_intf]
+					# Check if slice is connected to axis_switch(NM)
+					if {[string match -nocase [get_property IP_NAME $inip] "axis_register_slice"]} {
+						set intf "S_AXIS"
+						set streamin_ip [get_connected_stream_ip [get_cells -hier $inip] $intf]
+						if {[llength $streamin_ip]} {
+							set ip_mem_handles [hsi::utils::get_ip_mem_ranges $streamin_ip]
+						}
+						if {![llength $ip_mem_handles] && [string match -nocase [get_property IP_NAME $streamin_ip] "axis_switch"]} {
+							set inip "$streamin_ip"
+							set axis_sw_nm "1"
+						}
+					}
+					if {![llength $axis_sw_nm]} {
+						set inip [get_in_connect_ip $inip $master_intf]
+					}
 					if {[string match -nocase [get_property IP_NAME $inip] "v_frmbuf_rd"]} {
 						gen_frmbuf_rd_node $inip $drv_handle $hdmi_port_node
 					}
@@ -2766,6 +2858,10 @@ proc update_endpoints {drv_handle} {
 			}
 			if {[llength $hdmitx_in_end]} {
 				hsi::utils::add_new_dts_param "$hdmitx_node" "remote-endpoint" $hdmitx_in_end reference
+			}
+			# Add endpoints if IN IP is axis_switch and NM
+			if {[llength $axis_sw_nm]} {
+				update_axis_switch_endpoints $inip $hdmi_port_node $drv_handle
 			}
 		}
 	}
@@ -3270,6 +3366,12 @@ proc gen_axis_switch {ip} {
 	set count 0
 	foreach intf $master_intf {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
+		#Get next out IP if slice connected
+		if {[llength $connectip] && \
+			[string match -nocase [get_property IP_NAME $connectip] "axis_register_slice"]} {
+			set intf "M_AXIS"
+			set connectip [get_connected_stream_ip [get_cells -hier $connectip] "$intf"]
+		}
 		set len [llength $connectip]
 		if {$len > 1} {
 			for {set i 0 } {$i < $len} {incr i} {

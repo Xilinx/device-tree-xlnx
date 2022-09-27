@@ -96,7 +96,8 @@ proc generate {drv_handle} {
 					gen_endpoint $drv_handle "sca_out$drv_handle"
 					hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" $outip$drv_handle reference
 					gen_remoteendpoint $drv_handle "$outip$drv_handle"
-					if {[string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"] || [string match -nocase [get_property IP_NAME $outip] "axi_vdma"]} {
+					if {[string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"] \
+						|| [string match -nocase [get_property IP_NAME $outip] "axi_vdma"]} {
 						gen_sca_frm_buf_node $outip $drv_handle
 					}
 				} else {
@@ -106,7 +107,8 @@ proc generate {drv_handle} {
 						gen_endpoint $drv_handle "sca_out$drv_handle"
 						hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" $connectip$drv_handle reference
 						gen_remoteendpoint $drv_handle "$connectip$drv_handle"
-						if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"] || [string match -nocase [get_property IP_NAME $connectip] "axi_vdma"]} {
+						if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"] \
+							|| [string match -nocase [get_property IP_NAME $connectip] "axi_vdma"]} {
 							gen_sca_frm_buf_node $connectip $drv_handle
 						}
 					}
@@ -173,7 +175,8 @@ proc generate {drv_handle} {
 					gen_endpoint $drv_handle "csc_out$drv_handle"
 					hsi::utils::add_new_dts_param "$cscoutnode" "remote-endpoint" $ip$drv_handle reference
 					gen_remoteendpoint $drv_handle "$ip$drv_handle"
-					if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"]} {
+					if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"] \
+						|| [string match -nocase [get_property IP_NAME $ip] "axi_vdma"]} {
 						gen_csc_frm_buf_node $ip $drv_handle
 					}
 				} else {
@@ -186,7 +189,8 @@ proc generate {drv_handle} {
 						gen_endpoint $drv_handle "csc_out$drv_handle"
 						hsi::utils::add_new_dts_param "$cscoutnode" "remote-endpoint" $connectip$drv_handle reference
 						gen_remoteendpoint $drv_handle "$connectip$drv_handle"
-						if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+						if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"] \
+							|| [string match -nocase [get_property IP_NAME $ip] "axi_vdma"]} {
 							gen_csc_frm_buf_node $connectip $drv_handle
 						}
 					}
