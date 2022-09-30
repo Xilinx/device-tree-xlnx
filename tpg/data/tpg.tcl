@@ -134,7 +134,7 @@ proc gen_frmbuf_node {ip drv_handle} {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}

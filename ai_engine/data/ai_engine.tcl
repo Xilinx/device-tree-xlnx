@@ -111,11 +111,7 @@ proc generate {drv_handle} {
 	if {$dt_overlay} {
 		set RpRm [hsi::utils::get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
-		if {[llength $RpRm]} {
-			set bus_node "overlay2_$RpRm"
-		} else  {
-			set bus_node "overlay2"
-		}
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}

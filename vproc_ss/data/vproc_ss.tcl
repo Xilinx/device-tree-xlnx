@@ -206,7 +206,7 @@ proc generate {drv_handle} {
 proc gen_sca_frm_buf_node {outip drv_handle} {
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}
@@ -229,7 +229,7 @@ proc gen_sca_frm_buf_node {outip drv_handle} {
 proc gen_csc_frm_buf_node {outip drv_handle} {
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}

@@ -210,7 +210,7 @@ proc gen_pixel_format {node pxl_format} {
 proc gen_frmbuf_node {outip drv_handle} {
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}

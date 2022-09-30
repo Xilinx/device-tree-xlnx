@@ -70,7 +70,7 @@ proc generate {drv_handle} {
     for {set core 0} {$core < $num_cores} {incr core} {
           if {$ip_name == "xxv_ethernet"  && $core != 0} {
                if {$dt_overlay} {
-                     set bus_node "overlay2"
+                     set bus_node "amba"
                } else {
                     set bus_node "amba_pl"
                }

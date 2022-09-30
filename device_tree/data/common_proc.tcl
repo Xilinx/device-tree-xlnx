@@ -698,16 +698,13 @@ proc set_drv_def_dts {drv_handle} {
 				set defdt [create_dt_tree -dts_file $defaultdts1]
 				set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $defdt
-				set root_node [add_or_get_dt_node -n / -d ${defdt}]
-				set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${defdt} -p ${root_node}]
-				set child_name "__overlay__"
-				set child_node1 [add_or_get_dt_node -l "overlay0$RpRm1" -n $child_name -d $defdt -p $fpga_node]
 				if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 					set targets "fpga"
 				} else {
 					set targets "fpga_full"
 				}
-				hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+				set fpga_node [add_or_get_dt_node -n "&$targets" -d ${defdt}]
+				set child_node1 "$fpga_node"
 				set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
@@ -742,16 +739,13 @@ proc set_drv_def_dts {drv_handle} {
 		set defaultdts [set_cur_working_dts $default_dt]
 		set master_dts [get_dt_trees ${defaultdts}]
 		set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts
-		set root_node [add_or_get_dt_node -n / -d ${defaultdts}]
-		set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${defaultdts} -p ${root_node}]
-		set child_name "__overlay__"
-		set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
 		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			set targets "fpga"
 		} else {
 			set targets "fpga_full"
 		}
-		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		set fpga_node [add_or_get_dt_node -n "&$targets" -d ${defaultdts}]
+		set child_node $fpga_node
 		if 0 {
 		set ips [get_cells -hier -filter {IP_NAME == "dfx_decoupler"}]
 		set dfx_node ""
@@ -873,8 +867,6 @@ proc set_drv_def_dts {drv_handle} {
 				hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
 			}
 		}
-		hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
-		hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
 		set hw_name [get_property CONFIG.firmware_name [get_os]]
 		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "ps7_cortexa9"]} {
 			if {![llength $hw_name]} {
@@ -902,16 +894,12 @@ proc set_drv_def_dts {drv_handle} {
 	}
 
 	if {[is_pl_ip $drv_handle] && $dt_overlay} {
-		if 0 {
-		set master_dts_obj [get_dt_trees ${default_dts}]
-		set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
-		set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-		set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${default_dts} -p ${root_node}]
-		set pl_file $default_dts
-		set targets "fpga_full"
-		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+			set targets "fpga"
+		} else {
+			set targets "fpga_full"
 		}
-		set child_name "__overlay__"
 		set RpRm [get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
@@ -922,9 +910,8 @@ proc set_drv_def_dts {drv_handle} {
 				set default_dts "pl-partial-$RpRm.dtsi"
 				set master_dts_obj [get_dt_trees ${default_dts}]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
-				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
-				set fpga_node [add_or_get_dt_node -n "fragment@0" -d ${default_dts} -p ${root_node}]
-				set child_node2 [add_or_get_dt_node -l "overlay0$RpRm" -n $child_name -d $default_dts -p $fpga_node]
+				set fpga_node [add_or_get_dt_node -n "&$targets" -d ${default_dts}]
+				set child_node2 "$fpga_node"
 				set classic_soc [get_property CONFIG.classic_soc [get_os]]
 				if {$classic_soc} {
 					hsi::utils::add_new_dts_param "${child_node2}" "#address-cells" 2 int
@@ -940,7 +927,6 @@ proc set_drv_def_dts {drv_handle} {
 							if {$classic_soc} {
 								set targets "fpga"
 							}
-							hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 							break
 						}
 					}
@@ -1016,7 +1002,7 @@ proc set_drv_def_dts {drv_handle} {
 				}
 			}
 		} else {
-			set child_node [add_or_get_dt_node -l "overlay0" -n $child_name -p $fpga_node]
+			set child_node $fpga_node
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 			if {[string match -nocase $proctype "psv_cortexa72"]} {
 				set targets "fpga"
@@ -1024,7 +1010,6 @@ proc set_drv_def_dts {drv_handle} {
 			if {[string match -nocase $proctype "psu_cortexa53"]} {
 				set targets "fpga_full"
 			}
-			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
 			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 			if {[llength $pr_regions]} {
 				set pr_len [llength $pr_regions]
@@ -3259,7 +3244,7 @@ proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
 	hsi::utils::add_new_dts_param "$frmbuf_rd_node" "remote-endpoint" $ip$drv_handle reference
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set bus_node "overlay2"
+		set bus_node "amba"
 	} else {
 		set bus_node "amba_pl"
 	}
@@ -3423,7 +3408,7 @@ proc gen_axis_switch {ip} {
 proc gen_broad_frmbuf_wr_node {inputip outip drv_handle count} {
         set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
         if {$dt_overlay} {
-                set bus_node "overlay2"
+                set bus_node "amba"
         } else {
                 set bus_node "amba_pl"
         }
@@ -5762,6 +5747,7 @@ proc detect_bus_name {ip_drv} {
 	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
 	set valid_proc_list "ps7_cortexa9 psu_cortexa53 psv_cortexa72 psx_cortexa78"
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {[is_pl_ip $ip_drv] && $remove_pl} {
 		return 0
 	}
@@ -5769,7 +5755,9 @@ proc detect_bus_name {ip_drv} {
 		if {[is_pl_ip $ip_drv]} {
 			# create the parent_node for pl.dtsi
 			set default_dts [set_drv_def_dts $ip_drv]
-			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+			if {!$dt_overlay} {
+				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+			}
 			return "amba_pl"
 		}
 		return "amba"
@@ -5839,18 +5827,11 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			set zynq_periph [get_cells -hier -filter {IP_NAME == zynq_ultra_ps_e}]
 			set avail_param [list_property [get_cells -hier $zynq_periph]]
-			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-			set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
 			set targets "amba"
-			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
-			set child_name "__overlay__"
+			set fpga_node [add_or_get_dt_node -n "&$targets" -d [get_dt_tree ${dts_file}]]
+			set bus_node "$fpga_node"
 			set RpRm [get_rp_rm_for_drv $ip_drv]
 			regsub -all { } $RpRm "" RpRm
-			if {[llength $RpRm]} {
-				set bus_node [add_or_get_dt_node -l "overlay1_$RpRm" -n $child_name -p $fpga_node]
-			} else {
-				set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
-			}
 			set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -p $bus_node]
 			hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
 			set config_afi " "
@@ -5974,12 +5955,9 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		if {[string match -nocase $proctype "ps7_cortexa9"]} {
 			set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
 			set avail_param [list_property [get_cells -hier $zynq_periph]]
-			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-			set fpga_node [add_or_get_dt_node -n "fragment@1" -d [get_dt_tree ${dts_file}] -p ${root_node}]
 			set targets "amba"
-			hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
-			set child_name "__overlay__"
-			set bus_node [add_or_get_dt_node -l "overlay1" -n $child_name -p $fpga_node]
+			set fpga_node [add_or_get_dt_node -n "&$targets" -d [get_dt_tree ${dts_file}]]
+			set bus_node "$fpga_node"
 			if {[lsearch -nocase $avail_param "CONFIG.C_USE_S_AXI_HP0"] >= 0} {
 				set val [get_property CONFIG.C_USE_S_AXI_HP0 [get_cells -hier $zynq_periph]]
 				if {$val == 1} {
@@ -6143,19 +6121,14 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 		}
 	}
 	if {[is_pl_ip $ip_drv] && $dt_overlay} {
-		set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-		set fpga_node [add_or_get_dt_node -n "fragment@2" -d [get_dt_tree ${dts_file}] -p ${root_node}]
 		set targets "amba"
-		hsi::utils::add_new_dts_param $fpga_node target "$targets" reference
-		set child_name "__overlay__"
+		set fpga_node [add_or_get_dt_node -n "&$targets" -d [get_dt_tree ${dts_file}]]
 		set RpRm [get_rp_rm_for_drv $ip_drv]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
 			set default_dts "pl-partial-$RpRm.dtsi"
-			set bus_node [add_or_get_dt_node -l "overlay2_$RpRm" -n $child_name -p $fpga_node]
-		} else {
-			set bus_node [add_or_get_dt_node -l "overlay2" -n $child_name -p $fpga_node]
 		}
+		set bus_node "$fpga_node"
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			hsi::utils::add_new_dts_param "${bus_node}" "#address-cells" 2 int
