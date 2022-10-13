@@ -4409,7 +4409,11 @@ proc gen_clk_property {drv_handle} {
 			set clklist "FCLK_CLK0 FCLK_CLK1 FCLK_CLK2 FCLK_CLK3"
 		}
 		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			if {[string match -nocase $proctype "psv_cortexa72"]} {
+				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			} else {
+				set versal_periph [get_cells -hier -filter {IP_NAME == psx_wizard}]
+			}
 			set ver [get_comp_ver $versal_periph]
 			if {$ver >= 3.0} {
 				set clklist "pl0_ref_clk pl1_ref_clk pl2_ref_clk pl3_ref_clk"
@@ -4424,7 +4428,12 @@ proc gen_clk_property {drv_handle} {
 			}
 		}
 		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			if {[string match -nocase $proctype "psv_cortexa72"]} {
+				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			} else {
+				set versal_periph [get_cells -hier -filter {IP_NAME == psx_wizard}]
+			}
+
 			set ver [get_comp_ver $versal_periph]
 			if {$ver >= 3.0} {
 			switch $pl_clk {
