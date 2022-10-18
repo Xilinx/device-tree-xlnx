@@ -828,41 +828,48 @@ proc gen_zocl_node {} {
 }
 
 proc generate {lib_handle} {
-    add_skeleton
-    foreach drv_handle [get_drivers] {
-        # generate the default properties
-        gen_peripheral_nodes $drv_handle "create_node_only"
-        gen_reg_property $drv_handle
-        gen_compatible_property $drv_handle
-        gen_drv_prop_from_ip $drv_handle
-        gen_interrupt_property $drv_handle
-        gen_clk_property $drv_handle
-    }
-    gen_board_info
-    gen_include_headers
-    set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-    if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $mainline_ker "none"]} {
-		gen_sata_laneinfo
-		gen_zynqmp_ccf_clk
-		gen_versal_clk
-		gen_zynqmp_opp_freq
-		gen_zynqmp_pinctrl
-		gen_zocl_node
-		if {[string match -nocase $proctype "psv_cortexa72"]} {
-			gen_edac_node
-			gen_ddrmc_node
+	add_skeleton
+	foreach drv_handle [get_drivers] {
+		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
+			gen_peripheral_nodes $drv_handle "create_node_only"
 		}
 	}
-    }
-    if {[string match -nocase $proctype "ps7_cortexa9"]} {
-	set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
-	if {[string match -nocase $mainline_ker "none"]} {
-            gen_zocl_node
-        }
-    }
-    gen_ext_axi_interface
+	foreach drv_handle [get_drivers] {
+		# generate the default properties
+		if {![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
+			gen_peripheral_nodes $drv_handle "create_node_only"
+		}
+		gen_reg_property $drv_handle
+		gen_compatible_property $drv_handle
+		gen_drv_prop_from_ip $drv_handle
+		gen_interrupt_property $drv_handle
+		gen_clk_property $drv_handle
+	}
+	gen_board_info
+	gen_include_headers
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+		if {[string match -nocase $mainline_ker "none"]} {
+			gen_sata_laneinfo
+			gen_zynqmp_ccf_clk
+			gen_versal_clk
+			gen_zynqmp_opp_freq
+			gen_zynqmp_pinctrl
+			gen_zocl_node
+			if {[string match -nocase $proctype "psv_cortexa72"]} {
+				gen_edac_node
+				gen_ddrmc_node
+			}
+		}
+	}
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+		set mainline_ker [get_property CONFIG.mainline_kernel [get_os]]
+		if {[string match -nocase $mainline_ker "none"]} {
+			gen_zocl_node
+		}
+	}
+	gen_ext_axi_interface
 }
 
 proc post_generate {os_handle} {
