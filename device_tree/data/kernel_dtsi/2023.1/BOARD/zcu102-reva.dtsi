@@ -51,10 +51,6 @@
 		};
 	};
 
-	chosen {
-		xlnx,eeprom = &eeprom;
-	};
-
 	ina226-u76 {
 		compatible = "iio-hwmon";
 		io-channels = <&u76 0>, <&u76 1>, <&u76 2>, <&u76 3>;
