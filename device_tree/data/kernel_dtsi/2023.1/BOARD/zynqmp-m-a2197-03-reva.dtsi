@@ -436,11 +436,6 @@
 	};
 };
 
-&usb0 {
-	xlnx,usb-polarity = <0>;
-	xlnx,usb-reset-mode = <0>;
-};
-
 &dwc3_0 {
 	dr_mode = "host";
 	/* dr_mode = "peripheral"; */
@@ -449,8 +444,6 @@
 
 &usb1 {
 	status = "disabled"; /* not at mem board */
-	xlnx,usb-polarity = <0>;
-	xlnx,usb-reset-mode = <0>;
 };
 
 &dwc3_1 {

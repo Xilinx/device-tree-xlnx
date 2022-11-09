@@ -217,7 +217,6 @@
 	cdns,fifo-depth = <508>;
 	cdns,fifo-width = <4>;
 	cdns,is-dma = <1>;
-	cdns,is-stig-pgm = <1>;
 	cdns,trigger-address = <0x00000000>;
 	flash@0 {
 		compatible = "n25q512a", "micron,m25p80", "spi-flash";

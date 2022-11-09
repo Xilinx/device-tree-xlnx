@@ -304,6 +304,10 @@
 	clocks = <&zynqmp_clk AMS_REF>;
 };
 
+&zynqmp_pcap {
+	clocks = <&zynqmp_clk PCAP>;
+};
+
 &zynqmp_dpdma {
 	clocks = <&zynqmp_clk DPDMA_REF>;
 	assigned-clocks = <&zynqmp_clk DPDMA_REF>; /* apll */
@@ -318,6 +322,3 @@
 	clocks = <&zynqmp_clk DP_AUDIO_REF>;
 };
 
-&zynqmp_pcap {
-	clocks = <&zynqmp_clk PCAP>;
-};

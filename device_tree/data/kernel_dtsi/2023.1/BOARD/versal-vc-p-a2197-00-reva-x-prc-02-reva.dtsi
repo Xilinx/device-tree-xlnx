@@ -52,10 +52,6 @@
 	xlnx,mio-bank = <0>;
 };
 
-&usb0 {
-	xlnx,usb-polarity = <0>;
-	xlnx,usb-reset-mode = <0>;
-};
 
 &dwc3_0 { /* U4 */
 	dr_mode = "peripheral";

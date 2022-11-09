@@ -286,11 +286,6 @@
 	};
 };
 
-&usb0 { /* USB0 MIO52-63 */
-	xlnx,usb-polarity = <0>;
-	xlnx,usb-reset-mode = <0>;
-};
-
 &dwc3_0 {
 	dr_mode = "peripheral";
 	maximum-speed = "high-speed";

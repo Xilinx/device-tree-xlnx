@@ -90,11 +90,6 @@
 	clock-frequency = <400000>;
 };
 
-&usb0 { /* PMC_MIO13_500 - PMC_MIO25 USB 2.0 */
-	xlnx,usb-polarity = <0x0>;
-	xlnx,usb-reset-mode = <0x0>;
-};
-
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed";

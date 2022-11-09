@@ -539,8 +539,6 @@
 };
 
 &usb0 {
-        xlnx,usb-polarity = <0x0>;
-        xlnx,usb-reset-mode = <0x0>;
 	phy-names = "usb3-phy";
 	phys = <&psgtr 1 PHY_TYPE_USB3 0 1>;
 };
@@ -550,11 +548,6 @@
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
 	maximum-speed = "super-speed";
-};
-
-&usb1 {
-        xlnx,usb-polarity = <0x0>;
-        xlnx,usb-reset-mode = <0x0>;
 };
 
 &dwc3_1 {

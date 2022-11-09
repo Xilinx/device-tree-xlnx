@@ -95,7 +95,7 @@
 		ranges;
 
 		serial0: serial@ff000000 {
-			compatible = "arm,pl011", "arm,sbsa-uart";
+			compatible = "arm,pl011", "arm,primecell";
 			status = "okay";
 			interrupt-parent = <&gic>;
 			interrupts = <0 18 4>;
@@ -472,7 +472,6 @@
 			reg = <0x0 0xf1040000 0x0 0x10000>;
 			clock-names = "clk_xin", "clk_ahb";
 			clocks = <&clk25 &clk25>;
-			xlnx,device_id = <0>;
 			xlnx,mio_bank = <0>;
 			/* iommus = <&smmu 0x242>; */
 		};
@@ -485,7 +484,6 @@
 			reg = <0x0 0xf1050000 0x0 0x10000>;
 			clock-names = "clk_xin", "clk_ahb";
 			clocks = <&clk25 &clk25>;
-			xlnx,device_id = <1>;
 			xlnx,mio_bank = <0>;
 			/* iommus = <&smmu 0x243>; */
 		};

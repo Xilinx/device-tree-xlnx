@@ -412,7 +412,6 @@
 			reg = <0 0xf1040000 0 0x10000>;
 			interrupts = <0 126 4>;
 			clock-names = "clk_xin", "clk_ahb";
-			xlnx,device_id = <0>;
 			#clock-cells = <1>;
 			clock-output-names = "clk_out_sd0", "clk_in_sd0";
 			/* iommus = <&smmu 0x242>; */
@@ -425,7 +424,6 @@
 			reg = <0 0xf1050000 0 0x10000>;
 			interrupts = <0 128 4>;
 			clock-names = "clk_xin", "clk_ahb";
-			xlnx,device_id = <1>;
 			#clock-cells = <1>;
 			clock-output-names = "clk_out_sd1", "clk_in_sd1";
 			/* iommus = <&smmu 0x243>; */
@@ -433,21 +431,21 @@
 		};
 
 		serial0: serial@ff000000 {
-			compatible = "arm,pl011", "arm,sbsa-uart";
+			compatible = "arm,pl011", "arm,primecell";
 			status = "disabled";
 			reg = <0 0xff000000 0 0x1000>;
 			interrupts = <0 18 4>;
-			clock-names = "uart_clk", "apb_clk";
+			clock-names = "uartclk", "apb_pclk";
 			current-speed = <115200>;
 			u-boot,dm-pre-reloc;
 		};
 
 		serial1: serial@ff010000 {
-			compatible = "arm,pl011", "arm,sbsa-uart";
+			compatible = "arm,pl011", "arm,primecell";
 			status = "disabled";
 			reg = <0 0xff010000 0 0x1000>;
 			interrupts = <0 19 4>;
-			clock-names = "uart_clk", "apb_clk";
+			clock-names = "uartclk", "apb_pclk";
 			current-speed = <115200>;
 			u-boot,dm-pre-reloc;
 		};
@@ -478,7 +476,6 @@
 			cdns,fifo-depth = <256>;
 			cdns,fifo-width = <4>;
 			cdns,is-dma = <1>;
-			cdns,is-stig-pgm = <1>;
 			cdns,trigger-address = <0xC0000000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -599,9 +596,7 @@
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
-				snps,refclk_fladj;
 				clock-names = "ref";
-				snps,mask_phy_reset;
 				/* dma-coherent; */
 			};
 		};

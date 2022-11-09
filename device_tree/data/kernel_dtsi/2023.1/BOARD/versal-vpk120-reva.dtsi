@@ -51,11 +51,6 @@
 	};
 };
 
-&usb0 { /* PMC_MIO_500 13 - 25 USB 2.0 */
-	xlnx,usb-polarity = <0>;
-	xlnx,usb-reset-mode = <0>;
-};
-
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed"; /* FIXME */
