@@ -33,6 +33,7 @@ global or_id
 global or_cnt
 set or_id 0
 set or_cnt 0
+global set drv_handlers_mapping [dict create]
 global set end_mappings [dict create]
 global set remote_mappings [dict create]
 global set port1_end_mappings [dict create]
@@ -5064,7 +5065,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	if {[string_is_empty $intr_info]} {
 		return -1
 	}
-	set_drv_prop $drv_handle interrupts $intr_info intlist
+    global drv_handlers_mapping
+    if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "vdu"]} {
+        dict lappend drv_handlers_mapping $drv_handle "interrupts" "$intr_info"
+    } else {
+	    set_drv_prop $drv_handle interrupts $intr_info intlist
+    }
+
 	if {[string_is_empty $intc]} {
 		return -1
 	}
@@ -5073,22 +5080,32 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	if { [string match -nocase $intc "psu_acpu_gic"] || [string match -nocase $intc "psv_acpu_gic"]} {
 		set intc "gic"
 	}
+    set add_intr_parent ""
 	if { $intc == "gic" && ([string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"])} {
-		set_drv_prop $drv_handle interrupt-parent $intc reference
+		set add_intr_parent "1"
 	} elseif { $intc == "intc" && [string match -nocase $proctype "ps7_cortexa9" ] } {
-		set_drv_prop $drv_handle interrupt-parent $intc reference
+		set add_intr_parent "1"
 	} else {
 		set index [lsearch [get_mem_ranges -of_objects [get_cells -hier [get_sw_processor]]] $intc]
 		if {$index != -1 } {
-			set_drv_prop $drv_handle interrupt-parent $intc reference
+		    set add_intr_parent "1"
 		}
 	}
+    if {[llength $add_intr_parent]} {
+        if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "vdu"]} {
+            dict lappend drv_handlers_mapping $drv_handle "interrupt-parent" "$intc"
+        } else {
+            set_drv_prop $drv_handle interrupt-parent $intc reference
+        }
+    }
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "xdma"]} {
 		set msi_rx_pin_en [get_property CONFIG.msi_rx_pin_en [get_cells -hier $drv_handle]]
 		if {[string match -nocase $msi_rx_pin_en "true"]} {
 			set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
 		}
-	} else {
+	} elseif {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "vdu"]} {
+        dict lappend drv_handlers_mapping $drv_handle "interrupt-names" "$intr_names"
+    } else {
 		set_drv_prop_if_empty $drv_handle "interrupt-names" $intr_names stringlist
 	}
 }
@@ -5102,7 +5119,7 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 		}
 	}
 	set ip_name  [get_property IP_NAME [get_cells -hier $drv_handle]]
-	if {$ip_name == "xxv_ethernet" || $ip_name == "ddr4" || $ip_name == "mrmac"} {
+	if {$ip_name == "xxv_ethernet" || $ip_name == "ddr4" || $ip_name == "mrmac" || $ip_name == "vdu"} {
 		return
 	}
 
