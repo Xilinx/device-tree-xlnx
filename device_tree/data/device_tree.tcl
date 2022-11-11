@@ -325,6 +325,7 @@ proc gen_include_headers {} {
 		set power_base_file ""
 		set reset_base_file ""
 		set regnode_list ""
+        set clock_base_file ""
 		if {[string match -nocase $proctype "psu_cortexa53"]} {
 			set power_list "xlnx-zynqmp-power.h"
 			set clock_list "xlnx-zynqmp-clk.h"
@@ -334,7 +335,8 @@ proc gen_include_headers {} {
 		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
 			set power_list "xlnx-versal-net-power.h"
 		        set power_base_file "xlnx-versal-power.h"
-			set clock_list "xlnx-versal-clk.h"
+			set clock_list "xlnx-versal-net-clk.h"
+            set clock_base_file "xlnx-versal-clk.h"
 			set reset_list "xlnx-versal-net-resets.h"
 		        set reset_base_file "xlnx-versal-resets.h"
 			set regnode_list "xlnx-versal-regnode.h"
@@ -364,6 +366,8 @@ proc gen_include_headers {} {
 					file copy -force $file $powerdir
 				} elseif {[string first $clock_list $file] != -1} {
 					file copy -force $file $clockdir
+                } elseif {[string first $clock_base_file $file] != -1} {
+                    file copy -force $file $clockdir
 				} elseif {[string first $reset_list $file] != -1} {
 					file copy -force $file $resetdir
 				} elseif {[string first $dpdma_list $file] != -1} {
