@@ -48,7 +48,9 @@ proc generate {drv_handle} {
 
 	set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
 	set is_mrmac [is_mrmac_connected $drv_handle "M_AXIS_MM2S"]
-	if { $axiethernetfound || $is_xxv == 1 || $is_mrmac == 1} {
+	# if tsn ip exists in the design then it is through mcdma so changing the compatible string
+	set tsn_inst_name [get_cells -filter {IP_NAME =~ "*tsn*"}]
+	if { $axiethernetfound || $is_xxv == 1 || $is_mrmac == 1 || [llength $tsn_inst_name] } {
 		set compatstring "xlnx,eth-dma"
 		set_property compatible "$compatstring" $drv_handle
 	}
