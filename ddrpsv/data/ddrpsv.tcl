@@ -33,6 +33,10 @@ proc generate {drv_handle} {
 	set is_ddr_ch_1 0
 	set is_ddr_ch_2 0
 	set is_ddr_ch_3 0
+	set is_hbm_0 0
+	set is_hbm_1 0
+	set is_hbm_2 0
+	set is_hbm_3 0
 
 	set sw_proc [hsi::get_sw_processor]
 	set periph [get_cells -hier $drv_handle]
@@ -82,6 +86,30 @@ proc generate {drv_handle} {
 			}
 			set high_value_6 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
 			set is_ddr_ch_3 1
+		} elseif {[string match "HBM0*" $block_name]} {
+			if {$is_hbm_0 == 0} {
+				set hbm_base_value_0 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set hbm_high_value_0 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_hbm_0 1
+		} elseif {[string match "HBM1*" $block_name]} {
+			if {$is_hbm_1 == 0} {
+				set hbm_base_value_1 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set hbm_high_value_1 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_hbm_1 1
+		} elseif {[string match "HBM2*" $block_name]} {
+			if {$is_hbm_2 == 0} {
+				set hbm_base_value_2 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set hbm_high_value_2 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_hbm_2 1
+		} elseif {[string match "HBM3*" $block_name]} {
+			if {$is_hbm_3 == 0} {
+				set hbm_base_value_3 [common::get_property BASE_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			}
+			set hbm_high_value_3 [common::get_property HIGH_VALUE [lindex [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph] $i]]
+			set is_hbm_3 1
 		}
 		incr i
 	}
@@ -114,6 +142,22 @@ proc generate {drv_handle} {
 		set reg_val_6 [generate_reg_property $base_value_6 $high_value_6]
 		set updat [lappend updat $reg_val_6]
 	}
+	if {$is_hbm_0 == 1} {
+		set hbm_reg_val_0 [generate_reg_property $hbm_base_value_0 $hbm_high_value_0]
+		set updat [lappend updat $hbm_reg_val_0]
+	}
+	if {$is_hbm_1 == 1} {
+		set hbm_reg_val_1 [generate_reg_property $hbm_base_value_1 $hbm_high_value_1]
+		set updat [lappend updat $hbm_reg_val_1]
+	}
+	if {$is_hbm_2 == 1} {
+		set hbm_reg_val_2 [generate_reg_property $hbm_base_value_2 $hbm_high_value_2]
+		set updat [lappend updat $hbm_reg_val_2]
+	}
+	if {$is_hbm_3 == 1} {
+		set hbm_reg_val_3 [generate_reg_property $hbm_base_value_3 $hbm_high_value_3]
+		set updat [lappend updat $hbm_reg_val_3]
+	}
 	set len [llength $updat]
 	set reg_val ""
 	switch $len {
@@ -143,6 +187,22 @@ proc generate {drv_handle} {
 		"7" {
 			set reg_val [lindex $updat 0]
 			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]"
+		}
+		"8" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]>, <[lindex $updat 7]"
+		}
+		"9" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]>, <[lindex $updat 7]>, <[lindex $updat 8]"
+		}
+		"10" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]>, <[lindex $updat 7]>, <[lindex $updat 8]>, <[lindex $updat 9]"
+		}
+		"11" {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, <[lindex $updat 1]>, <[lindex $updat 2]>, <[lindex $updat 3]>, <[lindex $updat 4]>, <[lindex $updat 5]>, <[lindex $updat 6]>, <[lindex $updat 7]>, <[lindex $updat 8]>, <[lindex $updat 9]>, <[lindex $updat 10]"
 		}
 	}
 
