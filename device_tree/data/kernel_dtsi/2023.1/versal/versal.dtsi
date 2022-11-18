@@ -435,6 +435,7 @@
 			status = "disabled";
 			reg = <0 0xff000000 0 0x1000>;
 			interrupts = <0 18 4>;
+			reg-io-width = <4>
 			clock-names = "uartclk", "apb_pclk";
 			current-speed = <115200>;
 			u-boot,dm-pre-reloc;
@@ -445,6 +446,7 @@
 			status = "disabled";
 			reg = <0 0xff010000 0 0x1000>;
 			interrupts = <0 19 4>;
+			reg-io-width = <4>;
 			clock-names = "uartclk", "apb_pclk";
 			current-speed = <115200>;
 			u-boot,dm-pre-reloc;
