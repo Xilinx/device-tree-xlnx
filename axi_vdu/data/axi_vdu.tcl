@@ -143,7 +143,31 @@ proc generate {drv_handle} {
         hsi::utils::add_new_dts_param $al5d_node \
             "/*To be filled by user depending on design else CMA region will be used */" "" comment
         hsi::utils::add_new_dts_param $al5d_node "/*memory-region = <&mem_reg_0> */" "" comment
-        set reg "0x0 0x$al5d_baseaddr 0x0 $al5d_offset"
+
+		# check if base address is 64bit and split it as MSB and LSB
+		if {[regexp -nocase {0x([0-9a-f]{9})} "0x$al5d_baseaddr" match]} {
+		    set temp $al5d_baseaddr
+			set temp [string trimleft [string trimleft $temp 0] x]
+			set len [string length $temp]
+			set rem [expr {${len} - 8}]
+			set high_base "0x[string range $temp $rem $len]"
+			set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
+			set low_base [format 0x%08x $low_base]
+			if {[regexp -nocase {0x([0-9a-f]{9})} "$al5d_offset" match]} {
+			    set temp $al5d_offset
+				set temp [string trimleft [string trimleft $temp 0] x]
+				set len [string length $temp]
+				set rem [expr {${len} - 8}]
+				set high_size "0x[string range $temp $rem $len]"
+				set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+				set low_size [format 0x%08x $low_size]
+				set reg "$low_base $high_base $low_size $high_size"
+			} else {
+				set reg "$low_base $high_base 0x0 $al5d_offset"
+			}
+		} else {
+			set reg "0x0 0x$al5d_baseaddr 0x0 $al5d_offset"
+		}
         hsi::utils::add_new_dts_param $al5d_node "reg" "$reg" int
         if {[llength $intr_parent]} {
             set intr_width [get_intr_width $intr_parent]
