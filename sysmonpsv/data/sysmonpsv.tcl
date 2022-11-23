@@ -28,6 +28,14 @@ proc generate {drv_handle} {
     }
     hsi::utils::add_new_dts_param $node "#address-cells" 2 int
     hsi::utils::add_new_dts_param $node "#size-cells" 2 int
+    set ssitvalue [get_property IS_SSIT [get_current_part $drv_handle]]
+    if {[llength $ssitvalue]} {
+	hsi::utils::add_new_dts_param "$node" "xlnx,ssit-device" "$ssitvalue" bool
+	}
+    set slrsvalue [get_property NUM_OF_SLRS [get_current_part $drv_handle]]
+    if {[llength $slrsvalue] && $slrsvalue != "-1"} {
+	hsi::utils::add_new_dts_param "$node" "xlnx,num-of-slr" "$slrsvalue" int
+	}
 
     for {set supply_num 0} {$supply_num < 160} {incr supply_num} {
 	    set meas "C_MEAS_${supply_num}"
