@@ -138,7 +138,7 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	status = "okay";
-	clock-frequency = <400000>;
+	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
@@ -148,7 +148,7 @@
 
 &i2c1 { /* i2c1 MIO 24-25 */
 	u-boot,dm-pre-reloc;
-	clock-frequency = <400000>;
+	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
