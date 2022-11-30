@@ -29,12 +29,6 @@
                 serial1 = &dcc;
         };
 
-	chosen {
-		nvmem0 = <&eeprom>;
-		nvmem1 = &eeprom_ebm;
-		nvmem2 = &eeprom_fmc1;
-		nvmem3 = &eeprom_fmc2;
-	};
 
 	ref_clk: ref_clk {
 		status = "okay";

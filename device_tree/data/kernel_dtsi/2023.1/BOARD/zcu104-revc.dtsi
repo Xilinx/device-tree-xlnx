@@ -28,9 +28,6 @@
                 usb0 = &usb0;
         };
 
-	chosen {
-		nvmem0 = &eeprom;
-	};
 
 	ina226 {
 		compatible = "iio-hwmon";

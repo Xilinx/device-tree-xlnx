@@ -14,9 +14,6 @@
 	compatible = "xlnx,zynqmp-x-prc-01-revA", "xlnx,zynqmp-x-prc-01", "xlnx,zynqmp-p-a2197-00-revA", "xlnx,zynqmp-a2197-revA",
 				"xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
-	chosen {
-		nvmem0 = <&eeprom>;
-	};
 
 	ref_clk: ref_clk {
 		status = "okay";

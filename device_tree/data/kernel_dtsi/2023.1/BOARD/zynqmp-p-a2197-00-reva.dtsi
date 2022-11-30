@@ -29,9 +29,6 @@
                 usb1 = &usb1;
         };
 
-	chosen {
-		nvmem0 = <&eeprom>;
-	};
 
 	ref_clk: ref_clk {
 		status = "okay";

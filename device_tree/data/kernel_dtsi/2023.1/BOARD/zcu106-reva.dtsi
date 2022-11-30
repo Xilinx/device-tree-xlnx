@@ -51,9 +51,6 @@
 		};
 	};
 
-	chosen {
-		nvmem0 = &eeprom;
-	};
 
 	ina226-u76 {
 		compatible = "iio-hwmon";

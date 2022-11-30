@@ -12,10 +12,6 @@
 	model = "Versal System Controller RevA";
 	compatible = "xlnx,versal-sc-revA", "xlnx,versal-sc", "xlnx,zynqmp";
 
-	chosen {
-		nvmem0 = &eeprom;
-	};
-
 	/* SC Bank 43
 	FIXME no idea what they do VCCO_500_RBIAS, VCCO_501_RBIAS, VCCO_502_RBIAS
 	SYSCTLR_GPIO0 - 5 - conneced to versal */

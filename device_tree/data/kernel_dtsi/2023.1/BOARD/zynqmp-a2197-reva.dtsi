@@ -18,10 +18,6 @@
                 serial0 = &uart0;
         };
 
-	chosen {
-		nvmem0 = &eeprom1;
-		nvmem1 = &eeprom0;
-	};
 };
 
 &i2c0 {

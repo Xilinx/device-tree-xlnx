@@ -29,9 +29,6 @@
                 spi0 = &qspi;
         };
 
-	chosen {
-		nvmem0 = <&eeprom>;
-	};
 	ina226-vcc-aux {
 		compatible = "iio-hwmon";
 		io-channels = <&vcc_aux 0>, <&vcc_aux 1>, <&vcc_aux 2>, <&vcc_aux 3>;
