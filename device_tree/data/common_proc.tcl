@@ -6408,10 +6408,23 @@ proc add_memory_node {drv_handle} {
 	set ddr_list "psu_ddr ps7_ddr axi_emc mig_7series psv_ddr"
 	if {[lsearch -nocase $ddr_list $ddr_ip] >= 0} {
 		set parent_node [add_or_get_dt_node -n / -d ${master_dts}]
-		set unit_addr [get_baseaddr $drv_handle]
-		set memory_node [add_or_get_dt_node -n memory -p $parent_node]
+        set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		set reg_value [get_property CONFIG.reg $drv_handle]
-		hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
+        # Append base address to memory node.
+        if {[llength "$reg_value"]} {
+            if {[string match -nocase $proctype "psu_cortexa53"] || \
+                [string match -nocase $proctype "psv_cortexa72"] || \
+                [string match -nocase $proctype "psx_cortexa78"]} {
+                set higheraddr [expr [lindex $reg_value 0] << 32]
+                set loweraddr [lindex $reg_value 1]
+                set unitaddr [format 0x%x [expr {${higheraddr} + ${loweraddr}}]]
+            } else {
+                set unitaddr [lindex $reg_value 0]
+            }
+            regsub -all {^0x} $unitaddr {} unitaddr
+            set memory_node [add_or_get_dt_node -n memory -p $parent_node -u $unitaddr]
+            hsi::utils::add_new_dts_param "${memory_node}" "reg" $reg_value inthexlist
+        }
 		# maybe hardcoded
 		if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
 			set dev_type memory
