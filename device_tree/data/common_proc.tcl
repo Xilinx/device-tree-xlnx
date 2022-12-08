@@ -6238,14 +6238,20 @@ proc gen_root_node {drv_handle} {
 		"psx_cortexa78" {
 			create_dt_tree_from_dts_file
 			global dtsi_fname
-			update_system_dts_include [file tail ${dtsi_fname}]
+            update_system_dts_include [file tail ${dtsi_fname}]
 			set overrides [get_property CONFIG.periph_type_overrides [get_os]]
 			set dtsi_file " "
 			foreach override $overrides {
 				if {[lindex $override 0] == "BOARD"} {
-					set dtsi_file [lindex $override 1]
+					set board_dtsi_file [lindex $override 1]
 				}
 			}
+            #TMP fix to support ipp fixed clocks
+            if {[string match -nocase $board_dtsi_file "versal-net-ipp-rev1.9"]} {
+                set dtsi_file $board_dtsi_file
+            } else {
+                update_system_dts_include [file tail "versal-net-clk.dtsi"]
+            }
 			return 0
 		}
 		"microblaze" {

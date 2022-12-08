@@ -335,11 +335,11 @@ proc gen_include_headers {} {
 			set gpio_list "gpio.h"
 		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
 			set power_list "xlnx-versal-net-power.h"
-		        set power_base_file "xlnx-versal-power.h"
+		    set power_base_file "xlnx-versal-power.h"
 			set clock_list "xlnx-versal-net-clk.h"
             set clock_base_file "xlnx-versal-clk.h"
 			set reset_list "xlnx-versal-net-resets.h"
-		        set reset_base_file "xlnx-versal-resets.h"
+		    set reset_base_file "xlnx-versal-resets.h"
 			set regnode_list "xlnx-versal-regnode.h"
 			set dpdma_list "xlnx-zynqmp-dpdma.h"
 			set gpio_list "gpio.h"

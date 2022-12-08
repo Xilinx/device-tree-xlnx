@@ -15,8 +15,18 @@
 
 proc generate {drv_handle} {
 	global dtsi_fname
-	# copied board file inplace of versal-net.dtsi as no dts in uboot
-	set dtsi_fname "versal-net/versal-net-ipp-rev1.9.dtsi"
+	set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+	foreach override $overrides {
+	    if {[lindex $override 0] == "BOARD"} {
+	        set board_dtsi_file [lindex $override 1]
+	    }
+	}
+    #TMP fix to support ipp fixed clocks
+    if {[string match -nocase $board_dtsi_file "versal-net-ipp-rev1.9"]} {
+        set dtsi_fname "versal-net/versal-net-ipp-rev1.9.dtsi"
+    } else {
+	    set dtsi_fname "versal-net/versal-net.dtsi"
+    }
 
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
