@@ -83,14 +83,6 @@
 	phy-mode = "rgmii-id";
 };
 
-&i2c0 { /* PMC_MIO46/47 */
-	clock-frequency = <400000>;
-};
-
-&i2c1 { /* PMC_MIO44/45 */
-	clock-frequency = <400000>;
-};
-
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed";

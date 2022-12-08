@@ -65,14 +65,6 @@
 	no-1-8-v;
 };
 
-&i2c0 { /* PMC_MIO46/47 */
-	clock-frequency = <400000>;
-};
-
-&i2c1 { /* PMC_MIO44/45 */
-	clock-frequency = <400000>;
-};
-
 /* PCIe at MIO 38/39/40/50 */
 
 &gem0 { /* PMC_MIO_48 - reset, LPD_MIO0-11 , mdio LPD_MIO24/25 */

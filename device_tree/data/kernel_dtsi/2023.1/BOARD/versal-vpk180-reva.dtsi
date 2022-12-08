@@ -68,12 +68,7 @@
 	clk-phase-uhs-ddr50 = <126>, <36>;
 };
 
-&i2c0 { /* PMC_MIO46/47 */
-	clock-frequency = <400000>;
-};
-
 &i2c1 { /* PMC_MIO44/45 */
-	clock-frequency = <400000>;
 
 	/* Use for storing information about board */
 	eeprom: eeprom@54 { /* u34 - m24128 16kB */
