@@ -1,7 +1,8 @@
 /*
  * MIO pin configuration defines for Xilinx ZynqMP
  *
- * Copyright (C) 2017 Xilinx, Inc.
+ * Copyright (C) 2017-2022 Xilinx, Inc.
+ * Copyright (C) 2022 Advanced Micro Devices, Inc. All Rights Reserved.
  * Author: Chirag Parekh <chirag.parekh@xilinx.com>
  *
  * This program is free software; you can redistribute it and/or

@@ -1,5 +1,6 @@
 #
-# (C) Copyright 2015 Xilinx, Inc.
+# (C) Copyright 2015-2022 Xilinx, Inc.
+# (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as

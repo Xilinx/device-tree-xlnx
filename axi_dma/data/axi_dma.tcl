@@ -1,8 +1,9 @@
 #
-# (C) Copyright 2014-2015 Xilinx, Inc.
+# (C) Copyright 2007-2012 PetaLogix Qld Pty Ltd
 # Based on original code:
 # (C) Copyright 2007-2014 Michal Simek
-# (C) Copyright 2007-2012 PetaLogix Qld Pty Ltd
+# (C) Copyright 2014-2022 Xilinx, Inc.
+# (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
 #
 # Michal SIMEK <monstr@monstr.eu>
 #
