@@ -15,6 +15,7 @@
 
 proc generate {drv_handle} {
 	global dtsi_fname
+    set board_dtsi_file ""
 	set overrides [get_property CONFIG.periph_type_overrides [get_os]]
 	foreach override $overrides {
 	    if {[lindex $override 0] == "BOARD"} {
