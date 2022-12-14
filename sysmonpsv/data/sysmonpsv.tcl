@@ -45,7 +45,8 @@ proc generate {drv_handle} {
 	    if {[llength $value] != 0} {
 		    set local_value [string tolower [get_property CONFIG.$meas [get_cells -hier $drv_handle]]]
 		    set id_value [get_property CONFIG.$id [get_cells -hier $drv_handle]]
-		    set supply_node [add_or_get_dt_node -n "supply@$id_value" -p $node]
+            set default_dts [get_property CONFIG.pcw_dts [get_os]]
+		    set supply_node [add_or_get_dt_node -n "supply@$id_value" -p $node -d ${default_dts}]
 		    hsi::utils::add_new_dts_param "$supply_node" "reg" "$id_value" int
 		    hsi::utils::add_new_dts_param "$supply_node" "xlnx,name" "$local_value" string
 		    incr num_supply_channels
