@@ -1175,20 +1175,30 @@ proc update_alias {os_handle} {
 		set name "i2c$i"
 		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
 	}
-	set uart_pslen [llength $psuartlist]
-	for {set i 0} {$i < $uart_pslen} {incr i} {
-		set drv_name [lindex $psuartlist $i]
-		set value [ps_node_mapping $drv_name label]
-		set name "serial$i"
-		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
-	}
-	set uart_pllen [llength $pluartlist]
-	set uartlen1 [expr {$uart_pslen + $uart_pllen}]
-	for {set i $uart_pslen} {$i < $uartlen1} {incr i} {
-		set drv_name [lindex $pluartlist [expr {$i - $uart_pslen}]]
-		set value [ps_node_mapping $drv_name label]
-		set name "serial$i"
-		hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+	 set is_pl_console [is_pl_ip $console_ip]
+	if {$is_pl_console} {
+		for {set i 0} {$i < $uartlen} {incr i} {
+			set drv_name [lindex $uartate $i]
+			set value [ps_node_mapping $drv_name label]
+			set name "serial$i"
+			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+		}
+	} else {
+		set uart_pslen [llength $psuartlist]
+		for {set i 0} {$i < $uart_pslen} {incr i} {
+			set drv_name [lindex $psuartlist $i]
+			set value [ps_node_mapping $drv_name label]
+			set name "serial$i"
+			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+		}
+		set uart_pllen [llength $pluartlist]
+		set uartlen1 [expr {$uart_pslen + $uart_pllen}]
+		for {set i $uart_pslen} {$i < $uartlen1} {incr i} {
+			set drv_name [lindex $pluartlist [expr {$i - $uart_pslen}]]
+			set value [ps_node_mapping $drv_name label]
+			set name "serial$i"
+			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
+		}
 	}
 	set spi_pslen [llength $psspilist]
 	for {set i 0} {$i < $spi_pslen} {incr i} {
