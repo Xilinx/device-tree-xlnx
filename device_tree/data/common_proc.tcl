@@ -552,9 +552,8 @@ proc list_remove_element {cur_list elements} {
 	return $cur_list
 }
 
-proc update_overlay_custom_dts_include {include_file} {
+proc update_overlay_custom_dts_include {include_file overlay_custom_dts} {
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-	set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
 	set overlay_custom_dts_obj [get_dt_trees ${overlay_custom_dts}]
 	if {[string_is_empty $overlay_custom_dts_obj] == 1} {
 		set overlay_custom_dts_obj [set_cur_working_dts ${overlay_custom_dts}]
@@ -1096,10 +1095,17 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
 		if {[llength $overlay_custom_dts] && ![llength $RpRm]} {
-			update_overlay_custom_dts_include $default_dts
+			update_overlay_custom_dts_include $default_dts $overlay_custom_dts
 			set dts_file pl-custom.dtsi
 			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-			update_overlay_custom_dts_include $dts_file
+			update_overlay_custom_dts_include $dts_file $overlay_custom_dts
+		}
+		set partial_overlay_custom_dts [get_property CONFIG.partial_overlay_custom_dts [get_os]]
+		if {[llength $partial_overlay_custom_dts] && [llength $RpRm]} {
+			update_overlay_custom_dts_include $default_dts $partial_overlay_custom_dts
+			set dts_file partial-pl-custom.dtsi
+			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
+			update_overlay_custom_dts_include $dts_file $partial_overlay_custom_dts
 		}
 	} else {
 		update_system_dts_include $default_dts
