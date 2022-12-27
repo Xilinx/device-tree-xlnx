@@ -17,7 +17,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver ddrpsv
 
-  OPTION supported_peripherals = (axi_noc noc_mc_ddr4 noc_mc_ddr5);
+  OPTION supported_peripherals = (axi_noc axi_noc2 noc_mc_ddr4 noc_mc_ddr5);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = ddrpsv;
