@@ -1394,7 +1394,7 @@ proc is_ps_ip {ip_inst} {
 	}
 
 	set ip_name [get_property IP_NAME $ip_obj]
-	if {[string match -nocase $ip_name "axi_noc"]} {
+	if {[string match -nocase $ip_name "axi_noc"] || [string match -nocase $ip_name "axi_noc2"]} {
 		return 0
 	}
 	if {[regexp "ps._*" "$ip_name" match]} {
@@ -4257,7 +4257,7 @@ proc gen_clk_property {drv_handle} {
 	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
 	dtg_verbose "clk_pins:$clk_pins"
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
-	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc mrmac"
+	set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc  axi_noc2 mrmac"
 	if {[lsearch $ignore_list $ip] >= 0 } {
 		return 0
         }
@@ -5628,9 +5628,9 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set ip_type [get_property IP_NAME $ip]
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	if {$dt_overlay} {
-		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc axi_noc2"
 	} else {
-		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc"
+		set ignore_list "lmb_bram_if_cntlr PERIPHERAL axi_noc axi_noc2"
 	}
 	if {[string match -nocase $ip_type "psu_pcie"]} {
 		set pcie_config [get_property CONFIG.C_PCIE_MODE [get_cells -hier $drv_handle]]
