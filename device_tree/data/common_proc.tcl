@@ -1102,10 +1102,11 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		set partial_overlay_custom_dts [get_property CONFIG.partial_overlay_custom_dts [get_os]]
 		if {[llength $partial_overlay_custom_dts] && [llength $RpRm]} {
-			update_overlay_custom_dts_include $default_dts $partial_overlay_custom_dts
-			set dts_file partial-pl-custom.dtsi
+			append partial_overlay_dts $partial_overlay_custom_dts "-" $RpRm ".dts"
+			update_overlay_custom_dts_include $default_dts $partial_overlay_dts
+			set dts_file pl-partial-custom-$RpRm.dtsi
 			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
-			update_overlay_custom_dts_include $dts_file $partial_overlay_custom_dts
+			update_overlay_custom_dts_include $dts_file $partial_overlay_dts
 		}
 	} else {
 		update_system_dts_include $default_dts
