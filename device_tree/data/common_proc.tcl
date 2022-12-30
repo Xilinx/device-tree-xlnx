@@ -2789,8 +2789,8 @@ proc update_endpoints {drv_handle} {
 			}
 		}
 	}
-
-	if {[string match -nocase [get_property IP_NAME $ip] "v_hdmi_tx_ss"]} {
+	puts "ipname:[get_property IP_NAME $ip]"
+	if {[string match -nocase [get_property IP_NAME $ip] "v_hdmi_tx_ss"] || [string match -nocase [get_property IP_NAME $ip] "v_hdmi_txss1"]} {
 		set ports_node [add_or_get_dt_node -n "ports" -l hdmitx_ports$drv_handle -p $node]
 		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
@@ -3025,9 +3025,7 @@ proc update_endpoints {drv_handle} {
 				set inip [get_in_connect_ip $ip $intf]
 				if {[llength $inip]} {
 					set inipname [get_property IP_NAME $inip]
-					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_l
-ut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_sc
-enechange"
+					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
 					if {[lsearch  -nocase $valid_mmip_list $inipname] >= 0} {
 						set rt_node [add_or_get_dt_node -n ${dev_type} -l ${label} -u 0 -d ${default_dts} -p $bus_node -auto_ref_parent]
 						set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$ip -p $rt_node]
@@ -3072,7 +3070,7 @@ enechange"
 		foreach inip $inips {
 			if {[llength $inip]} {
 				set inipname [get_property IP_NAME $inip]
-					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
+				set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
 					if {[lsearch -nocase $valid_mmip_list $inipname] >= 0} {
 						set ports_node [add_or_get_dt_node -n "ports" -l axis_switch_ports$drv_handle -p $node]
 						hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
@@ -3124,9 +3122,7 @@ enechange"
 				if {[llength $broad]} {
 				if {[llength $inip]} {
 					set inipname [get_property IP_NAME $inip]
-set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_l
-ut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_sc
-enechange"
+					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
 				if {[lsearch  -nocase $valid_mmip_list $inipname] >= 0} {
 				set ports_node [add_or_get_dt_node -n "ports" -l axis_broadcaster_ports$ip -p $rt_node]
 				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
@@ -5066,7 +5062,8 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			set intc_names [string map {psu_acpu_gic gic} $intc_names]
 			set ref [lindex $intc_names 0]
 			append ref " [lindex $intc_names 1]>, <&[lindex $intc_names 2] [lindex $intc_names 3]>, <&[lindex $intc_names 4] [lindex $intc_names 5]>,<&[lindex $intc_names 6] [lindex $intc_names 7]>, <&[lindex $intc_names 8] [lindex $intc_names 9]"
-			if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "v_hdmi_tx_ss"]} {
+			if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "v_hdmi_tx_ss"] \
+				|| [string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "v_hdmi_txss1"]} {
 				set_drv_prop_if_empty $drv_handle "interrupts-extended" $ref reference
 			}
 		}
