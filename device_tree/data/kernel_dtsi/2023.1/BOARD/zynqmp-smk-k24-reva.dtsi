@@ -8,7 +8,7 @@
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "zynqmp-smk-k26-revA.dts"
+#include "zynqmp-smk-k26-reva.dtsi"
 
 / {
 	model = "ZynqMP SMK-K24 RevA";

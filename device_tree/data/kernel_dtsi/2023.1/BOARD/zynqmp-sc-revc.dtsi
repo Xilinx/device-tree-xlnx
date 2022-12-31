@@ -8,7 +8,7 @@
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "zynqmp-sc-revB.dts"
+#include "zynqmp-sc-revb.dtsi"
 
 / {
 	model = "ZynqMP Generic System Controller";
