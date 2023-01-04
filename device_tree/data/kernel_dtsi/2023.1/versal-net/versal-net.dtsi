@@ -8,8 +8,6 @@
  * Michal Simek <michal.simek@amd.com>
  */
 
-/dts-v1/;
-
 / {
 	compatible = "xlnx,versal-net";
 	model = "Xilinx Versal NET";

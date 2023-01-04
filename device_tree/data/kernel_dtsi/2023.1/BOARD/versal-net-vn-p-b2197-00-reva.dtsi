@@ -7,6 +7,9 @@
  * Michal Simek <michal.simek@xilinx.com>
  */
 
+#include "versal-net.dtsi"
+#include "versal-net-clk-ccf.dtsi"
+
 / {
 	compatible = "xlnx,versal-net-vn-p-b2197-00-revA",
 		     "xlnx,versal-net-vn-p-b2197-00", "xlnx,versal-net";

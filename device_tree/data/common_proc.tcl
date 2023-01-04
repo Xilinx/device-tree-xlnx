@@ -2789,7 +2789,6 @@ proc update_endpoints {drv_handle} {
 			}
 		}
 	}
-	puts "ipname:[get_property IP_NAME $ip]"
 	if {[string match -nocase [get_property IP_NAME $ip] "v_hdmi_tx_ss"] || [string match -nocase [get_property IP_NAME $ip] "v_hdmi_txss1"]} {
 		set ports_node [add_or_get_dt_node -n "ports" -l hdmitx_ports$drv_handle -p $node]
 		hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
@@ -3164,7 +3163,7 @@ proc get_axis_switch_in_connect_ip {ip intfpins} {
 		foreach cip $connectip {
 			if {[llength $cip]} {
 				set ipname [get_property IP_NAME $cip]
-				puts "ipname:$ipname"
+				#puts "ipname:$ipname"
 				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $cip]
 				if {[llength $ip_mem_handles]} {
 					break
