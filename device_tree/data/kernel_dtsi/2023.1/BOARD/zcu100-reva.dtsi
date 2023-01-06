@@ -59,6 +59,7 @@
 
 	ltc2952: ltc2952 { /* U7 */
 		compatible = "lltc,ltc2952";
+		status = "disabled";
 		trigger-gpios = <&gpio 23 1>; /* INT line - input */
 		watchdog-gpios = <&gpio 24 0>; /* FIXME Bogus - set it up to max3107 */
 		kill-gpios = <&gpio 25 1>; /* KILL signal - output */

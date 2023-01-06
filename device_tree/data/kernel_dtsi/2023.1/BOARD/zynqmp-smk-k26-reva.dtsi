@@ -16,3 +16,7 @@
                      "xlnx,zynqmp-smk-k26-revA", "xlnx,zynqmp-smk-k26",
                      "xlnx,zynqmp";
 };
+
+&sdhci0 {
+	 status = "disabled";
+};

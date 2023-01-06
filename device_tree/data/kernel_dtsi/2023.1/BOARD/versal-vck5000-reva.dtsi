@@ -57,3 +57,7 @@
 &dcc {
 	status = "okay";
 };
+
+&serial1 {
+	 status = "disabled";
+};
