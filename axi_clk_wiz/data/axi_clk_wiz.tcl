@@ -28,6 +28,7 @@ proc generate {drv_handle} {
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	gen_speedgrade $drv_handle
+	set j 0
 	set output_names ""
 	for {set i 1} {$i < 8} {incr i} {
 		if {[get_property CONFIG.C_CLKOUT${i}_USED $ip] != 0} {
@@ -36,10 +37,12 @@ proc generate {drv_handle} {
 			set basefrq [string tolower [get_property CONFIG.C_BASEADDR $ip]]
 			set pin_name "$basefrq-$pin_name"
 			lappend output_names $pin_name
+			incr j
 		}
 	}
 	if {![string_is_empty $output_names]} {
 		set_property CONFIG.clock-output-names $output_names $drv_handle
+		hsi::utils::add_new_property $drv_handle "xlnx,nr-outputs" int $j
 	}
 
 
@@ -56,6 +59,6 @@ proc gen_speedgrade {drv_handle} {
 	set speedgrade [get_property SPEEDGRADE [get_hw_designs]]
 	set num [regexp -all -inline -- {[0-9]} $speedgrade]
 	if {![string equal $num ""]} {
-		hsi::utils::add_new_property $drv_handle "speed-grade" int $num
+		hsi::utils::add_new_property $drv_handle "xlnx,speed-grade" int $num
 	}
 }
