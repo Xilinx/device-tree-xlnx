@@ -6680,14 +6680,17 @@ proc get_intr_cntrl_name { periph_name intr_pin_name } {
 				lappend intr_cntrl $sink_periph
 			}
 		} elseif {[llength $sink_periph] &&  [string match -nocase [common::get_property IP_NAME $sink_periph] "util_ff"]} {
-            lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Q"]
-        }
+			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "Q"]
+		} elseif { [llength $sink_periph] && [string match -nocase [common::get_property IP_NAME $sink_periph] "dfx_decoupler"] } {
+			set intr [get_pins -of_objects $sink_periph -filter {TYPE==INTERRUPT&&DIRECTION==O}]
+			lappend intr_cntrl [get_intr_cntrl_name $sink_periph "$intr"]
+		}
 		if {[llength $intr_cntrl] > 1} {
-				foreach intc $intr_cntrl {
-					if { [::hsi::utils::is_ip_interrupting_current_proc $intc] } {
-						set intr_cntrl $intc
-					}
+			foreach intc $intr_cntrl {
+				if { [::hsi::utils::is_ip_interrupting_current_proc $intc] } {
+					set intr_cntrl $intc
 				}
+			}
 		}
 	}
 	set val [string trim $intr_cntrl \{\}]
