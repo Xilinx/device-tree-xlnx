@@ -75,7 +75,20 @@ proc generate_aie_array_device_info {node drv_handle bus_node} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,core-rows" $corerows noformating
 	append memrows "/bits/ 8 <$mem_rows_start $mem_rows_num>"
 	hsi::utils::add_new_dts_param "${node}" "xlnx,mem-rows" $memrows noformating
-	set power_domain "&versal_firmware 0x18224072"
+
+	set name [get_property NAME [get_current_part $drv_handle]]
+	set part_num [string range $name 0 7]
+
+	if {$part_num == "xcvp2502"} {
+		#s100
+		set power_domain "&versal_firmware 0x18225072"
+	} elseif {$part_num == "xcvp2802"} {
+		#s200
+		set power_domain "&versal_firmware 0x18227072"
+	} else {
+		set power_domain "&versal_firmware 0x18224072"
+	}
+
 	hsi::utils::add_new_dts_param "${node}" "power-domains" $power_domain intlist
 	hsi::utils::add_new_dts_param "${node}" "#address-cells" "2" intlist
 	hsi::utils::add_new_dts_param "${node}" "#size-cells" "2" intlist
@@ -127,20 +140,38 @@ proc generate {drv_handle} {
 	set reg [get_property CONFIG.reg ${drv_handle}]
 	hsi::utils::add_new_dts_param "${aperture_node}" "reg" $reg noformat
 
-	set intr_names "interrupt1"
-	lappend intr_names "interrupt2"
-	lappend intr_names "interrupt3"
-	set intr_num "0x0 0x94 0x4>, <0x0 0x95 0x4>, <0x0 0x96 0x4"
-	set power_domain "&versal_firmware 0x18224072"
 
-	hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-names" $intr_names stringlist
-	hsi::utils::add_new_dts_param "${aperture_node}" "interrupts" $intr_num intlist
-	hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-parent" gic reference
+	set name [get_property NAME [get_current_part $drv_handle]]
+	set part_num [string range $name 0 7]
+
+	if {$part_num == "xcvp2502"} {
+		#s100
+		set power_domain "&versal_firmware 0x18225072"
+		hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,device-name" "100" int
+		set aperture_nodeid 0x18801000
+	} elseif {$part_num == "xcvp2802"} {
+		#s200
+		set power_domain "&versal_firmware 0x18227072"
+		hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,device-name" "200" int
+		set aperture_nodeid 0x18803000
+	} else {
+		#NON SSIT devices
+		set intr_names "interrupt1"
+		lappend intr_names "interrupt2"
+		lappend intr_names "interrupt3"
+		set intr_num "0x0 0x94 0x4>, <0x0 0x95 0x4>, <0x0 0x96 0x4"
+		set power_domain "&versal_firmware 0x18224072"
+		hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-names" $intr_names stringlist
+		hsi::utils::add_new_dts_param "${aperture_node}" "interrupts" $intr_num intlist
+		hsi::utils::add_new_dts_param "${aperture_node}" "interrupt-parent" gic reference
+		hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,device-name" "0" int
+		set aperture_nodeid 0x18800000
+	}
+
 	hsi::utils::add_new_dts_param "${aperture_node}" "power-domains" $power_domain intlist
 	hsi::utils::add_new_dts_param "${aperture_node}" "#address-cells" "2" intlist
 	hsi::utils::add_new_dts_param "${aperture_node}" "#size-cells" "2" intlist
 
-	set aperture_nodeid 0x18800000
 	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,columns" "$::aie_array_cols_start $::aie_array_cols_num" intlist
 	hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,node-id" "${aperture_nodeid}" intlist
 
