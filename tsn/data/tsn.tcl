@@ -466,7 +466,11 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,rxsum" $rxcsum int
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,tsn" "" boolean
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,eth-hasnobuf" "" boolean
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
+	set phymode $phytype
+	if {$phytype == "rgmii"} {
+		set phymode "rgmii-id"
+	}
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phymode string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,channel-ids" $id string
@@ -610,7 +614,11 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,tsn" "" boolean
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,tsn-slave" "" boolean
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,eth-hasnobuf" "" boolean
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phytype string
+	set phymode $phytype
+	if {$phytype == "rgmii"} {
+		set phymode "rgmii-id"
+	}
+	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phymode string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
