@@ -320,69 +320,12 @@ proc gen_include_headers {} {
 	foreach i [get_sw_cores device_tree] {
 		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
-		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
-		set include_list "include*"
+		set includes_dir [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set dir_path "./"
-		set power_base_file ""
-		set reset_base_file ""
-		set regnode_list ""
-        set clock_base_file ""
-		if {[string match -nocase $proctype "psu_cortexa53"]} {
-			set power_list "xlnx-zynqmp-power.h"
-			set clock_list "xlnx-zynqmp-clk.h"
-			set reset_list "xlnx-zynqmp-resets.h"
-			set dpdma_list "xlnx-zynqmp-dpdma.h"
-			set gpio_list "gpio.h"
-		} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
-			set power_list "xlnx-versal-net-power.h"
-		    set power_base_file "xlnx-versal-power.h"
-			set clock_list "xlnx-versal-net-clk.h"
-            set clock_base_file "xlnx-versal-clk.h"
-			set reset_list "xlnx-versal-net-resets.h"
-		    set reset_base_file "xlnx-versal-resets.h"
-			set regnode_list "xlnx-versal-regnode.h"
-			set dpdma_list "xlnx-zynqmp-dpdma.h"
-			set gpio_list "gpio.h"
-		} else {
-			set power_list "xlnx-versal-power.h"
-			set clock_list "xlnx-versal-clk.h"
-			set reset_list "xlnx-versal-resets.h"
-			set regnode_list "xlnx-versal-regnode.h"
-			set dpdma_list "xlnx-zynqmp-dpdma.h"
-			set gpio_list "gpio.h"
-		}
-		set powerdir "$dir_path/include/dt-bindings/power"
-		set clockdir "$dir_path/include/dt-bindings/clock"
-		set resetdir "$dir_path/include/dt-bindings/reset"
-		set dpdmadir "$dir_path/include/dt-bindings/dma"
-		set gpiodir "$dir_path/include/dt-bindings/gpio"
-		file mkdir $powerdir
-		file mkdir $clockdir
-		file mkdir $resetdir
-		file mkdir $dpdmadir
-		file mkdir $gpiodir
-		if {[file exists $include_dtsi]} {
-			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
-				if {[string first $power_list $file]!= -1} {
-					file copy -force $file $powerdir
-				} elseif {[string first $clock_list $file] != -1} {
-					file copy -force $file $clockdir
-                } elseif {[string first $clock_base_file $file] != -1} {
-                    file copy -force $file $clockdir
-				} elseif {[string first $reset_list $file] != -1} {
-					file copy -force $file $resetdir
-				} elseif {[string first $dpdma_list $file] != -1} {
-					file copy -force $file $dpdmadir
-				} elseif {[string first $gpio_list $file] != -1} {
-					file copy -force $file $gpiodir
-				} elseif {[string first $power_base_file $file] != -1} {
-                                        file copy -force $file $powerdir
-                                } elseif {[string first $reset_base_file $file] != -1} {
-                                        file copy -force $file $resetdir
-                                } elseif {[string first $regnode_list $file] != -1} {
-                                        file copy -force $file $powerdir
-                                }
-			}
+		# Copy full include directory to dt WS
+		if {[file exists $includes_dir]} {
+			file delete -force -- $dir_path/include
+			file copy -force $includes_dir $dir_path
 		}
 	}
 }
@@ -433,43 +376,12 @@ proc gen_board_info {} {
 			return
 		}
 		set kernel_ver [get_property CONFIG.kernel_version [get_os]]
-		set include_dtsi [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
-		set include_list "include*"
+		set includes_dir [file normalize "[get_property "REPOSITORY" $i]/data/kernel_dtsi/${kernel_ver}/include"]
 		set dir_path "./"
-		set gpio_list "gpio.h"
-		set intr_list "irq.h"
-		set phy_list  "phy.h"
-		set input_list "input.h"
-		set pinctrl_list "pinctrl-zynqmp.h"
-		set tidp_list "ti-dp83867.h"
-		set gpiodir "$dir_path/include/dt-bindings/gpio"
-		set phydir "$dir_path/include/dt-bindings/phy"
-		set intrdir "$dir_path/include/dt-bindings/interrupt-controller"
-		set inputdir "$dir_path/include/dt-bindings/input"
-		set pinctrldir "$dir_path/include/dt-bindings/pinctrl"
-		set tidpdir "$dir_path/include/dt-bindings/net"
-		file mkdir $phydir
-		file mkdir $gpiodir
-		file mkdir $intrdir
-		file mkdir $inputdir
-		file mkdir $pinctrldir
-		file mkdir $tidpdir
-		if {[file exists $include_dtsi]} {
-			foreach file [glob [file normalize [file dirname ${include_dtsi}]/*/*/*/*]] {
-				if {[string first $gpio_list $file] != -1} {
-					file copy -force $file $gpiodir
-				} elseif {[string first $phy_list $file] != -1} {
-					file copy -force $file $phydir
-				} elseif {[string first $intr_list $file] != -1} {
-					file copy -force $file $intrdir
-				} elseif {[string first $input_list $file] != -1} {
-					file copy -force $file $inputdir
-				} elseif {[string first $pinctrl_list $file] != -1} {
-					file copy -force $file $pinctrldir
-				} elseif {[string first $tidp_list $file] != -1} {
-					file copy -force $file $tidpdir
-				}
-			}
+		# Copy full include directory to dt WS
+		if {[file exists $includes_dir]} {
+			file delete -force -- $dir_path/include
+			file copy -force $includes_dir $dir_path
 		}
 		set dts_name [string tolower [lindex $override 1]]
 		if {[string match -nocase $dts_name "template"]} {
