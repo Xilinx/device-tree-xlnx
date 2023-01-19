@@ -296,7 +296,7 @@
 			#size-cells = <0>;
 			reg = <2>;
 		};
-		lpddr4_si570_clk3_i2c: i2c@3 {
+		i2c@3 { /* NC - FIXME */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;

@@ -320,8 +320,8 @@
 			phy-handle = <&phy1>;
 			phy-mode = "rgmii-id";
 			clocks = <&versal_net_clk LPD_LSBUS>,
-				 <&versal_net_clk GEM0_REF>, <&versal_net_clk GEM0_REF_TX>,
-				 <&versal_net_clk GEM0_REF_RX>, <&versal_net_clk GEM_TSU_REF>;
+				 <&versal_net_clk GEM0_REF>, <&versal_net_clk GEM0_TX>,
+				 <&versal_net_clk GEM0_RX>, <&versal_net_clk GEM_TSU>;
 			power-domains = <&versal_net_firmware PM_DEV_GEM_0>;
 			mdio0: mdio {
 				#address-cells = <1>;
@@ -349,8 +349,8 @@
 			phy-handle = <&phy2>;
 			phy-mode = "rmii";
 			clocks = <&versal_net_clk LPD_LSBUS>,
-				 <&versal_net_clk GEM1_REF>, <&versal_net_clk GEM1_REF_TX>,
-				 <&versal_net_clk GEM1_REF_RX>, <&versal_net_clk GEM_TSU_REF>;
+				 <&versal_net_clk GEM1_REF>, <&versal_net_clk GEM1_TX>,
+				 <&versal_net_clk GEM1_RX>, <&versal_net_clk GEM_TSU>;
 			power-domains = <&versal_net_firmware PM_DEV_GEM_1>;
 			mdio1: mdio {
 				#address-cells = <1>;
@@ -484,7 +484,7 @@
 			reg = <0 0xf1030000 0 0x1000>;
 			interrupts = <0 183 4>;
 			clock-names = "ref_clk", "pclk";
-			num-cs = <1>;
+			num-cs = <2>;
 			is-dual = <1>;
 			spi-rx-bus-width = <4>;
 			spi-tx-bus-width = <4>;
@@ -495,7 +495,8 @@
 
 			flash@0 {
 				compatible = "micron,m25p80", "jedec,spi-nor";
-				reg = <0>;
+				reg = <0>, <1>;
+				parallel-memories = /bits/ 64 <0x8000000 0x8000000>; /* 128MB */
 				#address-cells = <1>;
 				#size-cells = <1>;
 				spi-tx-bus-width = <1>;
@@ -657,7 +658,6 @@
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
-				snps,refclk_fladj;
 				dr_mode = "peripheral";
 				maximum-speed = "high-speed";
 				snps,usb3_lpm_capable;
@@ -684,7 +684,6 @@
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
-				snps,refclk_fladj;
 				dr_mode = "host";
 				maximum-speed = "high-speed";
 				snps,usb3_lpm_capable;

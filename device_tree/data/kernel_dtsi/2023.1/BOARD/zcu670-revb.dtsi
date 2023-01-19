@@ -585,6 +585,7 @@
 	 * This property should be removed for supporting UHS mode
 	 */
 	no-1-8-v;
+	xlnx,mio-bank = <1>;
 	clk-phase-sd-hs = <120>, <60>;
 	clk-phase-uhs-sdr25 = <132>, <60>;
 	clk-phase-uhs-ddr50 = <153>, <48>;
