@@ -70,6 +70,11 @@
 				compatible = "xlnx,versal-reset";
 				#reset-cells = <1>;
 			};
+
+			pinctrl0: pinctrl {
+				compatible = "xlnx,versal-pinctrl";
+			};
+
 			versal_sec_cfg: versal-sec-cfg {
 				compatible = "xlnx,versal-sec-cfg";
 				#address-cells = <1>;

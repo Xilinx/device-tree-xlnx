@@ -226,10 +226,6 @@
 				clock-names = "ref_clk";
 			};
 
-			xlnx_aes: zynqmp-aes {
-				compatible = "xlnx,zynqmp-aes";
-			};
-
 			zynqmp_reset: reset-controller {
 				compatible = "xlnx,zynqmp-reset";
 				#reset-cells = <1>;
@@ -238,10 +234,6 @@
 			pinctrl0: pinctrl {
 				compatible = "xlnx,zynqmp-pinctrl";
 				status = "disabled";
-			};
-
-			xlnx_rsa: zynqmp-rsa {
-				compatible = "xlnx,zynqmp-rsa";
 			};
 
 			modepin_gpio: gpio {
@@ -271,7 +263,6 @@
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
-		power-domains = <&zynqmp_firmware PD_PL>;
 	};
 
 
