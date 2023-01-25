@@ -143,6 +143,7 @@ proc generate {drv_handle} {
 
 	set name [get_property NAME [get_current_part $drv_handle]]
 	set part_num [string range $name 0 7]
+	set part_num_v70 [string range $name 0 4]
 
 	if {$part_num == "xcvp2502"} {
 		#s100
@@ -154,6 +155,11 @@ proc generate {drv_handle} {
 		set power_domain "&versal_firmware 0x18227072"
 		hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,device-name" "200" int
 		set aperture_nodeid 0x18803000
+	} elseif {$part_num_v70 == "xcv70"} {
+		#v70
+		set power_domain "&versal_firmware 0x18224072"
+		hsi::utils::add_new_dts_param "${aperture_node}" "xlnx,device-name" "0" int
+		set aperture_nodeid 0x18800000
 	} else {
 		#NON SSIT devices
 		set intr_names "interrupt1"
