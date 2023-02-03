@@ -107,7 +107,7 @@ proc generate {drv_handle} {
         hsi::utils::add_new_dts_param "${node}" "xlnx,ref_clk" ${ref_clk} int
     }
     set enable_dpll [get_property CONFIG.ENABLE_DPLL [get_cells -hier $drv_handle]]
-    if {[string compare -nocase "true" $enable_dpll]} {
+    if {[string match -nocase $enable_dpll "true"]} {
         hsi::utils::add_new_dts_param "${node}" "xlnx,enable_dpll" "" boolean
     }
     gen_reset_gpio "$drv_handle" "$node"
