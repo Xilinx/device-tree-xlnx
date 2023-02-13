@@ -574,7 +574,7 @@
 		};
 
 		gem0: ethernet@ff0b0000 {
-			compatible = "xlnx,zynqmp-gem", "cdns,zynqmp-gem", "cdns,gem";
+            compatible = "xlnx,zynqmp-gem", "cdns,gem";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 57 4>, <0 57 4>;
@@ -589,7 +589,7 @@
 		};
 
 		gem1: ethernet@ff0c0000 {
-			compatible = "xlnx,zynqmp-gem", "cdns,zynqmp-gem", "cdns,gem";
+            compatible = "xlnx,zynqmp-gem", "cdns,gem";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 59 4>, <0 59 4>;
@@ -604,7 +604,7 @@
 		};
 
 		gem2: ethernet@ff0d0000 {
-			compatible = "xlnx,zynqmp-gem", "cdns,zynqmp-gem", "cdns,gem";
+            compatible = "xlnx,zynqmp-gem", "cdns,gem";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 61 4>, <0 61 4>;
@@ -619,7 +619,7 @@
 		};
 
 		gem3: ethernet@ff0e0000 {
-			compatible = "xlnx,zynqmp-gem", "cdns,zynqmp-gem", "cdns,gem";
+            compatible = "xlnx,zynqmp-gem", "cdns,gem";
 			status = "disabled";
 			interrupt-parent = <&gic>;
 			interrupts = <0 63 4>, <0 63 4>;
@@ -989,7 +989,7 @@
 				clock-names = "ref";
 				snps,enable_guctl1_resume_quirk;
 				snps,enable_guctl1_ipd_quirk;
-				snps,xhci-stream-quirk;
+                snps,resume-hs-terminations;
 				/* dma-coherent; */
 			};
 		};
@@ -1021,7 +1021,7 @@
 				clock-names = "ref";
 				snps,enable_guctl1_resume_quirk;
 				snps,enable_guctl1_ipd_quirk;
-				snps,xhci-stream-quirk;
+                snps,resume-hs-terminations;
 				/* dma-coherent; */
 			};
 		};
