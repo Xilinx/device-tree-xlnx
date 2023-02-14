@@ -47,6 +47,14 @@ proc generate {drv_handle} {
 		set is_dual 0
 	}
 	set_property CONFIG.is-dual $is_dual $drv_handle
+
+	# Set num-cs value to 2 if qspi is dual/stacked else 1
+	set numcs 1
+	if { $is_dual == 1 || $is_stacked == 1 } {
+		set numcs 2
+	}
+	hsi::utils::add_new_property $drv_handle "num-cs" int $numcs
+
 	if {$is_stacked} {
 		set_property CONFIG.is-stacked $is_stacked $drv_handle
 	}

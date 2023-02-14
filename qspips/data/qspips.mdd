@@ -22,7 +22,6 @@ BEGIN driver qspips
   OPTION driver_state = ACTIVE;
   OPTION NAME = qspips;
   DTGPARAM name = is-dual, type = int;
-  DTGPARAM name = num-cs, default = 2, type =int;
   DTGPARAM name = dtg.alias , default = spi;
 
 END driver
