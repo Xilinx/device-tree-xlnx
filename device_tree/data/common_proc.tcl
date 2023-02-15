@@ -3103,8 +3103,17 @@ proc update_endpoints {drv_handle} {
                 if {[llength $ip]} {
                         set axis_broad_ip [get_property IP_NAME $ip]
                         set default_dts [set_drv_def_dts $ip]
-			set in_ip_name [get_property IP_NAME [get_broad_in_ip $ip]]
-			if {![string match -nocase $in_ip_name "v_proc_ss"]} {
+			# broad_ip means broadcaster input ip is connected to another ip
+			set broad_ip [get_broad_in_ip $ip]
+			set validate_ip 1
+			if {[llength $broad_ip]} {
+				if {[string match -nocase [get_property IP_NAME $broad_ip] "v_proc_ss"]} {
+				# set validate ip is 0 when axis_broadcaster input ip is connect to v_proc_ss to skip the below checks
+					set validate_ip 0
+				}
+			}
+			# add unit_addr and ip_type check when axis_broadcaster input ip is connected with other ips
+			if {$validate_ip} {
 				set unit_addr [get_baseaddr ${ip} no_prefix]
 				if { ![string equal $unit_addr "-1"] } {
 					break
