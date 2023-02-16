@@ -4949,12 +4949,14 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	# TODO: consolidation with get_intr_id proc
 	foreach pin ${intr_port_name} {
 		set connected_intc [get_intr_cntrl_name $drv_handle $pin]
-		if {[llength $connected_intc] == 0 || [string match $connected_intc "{}"] } {
+		regsub -all {\{|\}} $connected_intc "" connected_intc
+		if {[llength $connected_intc] == 0 } {
 			if {![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 				dtg_warning "Interrupt pin \"$pin\" of IP block: \"$drv_handle\" is not connected to any interrupt controller\n\r"
 			}
 			continue
 		}
+		set connected_intc [get_cells -hier $connected_intc]
 		set connected_intc_name [get_property IP_NAME $connected_intc]
 		set valid_gpio_list "ps7_gpio axi_gpio"
 		set valid_cascade_proc "microblaze ps7_cortexa9 psu_cortexa53 psv_cortexa72 psx_cortexa78"
