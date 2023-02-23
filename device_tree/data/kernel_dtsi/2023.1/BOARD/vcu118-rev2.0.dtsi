@@ -1,5 +1,9 @@
 &axi_ethernet_0 {
 	phy-handle = <&phy0>;
+	/delete-property/ pcs-handle ;
+	/delete-property/ managed ;
+	/delete-property/ xlnx,switch-x-sgmii ;
+	/delete-node/ mdio;
 	axi_ethernet_mdio: mdio {
 		#address-cells = <1>;
 		#size-cells = <0>;
