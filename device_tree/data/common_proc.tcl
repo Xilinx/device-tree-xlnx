@@ -901,6 +901,12 @@ proc set_drv_def_dts {drv_handle} {
 		} else {
 			set targets "fpga_full"
 		}
+		set hw_name [::hsi::get_hw_files -filter "TYPE == pl_pdi"]
+		if {[llength $hw_name]} {
+			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
+			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
+			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
+		}
 		set RpRm [get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
 		if {[llength $RpRm]} {
