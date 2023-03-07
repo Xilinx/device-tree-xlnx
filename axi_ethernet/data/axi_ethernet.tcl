@@ -238,7 +238,6 @@ proc generate {drv_handle} {
 	set rxmem [get_memrange $rxmem]
 	set_property xlnx,txcsum "$txcsum" $drv_handle
 	set_property xlnx,rxcsum "$rxcsum" $drv_handle
-	set_property xlnx,phy-type "$phytype" $drv_handle
 	set_property xlnx,phyaddr "$phyaddr" $drv_handle
 	set_property xlnx,rxmem "$rxmem" $drv_handle
     }
