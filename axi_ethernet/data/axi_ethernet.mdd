@@ -32,7 +32,6 @@ BEGIN driver axi_ethernet
   DTGPARAM name = xlnx,txcsum, type = hex, default = 0x0;
   DTGPARAM name = xlnx,rxcsum, type = hex, default = 0x0;
   DTGPARAM name = xlnx,rxmem, type = hex, default = 0x8000;
-  DTGPARAM name = xlnx,phy-type, type = hex, default = 0x1;
   DTGPARAM name = xlnx,phyaddr, type = hex, default = 0x0;
   DTGPARAM name = phy-mode, default = gmii
 
