@@ -568,9 +568,6 @@ proc update_overlay_custom_dts_include {include_file overlay_custom_dts} {
 			set cur_inc_list $include_file
 		} else {
 			append cur_inc_list "," $include_file
-			set field [split $cur_inc_list ","]
-			set cur_inc_list [lsort -decreasing $field]
-			set cur_inc_list [join $cur_inc_list ","]
 		}
 		set_property INCLUDE_FILES ${cur_inc_list} $overlay_custom_dts_obj
 	}
