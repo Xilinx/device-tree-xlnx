@@ -1600,7 +1600,7 @@ proc gen_ps7_mapping {} {
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 
 	set def_ps_mapping [dict create]
-	if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+	if {[string match -nocase $proctype "psv_cortexa72"]} {
 		dict set def_ps_mapping f9000000 label gic
 		dict set def_ps_mapping fd4b0000 label gpu
 		dict set def_ps_mapping ffa80000 label adma0
@@ -1637,6 +1637,46 @@ proc gen_ps7_mapping {} {
 		dict set def_ps_mapping fd0e0000 label pcie
 		dict set def_ps_mapping ff060000 label can0
 		dict set def_ps_mapping ff070000 label can1
+	} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
+		dict set def_ps_mapping e2000000 label gic
+		dict set def_ps_mapping ebd00000 label adma0
+		dict set def_ps_mapping ebd10000 label adma1
+		dict set def_ps_mapping ebd20000 label adma2
+		dict set def_ps_mapping ebd30000 label adma3
+		dict set def_ps_mapping ebd40000 label adma4
+		dict set def_ps_mapping ebd50000 label adma5
+		dict set def_ps_mapping ebd60000 label adma6
+		dict set def_ps_mapping ebd70000 label adma7
+		dict set def_ps_mapping f1980000 label can0
+		dict set def_ps_mapping f1990000 label can1
+		dict set def_ps_mapping f19e0000 label gem0
+		dict set def_ps_mapping f19f0000 label gem1
+		dict set def_ps_mapping f19d0000 label gpio0
+		dict set def_ps_mapping f1020000 label gpio1
+		dict set def_ps_mapping f1940000 label i2c0
+		dict set def_ps_mapping f1950000 label i2c1
+		dict set def_ps_mapping f1948000 label i3c0
+		dict set def_ps_mapping f1958000 label i3c1
+		dict set def_ps_mapping f1010000 label ospi
+		dict set def_ps_mapping f1030000 label qspi
+		dict set def_ps_mapping f12a0000 label rtc
+		dict set def_ps_mapping f1040000 label sdhci0
+		dict set def_ps_mapping f1050000 label sdhci1
+		dict set def_ps_mapping f1920000 label serial0
+		dict set def_ps_mapping f1930000 label serial1
+		dict set def_ps_mapping ec000000 label smmu
+		dict set def_ps_mapping f1960000 label spi0
+		dict set def_ps_mapping f1970000 label spi1
+		dict set def_ps_mapping f1dc0000 label ttc0
+		dict set def_ps_mapping f1dd0000 label ttc1
+		dict set def_ps_mapping f1de0000 label ttc2
+		dict set def_ps_mapping f1df0000 label ttc3
+		dict set def_ps_mapping f1e00000 label usb0
+		dict set def_ps_mapping f1e10000 label usb1
+		dict set def_ps_mapping ecc10000 label wwdt0
+		dict set def_ps_mapping ecd10000 label wwdt1
+		dict set def_ps_mapping ece10000 label wwdt2
+		dict set def_ps_mapping ecf10000 label wwdt3
 	} elseif {[string match -nocase $proctype "psu_cortexa53"]} {
 		dict set def_ps_mapping f9010000 label gic
 		dict set def_ps_mapping ff060000 label can0
