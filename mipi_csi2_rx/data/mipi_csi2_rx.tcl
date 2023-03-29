@@ -138,6 +138,11 @@ proc generate {drv_handle} {
 							hsi::utils::add_new_dts_param "$mipi_node" "remote-endpoint" $connectip$drv_handle reference
 							gen_axis_switch_in_remo_endpoint $drv_handle "$connectip$drv_handle"
 						}
+
+					} elseif {[string match -nocase [get_property IP_NAME $connectip] "ISPPipeline_accel"]} {
+						set isppipeline_node [add_or_get_dt_node -n "endpoint" -l isppipeline$connectip -p $port_node]
+						hsi::utils::add_new_dts_param "$isppipeline_node" "remote-endpoint" $connectip$drv_handle reference
+
 					} else {
 					set csi_rx_node [add_or_get_dt_node -n "endpoint" -l mipi_csirx_out$drv_handle -p $port_node]
 					gen_endpoint $drv_handle "mipi_csirx_out$drv_handle"
