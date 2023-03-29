@@ -2187,6 +2187,10 @@ proc update_endpoints {drv_handle} {
 			}
 			foreach inip $scaninip {
 				if {[llength $inip]} {
+					if {[string match -nocase [get_property IP_NAME $inip] "ISPPipeline_accel"]} {
+						set port0_node [add_or_get_dt_node -n "endpoint" -l v_proc_ss$inip -p $port_node]
+						hsi::utils::add_new_dts_param "$port0_node" "remote-endpoint" $inip$drv_handle reference
+					}
 					set ip_mem_handles [hsi::utils::get_ip_mem_ranges $inip]
 					if {![llength $ip_mem_handles]} {
 						# Add endpoints if IN IP is axis_switch and non memory mapped
