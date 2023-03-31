@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal vck5000 revA
+ *
+ * (C) Copyright 2020-2022 Xilinx, Inc.
+ * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+#include "include/dt-bindings/gpio/gpio.h"
+
+/ {
+	compatible = "xlnx,versal-vck5000-revA", "xlnx,versal";
+	model = "Xilinx Versal vck5000 board revA";
+
+	chosen {
+		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
+		stdout-path = "serial0:115200";
+	};
+
+	aliases {
+		serial0 = &serial0;
+		serial1 = &serial1;
+		spi0 = &ospi;
+	};
+
+};
+
+&ospi {
+	bus-num = <2>;
+	num-cs = <1>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reset-gpios = <&gpio1 0xc GPIO_ACTIVE_HIGH>;
+
+	flash@0 {
+		compatible = "mt35xu02g", "micron,m25p80", "jedec,spi-nor";
+		reg = <0>;
+		#address-cells = <0x1>;
+		#size-cells = <0x1>;
+		cdns,read-delay = <0x0>;
+		cdns,tshsl-ns = <0x0>;
+		cdns,tsd2d-ns = <0x0>;
+		cdns,tchsh-ns = <0x1>;
+		cdns,tslch-ns = <0x1>;
+		spi-tx-bus-width = <8>;
+		spi-rx-bus-width = <8>;
+		spi-max-frequency = <20000000>;
+		partition@0 {
+			label = "spi0-flash0";
+			reg = <0x0 0x10000000>;
+		};
+	};
+};
+
+&dcc {
+	status = "okay";
+};
+
+&serial1 {
+	 status = "disabled";
+};
