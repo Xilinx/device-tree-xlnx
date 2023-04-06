@@ -935,14 +935,17 @@ proc set_drv_def_dts {drv_handle} {
 						}
 					}
 				}
-				if {!$classic_soc} {
-					hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
-				}
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
 					for {set pr 0} {$pr < $pr_len} {incr pr} {
 						set pr0 [lindex $pr_regions $pr]
 						if {[regexp $pr0 $RpRm match]} {
+							set targets "fpga_PR$pr"
+							if {$classic_soc} {
+								set targets "fpga"
+							}
+							set fpga_node [add_or_get_dt_node -n "&$targets" -d ${default_dts}]
+							set child_node2 "$fpga_node"
 							set intf_pins [::hsi::get_intf_pins -of_objects $pr0]
 							foreach intf $intf_pins {
 								set connectip [get_connected_stream_ip [get_cells -hier $pr0] $intf]
@@ -954,6 +957,9 @@ proc set_drv_def_dts {drv_handle} {
 							}
 						}
 					}
+				}
+				if {!$classic_soc} {
+					hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
 				}
 				set hw_name [get_property CONFIG.firmware_name [get_os]]
 				set rprmpartial $hw_name
