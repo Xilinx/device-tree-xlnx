@@ -477,15 +477,19 @@ proc gen_zynqmp_ccf_clk {} {
 
 }
 
-proc gen_zynqmp_opp_freq {} {
+proc gen_opp_freq {} {
 	set default_dts [get_property CONFIG.pcw_dts [get_os]]
 	set cpu_opp_table [add_or_get_dt_node -n "&cpu_opp_table" -d $default_dts]
 	set periph_list [get_cells -hier]
+	set opp_freq ""
+	set add_opp_prop ""
 	foreach periph $periph_list {
-		set zynq_ultra_ps [get_property IP_NAME $periph]
-		if {[string match -nocase $zynq_ultra_ps "zynq_ultra_ps_e"] } {
+		set proc_ps [get_property IP_NAME $periph]
+		if {[string match -nocase $proc_ps "zynq_ultra_ps_e"] } {
 			set avail_param [list_property [get_cells -hier $periph]]
 			if {[lsearch -nocase $avail_param "CONFIG.PSU__CRF_APB__ACPU_CTRL__FREQMHZ"] >= 0} {
+				set act_freq ""
+				set div ""
 				set freq [get_property CONFIG.PSU__CRF_APB__ACPU_CTRL__FREQMHZ [get_cells -hier $periph]]
 				if {[string match -nocase $freq "1200"]} {
 					# This is the default value set, so no need to calcualte
@@ -498,24 +502,93 @@ proc gen_zynqmp_opp_freq {} {
 				if {[lsearch -nocase $avail_param "CONFIG.PSU__CRF_APB__ACPU_CTRL__DIVISOR0"] >= 0} {
 					set div [get_property CONFIG.PSU__CRF_APB__ACPU_CTRL__DIVISOR0 [get_cells -hier $periph]]
 				}
-				set opp_freq  [expr $act_freq * $div]
-				set opp00_result [expr int ([expr $opp_freq / 1])]
-				set opp01_result [expr int ([expr $opp_freq / 2])]
-				set opp02_result [expr int ([expr $opp_freq / 3])]
-				set opp03_result [expr int ([expr $opp_freq / 4])]
-				set opp00 "/bits/ 64 <$opp00_result>"
-				set opp01 "/bits/ 64 <$opp01_result>"
-				set opp02 "/bits/ 64 <$opp02_result>"
-				set opp03 "/bits/ 64 <$opp03_result>"
-				set opp00_table [add_or_get_dt_node -n "opp00" -d $default_dts -p $cpu_opp_table]
-				hsi::utils::add_new_dts_param "$opp00_table" "opp-hz" $opp00 noformating
-				set opp01_table [add_or_get_dt_node -n "opp01" -d $default_dts -p $cpu_opp_table]
-				hsi::utils::add_new_dts_param "$opp01_table" "opp-hz" $opp01 noformating
-				set opp02_table [add_or_get_dt_node -n "opp02" -d $default_dts -p $cpu_opp_table]
-				hsi::utils::add_new_dts_param "$opp02_table" "opp-hz" $opp02 noformating
-				set opp03_table [add_or_get_dt_node -n "opp03" -d $default_dts -p $cpu_opp_table]
-				hsi::utils::add_new_dts_param "$opp03_table" "opp-hz" $opp03 noformating
+				if {[llength $act_freq] && [llength $div]} {
+					set opp_freq  [expr $act_freq * $div]
+				}
 			}
+		}
+		if {[string match -nocase $proc_ps "versal_cips"] } {
+			set ps_pmc_params [get_property CONFIG.PS_PMC_CONFIG [get_cells -hier $periph]]
+			if {[llength $ps_pmc_params ]} {
+				set act_freq ""
+				set div ""
+				set clkoutdiv ""
+				if {[dict exists $ps_pmc_params "PMC_REF_CLK_FREQMHZ"]} {
+					set act_freq [dict get $ps_pmc_params PMC_REF_CLK_FREQMHZ]
+					set act_freq [expr $act_freq * 1000000]
+				}
+				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_FBDIV"]} {
+					set div [dict get $ps_pmc_params PS_CRF_APLL_CTRL_FBDIV]
+				}
+				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_CLKOUTDIV"]} {
+					set clkoutdiv [dict get $ps_pmc_params PS_CRF_APLL_CTRL_CLKOUTDIV]
+				}
+				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
+					set opp_freq [expr ($act_freq * $div) / $clkoutdiv]
+				}
+			}
+		}
+		if {[string match -nocase $proc_ps "psx_wizard"] } {
+			#NOTE: CONFIG.PSX_PMCX_CONFIG_INTERNAL this may change
+			set psx_pmcx_params [get_property CONFIG.PSX_PMCX_CONFIG_INTERNAL [get_cells -hier $periph]]
+			if {[llength $psx_pmcx_params]} {
+				set act_freq ""
+				set div ""
+				set clkoutdiv ""
+				if {[dict exists $psx_pmcx_params "PMCX_REF_CLK_FREQMHZ"]} {
+					set act_freq [dict get $psx_pmcx_params PMCX_REF_CLK_FREQMHZ]
+					set act_freq [expr $act_freq * 1000000]
+				}
+				if {[dict exists $psx_pmcx_params "PSX_CRF_APLL1_CTRL_FBDIV"]} {
+					set div [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_FBDIV]
+				}
+				if {[dict exists $psx_pmcx_params "PSX_CRF_APLL1_CTRL_CLKOUTDIV"]} {
+					set clkoutdiv [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_CLKOUTDIV]
+				}
+				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
+					set opp_freq [expr ($act_freq * $div) / $clkoutdiv]
+				}
+			}
+			set add_opp_prop "1"
+		}
+	}
+
+	if {[llength $opp_freq]} {
+		set opp00_result [expr int ([expr $opp_freq / 1])]
+		set opp01_result [expr int ([expr $opp_freq / 2])]
+		set opp02_result [expr int ([expr $opp_freq / 3])]
+		set opp03_result [expr int ([expr $opp_freq / 4])]
+		set opp00 "/bits/ 64 <$opp00_result>"
+		set opp01 "/bits/ 64 <$opp01_result>"
+		set opp02 "/bits/ 64 <$opp02_result>"
+		set opp03 "/bits/ 64 <$opp03_result>"
+		#versal-net.dtsi has opp-$freq, this tcl will generate the
+		#opp0{0,1,2,3} so creating full node by adding below props
+		set opp_microvolt "<1000000>"
+		set clock_latency "<500000>"
+		set opp00_table [add_or_get_dt_node -n "opp00" -d $default_dts -p $cpu_opp_table]
+		hsi::utils::add_new_dts_param "$opp00_table" "opp-hz" $opp00 noformating
+		if {[llength $add_opp_prop]} {
+			hsi::utils::add_new_dts_param "$opp00_table" "opp_microvolt" $opp_microvolt noformating
+			hsi::utils::add_new_dts_param "$opp00_table" "clock-latency-ns" $clock_latency noformating
+		}
+		set opp01_table [add_or_get_dt_node -n "opp01" -d $default_dts -p $cpu_opp_table]
+		hsi::utils::add_new_dts_param "$opp01_table" "opp-hz" $opp01 noformating
+		if {[llength $add_opp_prop]} {
+			hsi::utils::add_new_dts_param "$opp01_table" "opp_microvolt" $opp_microvolt noformating
+			hsi::utils::add_new_dts_param "$opp01_table" "clock-latency-ns" $clock_latency noformating
+		}
+		set opp02_table [add_or_get_dt_node -n "opp02" -d $default_dts -p $cpu_opp_table]
+		hsi::utils::add_new_dts_param "$opp02_table" "opp-hz" $opp02 noformating
+		if {[llength $add_opp_prop]} {
+			hsi::utils::add_new_dts_param "$opp02_table" "opp_microvolt" $opp_microvolt noformating
+			hsi::utils::add_new_dts_param "$opp02_table" "clock-latency-ns" $clock_latency noformating
+		}
+		set opp03_table [add_or_get_dt_node -n "opp03" -d $default_dts -p $cpu_opp_table]
+		hsi::utils::add_new_dts_param "$opp03_table" "opp-hz" $opp03 noformating
+		if {[llength $add_opp_prop]} {
+			hsi::utils::add_new_dts_param "$opp03_table" "opp_microvolt" $opp_microvolt noformating
+			hsi::utils::add_new_dts_param "$opp03_table" "clock-latency-ns" $clock_latency noformating
 		}
 	}
 }
@@ -771,7 +844,7 @@ proc generate {lib_handle} {
 			gen_sata_laneinfo
 			gen_zynqmp_ccf_clk
 			gen_versal_clk
-			gen_zynqmp_opp_freq
+			gen_opp_freq
 			gen_zynqmp_pinctrl
 			gen_zocl_node
 			if {[string match -nocase $proctype "psv_cortexa72"]} {
