@@ -529,6 +529,17 @@ proc gen_opp_freq {} {
 			}
 		}
 		if {[string match -nocase $proc_ps "psx_wizard"] } {
+			set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+			set board_dtsi_file ""
+			foreach override $overrides {
+				if {[lindex $override 0] == "BOARD"} {
+					set board_dtsi_file [lindex $override 1]
+				}
+			}
+			#TMP fix to support ipp fixed clocks
+			if {[string match -nocase $board_dtsi_file "versal-net-ipp-rev1.9"]} {
+				return
+			}
 			#NOTE: CONFIG.PSX_PMCX_CONFIG_INTERNAL this may change
 			set psx_pmcx_params [get_property CONFIG.PSX_PMCX_CONFIG_INTERNAL [get_cells -hier $periph]]
 			if {[llength $psx_pmcx_params]} {
