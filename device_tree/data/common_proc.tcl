@@ -6321,7 +6321,7 @@ proc gen_root_node {drv_handle} {
             if {[string match -nocase $board_dtsi_file "versal-net-ipp-rev1.9"]} {
                 set dtsi_file $board_dtsi_file
             } else {
-                update_system_dts_include [file tail "versal-net-clk.dtsi"]
+                update_system_dts_include [file tail "versal-net-clk-ccf.dtsi"]
             }
 			return 0
 		}
