@@ -153,6 +153,38 @@ proc generate {drv_handle} {
 		}
 	}
     }
+
+	if {[string match -nocase $proc_type "psx_cortexa78"] } {
+		set versalnet_periph [get_cells -hier -filter {IP_NAME == psx_wizard}]
+		set psx_pmcx_params [get_property CONFIG.PSX_PMCX_CONFIG [get_cells -hier $versalnet_periph]]
+		set psx_gem_tsu_enable ""
+		if {[llength $psx_pmcx_params]} {
+			set psx_gem_tsu ""
+			if {[dict exists $psx_pmcx_params "PSX_GEM_TSU"]} {
+				set psx_gem_tsu [dict get $psx_pmcx_params "PSX_GEM_TSU"]
+				if {[dict exists $psx_gem_tsu "ENABLE"]} {
+					set psx_gem_tsu_enable [dict get $psx_gem_tsu "ENABLE"]
+				}
+			}
+		}
+		if {$psx_gem_tsu_enable == 1} {
+			set default_dts [get_property CONFIG.pcw_dts [get_os]]
+			set root_node [add_or_get_dt_node -n / -d ${default_dts}]
+			set tsu_node [add_or_get_dt_node -n "tsu_ext_clk" -l "tsu_ext_clk" -d $default_dts -p $root_node]
+			hsi::utils::add_new_dts_param "${tsu_node}" "compatible" "fixed-clock" stringlist
+			hsi::utils::add_new_dts_param "${tsu_node}" "#clock-cells" 0 int
+			set tsu-clk-freq [get_property CONFIG.C_ENET_TSU_CLK_FREQ_HZ [get_cells -hier $drv_handle]]
+			hsi::utils::add_new_dts_param "${tsu_node}" "clock-frequency" ${tsu-clk-freq} int
+			set_drv_prop_if_empty $drv_handle "clock-names" "pclk hclk tx_clk rx_clk tsu_clk" stringlist
+			if {[string match -nocase $node "&gem0"]} {
+				set_drv_prop_if_empty $drv_handle "clocks" "versal_net_clk 82>, <&versal_net_clk 88>, <&versal_net_clk 49>, <&versal_net_clk 48>, <&tsu_ext_clk" reference
+			} elseif {[string match -nocase $node "&gem1"]} {
+				set_drv_prop_if_empty $drv_handle "clocks" "versal_net_clk 82>, <&versal_net_clk 89>, <&versal_net_clk 51>, <&versal_net_clk 50>, <&tsu_ext_clk" reference
+			}
+		}
+
+	}
+
     # check if gmii2rgmii converter is used.
     set conv_data [is_gmii2rgmii_conv_present $slave]
     set phya [lindex $conv_data 0]
