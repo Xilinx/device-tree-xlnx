@@ -27,27 +27,44 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
+	lappend compatible "xlnx,v-dp-rxss-3.0" "xlnx,vid-edid-1.0"
+	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set audio_channels [get_property CONFIG.AUDIO_CHANNELS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-channels" $audio_channels int
 	set audio_enable [get_property CONFIG.AUDIO_ENABLE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enable" $audio_enable int
 	set bits_per_color [get_property CONFIG.BITS_PER_COLOR [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,bits-per-color" $bits_per_color int
+	hsi::utils::add_new_dts_param "${node}" "xlnx,bpc" $bits_per_color int
 	set hdcp22_enable [get_property CONFIG.HDCP22_ENABLE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp22-enable" $hdcp22_enable int
 	set hdcp_enable [get_property CONFIG.HDCP_ENABLE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-enable" $hdcp_enable int
 	set include_fec_ports [get_property CONFIG.INCLUDE_FEC_PORTS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,include-fec-ports" $include_fec_ports int
+	set edid_ip [get_cells -hier -filter IP_NAME==vid_edid]
+	if {[llength $edid_ip]} {
+		set baseaddr_dp_rx [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
+		set highaddr_dp_rx [get_property CONFIG.C_HIGHADDR [get_cells -hier $drv_handle]]
+		set baseaddr [get_property CONFIG.C_BASEADDR [get_cells -hier $edid_ip]]
+		set highaddr [get_property CONFIG.C_HIGHADDR [get_cells -hier $edid_ip]]
+		set reg_val_0 [generate_reg_property $baseaddr_dp_rx $highaddr_dp_rx]
+		set updat [lappend updat $reg_val_0]
+		set reg_val_1 [generate_reg_property $baseaddr $highaddr]
+		set updat [lappend updat $reg_val_1]
+		set reg_val [lindex $updat 0]
+		append reg_val ">, <[lindex $updat 1]"
+		set_drv_prop $drv_handle reg "$reg_val" hexintlist
+	}
 	lappend reg_names "dp_base" "edid_base"
 	hsi::utils::add_new_dts_param "${node}" "reg-names" $reg_names stringlist
 	lappend phy_names "dp-phy0" "dp-phy1" "dp-phy2" "dp-phy3"
 	hsi::utils::add_new_dts_param "${node}" "phy-names" $phy_names stringlist
 	set lane_count [get_property CONFIG.LANE_COUNT [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,lane-count" $lane_count int
+	hsi::utils::add_new_dts_param "${node}" "xlnx,dp-retimer" "xfmc" reference
 	set i 0
 	while {$i < $lane_count} {
-		set phy_s "vphy_lane$i 0 1 1 0"
+		set phy_s "rxphy_lane$i 0 1 1 0"
 		set clocks [lappend clocks $phy_s]
 		set updat  [lappend updat $phy_s]
 		incr i
@@ -74,10 +91,6 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
 		}
 	}
-	set link_rate [get_property CONFIG.LINK_RATE [get_cells -hier $drv_handle]]
-	set link_rate [expr {${link_rate} * 1000}]
-	set link_rate [expr int ($link_rate)]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,linkrate" $link_rate int
 	set mode [get_property CONFIG.MODE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,mode" $mode int
 	set num_streams [get_property CONFIG.NUM_STREAMS [get_cells -hier $drv_handle]]
@@ -90,6 +103,10 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,sim-mode" $sim_mode string
 	set video_interface [get_property CONFIG.VIDEO_INTERFACE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,video-interface" $video_interface int
+	set vid_phy_ctlr [get_cells -hier -filter IP_NAME==vid_phy_controller]
+	if {[llength $vid_phy_ctlr]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vidphy" $vid_phy_ctlr reference
+	}
 	set ports_node [add_or_get_dt_node -n "ports" -l dprx_ports$drv_handle -p ${node}]
 	hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
