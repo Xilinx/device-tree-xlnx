@@ -157,6 +157,7 @@
 			compatible = "cdns,i2c-r1p10";
 			status = "disabled";
 			clocks = <&clkc 38>;
+			clock-frequency = <400000>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 25 4>;
 			reg = <0xe0004000 0x1000>;
@@ -168,6 +169,7 @@
 			compatible = "cdns,i2c-r1p10";
 			status = "disabled";
 			clocks = <&clkc 39>;
+			clock-frequency = <400000>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 48 4>;
 			reg = <0xe0005000 0x1000>;
