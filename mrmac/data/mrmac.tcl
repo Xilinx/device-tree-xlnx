@@ -52,26 +52,31 @@ proc generate {drv_handle} {
 		if {[string match -nocase $slave_intf "ptp_0_s_axi"]} {
 			set ptp_0_node [add_or_get_dt_node -n "ptp_timer" -l "$slave_intf" -u $base -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param "$ptp_0_node" "compatible" "$ptp_comp" stringlist
-			generate_reg_property $ptp_0_node $base_addr $high_addr
+			set reg [generate_reg_property $base_addr $high_addr]
+			hsi::utils::add_new_dts_param "$ptp_0_node" "reg" $reg inthexlist
 		}
 		if {[string match -nocase $slave_intf "ptp_1_s_axi"]} {
 			set ptp_1_node [add_or_get_dt_node -n "ptp_timer" -l "$slave_intf" -u $base -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param "$ptp_1_node" "compatible" "$ptp_comp" stringlist
-			generate_reg_property $ptp_1_node $base_addr $high_addr
+			set reg [generate_reg_property $base_addr $high_addr]
+			hsi::utils::add_new_dts_param "$ptp_1_node" "reg" $reg inthexlist
 		}
 		if {[string match -nocase $slave_intf "ptp_2_s_axi"]} {
 			set ptp_2_node [add_or_get_dt_node -n "ptp_timer" -l "$slave_intf" -u $base -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param "$ptp_2_node" "compatible" "$ptp_comp" stringlist
-			generate_reg_property $ptp_2_node $base_addr $high_addr
+			set reg [generate_reg_property $base_addr $high_addr]
+			hsi::utils::add_new_dts_param "$ptp_2_node" "reg" $reg inthexlist
 		}
 		if {[string match -nocase $slave_intf "ptp_3_s_axi"]} {
 			set ptp_3_node [add_or_get_dt_node -n "ptp_timer" -l "$slave_intf" -u $base -d $dts_file -p $bus_node]
 			hsi::utils::add_new_dts_param "$ptp_3_node" "compatible" "$ptp_comp" stringlist
-			generate_reg_property $ptp_3_node $base_addr $high_addr
+			set reg [generate_reg_property $base_addr $high_addr]
+			hsi::utils::add_new_dts_param "$ptp_3_node" "reg" $reg inthexlist
 		}
 		if {[string match -nocase $slave_intf "s_axi"]} {
 			set mrmac0_highaddr_hex [format 0x%x [expr $base_addr + 0xFFF]]
-			generate_reg_property $node $base_addr $mrmac0_highaddr_hex
+			set reg [generate_reg_property $base_addr $high_addr]
+			hsi::utils::add_new_dts_param "$node" "reg" $reg inthexlist
 		}
 	}
 	set connected_ip [get_connected_stream_ip $mrmac_ip "tx_axis_tdata0"]
@@ -627,7 +632,8 @@ proc generate {drv_handle} {
 	append new_label $drv_handle "_" $port1
 	set mrmac1_node [add_or_get_dt_node -n "mrmac" -l "$new_label" -u $mrmac1_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac1_node" "compatible" "$compatible" stringlist
-	generate_reg_property $mrmac1_node $mrmac1_base $mrmac1_highaddr_hex
+	set mrmac1_reg [generate_reg_property $mrmac1_base $mrmac1_highaddr_hex]
+	hsi::utils::add_new_dts_param "$mrmac1_node" "reg" $mrmac1_reg inthexlist
 	lappend clknames1 "$s_axi_aclk" "$rx_axi_clk1" "$rx_flexif_clk1" "$rx_ts_clk1" "$tx_axi_clk1" "$tx_flexif_clk1" "$tx_ts_clk1"
 	set index1 [lindex $clk_list $s_axi_aclk_index0]
 	regsub -all "\<&" $index1 {} index1
@@ -1034,7 +1040,8 @@ proc generate {drv_handle} {
 	append label2 $drv_handle "_" $port2
 	set mrmac2_node [add_or_get_dt_node -n "mrmac" -l "$label2" -u $mrmac2_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac2_node" "compatible" "$compatible" stringlist
-	generate_reg_property $mrmac2_node $mrmac2_base $mrmac2_highaddr_hex
+	set mrmac2_reg [generate_reg_property $mrmac2_base $mrmac2_highaddr_hex]
+	hsi::utils::add_new_dts_param "$mrmac2_node" "reg" $mrmac2_reg inthexlist
 
 	lappend clknames2 "$s_axi_aclk" "$rx_axi_clk2" "$rx_flexif_clk2" "$rx_ts_clk2" "$tx_axi_clk2" "$tx_flexif_clk2" "$tx_ts_clk2"
 	set index2 [lindex $clk_list $s_axi_aclk_index0]
@@ -1415,7 +1422,8 @@ proc generate {drv_handle} {
 	append label3 $drv_handle "_" $port3
 	set mrmac3_node [add_or_get_dt_node -n "mrmac" -l "$label3" -u $mrmac3_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac3_node" "compatible" "$compatible" stringlist
-	generate_reg_property $mrmac3_node $mrmac3_base $mrmac3_highaddr_hex
+	set mrmac3_reg [generate_reg_property $mrmac3_base $mrmac3_highaddr_hex]
+	hsi::utils::add_new_dts_param "$mrmac3_node" "reg" $mrmac3_reg inthexlist
 
 	set port3_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_axis_tdata6"]]
 	foreach pin $port3_pins {
@@ -1801,39 +1809,6 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,gt-ch3-tx-user-data-width-c0" $GT_CH3_TX_USER_DATA_WIDTH_C0 int
 	set GT_CH3_TX_USER_DATA_WIDTH_C1 [get_property CONFIG.GT_CH3_TX_USER_DATA_WIDTH_C1 [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,gt-ch3-tx-user-data-width-c1" $GT_CH3_TX_USER_DATA_WIDTH_C1 int
-}
-
-proc generate_reg_property {node base high} {
-	set size [format 0x%x [expr {${high} - ${base} + 1}]]
-	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-		if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
-			set temp $base
-			set temp [string trimleft [string trimleft $temp 0] x]
-			set len [string length $temp]
-			set rem [expr {${len} - 8}]
-			set high_base "0x[string range $temp $rem $len]"
-			set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
-			set low_base [format 0x%08x $low_base]
-			if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
-				set temp $size
-				set temp [string trimleft [string trimleft $temp 0] x]
-				set len [string length $temp]
-				set rem [expr {${len} - 8}]
-				set high_size "0x[string range $temp $rem $len]"
-				set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
-				set low_size [format 0x%08x $low_size]
-				set reg "$low_base $high_base $low_size $high_size"
-			} else {
-				set reg "$low_base $high_base 0x0 $size"
-			}
-		} else {
-			set reg "0x0 $base 0x0 $size"
-		}
-	} else {
-		set reg "$base $size"
-	}
-	hsi::utils::add_new_dts_param "${node}" "reg" $reg inthexlist
 }
 
 proc generate_intr_info {drv_handle node fifo_ip} {
