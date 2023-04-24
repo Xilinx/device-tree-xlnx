@@ -61,7 +61,10 @@ proc generate {drv_handle} {
     if {$ip_name == "xxv_ethernet"} {
         set ip_mem_handles [hsi::utils::get_ip_mem_ranges [get_cells -hier $drv_handle]]
         set num 0
-        generate_reg_property $node $ip_mem_handles $num
+        set base [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $num]]]
+        set high [string tolower [get_property HIGH_VALUE [lindex $ip_mem_handles $num]]]
+        set reg [generate_reg_property $base $high]
+        hsi::utils::add_new_dts_param "${node}" "reg" $reg inthexlist
         set num_cores [get_property CONFIG.NUM_OF_CORES [get_cells -hier $drv_handle]]
     }
     set new_label ""
@@ -83,7 +86,10 @@ proc generate {drv_handle} {
                   append new_label $drv_handle "_" $core
                   append clk_label $drv_handle "_" $core
                   set eth_node [add_or_get_dt_node -n "ethernet" -l "$new_label" -u $base_addr -d $dts_file -p $bus_node]
-                  generate_reg_property $eth_node $ip_mem_handles $core
+                  set base [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
+                  set high [string tolower [get_property HIGH_VALUE [lindex $ip_mem_handles $core]]]
+                  set reg [generate_reg_property $base $high]
+                  hsi::utils::add_new_dts_param "${eth_node}" "reg" $reg inthexlist
 	       }
           }
     if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet" && $ip_name != "usxgmii"} {
@@ -799,47 +805,6 @@ proc get_connectedip {intf} {
          }
       }
    }
-}
-
-proc generate_reg_property {node ip_mem_handles num} {
-       if {[llength $ip_mem_handles] == 0} {
-                 return
-       }
-       set base [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $num]]]
-       set high [string tolower [get_property HIGH_VALUE [lindex $ip_mem_handles $num]]]
-       set size [format 0x%x [expr {${high} - ${base} + 1}]]
-
-       set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-       if {[string match -nocase $proctype "psu_cortexa53"] || \
-	       [string match -nocase $proctype "psv_cortexa72"] || \
-		[string match -nocase $proctype "psx_cortexa78"]} {
-            if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
-                      set temp $base
-                      set temp [string trimleft [string trimleft $temp 0] x]
-                      set len [string length $temp]
-                      set rem [expr {${len} - 8}]
-                      set high_base "0x[string range $temp $rem $len]"
-                      set low_base "0x[string range $temp 0 [expr {${rem} - 1}]]"
-                      set low_base [format 0x%08x $low_base]
-                      if {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
-                               set temp $size
-                               set temp [string trimleft [string trimleft $temp 0] x]
-                               set len [string length $temp]
-                               set rem [expr {${len} - 8}]
-                               set high_size "0x[string range $temp $rem $len]"
-                               set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
-                               set low_size [format 0x%08x $low_size]
-                               set reg "$low_base $high_base $low_size $high_size"
-                      } else {
-                              set reg "$low_base $high_base 0x0 $size"
-                      }
-            } else {
-                    set reg "0x0 $base 0x0 $size"
-            }
-       } else {
-               set reg "$base $size"
-       }
-       hsi::utils::add_new_dts_param "${node}" "reg" $reg inthexlist
 }
 
 proc gen_drv_prop_eth_ip {drv_handle ipname} {
