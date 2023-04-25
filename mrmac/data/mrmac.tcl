@@ -75,7 +75,7 @@ proc generate {drv_handle} {
 		}
 		if {[string match -nocase $slave_intf "s_axi"]} {
 			set mrmac0_highaddr_hex [format 0x%x [expr $base_addr + 0xFFF]]
-			set reg [generate_reg_property $base_addr $high_addr]
+			set reg [generate_reg_property $base_addr $mrmac0_highaddr_hex]
 			hsi::utils::add_new_dts_param "$node" "reg" $reg inthexlist
 		}
 	}
