@@ -62,7 +62,7 @@ proc generate {drv_handle} {
 	set hdmi_fast_switch [get_property CONFIG.C_Hdmi_Fast_Switch [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,hdmi-fast-switch" $hdmi_fast_switch int
 	for {set ch 0} {$ch < $tx_no_of_channels} {incr ch} {
-		set phy_node [add_or_get_dt_node -n "vphy_lane@$ch" -l vphy_lane$ch -p $node]
+		set phy_node [add_or_get_dt_node -n "txphy_lane@$ch" -l txphy_lane$ch -p $node]
 		hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
 	}
 	set transceiver [get_property CONFIG.Transceiver [get_cells -hier $drv_handle]]
