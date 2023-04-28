@@ -72,8 +72,18 @@ global set axis_switch_port4_remo_mappings [dict create]
 proc get_clock_frequency {ip_handle portname} {
 	set clk ""
 	set clkhandle [get_pins -of_objects $ip_handle $portname]
+	set width [::hsi::utils::get_port_width $clkhandle]
 	if {[string compare -nocase $clkhandle ""] != 0} {
-		set clk [get_property CLK_FREQ $clkhandle ]
+		if {$width >= 2} {
+			set clk [get_property CLK_FREQ $clkhandle ]
+			regsub -all ":" $clk { } clk
+			set clklen [llength $clk]
+			if {$clklen > 1} {
+				set clk [lindex $clk 0]
+			}
+		} else {
+			set clk [get_property CLK_FREQ $clkhandle ]
+		}
 	}
 	return $clk
 }
