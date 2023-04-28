@@ -13,6 +13,15 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
+proc add_prop_ifexists {drv_handle hsi_prop dt_prop node {dt_prop_type "string"}} {
+	if {[llength $drv_handle] && [llength $hsi_prop] && [llength $dt_prop] && [llength $node]} {
+		set value [get_property $hsi_prop [get_cells -hier $drv_handle]]
+		if {[llength $value]} {
+			hsi::utils::add_new_dts_param "${node}" "$dt_prop" $value $dt_prop_type
+		}
+	}
+}
+
 proc generate {drv_handle} {
 	# try to source the common tcl procs
 	# assuming the order of return is based on repo priority
@@ -29,7 +38,9 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,mrmac-ethernet-1.0"]
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
+		set compatible [append compatible " " "xlnx,mrmac-ethernet-1.0"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set mrmac_ip [get_cells -hier $drv_handle]
 	gen_mrmac_clk_property $drv_handle
