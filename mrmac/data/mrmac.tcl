@@ -1944,7 +1944,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 					}
 					set dts_file "pl.dtsi"
 					set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-					set clk_freq [get_clk_frequency [get_cells -hier $drv_handle] "$clk"]
+					set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 					if {[llength $clk_freq] == 0} {
 						dtg_warning "clock frequency for the $clk is NULL"
 						continue
@@ -2100,7 +2100,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 			if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
 					set dts_file "pl.dtsi"
 					set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-					set clk_freq [get_clk_frequency [get_cells -hier $drv_handle] "$clk"]
+					set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 					if {[llength $clk_freq] == 0} {
 						dtg_warning "clock frequency for the $clk is NULL"
 						continue
@@ -2165,7 +2165,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 				}
 				set dts_file "pl.dtsi"
 				set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-				set clk_freq [get_clk_frequency [get_cells -hier $drv_handle] "$clk"]
+				set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 				if {[llength $clk_freq] == 0} {
 					dtg_warning "clock frequency for the $clk is NULL"
 					continue
@@ -2321,7 +2321,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 		if {[string match -nocase $is_clk_wiz "0"]&& [string match -nocase $is_pl_clk "0"]} {
 			set dts_file "pl.dtsi"
 			set bus_node [add_or_get_bus_node $drv_handle $dts_file]
-			set clk_freq [get_clk_frequency [get_cells -hier $drv_handle] "$clk"]
+			set clk_freq [get_clock_frequency [get_cells -hier $drv_handle] "$clk"]
 			if {[llength $clk_freq] == 0} {
 				dtg_warning "clock frequency for the $clk is NULL"
 				continue
@@ -2502,23 +2502,4 @@ proc gen_mrmac_clk_property {drv_handle} {
 			set_drv_prop $drv_handle "zclocks1" "$refs" reference
 		}
 	}
-}
-
-proc get_clk_frequency {ip_handle portname} {
-	set clk ""
-	set clkhandle [get_pins -of_objects $ip_handle $portname]
-	set width [::hsi::utils::get_port_width $clkhandle]
-	if {[string compare -nocase $clkhandle ""] != 0} {
-		if {$width >= 2} {
-			set clk [get_property CLK_FREQ $clkhandle ]
-			regsub -all ":" $clk { } clk
-			set clklen [llength $clk]
-			if {$clklen > 1} {
-				set clk [lindex $clk 0]
-			}
-		} else {
-			set clk [get_property CLK_FREQ $clkhandle ]
-		}
-	}
-	return $clk
 }
