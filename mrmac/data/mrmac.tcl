@@ -404,6 +404,9 @@ proc generate {drv_handle} {
 		set mux_ip ""
 		set fifo_ip ""
 		if {[llength $sink_periph]} {
+			if {[string match -nocase [get_property IP_NAME $sink_periph] "dcmac_intf_rx"]} {
+				set sink_periph [hsi::utils::get_connected_stream_ip [get_cells -hier $sink_periph] "M_AXIS"]
+			}
 			if {[string match -nocase [get_property IP_NAME $sink_periph] "axis_data_fifo"]} {
 				set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $sink_periph]
 				if {[string_is_empty $fifo_width_bytes]} {
@@ -415,6 +418,7 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "${node}" "xlnx,rxmem" $rxethmem int
 				set fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per [::hsi::get_cells -of_objects $fifo_pin]
+				set fiforx_connect_ip ""
 				if {[string match -nocase [get_property IP_NAME $mux_per] "mrmac_10g_mux"]} {
 					set data_fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per] "rx_m_axis_tdata"]]
 					set data_fifo_per [::hsi::get_cells -of_objects $data_fifo_pin]
@@ -430,25 +434,28 @@ proc generate {drv_handle} {
 								set fiforx_connect_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $fiforx_per] "M_AXIS"]
 							}
 						}
-						if {[llength $fiforx_connect_ip]} {
-						if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip] "axi_mcdma"]} {
-							hsi::utils::add_new_dts_param "$node" "axistream-connected" "$fiforx_connect_ip" reference
-							set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip]
-							set inhex [format %x $num_queues]
-							append numqueues "/bits/ 16 <0x$inhex>"
-							hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
-							set id 1
-							for {set i 2} {$i <= $num_queues} {incr i} {
-								set i [format "%" $i]
-								append id "\""
-								append id ",\"" $i
-								set i [expr 0x$i]
-							}
-							hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
-							hsi::utils::add_new_dts_param $node "xlnx,channel-ids" $id stringlist
-							generate_intr_info $drv_handle $node $fiforx_connect_ip
+					}
+				}
+				if {[string match -nocase [get_property IP_NAME $mux_per] "axi_mcdma"]} {
+					set fiforx_connect_ip $mux_per
+				}
+				if {[llength $fiforx_connect_ip]} {
+					if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip] "axi_mcdma"]} {
+						hsi::utils::add_new_dts_param "$node" "axistream-connected" "$fiforx_connect_ip" reference
+						set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip]
+						set inhex [format %x $num_queues]
+						append numqueues "/bits/ 16 <0x$inhex>"
+						hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
+						set id 1
+						for {set i 2} {$i <= $num_queues} {incr i} {
+							set i [format "%" $i]
+							append id "\""
+							append id ",\"" $i
+							set i [expr 0x$i]
 						}
-						}
+						hsi::utils::add_new_dts_param $node "xlnx,num-queues" $numqueues noformating
+						hsi::utils::add_new_dts_param $node "xlnx,channel-ids" $id stringlist
+						generate_intr_info $drv_handle $node $fiforx_connect_ip
 					}
 				}
 			}
@@ -651,6 +658,9 @@ proc generate {drv_handle} {
 		set mux_ip ""
 		set fifo_ip ""
 		if {[llength $sink_periph]} {
+			if {[string match -nocase [get_property IP_NAME $sink_periph] "dcmac_intf_rx"]} {
+				set sink_periph [hsi::utils::get_connected_stream_ip [get_cells -hier $sink_periph] "M_AXIS"]
+			}
 			if {[string match -nocase [get_property IP_NAME $sink_periph] "axis_data_fifo"]} {
 				set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $sink_periph]
 				if {[string_is_empty $fifo_width_bytes]} {
@@ -662,6 +672,7 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,rxmem" $rxethmem int
 				set fifo1_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per1 [::hsi::get_cells -of_objects $fifo1_pin]
+				set fiforx_connect_ip1 ""
 				if {[string match -nocase [get_property IP_NAME $mux_per1] "mrmac_10g_mux"]} {
 					set data_fifo_pin1 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per1] "rx_m_axis_tdata"]]
 					set data_fifo_per1 [::hsi::get_cells -of_objects $data_fifo_pin1]
@@ -676,25 +687,28 @@ proc generate {drv_handle} {
 								set fiforx_connect_ip1 [hsi::utils::get_connected_stream_ip [get_cells -hier $fiforx1_per] "M_AXIS"]
 							}
 						}
-						if {[llength $fiforx_connect_ip1]} {
-						if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip1] "axi_mcdma"]} {
-							hsi::utils::add_new_dts_param "$mrmac1_node" "axistream-connected" "$fiforx_connect_ip1" reference
-							set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip1]
-							set inhex [format %x $num_queues]
-							append numqueues1 "/bits/ 16 <0x$inhex>"
-							hsi::utils::add_new_dts_param $mrmac1_node "xlnx,num-queues" $numqueues1 noformating
-							set id 1
-							for {set i 2} {$i <= $num_queues} {incr i} {
-								set i [format "%" $i]
-								append id "\""
-								append id ",\"" $i
-								set i [expr 0x$i]
-							}
-							hsi::utils::add_new_dts_param $mrmac1_node "xlnx,num-queues" $numqueues1 noformating
-							hsi::utils::add_new_dts_param $mrmac1_node "xlnx,channel-ids" $id stringlist
-							generate_intr_info $drv_handle $mrmac1_node $fiforx_connect_ip1
+					}
+				}
+				if {[string match -nocase [get_property IP_NAME $mux_per1] "axi_mcdma"]} {
+					set fiforx_connect_ip1 $mux_per1
+				}
+				if {[llength $fiforx_connect_ip1]} {
+					if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip1] "axi_mcdma"]} {
+						hsi::utils::add_new_dts_param "$mrmac1_node" "axistream-connected" "$fiforx_connect_ip1" reference
+						set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip1]
+						set inhex [format %x $num_queues]
+						append numqueues1 "/bits/ 16 <0x$inhex>"
+						hsi::utils::add_new_dts_param $mrmac1_node "xlnx,num-queues" $numqueues1 noformating
+						set id 1
+						for {set i 2} {$i <= $num_queues} {incr i} {
+							set i [format "%" $i]
+							append id "\""
+							append id ",\"" $i
+							set i [expr 0x$i]
 						}
-						}
+						hsi::utils::add_new_dts_param $mrmac1_node "xlnx,num-queues" $numqueues1 noformating
+						hsi::utils::add_new_dts_param $mrmac1_node "xlnx,channel-ids" $id stringlist
+						generate_intr_info $drv_handle $mrmac1_node $fiforx_connect_ip1
 					}
 				}
 			}
@@ -975,6 +989,9 @@ proc generate {drv_handle} {
 		set mux_ip ""
 		set fifo_ip ""
 		if {[llength $sink_periph]} {
+			if {[string match -nocase [get_property IP_NAME $sink_periph] "dcmac_intf_rx"]} {
+				set sink_periph [hsi::utils::get_connected_stream_ip [get_cells -hier $sink_periph] "M_AXIS"]
+			}
 			if {[string match -nocase [get_property IP_NAME $sink_periph] "axis_data_fifo"]} {
 				set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $sink_periph]
 				if {[string_is_empty $fifo_width_bytes]} {
@@ -986,6 +1003,7 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,rxmem" $rxethmem int
 				set fifo2_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per2 [::hsi::get_cells -of_objects $fifo2_pin]
+				set fiforx_connect_ip2 ""
 				if {[string match -nocase [get_property IP_NAME $mux_per2] "mrmac_10g_mux"]} {
 					set data_fifo_pin2 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per2] "rx_m_axis_tdata"]]
 					set data_fifo_per2 [::hsi::get_cells -of_objects $data_fifo_pin2]
@@ -996,25 +1014,28 @@ proc generate {drv_handle} {
 						if {[string match -nocase [get_property IP_NAME $fiforx2_per] "RX_PTP_PKT_DETECT_TS_PREPEND"]} {
 							set fiforx_connect_ip2 [hsi::utils::get_connected_stream_ip [get_cells -hier $fiforx2_per] "M_AXIS"]
 						}
-						if {[llength $fiforx_connect_ip2]} {
-						if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip2] "axi_mcdma"]} {
-							hsi::utils::add_new_dts_param "$mrmac2_node" "axistream-connected" "$fiforx_connect_ip2" reference
-							set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip2]
-							set inhex [format %x $num_queues]
-							append numqueues2 "/bits/ 16 <0x$inhex>"
-							hsi::utils::add_new_dts_param $mrmac2_node "xlnx,num-queues" $numqueues2 noformating
-							set id 1
-							for {set i 2} {$i <= $num_queues} {incr i} {
-								set i [format "%" $i]
-								append id "\""
-								append id ",\"" $i
-								set i [expr 0x$i]
-							}
-							hsi::utils::add_new_dts_param $mrmac2_node "xlnx,num-queues" $numqueues2 noformating
-							hsi::utils::add_new_dts_param $mrmac2_node "xlnx,channel-ids" $id stringlist
-							generate_intr_info $drv_handle $mrmac2_node $fiforx_connect_ip2
+					}
+				}
+				if {[string match -nocase [get_property IP_NAME $mux_per2] "axi_mcdma"]} {
+					set fiforx_connect_ip2 $mux_per2
+				}
+				if {[llength $fiforx_connect_ip2]} {
+					if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip2] "axi_mcdma"]} {
+						hsi::utils::add_new_dts_param "$mrmac2_node" "axistream-connected" "$fiforx_connect_ip2" reference
+						set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip2]
+						set inhex [format %x $num_queues]
+						append numqueues2 "/bits/ 16 <0x$inhex>"
+						hsi::utils::add_new_dts_param $mrmac2_node "xlnx,num-queues" $numqueues2 noformating
+						set id 1
+						for {set i 2} {$i <= $num_queues} {incr i} {
+							set i [format "%" $i]
+							append id "\""
+							append id ",\"" $i
+							set i [expr 0x$i]
 						}
-						}
+						hsi::utils::add_new_dts_param $mrmac2_node "xlnx,num-queues" $numqueues2 noformating
+						hsi::utils::add_new_dts_param $mrmac2_node "xlnx,channel-ids" $id stringlist
+						generate_intr_info $drv_handle $mrmac2_node $fiforx_connect_ip2
 					}
 				}
 			}
@@ -1270,6 +1291,9 @@ proc generate {drv_handle} {
 		set mux_ip ""
 		set fifo_ip ""
 		if {[llength $sink_periph]} {
+			if {[string match -nocase [get_property IP_NAME $sink_periph] "dcmac_intf_rx"]} {
+				set sink_periph [hsi::utils::get_connected_stream_ip [get_cells -hier $sink_periph] "M_AXIS"]
+			}
 			if {[string match -nocase [get_property IP_NAME $sink_periph] "axis_data_fifo"]} {
 				set fifo_width_bytes [get_property CONFIG.TDATA_NUM_BYTES $sink_periph]
 				if {[string_is_empty $fifo_width_bytes]} {
@@ -1291,25 +1315,28 @@ proc generate {drv_handle} {
 						if {[string match -nocase [get_property IP_NAME $fiforx3_per] "RX_PTP_PKT_DETECT_TS_PREPEND"]} {
 							set fiforx_connect_ip3 [hsi::utils::get_connected_stream_ip [get_cells -hier $fiforx3_per] "M_AXIS"]
 						}
-						if {[llength $fiforx_connect_ip3]} {
-						if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip3] "axi_mcdma"]} {
-							hsi::utils::add_new_dts_param "$mrmac3_node" "axistream-connected" "$fiforx_connect_ip3" reference
-							set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip3]
-							set inhex [format %x $num_queues]
-							append numqueues3 "/bits/ 16 <0x$inhex>"
-							hsi::utils::add_new_dts_param $mrmac3_node "xlnx,num-queues" $numqueues3 noformating
-							set id 1
-							for {set i 2} {$i <= $num_queues} {incr i} {
-								set i [format "%" $i]
-								append id "\""
-								append id ",\"" $i
-								set i [expr 0x$i]
-							}
-							hsi::utils::add_new_dts_param $mrmac3_node "xlnx,num-queues" $numqueues3 noformating
-							hsi::utils::add_new_dts_param $mrmac3_node "xlnx,channel-ids" $id stringlist
-							generate_intr_info $drv_handle $mrmac3_node $fiforx_connect_ip3
+					}
+				}
+				if {[string match -nocase [get_property IP_NAME $mux_per3] "axi_mcdma"]} {
+					set fiforx_connect_ip3 $mux_per3
+				}
+				if {[llength $fiforx_connect_ip3]} {
+					if {[string match -nocase [get_property IP_NAME $fiforx_connect_ip3] "axi_mcdma"]} {
+						hsi::utils::add_new_dts_param "$mrmac3_node" "axistream-connected" "$fiforx_connect_ip3" reference
+						set num_queues [get_property CONFIG.c_num_mm2s_channels $fiforx_connect_ip3]
+						set inhex [format %x $num_queues]
+						append numqueues3 "/bits/ 16 <0x$inhex>"
+						hsi::utils::add_new_dts_param $mrmac3_node "xlnx,num-queues" $numqueues3 noformating
+						set id 1
+						for {set i 2} {$i <= $num_queues} {incr i} {
+							set i [format "%" $i]
+							append id "\""
+							append id ",\"" $i
+							set i [expr 0x$i]
 						}
-						}
+						hsi::utils::add_new_dts_param $mrmac3_node "xlnx,num-queues" $numqueues3 noformating
+						hsi::utils::add_new_dts_param $mrmac3_node "xlnx,channel-ids" $id stringlist
+						generate_intr_info $drv_handle $mrmac3_node $fiforx_connect_ip3
 					}
 				}
 			}
