@@ -237,7 +237,47 @@ proc generate {drv_handle} {
 			set s_axi_aclk "s_axi_aclk"
 			set s_axi_aclk_index0 $i
 		}
-		if {[string match -nocase $clkname "rx_axi_clk0"]} {
+		if {[string match -nocase $clkname "rx_macif_clk"]} {
+			set rx_macif_clk "rx_macif_clk"
+			set rx_macif_clk_index0 $i
+		}
+		if {[string match -nocase $clkname "tx_macif_clk"]} {
+			set tx_macif_clk "tx_macif_clk"
+			set tx_macif_clk_index0 $i
+		}
+		if {[string match -nocase $clkname "ts_clk0"]} {
+			set ts_clk0 "ts_clk"
+			set ts_clk_index0 $i
+		}
+		if {[string match -nocase $clkname "ts_clk1"]} {
+			set ts_clk1 "ts_clk"
+			set ts_clk_index1 $i
+		}
+		if {[string match -nocase $clkname "ts_clk2"]} {
+			set ts_clk2 "ts_clk"
+			set ts_clk_index2 $i
+		}
+		if {[string match -nocase $clkname "ts_clk3"]} {
+			set ts_clk3 "ts_clk"
+			set ts_clk_index3 $i
+		}
+		if {[string match -nocase $clkname "tx_serdes_clk0"]} {
+			set tx_serdes_clk0 "tx_serdes_clk"
+			set tx_serdes_clk_index0 $i
+		}
+		if {[string match -nocase $clkname "tx_serdes_clk1"]} {
+			set tx_serdes_clk1 "tx_serdes_clk"
+			set tx_serdes_clk_index1 $i
+		}
+		if {[string match -nocase $clkname "tx_serdes_clk2"]} {
+			set tx_serdes_clk2 "tx_serdes_clk"
+			set tx_serdes_clk_index2 $i
+		}
+		if {[string match -nocase $clkname "tx_serdes_clk3"]} {
+			set tx_serdes_clk3 "tx_serdes_clk"
+			set tx_serdes_clk_index3 $i
+		}
+		if {[string match -nocase $clkname "rx_axi_clk0"] || [string match -nocase $clkname "rx_axi_clk"]} {
 			set rx_axi_clk0 "rx_axi_clk"
 			set rx_axi_clk_index0 $i
 		}
@@ -285,7 +325,7 @@ proc generate {drv_handle} {
 			set rx_ts_clk3 "rx_ts_clk"
 			set rx_ts_clk3_index3 $i
 		}
-		if {[string match -nocase $clkname "tx_axi_clk0"]} {
+		if {[string match -nocase $clkname "tx_axi_clk0"] || [string match -nocase $clkname "tx_axi_clk"] } {
 			set tx_axi_clk0 "tx_axi_clk"
 			set tx_axi_clk_index0 $i
 		}
@@ -336,16 +376,27 @@ proc generate {drv_handle} {
 		incr i
 	}
 
-	lappend clknames "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk0" "$rx_ts_clk0" "$tx_axi_clk0" "$tx_flexif_clk0" "$tx_ts_clk0"
-	set index0 [lindex $clk_list $s_axi_aclk_index0]
-	regsub -all "\<&" $index0 {} index0
-	regsub -all "\<&" $index0 {} index0
-	set txindex0 [lindex $clk_list $tx_ts_clk_index0]
-	regsub -all "\>" $txindex0 {} txindex0
-	append clkvals0  "$index0, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $rx_ts_clk0_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], $txindex0"
-	hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals0 reference
-	hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames stringlist
-
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
+		lappend clknames "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk0" "$rx_ts_clk0" "$tx_axi_clk0" "$tx_flexif_clk0" "$tx_ts_clk0"
+		set index0 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index0 {} index0
+		regsub -all "\<&" $index0 {} index0
+		set txindex0 [lindex $clk_list $tx_ts_clk_index0]
+		regsub -all "\>" $txindex0 {} txindex0
+		append clkvals0  "$index0, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $rx_ts_clk0_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], $txindex0"
+		hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals0 reference
+		hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames stringlist
+	}
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
+		lappend clknames "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk0" "$tx_axi_clk0" "$tx_flexif_clk0" "$rx_macif_clk" "$ts_clk0" "$tx_macif_clk" "$tx_serdes_clk0"
+		set index0 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index0 {} index0
+		regsub -all "\<&" $index0 {} index0
+		set txindex0 [lindex $clk_list $tx_serdes_clk_index0]
+		append clkvals0  "$index0, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index0], [lindex $clk_list $tx_macif_clk_index0], $txindex0"
+		hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals0 reference
+		hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames stringlist
+	}
 	set port0_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_axis_tdata0"]]
 	dtg_verbose "port0_pins:$port0_pins"
 	foreach pin $port0_pins {
@@ -498,8 +549,8 @@ proc generate {drv_handle} {
 	if {[llength $mask_handle]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,gtpll" $mask_handle reference
 	}
-		hsi::utils::add_new_dts_param "$node" "xlnx,phcindex" 0 int
-		hsi::utils::add_new_dts_param "$node" "xlnx,gtlane" 0 int
+	hsi::utils::add_new_dts_param "$node" "xlnx,phcindex" 0 int
+	hsi::utils::add_new_dts_param "$node" "xlnx,gtlane" 0 int
 
 	set gt_reset_pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "gt_reset_all_in"]]
 	dtg_verbose "gt_reset_pins:$gt_reset_pins"
@@ -566,20 +617,33 @@ proc generate {drv_handle} {
 	set mrmac1_highaddr_hex [format 0x%x [expr $mrmac1_base + 0xFFF]]
 	set port1 1
 	append new_label $drv_handle "_" $port1
-	set mrmac1_node [add_or_get_dt_node -n "mrmac" -l "$new_label" -u $mrmac1_base_hex -d $dts_file -p $bus_node]
+	set node_prefix [get_property IP_NAME [get_cells -hier $drv_handle]]
+	set mrmac1_node [add_or_get_dt_node -n $node_prefix -l "$new_label" -u $mrmac1_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac1_node" "compatible" "$compatible" stringlist
 	set mrmac1_reg [generate_reg_property $mrmac1_base $mrmac1_highaddr_hex]
 	hsi::utils::add_new_dts_param "$mrmac1_node" "reg" $mrmac1_reg inthexlist
-	lappend clknames1 "$s_axi_aclk" "$rx_axi_clk1" "$rx_flexif_clk1" "$rx_ts_clk1" "$tx_axi_clk1" "$tx_flexif_clk1" "$tx_ts_clk1"
-	set index1 [lindex $clk_list $s_axi_aclk_index0]
-	regsub -all "\<&" $index1 {} index1
-	regsub -all "\<&" $index1 {} index1
-	set txindex1 [lindex $clk_list $tx_ts_clk_index1]
-	regsub -all "\>" $txindex1 {} txindex1
-	append clkvals  "$index1, [lindex $clk_list $rx_axi_clk_index1], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $rx_ts_clk1_index1], [lindex $clk_list $tx_axi_clk_index1], [lindex $clk_list $tx_flexif_clk_index1], $txindex1"
-	hsi::utils::add_new_dts_param "${mrmac1_node}" "clocks" $clkvals reference
-	hsi::utils::add_new_dts_param "${mrmac1_node}" "clock-names" $clknames1 stringlist
-
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
+		lappend clknames1 "$s_axi_aclk" "$rx_axi_clk1" "$rx_flexif_clk1" "$rx_ts_clk1" "$tx_axi_clk1" "$tx_flexif_clk1" "$tx_ts_clk1"
+		set index1 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index1 {} index1
+		regsub -all "\<&" $index1 {} index1
+		set txindex1 [lindex $clk_list $tx_ts_clk_index1]
+		regsub -all "\>" $txindex1 {} txindex1
+		append clkvals  "$index1, [lindex $clk_list $rx_axi_clk_index1], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $rx_ts_clk1_index1], [lindex $clk_list $tx_axi_clk_index1], [lindex $clk_list $tx_flexif_clk_index1], $txindex1"
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "clocks" $clkvals reference
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "clock-names" $clknames1 stringlist
+	}
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
+		lappend clknames1 "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk1" "$tx_axi_clk0" "$tx_flexif_clk1" "$rx_macif_clk" "$ts_clk1" "$tx_macif_clk" "$tx_serdes_clk1"
+		set index1 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index1 {} index1
+		regsub -all "\<&" $index1 {} index1
+		set txindex1 [lindex $clk_list $tx_serdes_clk_index1]
+		regsub -all "\>" $txindex1 {} txindex1
+		append clkvals  "$index1, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index1], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index1], [lindex $clk_list $tx_macif_clk_index0], $txindex1"
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "clocks" $clkvals reference
+		hsi::utils::add_new_dts_param "${mrmac1_node}" "clock-names" $clknames1 stringlist
+	}
 	set port1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_axis_tdata2"]]
 	dtg_verbose "port1_pins:$port1_pins"
 	foreach pin $port1_pins {
@@ -876,20 +940,34 @@ proc generate {drv_handle} {
 	set mrmac2_highaddr_hex [format 0x%x [expr $mrmac2_base + 0xFFF]]
 	set port2 2
 	append label2 $drv_handle "_" $port2
-	set mrmac2_node [add_or_get_dt_node -n "mrmac" -l "$label2" -u $mrmac2_base_hex -d $dts_file -p $bus_node]
+	set node_prefix [get_property IP_NAME [get_cells -hier $drv_handle]]
+	set mrmac2_node [add_or_get_dt_node -n $node_prefix -l "$label2" -u $mrmac2_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac2_node" "compatible" "$compatible" stringlist
 	set mrmac2_reg [generate_reg_property $mrmac2_base $mrmac2_highaddr_hex]
 	hsi::utils::add_new_dts_param "$mrmac2_node" "reg" $mrmac2_reg inthexlist
 
-	lappend clknames2 "$s_axi_aclk" "$rx_axi_clk2" "$rx_flexif_clk2" "$rx_ts_clk2" "$tx_axi_clk2" "$tx_flexif_clk2" "$tx_ts_clk2"
-	set index2 [lindex $clk_list $s_axi_aclk_index0]
-	regsub -all "\<&" $index2 {} index2
-	regsub -all "\<&" $index2 {} index2
-	set txindex2 [lindex $clk_list $tx_ts_clk_index2]
-	regsub -all "\>" $txindex2 {} txindex2
-	append clkvals2  "$index2,[lindex $clk_list $rx_axi_clk_index2], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $rx_ts_clk2_index2], [lindex $clk_list $tx_axi_clk_index2], [lindex $clk_list $tx_flexif_clk_index2], $txindex2"
-	hsi::utils::add_new_dts_param "${mrmac2_node}" "clocks" $clkvals2 reference
-	hsi::utils::add_new_dts_param "${mrmac2_node}" "clock-names" $clknames2 stringlist
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
+		lappend clknames2 "$s_axi_aclk" "$rx_axi_clk2" "$rx_flexif_clk2" "$rx_ts_clk2" "$tx_axi_clk2" "$tx_flexif_clk2" "$tx_ts_clk2"
+		set index2 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index2 {} index2
+		regsub -all "\<&" $index2 {} index2
+		set txindex2 [lindex $clk_list $tx_ts_clk_index2]
+		regsub -all "\>" $txindex2 {} txindex2
+		append clkvals2  "$index2,[lindex $clk_list $rx_axi_clk_index2], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $rx_ts_clk2_index2], [lindex $clk_list $tx_axi_clk_index2], [lindex $clk_list $tx_flexif_clk_index2], $txindex2"
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "clocks" $clkvals2 reference
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "clock-names" $clknames2 stringlist
+	}
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
+		lappend clknames2 "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk2" "$tx_axi_clk0" "$tx_flexif_clk2" "$rx_macif_clk" "$ts_clk2" "$tx_macif_clk" "$tx_serdes_clk2"
+		set index2 [lindex $clk_list $s_axi_aclk_index0]
+		regsub -all "\<&" $index2 {} index2
+		regsub -all "\<&" $index2 {} index2
+		set txindex2 [lindex $clk_list $tx_serdes_clk_index2]
+		regsub -all "\>" $txindex2 {} txindex2
+		append clkvals2  "$index2, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index2], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index2], [lindex $clk_list $tx_macif_clk_index0], $txindex2"
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "clocks" $clkvals2 reference
+		hsi::utils::add_new_dts_param "${mrmac2_node}" "clock-names" $clknames2 stringlist
+	}
 
 	set port2_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mrmac_ip] "rx_axis_tdata4"]]
 	foreach pin $port2_pins {
@@ -1180,7 +1258,8 @@ proc generate {drv_handle} {
 	set mrmac3_highaddr_hex [format 0x%x [expr $mrmac3_base + 0xFFF]]
 	set port3 3
 	append label3 $drv_handle "_" $port3
-	set mrmac3_node [add_or_get_dt_node -n "mrmac" -l "$label3" -u $mrmac3_base_hex -d $dts_file -p $bus_node]
+	set node_prefix [get_property IP_NAME [get_cells -hier $drv_handle]]
+	set mrmac3_node [add_or_get_dt_node -n $node_prefix -l "$label3" -u $mrmac3_base_hex -d $dts_file -p $bus_node]
 	hsi::utils::add_new_dts_param "$mrmac3_node" "compatible" "$compatible" stringlist
 	set mrmac3_reg [generate_reg_property $mrmac3_base $mrmac3_highaddr_hex]
 	hsi::utils::add_new_dts_param "$mrmac3_node" "reg" $mrmac3_reg inthexlist
