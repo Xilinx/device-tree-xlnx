@@ -5,6 +5,8 @@
  *  Copyright (C) 2012 National Instruments Corp.
  */
 
+#include <dt-bindings/gpio/gpio.h>
+
 / {
 	model = "Zynq ZC702 Development Board";
 	compatible = "xlnx,zynq-zc702", "xlnx,zynq-7000";
@@ -87,8 +89,8 @@
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
-	scl-gpios = <&gpio0 50 0>;
-	sda-gpios = <&gpio0 51 0>;
+	scl-gpios = <&gpio0 50 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+	sda-gpios = <&gpio0 51 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 
 	i2c-mux@74 {
 		compatible = "nxp,pca9548";
