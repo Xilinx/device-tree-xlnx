@@ -2453,10 +2453,6 @@ proc update_endpoints {drv_handle} {
 		hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 		set port_node [add_or_get_dt_node -n "port" -l demosaic_port0$drv_handle -u 0 -p $ports_node]
 		hsi::utils::add_new_dts_param "$port_node" "reg" 0 int
-		hsi::utils::add_new_dts_param "${port_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
-		hsi::utils::add_new_dts_param "$port_node" "xlnx,cfa-pattern" rggb string
-		set max_data_width [get_property CONFIG.MAX_DATA_WIDTH [get_cells -hier $drv_handle]]
-		hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
 		set demo_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
 		set len [llength $demo_inip]
 		if {$len > 1} {
