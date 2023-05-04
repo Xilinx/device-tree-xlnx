@@ -45,9 +45,6 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set port1_node [add_or_get_dt_node -n "port" -l demosaic_port1$drv_handle -u 1 -p $ports_node]
 	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
-	hsi::utils::add_new_dts_param "${port1_node}" "/* For cfa-pattern=rggb user needs to fill as per BAYER format */" "" comment
-	hsi::utils::add_new_dts_param "$port1_node" "xlnx,video-width" $max_data_width int
-	hsi::utils::add_new_dts_param "$port1_node" "xlnx,cfa-pattern" rggb string
 
 	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
 	set outipname [get_property IP_NAME $outip]
