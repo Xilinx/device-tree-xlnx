@@ -767,46 +767,52 @@ proc gen_zocl_node {} {
 	} else {
 		hsi::utils::add_new_dts_param $zocl_node "compatible" "xlnx,zocl-versal" string
 	}
-	set intr_ctrl [get_cells -hier -filter {IP_NAME == axi_intc}]
-	if {[llength $intr_ctrl]} {
-	set intr_ctrl_len [llength $intr_ctrl]
-	puts "intr_ctrl_len:$intr_ctrl_len"
-	set int0 [lindex $intr_ctrl 0]
-	foreach ip [get_drivers] {
-		if {[string compare -nocase $ip $int0] == 0} {
-			set target_handle $ip
+	#if axi_intc exists in the design then add 0 to 31 extended interrupts.
+	set axi_intr_ctrl [get_cells -hier -filter {IP_NAME == axi_intc}]
+	if {[llength $axi_intr_ctrl]} {
+		set intr_ctrl_len [llength $axi_intr_ctrl]
+		puts "intr_ctrl_len:$intr_ctrl_len"
+		set int0 [lindex $axi_intr_ctrl 0]
+		foreach ip [get_drivers] {
+			if {[string compare -nocase $ip $int0] == 0} {
+				set target_handle $ip
+			}
 		}
-	}
-	set intr [get_property CONFIG.interrupt-parent $target_handle]
-	set int1 [lindex $intr_ctrl 1]
-	foreach ip [get_drivers] {
-		if {[string compare -nocase $ip $int1] == 0} {
-			set target_handle $ip
+		set intr [get_property CONFIG.interrupt-parent $target_handle]
+		set int1 [lindex $axi_intr_ctrl 1]
+		foreach ip [get_drivers] {
+			if {[string compare -nocase $ip $int1] == 0} {
+				set target_handle $ip
+			}
 		}
-	}
-	set intr [get_property CONFIG.interrupt-parent $target_handle]
-	switch $intr_ctrl_len {
-		"1"   {
-			set ref [lindex $intr_ctrl 0]
-			append ref " 0 4>, <&[lindex $intr_ctrl 0] 1 4>, <&[lindex $intr_ctrl 0] 2 4>, <&[lindex $intr_ctrl 0] 3 4>, <&[lindex $intr_ctrl 0] 4 4>, <&[lindex $intr_ctrl 0] 5 4>, <&[lindex $intr_ctrl 0] 6 4>, <&[lindex $intr_ctrl 0] 7 4>, <&[lindex $intr_ctrl 0] 8 4>, <&[lindex $intr_ctrl 0] 9 4>,
-<&[lindex $intr_ctrl 0] 10 4>, <&[lindex $intr_ctrl 0] 11 4>, <&[lindex $intr_ctrl 0] 12 4>, <&[lindex $intr_ctrl 0] 13 4>, <&[lindex $intr_ctrl 0] 14 4>,
-<&[lindex $intr_ctrl 0] 15 4>, <&[lindex $intr_ctrl 0] 16 4>, <&[lindex $intr_ctrl 0] 17 4>, <&[lindex $intr_ctrl 0] 18 4>, <&[lindex $intr_ctrl 0] 19 4>,
-<&[lindex $intr_ctrl 0] 20 4>, <&[lindex $intr_ctrl 0] 21 4>, <&[lindex $intr_ctrl 0] 22 4>, <&[lindex $intr_ctrl 0] 23 4>, <&[lindex $intr_ctrl 0] 24 4>,
-<&[lindex $intr_ctrl 0] 25 4>, <&[lindex $intr_ctrl 0] 26 4>, <&[lindex $intr_ctrl 0] 27 4>, <&[lindex $intr_ctrl 0] 28 4>, <&[lindex $intr_ctrl 0] 29 4>,
-<&[lindex $intr_ctrl 0] 30 4>, <&[lindex $intr_ctrl 0] 31 4 "
-			hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
+		set intr [get_property CONFIG.interrupt-parent $target_handle]
+		switch $intr_ctrl_len {
+			"1"   {
+				set ref [lindex $axi_intr_ctrl 0]
+				append ref " 0 4>, <&[lindex $axi_intr_ctrl 0] 1 4>, <&[lindex $axi_intr_ctrl 0] 2 4>, <&[lindex $axi_intr_ctrl 0] 3 4>, <&[lindex $axi_intr_ctrl 0] 4 4>, <&[lindex $axi_intr_ctrl 0] 5 4>, <&[lindex $axi_intr_ctrl 0] 6 4>, <&[lindex $axi_intr_ctrl 0] 7 4>, <&[lindex $axi_intr_ctrl 0] 8 4>, <&[lindex $axi_intr_ctrl 0] 9 4>,
+<&[lindex $axi_intr_ctrl 0] 10 4>, <&[lindex $axi_intr_ctrl 0] 11 4>, <&[lindex $axi_intr_ctrl 0] 12 4>, <&[lindex $axi_intr_ctrl 0] 13 4>, <&[lindex $axi_intr_ctrl 0] 14 4>,
+<&[lindex $axi_intr_ctrl 0] 15 4>, <&[lindex $axi_intr_ctrl 0] 16 4>, <&[lindex $axi_intr_ctrl 0] 17 4>, <&[lindex $axi_intr_ctrl 0] 18 4>, <&[lindex $axi_intr_ctrl 0] 19 4>,
+<&[lindex $axi_intr_ctrl 0] 20 4>, <&[lindex $axi_intr_ctrl 0] 21 4>, <&[lindex $axi_intr_ctrl 0] 22 4>, <&[lindex $axi_intr_ctrl 0] 23 4>, <&[lindex $axi_intr_ctrl 0] 24 4>,
+<&[lindex $axi_intr_ctrl 0] 25 4>, <&[lindex $axi_intr_ctrl 0] 26 4>, <&[lindex $axi_intr_ctrl 0] 27 4>, <&[lindex $axi_intr_ctrl 0] 28 4>, <&[lindex $axi_intr_ctrl 0] 29 4>,
+<&[lindex $axi_intr_ctrl 0] 30 4>, <&[lindex $axi_intr_ctrl 0] 31 4 "
+				hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
+			}
+			"2"   {
+				set ref [lindex $axi_intr_ctrl 0]
+				append ref " 0 4>, <&[lindex $axi_intr_ctrl 0] 1 4>, <&[lindex $axi_intr_ctrl 0] 2 4>, <&[lindex $axi_intr_ctrl 0] 3 4>, <&[lindex $axi_intr_ctrl 0] 4 4>, <&[lindex $axi_intr_ctrl 0] 5 4>, <&[lindex $axi_intr_ctrl 0] 6 4>, <&[lindex $axi_intr_ctrl 0] 7 4>, <&[lindex $axi_intr_ctrl 0] 8 4>, <&[lindex $axi_intr_ctrl 0] 9 4>, <&[lindex $axi_intr_ctrl 0] 10 4>, <&[lindex $axi_intr_ctrl 0] 11 4>, <&[lindex $axi_intr_ctrl 0] 12 4>, <&[lindex $axi_intr_ctrl 0] 13 4>, <&[lindex $axi_intr_ctrl 0] 14 4>, <&[lindex $axi_intr_ctrl 0] 15 4>, <&[lindex $axi_intr_ctrl 0] 16 4>, <&[lindex $axi_intr_ctrl 0] 17 4>, <&[lindex $axi_intr_ctrl 0] 18 4>, <&[lindex $axi_intr_ctrl 0] 19 4>, <&[lindex $axi_intr_ctrl 0] 20 4>, <&[lindex $axi_intr_ctrl 0] 21 4>, <&[lindex $axi_intr_ctrl 0] 22 4>, <&[lindex $axi_intr_ctrl 0] 23 4>, <&[lindex $axi_intr_ctrl 0] 24 4>, <&[lindex $axi_intr_ctrl 0] 25 4>, <&[lindex $axi_intr_ctrl 0] 26 4>, <&[lindex $axi_intr_ctrl 0] 27 4>, <&[lindex $axi_intr_ctrl 0] 28 4>, <&[lindex $axi_intr_ctrl 0] 29 4>, <&[lindex $axi_intr_ctrl 0] 30 4>, <&[lindex $axi_intr_ctrl 0] 31 4>, <&[lindex $axi_intr_ctrl 1] 0 4>, <&[lindex $axi_intr_ctrl 1] 1 4>, <&[lindex $axi_intr_ctrl 1] 2 4>,  <&[lindex $axi_intr_ctrl 1] 3 4>,  <&[lindex $axi_intr_ctrl 1] 4 4>,  <&[lindex $axi_intr_ctrl 1] 5 4>, <&[lindex $axi_intr_ctrl 1] 6 4>, <&[lindex $axi_intr_ctrl 1] 7 4>,  <&[lindex $axi_intr_ctrl 1] 8 4>,  <&[lindex $axi_intr_ctrl 1] 9 4>,  <&[lindex $axi_intr_ctrl 1] 10 4>, <&[lindex $axi_intr_ctrl 1] 11 4>, <&[lindex $axi_intr_ctrl 1] 12 4>, <&[lindex $axi_intr_ctrl 1] 13 4>, <&[lindex $axi_intr_ctrl 1] 14 4>, <&[lindex $axi_intr_ctrl 1] 15 4>, <&[lindex $axi_intr_ctrl 1] 16 4>, <&[lindex $axi_intr_ctrl 1] 17 4>, <&[lindex $axi_intr_ctrl 1] 18 4>, <&[lindex $axi_intr_ctrl 1] 19 4>, <&[lindex $axi_intr_ctrl 1] 20 4>, <&[lindex $axi_intr_ctrl 1] 21 4>, <&[lindex $axi_intr_ctrl 1] 22 4>, <&[lindex $axi_intr_ctrl 1] 23 4>, <&[lindex $axi_intr_ctrl 1] 24 4>, <&[lindex $axi_intr_ctrl 1] 25 4>, <&[lindex $axi_intr_ctrl 1] 26 4>, <&[lindex $axi_intr_ctrl 1] 27 4>, <&[lindex $axi_intr_ctrl 1] 28 4>, <&[lindex $axi_intr_ctrl 1] 29 4>, <&[lindex $axi_intr_ctrl 1] 30 4 "
+				hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
+			}
+			"3" {
+				set ref [lindex $axi_intr_ctrl 0]
+				append ref " 0 4>, <&[lindex $axi_intr_ctrl 0] 1 4>, <&[lindex $axi_intr_ctrl 0] 2 4>, <&[lindex $axi_intr_ctrl 0] 3 4>, <&[lindex $axi_intr_ctrl 0] 4 4>, <&[lindex $axi_intr_ctrl 0] 5 4>, <&[lindex $axi_intr_ctrl 0] 6 4>, <&[lindex $axi_intr_ctrl 0] 7 4>, <&[lindex $axi_intr_ctrl 0] 8 4>, <&[lindex $axi_intr_ctrl 0] 9 4>, <&[lindex $axi_intr_ctrl 0] 10 4>, <&[lindex $axi_intr_ctrl 0] 11 4>, <&[lindex $axi_intr_ctrl 0] 12 4>, <&[lindex $axi_intr_ctrl 0] 13 4>, <&[lindex $axi_intr_ctrl 0] 14 4>, <&[lindex $axi_intr_ctrl 0] 15 4>, <&[lindex $axi_intr_ctrl 0] 16 4>, <&[lindex $axi_intr_ctrl 0] 17 4>, <&[lindex $axi_intr_ctrl 0] 18 4>, <&[lindex $axi_intr_ctrl 0] 19 4>, <&[lindex $axi_intr_ctrl 0] 20 4>, <&[lindex $axi_intr_ctrl 0] 21 4>, <&[lindex $axi_intr_ctrl 0] 22 4>, <&[lindex $axi_intr_ctrl 0] 23 4>, <&[lindex $axi_intr_ctrl 0] 24 4>, <&[lindex $axi_intr_ctrl 0] 25 4>, <&[lindex $axi_intr_ctrl 0] 26 4>, <&[lindex $axi_intr_ctrl 0] 27 4>, <&[lindex $axi_intr_ctrl 0] 28 4>, <&[lindex $axi_intr_ctrl 0] 29 4>, <&[lindex $axi_intr_ctrl 0] 30 4>, <&[lindex $axi_intr_ctrl 0] 31 4>, <&[lindex $axi_intr_ctrl 1] 0 4>, <&[lindex $axi_intr_ctrl 1] 1 4>, <&[lindex $axi_intr_ctrl 1] 2 4>, <&[lindex $axi_intr_ctrl 1] 2 4>, <&[lindex $axi_intr_ctrl 1] 3 4>, <&[lindex $axi_intr_ctrl 1] 4 4>, <&[lindex $axi_intr_ctrl 1] 5 4>, <&[lindex $axi_intr_ctrl 1] 6 4>, <&[lindex $axi_intr_ctrl 1] 7 4>, <&[lindex $axi_intr_ctrl 1] 8 4>, <&[lindex $axi_intr_ctrl 1] 9 4>, <&[lindex $axi_intr_ctrl 1] 10 4>, <&[lindex $axi_intr_ctrl 1] 11 4>, <&[lindex $axi_intr_ctrl 1] 12 4>, <&[lindex $axi_intr_ctrl 1] 13 4>, <&[lindex $axi_intr_ctrl 1] 14 4>, <&[lindex $axi_intr_ctrl 1] 15 4>, <&[lindex $axi_intr_ctrl 1] 16 4>, <&[lindex $axi_intr_ctrl 1] 17 4>, <&[lindex $axi_intr_ctrl 1] 18 4>, <&[lindex $axi_intr_ctrl 1] 19 4>, <&[lindex $axi_intr_ctrl 1] 20 4>, <&[lindex $axi_intr_ctrl 1] 21 4>, <&[lindex $axi_intr_ctrl 1] 22 4>, <&[lindex $axi_intr_ctrl 1] 23 4>, <&[lindex $axi_intr_ctrl 1] 24 4>, <&[lindex $axi_intr_ctrl 1] 25 4>, <&[lindex $axi_intr_ctrl 1] 26 4>, <&[lindex $axi_intr_ctrl 1] 27 4>, <&[lindex $axi_intr_ctrl 1] 28 4>, <&[lindex $axi_intr_ctrl 1] 29 4>, <&[lindex $axi_intr_ctrl 1] 30 4>, <&[lindex $axi_intr_ctrl 1] 31 4>, <&[lindex $axi_intr_ctrl 2] 0 4>, <&[lindex $axi_intr_ctrl 2] 1 4>, <&[lindex $axi_intr_ctrl 2] 2 4>, <&[lindex $axi_intr_ctrl 2] 3 4>, <&[lindex $axi_intr_ctrl 2] 4 4>, <&[lindex $axi_intr_ctrl 2] 5 4>, <&[lindex $axi_intr_ctrl 2] 6 4>, <&[lindex $axi_intr_ctrl 2] 7 4>, <&[lindex $axi_intr_ctrl 2] 8 4>, <&[lindex $axi_intr_ctrl 2] 9 4>, <&[lindex $axi_intr_ctrl 2] 10 4>, <&[lindex $axi_intr_ctrl 2] 11 4>, <&[lindex $axi_intr_ctrl 2] 12 4>, <&[lindex $axi_intr_ctrl 2] 13 4>, <&[lindex $axi_intr_ctrl 2] 14 4>, <&[lindex $axi_intr_ctrl 2] 15 4>, <&[lindex $axi_intr_ctrl 2] 16 4>, <&[lindex $axi_intr_ctrl 2] 17 4>, <&[lindex $axi_intr_ctrl 2] 18 4>, <&[lindex $axi_intr_ctrl 2] 19 4>, <&[lindex $axi_intr_ctrl 2] 20 4>, <&[lindex $axi_intr_ctrl 2] 21 4>, <&[lindex $axi_intr_ctrl 2] 22 4 >, <&[lindex $axi_intr_ctrl 2] 23 4>, <&[lindex $axi_intr_ctrl 2] 24 4>, <&[lindex $axi_intr_ctrl 2] 25 4>, <&[lindex $axi_intr_ctrl 2] 26 4>, <&[lindex $axi_intr_ctrl 2] 27 4>, <&[lindex $axi_intr_ctrl 2] 28 4>, <&[lindex $axi_intr_ctrl 2] 29 4>, <&[lindex $axi_intr_ctrl 2] 30 4 "
+				hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
+			}
 		}
-		"2"   {
-			set ref [lindex $intr_ctrl 0]
-			append ref " 0 4>, <&[lindex $intr_ctrl 0] 1 4>, <&[lindex $intr_ctrl 0] 2 4>, <&[lindex $intr_ctrl 0] 3 4>, <&[lindex $intr_ctrl 0] 4 4>, <&[lindex $intr_ctrl 0] 5 4>, <&[lindex $intr_ctrl 0] 6 4>, <&[lindex $intr_ctrl 0] 7 4>, <&[lindex $intr_ctrl 0] 8 4>, <&[lindex $intr_ctrl 0] 9 4>, <&[lindex $intr_ctrl 0] 10 4>, <&[lindex $intr_ctrl 0] 11 4>, <&[lindex $intr_ctrl 0] 12 4>, <&[lindex $intr_ctrl 0] 13 4>, <&[lindex $intr_ctrl 0] 14 4>, <&[lindex $intr_ctrl 0] 15 4>, <&[lindex $intr_ctrl 0] 16 4>, <&[lindex $intr_ctrl 0] 17 4>, <&[lindex $intr_ctrl 0] 18 4>, <&[lindex $intr_ctrl 0] 19 4>, <&[lindex $intr_ctrl 0] 20 4>, <&[lindex $intr_ctrl 0] 21 4>, <&[lindex $intr_ctrl 0] 22 4>, <&[lindex $intr_ctrl 0] 23 4>, <&[lindex $intr_ctrl 0] 24 4>, <&[lindex $intr_ctrl 0] 25 4>, <&[lindex $intr_ctrl 0] 26 4>, <&[lindex $intr_ctrl 0] 27 4>, <&[lindex $intr_ctrl 0] 28 4>, <&[lindex $intr_ctrl 0] 29 4>, <&[lindex $intr_ctrl 0] 30 4>, <&[lindex $intr_ctrl 0] 31 4>, <&[lindex $intr_ctrl 1] 0 4>, <&[lindex $intr_ctrl 1] 1 4>, <&[lindex $intr_ctrl 1] 2 4>,  <&[lindex $intr_ctrl 1] 3 4>,  <&[lindex $intr_ctrl 1] 4 4>,  <&[lindex $intr_ctrl 1] 5 4>, <&[lindex $intr_ctrl 1] 6 4>, <&[lindex $intr_ctrl 1] 7 4>,  <&[lindex $intr_ctrl 1] 8 4>,  <&[lindex $intr_ctrl 1] 9 4>,  <&[lindex $intr_ctrl 1] 10 4>, <&[lindex $intr_ctrl 1] 11 4>, <&[lindex $intr_ctrl 1] 12 4>, <&[lindex $intr_ctrl 1] 13 4>, <&[lindex $intr_ctrl 1] 14 4>, <&[lindex $intr_ctrl 1] 15 4>, <&[lindex $intr_ctrl 1] 16 4>, <&[lindex $intr_ctrl 1] 17 4>, <&[lindex $intr_ctrl 1] 18 4>, <&[lindex $intr_ctrl 1] 19 4>, <&[lindex $intr_ctrl 1] 20 4>, <&[lindex $intr_ctrl 1] 21 4>, <&[lindex $intr_ctrl 1] 22 4>, <&[lindex $intr_ctrl 1] 23 4>, <&[lindex $intr_ctrl 1] 24 4>, <&[lindex $intr_ctrl 1] 25 4>, <&[lindex $intr_ctrl 1] 26 4>, <&[lindex $intr_ctrl 1] 27 4>, <&[lindex $intr_ctrl 1] 28 4>, <&[lindex $intr_ctrl 1] 29 4>, <&[lindex $intr_ctrl 1] 30 4 "
-		hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
-		}
-		"3" {
-			set ref [lindex $intr_ctrl 0]
-			append ref " 0 4>, <&[lindex $intr_ctrl 0] 1 4>, <&[lindex $intr_ctrl 0] 2 4>, <&[lindex $intr_ctrl 0] 3 4>, <&[lindex $intr_ctrl 0] 4 4>, <&[lindex $intr_ctrl 0] 5 4>, <&[lindex $intr_ctrl 0] 6 4>, <&[lindex $intr_ctrl 0] 7 4>, <&[lindex $intr_ctrl 0] 8 4>, <&[lindex $intr_ctrl 0] 9 4>, <&[lindex $intr_ctrl 0] 10 4>, <&[lindex $intr_ctrl 0] 11 4>, <&[lindex $intr_ctrl 0] 12 4>, <&[lindex $intr_ctrl 0] 13 4>, <&[lindex $intr_ctrl 0] 14 4>, <&[lindex $intr_ctrl 0] 15 4>, <&[lindex $intr_ctrl 0] 16 4>, <&[lindex $intr_ctrl 0] 17 4>, <&[lindex $intr_ctrl 0] 18 4>, <&[lindex $intr_ctrl 0] 19 4>, <&[lindex $intr_ctrl 0] 20 4>, <&[lindex $intr_ctrl 0] 21 4>, <&[lindex $intr_ctrl 0] 22 4>, <&[lindex $intr_ctrl 0] 23 4>, <&[lindex $intr_ctrl 0] 24 4>, <&[lindex $intr_ctrl 0] 25 4>, <&[lindex $intr_ctrl 0] 26 4>, <&[lindex $intr_ctrl 0] 27 4>, <&[lindex $intr_ctrl 0] 28 4>, <&[lindex $intr_ctrl 0] 29 4>, <&[lindex $intr_ctrl 0] 30 4>, <&[lindex $intr_ctrl 0] 31 4>, <&[lindex $intr_ctrl 1] 0 4>, <&[lindex $intr_ctrl 1] 1 4>, <&[lindex $intr_ctrl 1] 2 4>, <&[lindex $intr_ctrl 1] 2 4>, <&[lindex $intr_ctrl 1] 3 4>, <&[lindex $intr_ctrl 1] 4 4>, <&[lindex $intr_ctrl 1] 5 4>, <&[lindex $intr_ctrl 1] 6 4>, <&[lindex $intr_ctrl 1] 7 4>, <&[lindex $intr_ctrl 1] 8 4>, <&[lindex $intr_ctrl 1] 9 4>, <&[lindex $intr_ctrl 1] 10 4>, <&[lindex $intr_ctrl 1] 11 4>, <&[lindex $intr_ctrl 1] 12 4>, <&[lindex $intr_ctrl 1] 13 4>, <&[lindex $intr_ctrl 1] 14 4>, <&[lindex $intr_ctrl 1] 15 4>, <&[lindex $intr_ctrl 1] 16 4>, <&[lindex $intr_ctrl 1] 17 4>, <&[lindex $intr_ctrl 1] 18 4>, <&[lindex $intr_ctrl 1] 19 4>, <&[lindex $intr_ctrl 1] 20 4>, <&[lindex $intr_ctrl 1] 21 4>, <&[lindex $intr_ctrl 1] 22 4>, <&[lindex $intr_ctrl 1] 23 4>, <&[lindex $intr_ctrl 1] 24 4>, <&[lindex $intr_ctrl 1] 25 4>, <&[lindex $intr_ctrl 1] 26 4>, <&[lindex $intr_ctrl 1] 27 4>, <&[lindex $intr_ctrl 1] 28 4>, <&[lindex $intr_ctrl 1] 29 4>, <&[lindex $intr_ctrl 1] 30 4>, <&[lindex $intr_ctrl 1] 31 4>, <&[lindex $intr_ctrl 2] 0 4>, <&[lindex $intr_ctrl 2] 1 4>, <&[lindex $intr_ctrl 2] 2 4>, <&[lindex $intr_ctrl 2] 3 4>, <&[lindex $intr_ctrl 2] 4 4>, <&[lindex $intr_ctrl 2] 5 4>, <&[lindex $intr_ctrl 2] 6 4>, <&[lindex $intr_ctrl 2] 7 4>, <&[lindex $intr_ctrl 2] 8 4>, <&[lindex $intr_ctrl 2] 9 4>, <&[lindex $intr_ctrl 2] 10 4>, <&[lindex $intr_ctrl 2] 11 4>, <&[lindex $intr_ctrl 2] 12 4>, <&[lindex $intr_ctrl 2] 13 4>, <&[lindex $intr_ctrl 2] 14 4>, <&[lindex $intr_ctrl 2] 15 4>, <&[lindex $intr_ctrl 2] 16 4>, <&[lindex $intr_ctrl 2] 17 4>, <&[lindex $intr_ctrl 2] 18 4>, <&[lindex $intr_ctrl 2] 19 4>, <&[lindex $intr_ctrl 2] 20 4>, <&[lindex $intr_ctrl 2] 21 4>, <&[lindex $intr_ctrl 2] 22 4 >, <&[lindex $intr_ctrl 2] 23 4>, <&[lindex $intr_ctrl 2] 24 4>, <&[lindex $intr_ctrl 2] 25 4>, <&[lindex $intr_ctrl 2] 26 4>, <&[lindex $intr_ctrl 2] 27 4>, <&[lindex $intr_ctrl 2] 28 4>, <&[lindex $intr_ctrl 2] 29 4>, <&[lindex $intr_ctrl 2] 30 4 "
-		hsi::utils::add_new_dts_param $zocl_node "interrupts-extended" $ref reference
-		}
-	}
+	} else {
+		# if axi_intc not found then use gic controller
+		set intr_num "0x0 0x89 0x4>, <0x0 0x90 0x4>, <0x0 0x91 0x4>, <0x0 0x92 0x4>, <0x0 0x93 0x4>, <0x0 0x94 0x4>, <0x0 0x95 0x4>, <0x0 0x96 0x4"
+		hsi::utils::add_new_dts_param $zocl_node "interrupt-parent" gic reference
+		hsi::utils::add_new_dts_param $zocl_node "interrupts" $intr_num intlist
 	}
 	set decouplers [get_cells -hier -filter {IP_NAME == "dfx_decoupler"}]
 	set count 1
