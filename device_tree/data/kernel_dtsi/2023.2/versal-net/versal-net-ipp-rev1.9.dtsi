@@ -311,7 +311,7 @@
 		};
 
 		gem0: ethernet@f19e0000 {
-            compatible = "xlnx,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
 			reg = <0 0xf19e0000 0 0x1000>;
 			interrupts = <0 39 4>, <0 39 4>;
 			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
@@ -340,7 +340,7 @@
 		};
 
 		gem1: ethernet@f19f0000 {
-            compatible = "xlnx,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
 			reg = <0 0xf19f0000 0 0x1000>;
 			interrupts = <0 41 4>, <0 41 4>;
 			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
@@ -484,7 +484,7 @@
 			reg = <0 0xf1030000 0 0x1000>;
 			interrupts = <0 183 4>;
 			clock-names = "ref_clk", "pclk";
-			num-cs = <1>;
+			num-cs = <2>;
 			is-dual = <1>;
 			spi-rx-bus-width = <4>;
 			spi-tx-bus-width = <4>;
@@ -495,7 +495,8 @@
 
 			flash@0 {
 				compatible = "micron,m25p80", "jedec,spi-nor";
-				reg = <0>;
+				reg = <0>, <1>;
+				parallel-memories = /bits/ 64 <0x8000000 0x8000000>; /* 128MB */
 				#address-cells = <1>;
 				#size-cells = <1>;
 				spi-tx-bus-width = <1>;
@@ -533,8 +534,8 @@
 			interrupts = <0 184 4>;
 			clock-names = "clk_xin", "clk_ahb";
 			no-1-8-v;
-			clocks = <&versal_net_clk SDIO0_REF>, <&versal_net_clk LPD_LSBUS>;
-			power-domains = <&versal_net_firmware PM_DEV_SDIO_0>;
+			clocks = <&versal_net_clk SDIO1_REF>, <&versal_net_clk LPD_LSBUS>;
+			power-domains = <&versal_net_firmware PM_DEV_SDIO_1>;
 		};
 
 		sdhci1: mmc@f1050000 {
@@ -543,8 +544,8 @@
 			interrupts = <0 186 4>;
 			clock-names = "clk_xin", "clk_ahb";
 			no-1-8-v;
-			clocks = <&versal_net_clk SDIO1_REF>, <&versal_net_clk LPD_LSBUS>;
-			power-domains = <&versal_net_firmware PM_DEV_SDIO_1>;
+			clocks = <&versal_net_clk SDIO0_REF>, <&versal_net_clk LPD_LSBUS>;
+			power-domains = <&versal_net_firmware PM_DEV_SDIO_0>;
 		};
 
 		serial0: serial@f1920000 {
@@ -657,7 +658,6 @@
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
-				snps,refclk_fladj;
 				dr_mode = "peripheral";
 				maximum-speed = "high-speed";
 				snps,usb3_lpm_capable;
@@ -684,7 +684,6 @@
 				snps,dis_u2_susphy_quirk;
 				snps,dis_u3_susphy_quirk;
 				snps,quirk-frame-length-adjustment = <0x20>;
-				snps,refclk_fladj;
 				dr_mode = "host";
 				maximum-speed = "high-speed";
 				snps,usb3_lpm_capable;
