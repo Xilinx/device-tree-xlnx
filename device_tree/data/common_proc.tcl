@@ -888,7 +888,8 @@ proc set_drv_def_dts {drv_handle} {
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
-			if {!$classic_soc} {
+			#external-fpga-config is required only in dfx case
+			if {!$classic_soc && [llength $pr_regions]} {
 				hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
 			}
 		}
@@ -908,8 +909,10 @@ proc set_drv_def_dts {drv_handle} {
 		} else {
 			set targets "fpga_full"
 		}
-		set hw_name [::hsi::get_hw_files -filter "TYPE == pl_pdi"]
-		if {[llength $hw_name]} {
+		#considering the firmware name when configured for new soc boot flow.
+		set hw_name [get_property CONFIG.firmware_name [get_os]]
+		if {![llength $hw_name]} {
+			set hw_name [::hsi::get_hw_files -filter "TYPE == pl_pdi"]
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
