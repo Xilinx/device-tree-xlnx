@@ -936,7 +936,7 @@ proc update_chosen {os_handle} {
 proc update_cpu_node {os_handle} {
     set default_dts [get_property CONFIG.master_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
-
+    set avail_cpu_cores 0
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
     if {[string match -nocase $proctype "psv_cortexa72"] } {
         set current_proc "psv_cortexa72_"
@@ -947,6 +947,7 @@ proc update_cpu_node {os_handle} {
     } elseif {[string match -nocase $proctype "psu_cortexa53"] } {
         set current_proc "psu_cortexa53_"
         set total_cores 4
+	set avail_cpu_cores [llength [get_cells -hier -filter {IP_NAME == "psu_cortexa53"}]]
     } elseif {[string match -nocase $proctype "ps7_cortexa9"] } {
         set current_proc "ps7_cortexa9_"
         set total_cores 2
@@ -983,8 +984,7 @@ proc update_cpu_node {os_handle} {
 	     return
         }
     }
-    #getting boot arguments
-    set proc_instance 0
+
     for {set i 0} {$i < $total_cores} {incr i} {
         set proc_name [lindex [get_cells -hier -filter {IP_TYPE==PROCESSOR} *$proctype*] $i]
         if {[llength $proc_name] == 0} {
@@ -1001,6 +1001,22 @@ proc update_cpu_node {os_handle} {
             set cpu_node [add_or_get_dt_node -n "cpus" -d ${default_dts} -p ${system_root_node}]
             hsi::utils::add_new_dts_param "${cpu_node}" "/delete-node/ cpu@$i" "" boolean
         }
+    }
+
+    # zynqmp.dtsi pmu node has cpu references hense generating them as per design
+    set pmc_prop_value ""
+    if { $avail_cpu_cores < $total_cores } {
+        for {set i 0} {$i < $avail_cpu_cores} {incr i} {
+	    if { $i > 0 } {
+	        append pmc_prop_value ">, <&cpu$i"
+	    } else {
+		append pmc_prop_value "&cpu$i"
+	    }
+        }
+    }
+    if {[llength $pmc_prop_value]} {
+        set pmu_node [add_or_get_dt_node -n "pmu" -d ${default_dts} -p ${system_root_node}]
+        hsi::utils::add_new_dts_param "${pmu_node}" "interrupt-affinity" "$pmc_prop_value" intlist
     }
 }
 
