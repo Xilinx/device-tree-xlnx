@@ -1173,7 +1173,12 @@ proc update_alias {os_handle} {
 					continue
 				}
 			}
+            set dtg_alias_only [get_property CONFIG.dtg_alias [get_os]]
             set alias_node [add_or_get_dt_node -n "aliases" -d ${default_dts} -p ${system_root_node}]
+            if {$dtg_alias_only} {
+		# if dtg_alias set to true then we are deleting the  board.dtsi aliases
+		hsi::utils::add_new_dts_param ${system_root_node} "/delete-node/ aliases" "" boolean
+            }
             hsi::utils::add_new_dts_param "${alias_node}" ${conf_name} ${value} aliasref
             hsi::utils::set_os_parameter_value alias_${alias_str}_count [expr $alias_count + 1]
         }
