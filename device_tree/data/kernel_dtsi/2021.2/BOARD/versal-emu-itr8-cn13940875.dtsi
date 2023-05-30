@@ -1,3 +1,11 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2019-2022 Xilinx, Inc.
+ * Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
 / {
 	compatible = "xlnx,versal-emu-itr8", "xlnx,versal-emu", "xlnx,versal";
 	#address-cells = <2>;

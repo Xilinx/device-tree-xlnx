@@ -1,8 +1,21 @@
 /*
+ * Copyright (C) 2011-2022 Xilinx, Inc.
+ * Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
  * Skeleton device tree; the bare minimum needed to boot; just include and
  * add a compatible value.  The bootloader will typically populate the memory
  * node.
  */
+
 
 / {
 	#address-cells = <1>;
