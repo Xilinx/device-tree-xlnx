@@ -884,7 +884,7 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
 		set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
-		if {[string match -nocase $proctype "psv_cortexa72"]} {
+		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			if {![llength $hw_name]} {
 				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 			}
@@ -909,12 +909,16 @@ proc set_drv_def_dts {drv_handle} {
 		} else {
 			set targets "fpga_full"
 		}
-		#considering the firmware name when configured for new soc boot flow.
-		set hw_name [get_property CONFIG.firmware_name [get_os]]
-		if {![llength $hw_name]} {
-			set hw_name [::hsi::get_hw_files -filter "TYPE == pl_pdi"]
-		}
-		if {[llength $hw_name]} {
+		#fpga node for new soc boot flow.
+		set new_soc_hw_name [::hsi::get_hw_files -filter "TYPE == pl_pdi"]
+		if {[llength $new_soc_hw_name]} {
+			set fpga_node [add_or_get_dt_node -n "&$targets" -d ${default_dts}]
+			set child_node "$fpga_node"
+			#if configured firmware name exists
+			set hw_name [get_property CONFIG.firmware_name [get_os]]
+			if {![llength $hw_name]} {
+				set hw_name $new_soc_hw_name
+			}
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
