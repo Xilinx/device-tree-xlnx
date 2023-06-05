@@ -419,7 +419,7 @@ proc generate {drv_handle} {
 				set fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per [::hsi::get_cells -of_objects $fifo_pin]
 				set fiforx_connect_ip ""
-				if {[string match -nocase [get_property IP_NAME $mux_per] "mrmac_10g_mux"]} {
+				if {[llength $mux_per] && [string match -nocase [get_property IP_NAME $mux_per] "mrmac_10g_mux"]} {
 					set data_fifo_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per] "rx_m_axis_tdata"]]
 					set data_fifo_per [::hsi::get_cells -of_objects $data_fifo_pin]
 					if {[string match -nocase [get_property IP_NAME $data_fifo_per] "axis_data_fifo"]} {
@@ -673,7 +673,7 @@ proc generate {drv_handle} {
 				set fifo1_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per1 [::hsi::get_cells -of_objects $fifo1_pin]
 				set fiforx_connect_ip1 ""
-				if {[string match -nocase [get_property IP_NAME $mux_per1] "mrmac_10g_mux"]} {
+				if {[llength $mux_per1] && [string match -nocase [get_property IP_NAME $mux_per1] "mrmac_10g_mux"]} {
 					set data_fifo_pin1 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per1] "rx_m_axis_tdata"]]
 					set data_fifo_per1 [::hsi::get_cells -of_objects $data_fifo_pin1]
 					if {[string match -nocase [get_property IP_NAME $data_fifo_per1] "axis_data_fifo"]} {
@@ -1004,7 +1004,7 @@ proc generate {drv_handle} {
 				set fifo2_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per2 [::hsi::get_cells -of_objects $fifo2_pin]
 				set fiforx_connect_ip2 ""
-				if {[string match -nocase [get_property IP_NAME $mux_per2] "mrmac_10g_mux"]} {
+				if {[llength $mux_per2] && [string match -nocase [get_property IP_NAME $mux_per2] "mrmac_10g_mux"]} {
 					set data_fifo_pin2 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per2] "rx_m_axis_tdata"]]
 					set data_fifo_per2 [::hsi::get_cells -of_objects $data_fifo_pin2]
 					if {[string match -nocase [get_property IP_NAME $data_fifo_per2] "axis_data_fifo"]} {
@@ -1305,7 +1305,7 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,rxmem" $rxethmem int
 				set fifo3_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per3 [::hsi::get_cells -of_objects $fifo3_pin]
-				if {[string match -nocase [get_property IP_NAME $mux_per3] "mrmac_10g_mux"]} {
+				if {[llength $mux_per3] && [string match -nocase [get_property IP_NAME $mux_per3] "mrmac_10g_mux"]} {
 					set data_fifo_pin3 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per3] "rx_m_axis_tdata"]]
 					set data_fifo_per3 [::hsi::get_cells -of_objects $data_fifo_pin3]
 					if {[string match -nocase [get_property IP_NAME $data_fifo_per3] "axis_data_fifo"]} {
