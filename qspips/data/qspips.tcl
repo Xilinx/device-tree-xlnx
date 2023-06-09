@@ -24,18 +24,33 @@ proc generate {drv_handle} {
 
 	set slave [get_cells -hier $drv_handle]
 	set qspi_mode [hsi::utils::get_ip_param_value $slave "C_QSPI_MODE"]
-	set pspmc [get_cells -hier -filter {IP_NAME =~ "*pspmc*"}]
-	if {[string compare -nocase $pspmc ""] != 0} {
-		set fbclk [get_property CONFIG.PMC_QSPI_FBCLK [get_cells -hier -filter {IP_NAME =~ "*pspmc*"}]]
-		if {[regexp "ENABLE 0" $fbclk matched]} {
-			set node [gen_peripheral_nodes $drv_handle]
-			if {$node == 0} {
-				return
+	#for versal setting spi-max-frequency to 40MHZ if fbclk disabled in design
+	set pspmc [get_cells -hier -filter {IP_NAME == "pspmc"}]
+	if {[llength $pspmc]} {
+		set fbclk [get_property CONFIG.PMC_QSPI_FBCLK [get_cells -hier $pspmc]]
+		if {[llength $fbclk]} {
+			if {[regexp "ENABLE 0" $fbclk matched]} {
+				set_spi_max_frequency $drv_handle
 			}
-			hsi::utils::add_new_dts_param "${node}" "/* hw design is missing feedback clock that's why spi-max-frequency is 40MHz */" "" comment
-                        hsi::utils::add_new_property $drv_handle spi-max-frequency int 40000000
 		}
-
+	}
+	#for versal-net setting spi-max-frequency to 40MHZ if fbclk disabled in design
+	set psxwizard [get_cells -hier -filter {IP_NAME == "psx_wizard"}]
+	if {[llength $psxwizard]} {
+		set psx_pmcx_config [get_property CONFIG.PSX_PMCX_CONFIG [get_cells -hier $psxwizard]]
+		if {[llength $psx_pmcx_config]} {
+			set qspi_fbclk ""
+			if {[dict exists $psx_pmcx_config "PMCX_QSPI_FBCLK"]} {
+				set qspi_fbclk [dict get $psx_pmcx_config "PMCX_QSPI_FBCLK"]
+				set qspi_fbclk_enabled ""
+				if {[dict exists $qspi_fbclk "ENABLE"]} {
+					set qspi_fbclk_enabled [dict get $qspi_fbclk "ENABLE"]
+					if {$qspi_fbclk_enabled == 0} {
+						set_spi_max_frequency $drv_handle
+					}
+				}
+			}
+		}
 	}
 	set is_stacked 0
 	if { $qspi_mode == 2} {
@@ -86,4 +101,15 @@ proc generate {drv_handle} {
     # hsi::utils::add_new_property $primary_flash "dts.device_type" string "ps7-qspi"
     # hsi::utils::add_new_property $primary_flash reg hexint 0
     # hsi::utils::add_new_property $primary_flash spi-max-frequency int 50000000
+}
+
+#when fbclk disabled in the design
+#this function will set the spi-max-freq to 40MHZ
+proc set_spi_max_frequency {drv_handle} {
+	set node [gen_peripheral_nodes $drv_handle]
+	if {$node == 0} {
+		return
+	}
+	hsi::utils::add_new_dts_param "${node}" "/* hw design is missing feedback clock that's why spi-max-frequency is 40MHz */" "" comment
+	hsi::utils::add_new_property $drv_handle spi-max-frequency int 40000000
 }
