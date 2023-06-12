@@ -443,39 +443,51 @@ proc generate {drv_handle} {
 		set updat_hbm [lappend updat_hbm $reg_val_hbm15_pc1]
 	}
 	set len [llength $updat]
-	set reg_val ""
-	set len [expr {$len - 1}]
 	if {$len > 0} {
-		set reg_val [lindex $updat 0]
-		append reg_val ">, "
-		for {set k 1} {$k < $len} {incr k} {
-			append reg_val "<[lindex $updat $k]>, "
+		set reg_val ""
+		set banks [expr {$len - 1}]
+		#for single bank generate mem node
+		if {$len == 1} {
+			set reg_val [lindex $updat 0]
+			generate_mem_node $reg_val $parent_node "ddr" $drv_handle
+		} elseif {$len > 1} {
+			set reg_val [lindex $updat 0]
+			append reg_val ">, "
+			for {set k 1} {$k < $banks} {incr k} {
+				append reg_val "<[lindex $updat $k]>, "
+			}
+			append reg_val "<[lindex $updat $k]"
+			generate_mem_node $reg_val $parent_node "ddr" $drv_handle
 		}
-		append reg_val "<[lindex $updat $k]"
 	}
-	generate_mem_node $reg_val $parent_node "ddr"
 	set len_hbm [llength $updat_hbm]
-	set reg_val_hbm ""
-	set len_hbm [expr {$len_hbm - 1}]
 	if {$len_hbm > 0} {
-		set reg_val_hbm [lindex $updat_hbm 0]
-		append reg_val_hbm ">, "
-		for {set j 1} {$j < $len_hbm} {incr j} {
-			append reg_val_hbm "<[lindex $updat_hbm $j]>, "
+		set reg_val_hbm ""
+		set banks [expr {$len_hbm - 1}]
+		#for single bank generate mem mode
+		if {$len_hbm == 1} {
+			set reg_val_hbm [lindex $updat_hbm 0]
+			generate_mem_node $reg_val_hbm $parent_node "hbm" $drv_handle
+		} elseif {$len_hbm > 1} {
+			set reg_val_hbm [lindex $updat_hbm 0]
+			append reg_val_hbm ">, "
+			for {set j 1} {$j < $banks} {incr j} {
+				append reg_val_hbm "<[lindex $updat_hbm $j]>, "
+			}
+			append reg_val_hbm "<[lindex $updat_hbm $j]"
+			generate_mem_node $reg_val_hbm $parent_node "hbm" $drv_handle
 		}
-		append reg_val_hbm "<[lindex $updat_hbm $j]"
 	}
-	generate_mem_node $reg_val_hbm $parent_node "hbm"
 
 }
 
-proc generate_mem_node {reg_val parent_node mem_label} {
+proc generate_mem_node {reg_val parent_node mem_label drv_handle} {
 	if {[llength $reg_val]} {
 		set higheraddr [expr [lindex $reg_val 0] << 32]
 		set loweraddr [lindex $reg_val 1]
 		set baseaddr [format 0x%x [expr {${higheraddr} + ${loweraddr}}]]
 		regsub -all {^0x} $baseaddr {} baseaddr
-		set memory_node [add_or_get_dt_node -n memory -l "memory_$mem_label" -u $baseaddr -p $parent_node]
+		set memory_node [add_or_get_dt_node -n memory -l "memory$drv_handle\_$mem_label" -u $baseaddr -p $parent_node]
 		if {[catch {set dev_type [get_property CONFIG.device_type $drv_handle]} msg]} {
 			set dev_type memory
 		}
