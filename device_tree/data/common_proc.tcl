@@ -1660,6 +1660,8 @@ proc gen_ps7_mapping {} {
 		dict set def_ps_mapping ff120000 label watchdog0
 		dict set def_ps_mapping fe5f0000 label dpdma
 		dict set def_ps_mapping fd0e0000 label pcie
+		dict set def_ps_mapping fca10000 label cpm_pciea
+		dict set def_ps_mapping fcdd0000 label cpm5_pcie
 		dict set def_ps_mapping ff060000 label can0
 		dict set def_ps_mapping ff070000 label can1
 	} elseif {[string match -nocase $proctype "psx_cortexa78"]} {
