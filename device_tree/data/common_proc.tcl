@@ -4660,7 +4660,7 @@ proc gen_clk_property {drv_handle} {
 				}
 				set bus_clk_cnt [lsearch -exact $bus_clk_list $clk_freq]
 				if {[llength $RpRm]} {
-					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_$RpRm${bus_clk_cnt}" \
+					set misc_clk_node [add_or_get_dt_node -n "misc_clk_$RpRm${bus_clk_cnt}" -l "misc_clk_$RpRm${bus_clk_cnt}" \
 						-d ${dts_file} -p ${bus_node}]
 				} else {
 					set misc_clk_node [add_or_get_dt_node -n "misc_clk_${bus_clk_cnt}" -l "misc_clk_${bus_clk_cnt}" \
