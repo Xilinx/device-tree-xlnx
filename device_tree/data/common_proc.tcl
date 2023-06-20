@@ -2206,6 +2206,11 @@ proc update_endpoints {drv_handle} {
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
 
 			set scaninip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis"]
+			if {[llength $scaninip] && \
+				[string match -nocase [get_property IP_NAME $scaninip] "axis_switch"]} {
+					set axis_node [add_or_get_dt_node -n "endpoint" -l $drv_handle$scaninip -p $port_node]
+					hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" axis_switch_out1$scaninip reference
+					}
 			# Get next IN IP if axis_slice connected
 			if {[llength "$scaninip"] && \
 				[string match -nocase [get_property IP_NAME $scaninip] "axis_register_slice"]} {
@@ -2414,6 +2419,11 @@ proc update_endpoints {drv_handle} {
 			hsi::utils::add_new_dts_param "$port_node" "xlnx,video-width" $max_data_width int
 
 			set cscinip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis"]
+			if {[llength $cscinip] && \
+				[string match -nocase [get_property IP_NAME $cscinip] "axis_switch"]} {
+				set csc_node [add_or_get_dt_node -n "endpoint" -l $drv_handle$cscinip -p $port_node]
+				hsi::utils::add_new_dts_param "$csc_node" "remote-endpoint" axis_switch_out2$cscinip reference
+				}
 			if {[llength $cscinip]} {
 				foreach inip $cscinip {
 					set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
@@ -3237,11 +3247,9 @@ proc update_endpoints {drv_handle} {
 }
 
 proc get_axis_switch_in_connect_ip {ip intfpins} {
-	puts "get_axis_switch_in_connect_ip:$ip $intfpins"
 	global connectip ""
 	foreach intf $intfpins {
 		set connectip [get_connected_stream_ip [get_cells -hier $ip] $intf]
-		puts "connectip:$connectip"
 		foreach cip $connectip {
 			if {[llength $cip]} {
 				set ipname [get_property IP_NAME $cip]
