@@ -98,6 +98,14 @@ proc generate {drv_handle} {
 				}
 				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $out_ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
 				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $out_ip]
+				if {[string match -nocase [get_property IP_NAME $out_ip] "axis_switch"]} {
+					if {[llength $ip_mem_handles]} {
+						set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port1_node]
+						gen_axis_switch_in_endpoint $drv_handle "tpg_out$drv_handle"
+						hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $out_ip$drv_handle reference
+						gen_axis_switch_in_remo_endpoint $drv_handle "$out_ip$drv_handle"
+					}
+				}
 				if {[llength $ip_mem_handles]} {
 					set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port1_node]
 					gen_endpoint $drv_handle "tpg_out$drv_handle"
@@ -108,10 +116,8 @@ proc generate {drv_handle} {
 					}
 				 } else {
 					set connectip [get_connect_ip $out_ip $master_intf]
-					puts "connectip:$connectip"
 					if {[llength $connectip]} {
 						set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
-						puts "ip_mem_handles:$ip_mem_handles"
 						if {[llength $ip_mem_handles]} {
 							set tpg_node [add_or_get_dt_node -n "endpoint" -l tpg_out$drv_handle -p $port1_node]
 							gen_endpoint $drv_handle "tpg_out$drv_handle"
