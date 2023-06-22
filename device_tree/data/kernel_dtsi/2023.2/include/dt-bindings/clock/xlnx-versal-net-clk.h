@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2022, Xilinx Inc.
- * Copyright (C) 2022, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022, Advanced Micro Devices, Inc.
  */
 
 #ifndef _DT_BINDINGS_CLK_VERSAL_NET_H
@@ -23,6 +23,7 @@
 #define I3C0_REF	0x9D
 #define I3C1_REF	0x9F
 #define USB1_BUS_REF	0xAE
+#define LPD_WWDT	0xAD
 
 /* Remove Versal specific node IDs */
 #undef APU_PLL
