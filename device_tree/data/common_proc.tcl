@@ -3065,34 +3065,35 @@ proc update_endpoints {drv_handle} {
 		set tpg_inip [get_connected_stream_ip [get_cells -hier $drv_handle] "S_AXIS_VIDEO"]
                 if {![llength $tpg_inip]} {
                         dtg_warning "$drv_handle pin S_AXIS_VIDEO is not connected...check your design"
-                }
-		set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $tpg_inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
-		set inip [get_in_connect_ip $tpg_inip $master_intf]
-		#if tpg is getting input from gamma ip then setting inip
-		#to gamma as the get_in_connect_ip is traversing through
-		#first input and which might not be correct. For each ip we should
-		#have immediate input. As we are not sure about the history
-		#handling for only gamma ip for now.
-		if {[string match -nocase [get_property IP_NAME $tpg_inip] "v_gamma_lut"]} {
-			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $tpg_inip]
-			if {[llength $ip_mem_handles]} {
-				set inip $tpg_inip
+                } else {
+			set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $tpg_inip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
+			set inip [get_in_connect_ip $tpg_inip $master_intf]
+			#if tpg is getting input from gamma ip then setting inip
+			#to gamma as the get_in_connect_ip is traversing through
+			#first input and which might not be correct. For each ip we should
+			#have immediate input. As we are not sure about the history
+			#handling for only gamma ip for now.
+			if {[string match -nocase [get_property IP_NAME $tpg_inip] "v_gamma_lut"]} {
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $tpg_inip]
+				if {[llength $ip_mem_handles]} {
+					set inip $tpg_inip
+				}
 			}
-		}
-		if {[llength $inip]} {
-			set tpg_in_end ""
-			set tpg_remo_in_end ""
-			if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
-				set tpg_in_end [dict get $end_mappings $inip]
-			}
-			if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
-				set tpg_remo_in_end [dict get $remo_mappings $inip]
-			}
-			if {[llength $tpg_remo_in_end]} {
-				set tpg_node [add_or_get_dt_node -n "endpoint" -l $tpg_remo_in_end -p $port0_node]
-			}
-			if {[llength $tpg_in_end]} {
-				hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $tpg_in_end reference
+			if {[llength $inip]} {
+				set tpg_in_end ""
+				set tpg_remo_in_end ""
+				if {[info exists end_mappings] && [dict exists $end_mappings $inip]} {
+					set tpg_in_end [dict get $end_mappings $inip]
+				}
+				if {[info exists remo_mappings] && [dict exists $remo_mappings $inip]} {
+					set tpg_remo_in_end [dict get $remo_mappings $inip]
+				}
+				if {[llength $tpg_remo_in_end]} {
+					set tpg_node [add_or_get_dt_node -n "endpoint" -l $tpg_remo_in_end -p $port0_node]
+				}
+				if {[llength $tpg_in_end]} {
+					hsi::utils::add_new_dts_param "$tpg_node" "remote-endpoint" $tpg_in_end reference
+				}
 			}
 		}
 	}
