@@ -1242,7 +1242,14 @@ proc add_or_get_dt_node args {
 		set cmd "${cmd} -name ${node_name}"
 	}
 	if {![string equal -nocase ${node_label} ${def_string}]} {
-		set cmd "${cmd} -label ${node_label}"
+		if {[regexp "pl-partial-.*.dtsi" $parent_dts_file match] && \
+			[get_property CONFIG.no_labels [get_os]]} {
+			# CONFIG.no_lables set to true and RpRm dtsi.
+			# skip adding labels for Partial dt files.
+			set cmd "${cmd}"
+		} else {
+			set cmd "${cmd} -label ${node_label}"
+		}
 	}
 	if {![string equal -nocase ${node_unit_addr} ${def_string}]} {
 		set cmd "${cmd} -unit_addr ${node_unit_addr}"
