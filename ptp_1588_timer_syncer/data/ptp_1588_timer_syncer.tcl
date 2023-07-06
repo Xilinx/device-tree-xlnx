@@ -27,8 +27,8 @@ proc generate {drv_handle} {
 	}
 	set compatible [get_comp_str $drv_handle]
 	set ip_ver     [get_comp_ver $drv_handle]
-	if {[string match -nocase $ip_ver "2.0"]} {
-		set compatible [append compatible " " "xlnx,timer-syncer-1588-2.0"]
+	if {[string match -nocase $ip_ver "2.0"] || [string match -nocase $ip_ver "3.0"]} {
+		set compatible [append compatible " " "xlnx,timer-syncer-1588-3.0"]
 	} elseif {[string match -nocase $ip_ver "1.0"]} {
 		set compatible [append compatible " " "xlnx,timer-syncer-1588-1.0"]
 	}
