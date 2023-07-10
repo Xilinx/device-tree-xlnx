@@ -1305,6 +1305,7 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,rxmem" $rxethmem int
 				set fifo3_pin [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $sink_periph] "m_axis_tdata"]]
 				set mux_per3 [::hsi::get_cells -of_objects $fifo3_pin]
+				set fiforx_connect_ip3 ""
 				if {[llength $mux_per3] && [string match -nocase [get_property IP_NAME $mux_per3] "mrmac_10g_mux"]} {
 					set data_fifo_pin3 [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $mux_per3] "rx_m_axis_tdata"]]
 					set data_fifo_per3 [::hsi::get_cells -of_objects $data_fifo_pin3]
