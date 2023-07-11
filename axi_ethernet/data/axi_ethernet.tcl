@@ -459,11 +459,18 @@ proc generate {drv_handle} {
                     append clknames1 "$clknames" "$clk_names"
                     set index0 [lindex $clk_list $axi_index_0]
                     regsub -all "\>||\t" $index0 {} index0
+		    set ini0 [lindex $clk_list $index_0]
+		    regsub -all " " $ini0 "" ini0
+		    regsub -all "\<&||\t" $ini0 {} ini0
 		    if {[llength $dclk]} {
-                    append clkvals  "[lindex $clk_list $index_0], [lindex $clk_list $dclk_index], $index0>, <&$clks"
-		    } else {
-                    append clkvals  "[lindex $clk_list $index_0], $index0>, <&$clks"
+			set dclk_ini [lindex $clk_list $dclk_index]
+			if {![string match -nocase "<&$dclk_ini" "$dclk_ini"]} {
+				set dclk_ini "<&$dclk_ini"
 			}
+			append clkvals  "$ini0, $dclk_ini, $index0>, <&$clks"
+		    } else {
+			append clkvals  "$ini0, $index0>, <&$clks"
+		    }
                     set_property "clocks" $clkvals $drv_handle
                     set_property "clock-names" $clknames1 $drv_handle
                     set clknames1 ""
