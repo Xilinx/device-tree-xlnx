@@ -860,7 +860,7 @@ proc set_drv_def_dts {drv_handle} {
 							foreach intf $intf_pins {
 								set connectip [get_connected_stream_ip [get_cells -hier $pr0] $intf]
 								if {[llength $connectip]} {
-									if {[string match -nocase [get_property IP_NAME $connectip] "dfx_decoupler"]} {
+									if { [get_property IP_NAME $connectip] in { "dfx_decoupler" "dfx_axi_shutdown_manager" } } {
 										hsi::utils::add_new_dts_param $child_node2 "fpga-bridges" "$connectip" reference
 									}
 								}
