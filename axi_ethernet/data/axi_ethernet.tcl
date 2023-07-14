@@ -464,7 +464,8 @@ proc generate {drv_handle} {
 		    regsub -all "\<&||\t" $ini0 {} ini0
 		    if {[llength $dclk]} {
 			set dclk_ini [lindex $clk_list $dclk_index]
-			if {![string match -nocase "<&$dclk_ini" "$dclk_ini"]} {
+			set dclk_ini [string trim $dclk_ini]
+			if {![string match -nocase "<&*" "$dclk_ini"]} {
 				set dclk_ini "<&$dclk_ini"
 			}
 			append clkvals  "$ini0, $dclk_ini, $index0>, <&$clks"
