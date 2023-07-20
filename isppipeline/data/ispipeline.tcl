@@ -88,28 +88,68 @@ proc generate {drv_handle} {
 	# find input ip which is connected to s_axis_video
 	set inip [get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
 	if {[llength $inip]} {
+		if {[string match -nocase [get_property IP_NAME $inip] "axis_subset_converter"]} {
+			set inip [get_connected_stream_ip [get_cells -hier $inip] "S_AXIS"]
+		}
 		if {[string match -nocase [get_property IP_NAME $inip] "axis_data_fifo"]} {
 			set inip [get_connected_stream_ip [get_cells -hier $inip] "S_AXIS"]
 		}
 		# generating port0 node for ispipeline ip
-		set isppipeline_port0_node [add_or_get_dt_node -n "port" -l isppipeline_port0$drv_handle -u 0 -p $isppipeline_ports_node]
-		hsi::utils::add_new_dts_param "$isppipeline_port0_node" "reg" 0 int
-		set isppipeline_port_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$inip -p $isppipeline_port0_node]
-		hsi::utils::add_new_dts_param "$isppipeline_port_node_endpoint" "remote-endpoint" isppipeline$drv_handle reference
-		}
-	# find outip which is connected to m_axis_video
-	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
-	if {[llength $outip]} {
+		set port0_node [add_or_get_dt_node -n "port" -l isppipeline_port0$drv_handle -u 0 -p $isppipeline_ports_node]
+		hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+		set isppipeline_port_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$inip -p $port0_node]
+		hsi::utils::add_new_dts_param "$isppipeline_port_node_endpoint" "remote-endpoint" isppipeline_in$drv_handle reference
+	}
+	# find scanoutip which is connected to m_axis_video
+	set scanoutip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	set port1_node [add_or_get_dt_node -n "port" -l isppipeline_port1$drv_handle -u 1 -p $isppipeline_ports_node]
+	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
+	if {[llength $scanoutip]} {
 		# generating port1 node for ispipeline ip
-		set isppipeline_port1_node [add_or_get_dt_node -n "port" -l isppipeline_port1$drv_handle -u 1 -p $isppipeline_ports_node]
-		hsi::utils::add_new_dts_param "$isppipeline_port1_node" "reg" 1 int
-		set isppipeline_port1_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$outip -p $isppipeline_port1_node]
-		if {[string match -nocase [get_property IP_NAME $outip] "v_proc_ss"]} {
-			# generating remote-endpoint  only when it is connected to v_proc_ss ip
-			hsi::utils::add_new_dts_param "$isppipeline_port1_node_endpoint" "remote-endpoint" v_proc_ss$drv_handle reference
-		 } else {
-			# generating remote-endpoint when it is connected to another ip
-			hsi::utils::add_new_dts_param "$isppipeline_port1_node_endpoint" "remote-endpoint" $outip$drv_handle reference
+		if {[string match -nocase [get_property IP_NAME $scanoutip] "axis_broadcaster"]} {
+			set port1_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$scanoutip -p $port1_node]
+			gen_endpoint $drv_handle "$drv_handle$scanoutip"
+			hsi::utils::add_new_dts_param "$port1_node_endpoint" "remote-endpoint" $scanoutip$drv_handle reference
+			gen_remoteendpoint $drv_handle "$scanoutip$drv_handle"
+		}
+		if {[string match -nocase [get_property IP_NAME $scanoutip] "axis_switch"]} {
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $scanoutip]
+			if {[llength $ip_mem_handles]} {
+				set port1_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$scanoutip -p $port1_node]
+				gen_axis_switch_in_endpoint $drv_handle "$drv_handle$scanoutip"
+				hsi::utils::add_new_dts_param "$port1_node_endpoint" "remote-endpoint" $scanoutip$drv_handle reference
+				gen_axis_switch_in_remo_endpoint $drv_handle "$scanoutip$drv_handle"
+			}
+		}
+	}
+	foreach outip $scanoutip {
+		if {[llength $outip]} {
+			if {[string match -nocase [get_property IP_NAME $outip] "system_ila"]} {
+				continue
+			}
+			set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $outip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
+			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $outip]
+			if {[llength $ip_mem_handles]} {
+				set port1_node_endpoint [add_or_get_dt_node -n "endpoint" -l $drv_handle$outip -p $port1_node]
+				if {[string match -nocase [get_property IP_NAME $outip] "v_proc_ss"]} {
+					# generating remote-endpoint  only when it is connected to v_proc_ss ip
+					hsi::utils::add_new_dts_param "$port1_node_endpoint" "remote-endpoint" "v_proc_ss$drv_handle" reference
+				} else {
+					gen_endpoint $drv_handle "$drv_handle$outip"
+					hsi::utils::add_new_dts_param "$port1_node_endpoint" "remote-endpoint" $outip$drv_handle reference
+					gen_remoteendpoint $drv_handle "$outip$drv_handle"
+				}
+			} else {
+				set connectip [get_connect_ip $outip $master_intf]
+				if {[llength $connectip]} {
+					set port1_node_endpoint [add_or_get_dt_node -n "endpoint" -l ispipeline_out$drv_handle -p $port1_node]
+					gen_endpoint $drv_handle "$drv_handle$outip"
+					hsi::utils::add_new_dts_param "$port1_node_endpoint" "remote-endpoint" $connectip$drv_handle reference
+					gen_remoteendpoint $drv_handle "$connectip$drv_handle"
+				}
+			}
+		} else {
+			dtg_warning "$drv_handle pin m_axis_video is not connected..check your design"
 		}
 	}
 }
