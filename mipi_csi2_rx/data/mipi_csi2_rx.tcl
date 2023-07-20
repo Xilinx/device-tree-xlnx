@@ -132,7 +132,7 @@ proc generate {drv_handle} {
 						}
 
 					} elseif {[string match -nocase [get_property IP_NAME $connectip] "ISPPipeline_accel"]} {
-						set isppipeline_node [add_or_get_dt_node -n "endpoint" -l isppipeline$connectip -p $port_node]
+						set isppipeline_node [add_or_get_dt_node -n "endpoint" -l isppipeline_in$connectip -p $port_node]
 						hsi::utils::add_new_dts_param "$isppipeline_node" "remote-endpoint" $connectip$drv_handle reference
 
 					} else {
