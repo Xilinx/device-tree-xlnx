@@ -2134,6 +2134,9 @@ proc update_endpoints {drv_handle} {
 								set intlen [llength $master_intf]
 								set sca_in_end ""
 								set sca_remo_in_end ""
+								set sca_remo_in1_end ""
+								set sca_remo_in2_end ""
+								set sca_remo_in3_end ""
 								switch $intlen {
 									"1" {
 										if {[info exists port1_broad_end_mappings] && [dict exists $port1_broad_end_mappings $broad_ip]} {
@@ -2160,7 +2163,7 @@ proc update_endpoints {drv_handle} {
 										if {[info exists broad_port1_remo_mappings] && [dict exists $broad_port1_remo_mappings $broad_ip]} {
 											set sca_remo_in_end [dict get $broad_port1_remo_mappings $broad_ip]
 										}
-										if {[info exists port1_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
+										if {[info exists port2_broad_end_mappings] && [dict exists $port2_broad_end_mappings $broad_ip]} {
 											set sca_in1_end [dict get $port2_broad_end_mappings $broad_ip]
 										}
 										if {[info exists broad_port2_remo_mappings] && [dict exists $broad_port2_remo_mappings $broad_ip]} {
@@ -3097,8 +3100,9 @@ proc update_endpoints {drv_handle} {
 			set broad_ip [get_broad_in_ip $ip]
 			set validate_ip 1
 			if {[llength $broad_ip]} {
-				if {[string match -nocase [get_property IP_NAME $broad_ip] "v_proc_ss"]} {
-				# set validate ip is 0 when axis_broadcaster input ip is connect to v_proc_ss to skip the below checks
+				if { [get_property IP_NAME $broad_ip] in { "v_proc_ss" "ISPPipeline_accel" } } {
+				# set validate ip is 0 when axis_broadcaster input ip is
+				# connect to v_proc_ss or ISPPipeline_accel to skip the below checks
 					set validate_ip 0
 				}
 			}
@@ -3123,7 +3127,7 @@ proc update_endpoints {drv_handle} {
 				if {[llength $broad]} {
 				if {[llength $inip]} {
 					set inipname [get_property IP_NAME $inip]
-					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
+					set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange ISPPipeline_accel"
 				if {[lsearch  -nocase $valid_mmip_list $inipname] >= 0} {
 				set ports_node [add_or_get_dt_node -n "ports" -l axis_broadcaster_ports$ip -p $rt_node]
 				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
@@ -3310,19 +3314,15 @@ proc gen_broadcaster {ip} {
 			set port_node [add_or_get_dt_node -n "port" -l axis_broad_port$count$ip -u $count -p $ports_node]
 			hsi::utils::add_new_dts_param "$port_node" "reg" $count int
 			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out$count$ip -p $port_node]
-			if {$count <= $count-1} {
-				gen_broad_endpoint_port$count $ip "axis_broad_out$count$ip"
-			}
+			gen_broad_endpoint_port$count $ip "axis_broad_out$count$ip"
 			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-			if {$count <= $count-1} {
-				gen_broad_remoteendpoint_port$count $ip $connectip$ip
-			}
+			gen_broad_remoteendpoint_port$count $ip $connectip$ip
 			append inputip " " $connectip
 			append outip " " $connectip$ip
 		}
-	}
-	if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-		gen_broad_frmbuf_wr_node $inputip $outip $ip $count
+		if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+			gen_broad_frmbuf_wr_node $inputip $outip $ip $count
+		}
 	}
 }
 
