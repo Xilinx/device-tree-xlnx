@@ -72,10 +72,11 @@ proc generate {drv_handle} {
 	if {[llength $link_data0]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data0]
 		if {[llength $ip_mem_handles]} {
+			set link_data0_inst $link_data0
 			set link_data0 [get_property IP_NAME $link_data0]
 			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"]} {
 				append phy_names " " "hdmi-phy0"
-				append phys  "rxphy_lane0 0 1 1 0>,"
+				append phys  "${link_data0_inst}rxphy_lane0 0 1 1 0>,"
 			}
 		} else {
 			dtg_warning "connected stream of LINK_DATA0_IN is NULL...check the design"
@@ -85,10 +86,11 @@ proc generate {drv_handle} {
 	if {[llength $link_data1]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data1]
 		if {[llength $ip_mem_handles]} {
+			set link_data1_inst $link_data1
 			set link_data1 [get_property IP_NAME $link_data1]
 			if {[string match -nocase $link_data1 "vid_phy_controller"] || [string match -nocase $link_data1 "hdmi_gt_controller"]} {
 				append phy_names " " "hdmi-phy1"
-				append phys  " <&rxphy_lane1 0 1 1 0>,"
+				append phys  " <&${link_data1_inst}rxphy_lane1 0 1 1 0>,"
 			}
 		} else {
 			dtg_warning "Connected stream of LINK_DATA1_IN is NULL...check the design"
@@ -98,10 +100,11 @@ proc generate {drv_handle} {
 	if {[llength $link_data2]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data2]
 		if {[llength $ip_mem_handles]} {
+			set link_data2_inst $link_data2
 			set link_data2 [get_property IP_NAME $link_data2]
 			if {[string match -nocase $link_data2 "vid_phy_controller"] || [string match -nocase $link_data2 "hdmi_gt_controller"]} {
 				append phy_names " " "hdmi-phy2"
-				append phys " <&rxphy_lane2 0 1 1 0"
+				append phys " <&${link_data2_inst}rxphy_lane2 0 1 1 0"
 			}
 		} else {
 			dtg_warning "Connected stream of LINK_DATA2_IN is NULL...check the design"
@@ -111,10 +114,11 @@ proc generate {drv_handle} {
 	if {[llength $link_data3]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data3]
 		if {[llength $ip_mem_handles]} {
+			set link_data3_inst $link_data3
 			set link_data3 [get_property IP_NAME $link_data3]
 			if {[string match -nocase $link_data3 "vid_phy_controller"] || [string match -nocase $link_data3 "hdmi_gt_controller"]} {
 				append phy_names " " "hdmi-phy3"
-				append phys " <&rxphy_lane3 0 1 1 0"
+				append phys " <&${link_data3_inst}rxphy_lane3 0 1 1 0"
 			}
 		} else {
 			dtg_warning "Connected stream of LINK_DATA3_IN is NULL...check the design"

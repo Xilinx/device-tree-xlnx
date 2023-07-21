@@ -61,12 +61,20 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-gt-ch4-hdmi" $use_gt_ch4_hdmi int
 	}
 	for {set ch 0} {$ch < $Rx_No_Of_Channels} {incr ch} {
-		set phy_node [add_or_get_dt_node -n "rxphy_lane@$ch" -l rxphy_lane$ch -p $node]
-		hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
+		set rxpinname "vid_phy_rx_axi4s_ch$ch"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $rxpinname]
+		if {[llength $channelip] && [llength [hsi::utils::get_ip_mem_ranges $channelip]]} {
+			set phy_node [add_or_get_dt_node -n "${rxpinname}${channelip}" -l ${drv_handle}rxphy_lane${ch} -p $node]
+			hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
+		}
 	}
 	for {set ch 0} {$ch < $tx_no_of_channels} {incr ch} {
-		set phy_node [add_or_get_dt_node -n "txphy_lane@$ch" -l txphy_lane$ch -p $node]
-		hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
+		set txpinname "vid_phy_tx_axi4s_ch$ch"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $txpinname]
+		if {[llength $channelip] && [llength [hsi::utils::get_ip_mem_ranges $channelip]]} {
+			set phy_node [add_or_get_dt_node -n "${txpinname}${channelip}" -l ${drv_handle}txphy_lane${ch} -p $node]
+			hsi::utils::add_new_dts_param "$phy_node" "#phy-cells" 4 int
+		}
 	}
 	set transceiver [get_property CONFIG.Transceiver [get_cells -hier $drv_handle]]
 	switch $transceiver {

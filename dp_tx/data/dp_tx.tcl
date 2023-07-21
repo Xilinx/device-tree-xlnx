@@ -54,9 +54,13 @@ proc generate {drv_handle} {
 	}
 	set i 0
 	while {$i < $lane_count} {
-		set phy_s "txphy_lane$i 0 1 1 1"
-		set clocks [lappend clocks $phy_s]
-		set updat  [lappend updat $phy_s]
+		set txpinname "m_axis_lnk_tx_lane$i"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $txpinname]
+		if {[llength $channelip] && [llength [hsi::utils::get_ip_mem_ranges $channelip]]} {
+			set phy_s "${channelip}txphy_lane${i} 0 1 1 1"
+			set clocks [lappend clocks $phy_s]
+			set updat  [lappend updat $phy_s]
+		}
 		incr i
 	}
 	set len [llength $updat]
