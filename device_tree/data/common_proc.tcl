@@ -4605,8 +4605,14 @@ proc gen_clk_property {drv_handle} {
 		set is_clk_wiz 0
 		set axi 0
 	}
-	set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
+	if {[string match -nocase $ip "dfx_axi_shutdown_manager"]} {
+		# DFX axi shutdown manager driver expecting aclk as clock name
+		# but IP has clk pin name. We cannot update this in Driver as it
+		# breaks the backward compatiblity. so rename clk -> aclk
+		set clocknames [string map {clk aclk} $clocknames]
+	}
+	set_drv_prop_if_empty $drv_handle "clock-names" $clocknames stringlist
 	if {[string match -nocase $ip "vcu"]} {
 		set vcu_label $drv_handle
 		set vcu_clk1 "$drv_handle 0"
