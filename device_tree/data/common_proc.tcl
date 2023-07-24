@@ -51,12 +51,14 @@ global set port3_broad_end_mappings [dict create]
 global set port4_broad_end_mappings [dict create]
 global set port5_broad_end_mappings [dict create]
 global set port6_broad_end_mappings [dict create]
+global set port7_broad_end_mappings [dict create]
 global set broad_port1_remo_mappings [dict create]
 global set broad_port2_remo_mappings [dict create]
 global set broad_port3_remo_mappings [dict create]
 global set broad_port4_remo_mappings [dict create]
 global set broad_port5_remo_mappings [dict create]
 global set broad_port6_remo_mappings [dict create]
+global set broad_port7_remo_mappings [dict create]
 global set axis_switch_in_end_mappings [dict create]
 global set axis_switch_port1_end_mappings [dict create]
 global set axis_switch_port2_end_mappings [dict create]
@@ -1980,6 +1982,12 @@ proc gen_broad_endpoint_port6 {drv_handle value} {
         set val [dict get $port6_broad_end_mappings $drv_handle]
 }
 
+proc gen_broad_endpoint_port7 {drv_handle value} {
+        global port7_broad_end_mappings
+        dict append port7_broad_end_mappings $drv_handle $value
+        set val [dict get $port7_broad_end_mappings $drv_handle]
+}
+
 proc get_endpoint_mapping {inip mappings} {
 	#search the inip in mappings and return value if found
 	set endpoint ""
@@ -2064,12 +2072,14 @@ proc update_endpoints {drv_handle} {
 	global set port4_broad_end_mappings
 	global set port5_broad_end_mappings
 	global set port6_broad_end_mappings
+	global set port7_broad_end_mappings
 	global set broad_port1_remo_mappings
 	global set broad_port2_remo_mappings
 	global set broad_port3_remo_mappings
 	global set broad_port4_remo_mappings
 	global set broad_port5_remo_mappings
 	global set broad_port6_remo_mappings
+	global set broad_port7_remo_mappings
 	global set axis_switch_in_end_mappings
 	global set axis_switch_in_remo_mappings
 	global set axis_switch_port1_end_mappings
@@ -3247,6 +3257,12 @@ proc gen_broad_remoteendpoint_port6 {drv_handle value} {
         set val [dict get $broad_port6_remo_mappings $drv_handle]
 }
 
+proc gen_broad_remoteendpoint_port7 {drv_handle value} {
+        global broad_port7_remo_mappings
+        dict append broad_port7_remo_mappings $drv_handle $value
+        set val [dict get $broad_port7_remo_mappings $drv_handle]
+}
+
 proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
 	set frmbuf_rd_node [add_or_get_dt_node -n "endpoint" -l encoder$drv_handle -p $sdi_port_node]
 	hsi::utils::add_new_dts_param "$frmbuf_rd_node" "remote-endpoint" $ip$drv_handle reference
@@ -3411,12 +3427,9 @@ proc gen_axis_switch {ip} {
 
 proc gen_broad_frmbuf_wr_node {inputip outip drv_handle count} {
         set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
-        if {$dt_overlay} {
-                set bus_node "amba"
-        } else {
-                set bus_node "amba_pl"
-        }
-        set vcap [add_or_get_dt_node -n "vcapaxis_broad_out1$drv_handle" -p $bus_node]
+	set dts_file [current_dt_tree]
+	set bus_node [add_or_get_bus_node $drv_handle $dts_file]
+	set vcap [add_or_get_dt_node -n "vcapaxis_broad_out1$drv_handle" -p $bus_node]
         hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
 	set inputip [split $inputip " "]
 	set j 0
