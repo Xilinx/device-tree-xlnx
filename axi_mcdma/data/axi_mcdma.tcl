@@ -29,7 +29,7 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,axi-mcdma-1.00.a"]
+	set compatible [append compatible " " "xlnx,axi-mcdma-1.00.a xlnx,eth-dma"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set mcdma_ip [get_cells -hier $drv_handle]
 	set dma_count [hsi::utils::get_os_parameter_value "dma_count"]
