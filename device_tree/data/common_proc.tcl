@@ -3330,14 +3330,20 @@ proc gen_broadcaster {ip} {
 			set port_node [add_or_get_dt_node -n "port" -l axis_broad_port$count$ip -u $count -p $ports_node]
 			hsi::utils::add_new_dts_param "$port_node" "reg" $count int
 			set axis_node [add_or_get_dt_node -n "endpoint" -l axis_broad_out$count$ip -p $port_node]
-			gen_broad_endpoint_port$count $ip "axis_broad_out$count$ip"
 			hsi::utils::add_new_dts_param "$axis_node" "remote-endpoint" $connectip$ip reference
-			gen_broad_remoteendpoint_port$count $ip $connectip$ip
+			set addbroadip "1"
+			if {[get_property IP_NAME $connectip] in { "v_scenechange" "v_frmbuf_wr" }} {
+				set addbroadip ""
+			}
+			if {[llength $addbroadip]} {
+				gen_broad_endpoint_port$count $ip "axis_broad_out$count$ip"
+				gen_broad_remoteendpoint_port$count $ip $connectip$ip
+			}
 			append inputip " " $connectip
 			append outip " " $connectip$ip
-		}
-		if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-			gen_broad_frmbuf_wr_node $inputip $outip $ip $count
+			if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+				gen_broad_frmbuf_wr_node $inputip $outip $ip $count
+			}
 		}
 	}
 }
