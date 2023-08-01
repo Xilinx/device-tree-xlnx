@@ -23,10 +23,15 @@ proc generate {drv_handle} {
             break
         }
     }
+    set node [gen_peripheral_nodes $drv_handle]
     set compatible [get_comp_str $drv_handle]
     set compatible [append compatible " " "xlnx,axi-can-1.00.a"]
     set_drv_prop $drv_handle compatible "$compatible" stringlist
     set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
+    set ecc [get_property CONFIG.ENABLE_ECC [get_cells -hier $drv_handle]]
+    if { [llength $ecc] } {
+	hsi::utils::add_new_dts_param $node "xlnx,has-ecc" "" boolean
+	}
     set version [string tolower [common::get_property VLNV $drv_handle]]
     if {[string match -nocase $ip_name "canfd"]} {
         if {[string compare -nocase "xilinx.com:ip:canfd:1.0" $version] == 0} {
