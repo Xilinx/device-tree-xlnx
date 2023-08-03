@@ -5631,6 +5631,20 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	set proc_type [get_sw_proc_prop IP_NAME]
 	if {[string match -nocase $proc_type "psv_cortexa72"] } {
 		set ip_type [get_property IP_NAME $ip]
+		# For psv_cpm BASE_VALUE is different than the node unitaddr from versal.dtsi
+		# So reading proper xsct configs to add status okay
+		if {[string match -nocase $ip_type "psv_cpm"]} {
+			# CONFIG.CPM_SLCR is for cpm4
+			set cpm_unit_addr [get_property CONFIG.CPM_SLCR [get_cells -hier $ip]]
+			if {![llength $cpm_unit_addr]} {
+				# CONFIG.CPM5_SLCR_ADDR is for cpm5
+				set cpm_unit_addr [get_property CONFIG.CPM5_SLCR_ADDR [get_cells -hier $ip]]
+			}
+			if {[llength $cpm_unit_addr]} {
+				set unit_addr [string tolower $cpm_unit_addr]
+				regsub -all {^0x} $unit_addr {} unit_addr
+			}
+		}
 		if {[string match -nocase $ip_type "psv_cpm_slcr"]} {
 			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
 			if {[llength $versal_periph]} {
