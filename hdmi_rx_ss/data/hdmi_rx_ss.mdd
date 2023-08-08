@@ -17,7 +17,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver hdmi_rx_ss
 
-  OPTION supported_peripherals = (v_hdmi_rx_ss);
+  OPTION supported_peripherals = (v_hdmi_rx_ss v_hdmi_rxss1);
   OPTION supported_os_types = (DTS);
   OPTION driver_state = ACTIVE;
   OPTION NAME = hdmi_rx_ss;
