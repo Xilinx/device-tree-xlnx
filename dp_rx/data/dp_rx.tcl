@@ -27,7 +27,7 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
-	lappend compatible "xlnx,v-dp-rxss-3.0" "xlnx,vid-edid-1.0"
+	lappend compatible "xlnx,v-dp-rxss-3.0" "xlnx,v-dp-rxss-3.1"
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set audio_channels [get_property CONFIG.AUDIO_CHANNELS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-channels" $audio_channels int
