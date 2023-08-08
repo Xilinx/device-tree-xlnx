@@ -53,6 +53,7 @@ proc generate {drv_handle} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp1x-keymgmt" [lindex $hdcp_keymngmt 1] reference
 	}
 	set i 0
+	set updat ""
 	while {$i < $lane_count} {
 		set txpinname "m_axis_lnk_tx_lane$i"
 		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $txpinname]
