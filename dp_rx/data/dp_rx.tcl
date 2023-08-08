@@ -63,9 +63,10 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,lane-count" $lane_count int
 	hsi::utils::add_new_dts_param "${node}" "xlnx,dp-retimer" "xfmc" reference
 	set i 0
+	set updat ""
 	while {$i < $lane_count} {
-		set txpinname "m_axis_lnk_rx_lane$i"
-		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $txpinname]
+		set rxpinname "s_axis_lnk_rx_lane$i"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $rxpinname]
 		if {[llength $channelip] && [llength [hsi::utils::get_ip_mem_ranges $channelip]]} {
 			set phy_s "${channelip}rxphy_lane${i} 0 1 1 1"
 			set clocks [lappend clocks $phy_s]
