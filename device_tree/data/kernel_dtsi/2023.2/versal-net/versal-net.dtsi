@@ -313,7 +313,7 @@
 		interrupts = <1 13 4>, <1 14 4>, <1 11 4>, <1 10 4>; /* FIXME 3rd cell */
 	};
 
-	versal_fpga: versal_fpga {
+	versal_fpga: versal-fpga {
 		compatible = "xlnx,versal-fpga";
 	};
 
@@ -616,6 +616,14 @@
 			interrupts = <0 24 4>;
 			reg = <0 0xf1970000 0 0x1000>;
 			clock-names = "ref_clk", "pclk";
+		};
+
+		sysmon0: sysmon@f1270000 {
+			compatible = "xlnx,versal-sysmon";
+			status = "disabled";
+			reg = <0x0 0xf1270000 0x0 0x4000>;
+			interrupts = <0 144 4>;
+			xlnx,numchannels = /bits/8 <0>;
 		};
 
 		ttc0: timer@f1dc0000 {
