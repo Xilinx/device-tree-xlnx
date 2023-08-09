@@ -50,7 +50,7 @@
 		};
 	};
 
-	cpu_opp_table: cpu_opp_table {
+	cpu_opp_table: cpu-opp-table {
 		compatible = "operating-points-v2";
 		opp-shared;
 		opp00 {
@@ -108,7 +108,7 @@
 			     <1 10 4>;
 	};
 
-	versal_fpga: versal_fpga {
+	versal_fpga: versal-fpga {
 		compatible = "xlnx,versal-fpga";
 	};
 

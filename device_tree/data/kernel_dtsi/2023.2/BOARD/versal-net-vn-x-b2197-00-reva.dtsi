@@ -18,13 +18,6 @@
 	aliases {
 		nvmem0 = &eeprom0;
 	};
-
-	ref_clk: ref_clk {
-		u-boot,dm-pre-reloc;
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-		clock-frequency = <33333333>;
-	};
 };
 
 &adma0 {
@@ -142,7 +135,6 @@
 
 &sdhci1 {
 	status = "okay";
-	xlnx,device_id = <1>;
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
