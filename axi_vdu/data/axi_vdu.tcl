@@ -94,21 +94,17 @@ proc generate {drv_handle} {
 		set bus_node "amba_pl"
 	}
     set vdu_ip [get_cells -hier $drv_handle]
-    set core_clk [get_property CONFIG.CORE_CLK [get_cells -hier $drv_handle]]
+    set core_clk [get_property CONFIG.Actual_CORE_CLK [get_cells -hier $drv_handle]]
     if {[llength $core_clk]} {
         hsi::utils::add_new_dts_param "${node}" "xlnx,core_clk" ${core_clk} int
     }
-    set mcu_clk [get_property CONFIG.MCU_CLK [get_cells -hier $drv_handle]]
+    set mcu_clk [get_property CONFIG.Actual_MCU_CLK [get_cells -hier $drv_handle]]
     if {[llength $mcu_clk]} {
         hsi::utils::add_new_dts_param "${node}" "xlnx,mcu_clk" ${mcu_clk} int
     }
     set ref_clk [get_property CONFIG.REF_CLK [get_cells -hier $drv_handle]]
     if {[llength $ref_clk]} {
         hsi::utils::add_new_dts_param "${node}" "xlnx,ref_clk" ${ref_clk} int
-    }
-    set enable_dpll [get_property CONFIG.ENABLE_DPLL [get_cells -hier $drv_handle]]
-    if {[string match -nocase $enable_dpll "true"]} {
-        hsi::utils::add_new_dts_param "${node}" "xlnx,enable_dpll" "" boolean
     }
     gen_reset_gpio "$drv_handle" "$node"
     set intr_val ""
