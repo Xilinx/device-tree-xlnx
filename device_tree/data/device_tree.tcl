@@ -507,7 +507,7 @@ proc gen_opp_freq {} {
 				}
 			}
 		}
-		if {[string match -nocase $proc_ps "versal_cips"] } {
+		if { $proc_ps in { "versal_cips" "ps_wizard" }} {
 			set ps_pmc_params [get_property CONFIG.PS_PMC_CONFIG [get_cells -hier $periph]]
 			if {[llength $ps_pmc_params ]} {
 				set act_freq ""
@@ -611,7 +611,7 @@ proc gen_versal_clk {} {
 	set periph_list [get_cells -hier]
 	foreach periph $periph_list {
 		set versal_ps [get_property IP_NAME $periph]
-		if {[string match -nocase $versal_ps "versal_cips"] } {
+		if { $versal_ps in { "versal_cips" "ps_wizard" }} {
 			set ver [get_comp_ver $periph]
 			if {$ver < 3.0} {
 				set avail_param [list_property [get_cells -hier $periph]]

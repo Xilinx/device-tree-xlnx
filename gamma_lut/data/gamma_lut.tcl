@@ -118,7 +118,7 @@ proc gen_gpio_reset {drv_handle node} {
 					if {[llength $periph]} {
 						set ip [get_property IP_NAME $periph]
 						if {[string match -nocase $proc_type "psv_cortexa72"] } {
-							if {[string match -nocase $ip "versal_cips"]} {
+							if { $ip in { "versal_cips" "ps_wizard" }} {
 								# As versal has only bank0 for MIOs
 								set gpio [expr $gpio + 26]
 								hsi::utils::add_new_dts_param "$node" "reset-gpios" "gpio0 $gpio 1" reference

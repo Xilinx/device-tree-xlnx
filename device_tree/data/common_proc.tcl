@@ -4433,7 +4433,7 @@ proc gen_clk_property {drv_handle} {
 		}
 		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			if {[string match -nocase $proctype "psv_cortexa72"]} {
-				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips || IP_NAME == ps_wizard}]
 			} else {
 				set versal_periph [get_cells -hier -filter {IP_NAME == psx_wizard}]
 			}
@@ -4452,7 +4452,7 @@ proc gen_clk_property {drv_handle} {
 		}
 		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 			if {[string match -nocase $proctype "psv_cortexa72"]} {
-				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+				set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips || IP_NAME == ps_wizard}]
 			} else {
 				set versal_periph [get_cells -hier -filter {IP_NAME == psx_wizard}]
 			}
@@ -5646,7 +5646,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 			}
 		}
 		if {[string match -nocase $ip_type "psv_cpm_slcr"]} {
-			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+			set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips || IP_NAME == ps_wizard}]
 			if {[llength $versal_periph]} {
 				set avail_param [list_property [get_cells -hier $versal_periph]]
 				if {[lsearch -nocase $avail_param "CONFIG.CPM_PCIE0_PORT_TYPE"] >= 0} {
