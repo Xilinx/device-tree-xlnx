@@ -132,7 +132,7 @@ proc generate {drv_handle} {
    }
 
     if {[string match -nocase $proc_type "psv_cortexa72"] } {
-	set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips}]
+	set versal_periph [get_cells -hier -filter {IP_NAME == versal_cips || IP_NAME == ps_wizard}]
 	if {[llength $versal_periph]} {
 		set avail_param [list_property [get_cells -hier $versal_periph]]
 		if {[lsearch -nocase $avail_param "CONFIG.PS_GEM_TSU_ENABLE"] >= 0} {
