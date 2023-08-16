@@ -22,6 +22,20 @@ proc add_prop_ifexists {drv_handle hsi_prop dt_prop node {dt_prop_type "string"}
 	}
 }
 
+proc fix_clockprop {s_clk rx_clk} {
+	regsub -all "\<&" $s_clk {} s_clk
+	regsub -all "\<&" $s_clk {} s_clk
+	regsub -all " " $s_clk "" s_clk
+	# if s_clk and rx_clk not matches and clock not starts
+	# with <& add it.
+	set rx_clk [string trim $rx_clk]
+	if {![string match -nocase "$s_clk" $rx_clk] && \
+		![string match -nocase "<&*" "$rx_clk"]} {
+		set rx_clk "<&$rx_clk"
+	}
+	return "$s_clk $rx_clk"
+}
+
 proc generate {drv_handle} {
 	# try to source the common tcl procs
 	# assuming the order of return is based on repo priority
@@ -378,22 +392,19 @@ proc generate {drv_handle} {
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
 		lappend clknames "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk0" "$rx_ts_clk0" "$tx_axi_clk0" "$tx_flexif_clk0" "$tx_ts_clk0"
-		set index0 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index0 {} index0
-		regsub -all "\<&" $index0 {} index0
+		set tmpclks0 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index0]"]
 		set txindex0 [lindex $clk_list $tx_ts_clk_index0]
 		regsub -all "\>" $txindex0 {} txindex0
-		append clkvals0  "$index0, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $rx_ts_clk0_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], $txindex0"
+		append clkvals0  "[lindex $tmpclks0 0], [lindex $tmpclks0 1], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $rx_ts_clk0_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], $txindex0"
 		hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals0 reference
 		hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames stringlist
 	}
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
 		lappend clknames "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk0" "$tx_axi_clk0" "$tx_flexif_clk0" "$rx_macif_clk" "$ts_clk0" "$tx_macif_clk" "$tx_serdes_clk0"
-		set index0 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index0 {} index0
-		regsub -all "\<&" $index0 {} index0
+		set tmpclks0 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index0]"]
 		set txindex0 [lindex $clk_list $tx_serdes_clk_index0]
-		append clkvals0  "$index0, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index0], [lindex $clk_list $tx_macif_clk_index0], $txindex0"
+		regsub -all "\>" $txindex0 {} txindex0
+		append clkvals0  "[lindex $tmpclks0 0], [lindex $tmpclks0 1], [lindex $clk_list $rx_flexif_clk_index0], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index0], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index0], [lindex $clk_list $tx_macif_clk_index0], $txindex0"
 		hsi::utils::add_new_dts_param "${node}" "clocks" $clkvals0 reference
 		hsi::utils::add_new_dts_param "${node}" "clock-names" $clknames stringlist
 	}
@@ -631,23 +642,19 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$mrmac1_node" "reg" $mrmac1_reg inthexlist
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
 		lappend clknames1 "$s_axi_aclk" "$rx_axi_clk1" "$rx_flexif_clk1" "$rx_ts_clk1" "$tx_axi_clk1" "$tx_flexif_clk1" "$tx_ts_clk1"
-		set index1 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index1 {} index1
-		regsub -all "\<&" $index1 {} index1
+		set tmpclks1 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index1]"]
 		set txindex1 [lindex $clk_list $tx_ts_clk_index1]
 		regsub -all "\>" $txindex1 {} txindex1
-		append clkvals  "$index1, [lindex $clk_list $rx_axi_clk_index1], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $rx_ts_clk1_index1], [lindex $clk_list $tx_axi_clk_index1], [lindex $clk_list $tx_flexif_clk_index1], $txindex1"
+		append clkvals  "[lindex $tmpclks1 0], [lindex $tmpclks1 1], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $rx_ts_clk1_index1], [lindex $clk_list $tx_axi_clk_index1], [lindex $clk_list $tx_flexif_clk_index1], $txindex1"
 		hsi::utils::add_new_dts_param "${mrmac1_node}" "clocks" $clkvals reference
 		hsi::utils::add_new_dts_param "${mrmac1_node}" "clock-names" $clknames1 stringlist
 	}
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
 		lappend clknames1 "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk1" "$tx_axi_clk0" "$tx_flexif_clk1" "$rx_macif_clk" "$ts_clk1" "$tx_macif_clk" "$tx_serdes_clk1"
-		set index1 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index1 {} index1
-		regsub -all "\<&" $index1 {} index1
+		set tmpclks1 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index0]"]
 		set txindex1 [lindex $clk_list $tx_serdes_clk_index1]
 		regsub -all "\>" $txindex1 {} txindex1
-		append clkvals  "$index1, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index1], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index1], [lindex $clk_list $tx_macif_clk_index0], $txindex1"
+		append clkvals  "[lindex $tmpclks1 0], [lindex $tmpclks1 1], [lindex $clk_list $rx_flexif_clk_index1], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index1], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index1], [lindex $clk_list $tx_macif_clk_index0], $txindex1"
 		hsi::utils::add_new_dts_param "${mrmac1_node}" "clocks" $clkvals reference
 		hsi::utils::add_new_dts_param "${mrmac1_node}" "clock-names" $clknames1 stringlist
 	}
@@ -962,23 +969,19 @@ proc generate {drv_handle} {
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
 		lappend clknames2 "$s_axi_aclk" "$rx_axi_clk2" "$rx_flexif_clk2" "$rx_ts_clk2" "$tx_axi_clk2" "$tx_flexif_clk2" "$tx_ts_clk2"
-		set index2 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index2 {} index2
-		regsub -all "\<&" $index2 {} index2
+		set tmpclks2 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index2]"]
 		set txindex2 [lindex $clk_list $tx_ts_clk_index2]
 		regsub -all "\>" $txindex2 {} txindex2
-		append clkvals2  "$index2,[lindex $clk_list $rx_axi_clk_index2], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $rx_ts_clk2_index2], [lindex $clk_list $tx_axi_clk_index2], [lindex $clk_list $tx_flexif_clk_index2], $txindex2"
+		append clkvals2  "[lindex $tmpclks2 0], [lindex $tmpclks2 1], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $rx_ts_clk2_index2], [lindex $clk_list $tx_axi_clk_index2], [lindex $clk_list $tx_flexif_clk_index2], $txindex2"
 		hsi::utils::add_new_dts_param "${mrmac2_node}" "clocks" $clkvals2 reference
 		hsi::utils::add_new_dts_param "${mrmac2_node}" "clock-names" $clknames2 stringlist
 	}
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
 		lappend clknames2 "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk2" "$tx_axi_clk0" "$tx_flexif_clk2" "$rx_macif_clk" "$ts_clk2" "$tx_macif_clk" "$tx_serdes_clk2"
-		set index2 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index2 {} index2
-		regsub -all "\<&" $index2 {} index2
+		set tmpclks2 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index0]"]
 		set txindex2 [lindex $clk_list $tx_serdes_clk_index2]
 		regsub -all "\>" $txindex2 {} txindex2
-		append clkvals2  "$index2, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index2], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index2], [lindex $clk_list $tx_macif_clk_index0], $txindex2"
+		append clkvals2  "[lindex $tmpclks2 0], [lindex $tmpclks2 1], [lindex $clk_list $rx_flexif_clk_index2], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index2], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index2], [lindex $clk_list $tx_macif_clk_index0], $txindex2"
 		hsi::utils::add_new_dts_param "${mrmac2_node}" "clocks" $clkvals2 reference
 		hsi::utils::add_new_dts_param "${mrmac2_node}" "clock-names" $clknames2 stringlist
 	}
@@ -1419,23 +1422,19 @@ proc generate {drv_handle} {
 
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "mrmac"]} {
 		lappend clknames3 "$s_axi_aclk" "$rx_axi_clk3" "$rx_flexif_clk3" "$rx_ts_clk3" "$tx_axi_clk3" "$tx_flexif_clk3" "$tx_ts_clk3"
-		set index3 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index3 {} index3
-		regsub -all "\<&" $index3 {} index3
+		set tmpclks3 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index3]"]
 		set txindex3 [lindex $clk_list $tx_ts_clk_index3]
 		regsub -all "\>" $txindex3 {} txindex3
-		append clkvals3  "$index3,[lindex $clk_list $rx_axi_clk_index3], [lindex $clk_list $rx_flexif_clk_index3], [lindex $clk_list $rx_ts_clk3_index3], [lindex $clk_list $tx_axi_clk_index3], [lindex $clk_list $tx_flexif_clk_index3], $txindex3"
+		append clkvals3  "[lindex $tmpclks3 0], [lindex $tmpclks3 1], [lindex $clk_list $rx_flexif_clk_index3], [lindex $clk_list $rx_ts_clk3_index3], [lindex $clk_list $tx_axi_clk_index3], [lindex $clk_list $tx_flexif_clk_index3], $txindex3"
 		hsi::utils::add_new_dts_param "${mrmac3_node}" "clocks" $clkvals3 reference
 		hsi::utils::add_new_dts_param "${mrmac3_node}" "clock-names" $clknames3 stringlist
 	}
 	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "dcmac"]} {
 		lappend clknames3 "$s_axi_aclk" "$rx_axi_clk0" "$rx_flexif_clk3" "$tx_axi_clk0" "$tx_flexif_clk3" "$rx_macif_clk" "$ts_clk3" "$tx_macif_clk" "$tx_serdes_clk3"
-		set index3 [lindex $clk_list $s_axi_aclk_index0]
-		regsub -all "\<&" $index3 {} index3
-		regsub -all "\<&" $index3 {} index3
+		set tmpclks3 [fix_clockprop "[lindex $clk_list $s_axi_aclk_index0]" "[lindex $clk_list $rx_axi_clk_index0]"]
 		set txindex3 [lindex $clk_list $tx_serdes_clk_index3]
 		regsub -all "\>" $txindex3 {} txindex3
-		append clkvals3  "$index3, [lindex $clk_list $rx_axi_clk_index0], [lindex $clk_list $rx_flexif_clk_index3], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index3], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index3], [lindex $clk_list $tx_macif_clk_index0], $txindex2"
+		append clkvals3  "[lindex $tmpclks3 0], [lindex $tmpclks3 1], [lindex $clk_list $rx_flexif_clk_index3], [lindex $clk_list $tx_axi_clk_index0], [lindex $clk_list $tx_flexif_clk_index3], [lindex $clk_list $rx_macif_clk_index0], [lindex $clk_list $ts_clk_index3], [lindex $clk_list $tx_macif_clk_index0], $txindex3"
 		hsi::utils::add_new_dts_param "${mrmac3_node}" "clocks" $clkvals3 reference
 		hsi::utils::add_new_dts_param "${mrmac3_node}" "clock-names" $clknames3 stringlist
 	}
