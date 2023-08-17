@@ -28,6 +28,6 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "generic-uio"]
+	set compatible [append compatible " " "xlnx,xvc"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 }
