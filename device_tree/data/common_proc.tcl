@@ -292,7 +292,9 @@ proc get_intr_id {drv_handle intr_port_name} {
 			} elseif {[string match "[get_property IP_NAME $intc]" "axi_intc"] } {
 				set cur_intr_info "$intr_id $intr_type"
 			}
-		} elseif {[string match -nocase $intc "psu_acpu_gic"]|| [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"]} {
+		} elseif {[string match -nocase $intc "psu_acpu_gic"] \
+			|| [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"] \
+			|| [string match -nocase [get_property IP_NAME $intc] "psx_acpu_gic"]} {
 		    set cur_intr_info "0 $intr_id $intr_type"
 		} else {
 			set cur_intr_info "$intr_id $intr_type"
@@ -4756,7 +4758,7 @@ proc get_intr_type {intc_name ip_name port_name} {
 		set sensitivity [get_property SENSITIVITY $intr_pin]
 	}
 	set intc_type [get_property IP_NAME $intc ]
-	set valid_intc_list "ps7_scugic psu_acpu_gic psv_acpu_gic"
+	set valid_intc_list "ps7_scugic psu_acpu_gic psv_acpu_gic psx_acpu_gic"
 	if {[lsearch  -nocase $valid_intc_list $intc_type] >= 0} {
 		if {[string match -nocase $sensitivity "EDGE_FALLING"]} {
 				return 2;
@@ -5040,7 +5042,7 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 			}
 
 			set cur_intr_info ""
-			set valid_intc_list "ps7_scugic psu_acpu_gic psv_acpu_gic"
+			set valid_intc_list "ps7_scugic psu_acpu_gic psv_acpu_gic psx_acpu_gic"
 			global intrpin_width
 			if { [string match -nocase $proctype "ps7_cortexa9"] }  {
 				if {[string match "[get_property IP_NAME $intc]" "ps7_scugic"] } {
@@ -5051,8 +5053,9 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				} elseif {[string match "[get_property IP_NAME $intc]" "axi_intc"] } {
 					set cur_intr_info "$intr_id $intr_type"
 				}
-			} elseif {[string match -nocase $intc "psu_acpu_gic"] || [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"]} {
-
+			} elseif {[string match -nocase $intc "psu_acpu_gic"] \
+				|| [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"] \
+				|| [string match -nocase [get_property IP_NAME $intc] "psx_acpu_gic"]} {
 			    set cur_intr_info "0 $intr_id $intr_type"
 			    for { set i 1 } {$i < $intrpin_width} {incr i} {
 				    set intr_id_inc [expr $intr_id + $i]
@@ -5110,11 +5113,13 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 	}
 	set intc [ps_node_mapping $intc label]
 
-	if { [string match -nocase $intc "psu_acpu_gic"] || [string match -nocase $intc "psv_acpu_gic"]} {
+	if { $intc in { "psu_acpu_gic" "psv_acpu_gic" "psx_acpu_gic" }} {
 		set intc "gic"
 	}
-    set add_intr_parent ""
-	if { $intc == "gic" && ([string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"])} {
+	set add_intr_parent ""
+	if { $intc == "gic" && ([string match -nocase $proctype "psu_cortexa53"] \
+				|| [string match -nocase $proctype "psv_cortexa72"] \
+				|| [string match -nocase $proctype "psx_cortexa78"])} {
 		set add_intr_parent "1"
 	} elseif { $intc == "intc" && [string match -nocase $proctype "ps7_cortexa9" ] } {
 		set add_intr_parent "1"
@@ -7163,40 +7168,15 @@ proc get_psu_interrupt_id { ip_name port_name } {
                     return $ret
                 }
              }
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq0"] == 0} {
-		set ret 84
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq1"] == 0} {
-		set ret 85
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq2"] == 0} {
-		set ret 86
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq3"] == 0} {
-		set ret 87
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq4"] == 0} {
-		set ret 88
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq5"] == 0} {
-		set ret 89
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq6"] == 0} {
-		set ret 90
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq7"] == 0} {
-		set ret 91
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq8"] == 0} {
-		set ret 92
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq9"] == 0} {
-		set ret 93
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq10"] == 0} {
-		set ret 94
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq11"] == 0} {
-		set ret 95
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq12"] == 0} {
-		set ret 96
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq13"] == 0} {
-		set ret 97
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq14"] == 0} {
-		set ret 98
-	} elseif { [string compare -nocase "$sink_pin" "pl_ps_irq15"] == 0} {
-		set ret 99
+	} elseif {[regexp "^pl_ps_irq.*" "$sink_pin" match] && \
+			[expr [string trim "$sink_pin" "pl_ps_irq"] <= 15]} {
+		set intr_index [string trim "$sink_pin" "pl_ps_irq"]
+		set ret [expr 84 + $intr_index]
+	} elseif {[regexp "^pl_psx_irq.*" "$sink_pin" match] && \
+			[expr [string trim "$sink_pin" "pl_psx_irq"] <= 15]} {
+		set intr_index [string trim "$sink_pin" "pl_psx_irq"]
+		set ret [expr 104 + $intr_index]
         } else {
-
             set sink_periph [::hsi::get_cells -of_objects $sink_pin]
 	    if {[llength $sink_periph] == 0 } {
 		break
@@ -7289,7 +7269,8 @@ proc generate_cci_node { drv_handle rt_node} {
 proc generate_reg_property {base high} {
 	set size [format 0x%x [expr {${high} - ${base} + 1}]]
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-	if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+	if { $proctype in { "psu_cortexa53" "psv_cortexa72" "psx_cortexa78" }} {
+		# When both base and size are 64 bit
 		if {[regexp -nocase {0x([0-9a-f]{9})} "$base" match]} {
 			set temp $base
 			set temp [string trimleft [string trimleft $temp 0] x]
@@ -7310,6 +7291,16 @@ proc generate_reg_property {base high} {
 			} else {
 				set reg "$low_base $high_base 0x0 $size"
 			}
+		# When base has 32 bit and size has 64 bit
+		} elseif {[regexp -nocase {0x([0-9a-f]{9})} "$size" match]} {
+			set temp $size
+			set temp [string trimleft [string trimleft $temp 0] x]
+			set len [string length $temp]
+			set rem [expr {${len} - 8}]
+			set high_size "0x[string range $temp $rem $len]"
+			set low_size  "0x[string range $temp 0 [expr {${rem} - 1}]]"
+			set low_size [format 0x%08x $low_size]
+			set reg "0x0 $base $low_size $high_size"
 		} else {
 			set reg "0x0 $base 0x0 $size"
 		}
