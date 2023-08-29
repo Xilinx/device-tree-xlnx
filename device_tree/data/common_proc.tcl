@@ -1016,6 +1016,7 @@ proc set_drv_def_dts {drv_handle} {
 			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
 		}
 		}
+		set current_dtsi [current_dt_tree]
 		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
 		if {[llength $overlay_custom_dts] && ![llength $RpRm]} {
 			update_overlay_custom_dts_include $default_dts $overlay_custom_dts
@@ -1031,6 +1032,7 @@ proc set_drv_def_dts {drv_handle} {
 			set root_node [add_or_get_dt_node -n / -d ${dts_file}]
 			update_overlay_custom_dts_include $dts_file $partial_overlay_dts
 		}
+		set_cur_working_dts $current_dtsi
 	} else {
 		update_system_dts_include $default_dts
 	}
