@@ -834,40 +834,23 @@ proc gen_zocl_node {} {
 	}
 }
 
-
-proc IsIPtobeAddFirst {ip_name} {
-	# Check if given ip_name listed in dict if yes return o else 1
-	set Dep_IpsList {"axi_intc" "clk_wizard"}
-	if { $ip_name in $Dep_IpsList } {
-		return 0
-	}
-	return 1
-}
-
-
 proc generate {lib_handle} {
 	add_skeleton
-	# Hack to solve the issue when node has dependent on clocks
-	# or defined IP's while unloading the dtbo.
 	foreach drv_handle [get_drivers] {
-		# Generate the clocks for each drv_handler
-		gen_clk_property $drv_handle
-	}
-	foreach drv_handle [get_drivers] {
-		if {[IsIPtobeAddFirst [get_property IP_NAME [get_cells -hier $drv_handle]]] == 0} {
-			# Generate the node first
+		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 			gen_peripheral_nodes $drv_handle "create_node_only"
 		}
 	}
 	foreach drv_handle [get_drivers] {
 		# generate the default properties
-		if {[IsIPtobeAddFirst [get_property IP_NAME [get_cells -hier $drv_handle]]] != 0} {
+		if {![string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 			gen_peripheral_nodes $drv_handle "create_node_only"
 		}
 		gen_reg_property $drv_handle
 		gen_compatible_property $drv_handle
 		gen_drv_prop_from_ip $drv_handle
 		gen_interrupt_property $drv_handle
+		gen_clk_property $drv_handle
 	}
 	gen_board_info
 	gen_include_headers
