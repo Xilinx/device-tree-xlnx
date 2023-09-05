@@ -745,55 +745,55 @@ proc set_drv_def_dts {drv_handle} {
 			}
 		}
 
-	if {![llength $RpRm]} {
-		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-		set default_dt "pl.dtsi"
-		set defaultdts [set_cur_working_dts $default_dt]
-		set master_dts [get_dt_trees ${defaultdts}]
-		set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts
-		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-			set targets "fpga"
-		} else {
-			set targets "fpga_full"
-		}
-		set fpga_node [add_or_get_dt_node -n "&$targets" -d ${defaultdts}]
-		set child_node $fpga_node
-		set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
-		set classic_soc [get_property CONFIG.classic_soc [get_os]]
-		if {[llength $pr_regions]} {
-			set pr_len [llength $pr_regions]
-			for {set pr 0} {$pr < $pr_len} {incr pr} {
-				set pr_node [add_or_get_dt_node -l "fpga_PR$pr" -n "fpga-PR$pr" -p $child_node]
-				hsi::utils::add_new_dts_param  "${pr_node}" "compatible"  "fpga-region" string
-				hsi::utils::add_new_dts_param "${pr_node}" "#address-cells" 2 int
-				hsi::utils::add_new_dts_param "${pr_node}" "#size-cells" 2 int
-				hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
+		if {![llength $RpRm] && [is_pl_ip $drv_handle]} {
+			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+			set default_dt "pl.dtsi"
+			set defaultdts [set_cur_working_dts $default_dt]
+			set master_dts [get_dt_trees ${defaultdts}]
+			set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts
+			if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+				set targets "fpga"
+			} else {
+				set targets "fpga_full"
 			}
-		}
-		set hw_name [get_property CONFIG.firmware_name [get_os]]
-		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "ps7_cortexa9"]} {
-			if {![llength $hw_name]} {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
+			set fpga_node [add_or_get_dt_node -n "&$targets" -d ${defaultdts}]
+			set child_node $fpga_node
+			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
+			set classic_soc [get_property CONFIG.classic_soc [get_os]]
+			if {[llength $pr_regions]} {
+				set pr_len [llength $pr_regions]
+				for {set pr 0} {$pr < $pr_len} {incr pr} {
+					set pr_node [add_or_get_dt_node -l "fpga_PR$pr" -n "fpga-PR$pr" -p $child_node]
+					hsi::utils::add_new_dts_param  "${pr_node}" "compatible"  "fpga-region" string
+					hsi::utils::add_new_dts_param "${pr_node}" "#address-cells" 2 int
+					hsi::utils::add_new_dts_param "${pr_node}" "#size-cells" 2 int
+					hsi::utils::add_new_dts_param "${pr_node}" "ranges" "" boolean
+				}
 			}
-			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
-		}
-		set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
-		set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
-		if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-			if {![llength $hw_name]} {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
+			set hw_name [get_property CONFIG.firmware_name [get_os]]
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "ps7_cortexa9"]} {
+				if {![llength $hw_name]} {
+					set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
+				}
+				hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
 			}
-			#external-fpga-config is required only in dfx case
-			if {!$classic_soc && [llength $pr_regions]} {
-				hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
+			set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
+			set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
+			if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+				if {![llength $hw_name]} {
+					set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
+				}
+				#external-fpga-config is required only in dfx case
+				if {!$classic_soc && [llength $pr_regions]} {
+					hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
+				}
 			}
-		}
-		if {[llength $UID]} {
-			hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
-		}
-		if {[llength $PID]} {
-			hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
-		}
+			if {[llength $UID]} {
+				hsi::utils::add_new_dts_param "${child_node}" "uid" $UID int
+			}
+			if {[llength $PID]} {
+				hsi::utils::add_new_dts_param "${child_node}" "pid" $PID int
+			}
 		}
 	}
 
