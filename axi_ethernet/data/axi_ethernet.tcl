@@ -171,13 +171,15 @@ proc generate {drv_handle} {
                      set intf "Din"
                      set in1_pin [::hsi::get_pins -of_objects $periph -filter "NAME==$intf"]
                      set sink_pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $periph] $in1_pin]]
-                     set per [::hsi::get_cells -of_objects $sink_pins]
-                     if {[string match -nocase [get_property IP_NAME $per] "axis_clock_converter"]} {
-                          set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $per] "s_axis_tdata"]]
-                          if {[llength $pins]} {
-                              set txfifo [get_cells -of_objects $pins]
-                              if {[llength $txfifo]} {
-                                   set_drv_prop $drv_handle axififo-connected "$txfifo" reference
+		     if {[llength $sink_pins]} {
+                          set per [::hsi::get_cells -of_objects $sink_pins]
+                          if {[llength $per] && [string match -nocase [get_property IP_NAME $per] "axis_clock_converter"]} {
+                              set pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $per] "s_axis_tdata"]]
+                              if {[llength $pins]} {
+                                  set txfifo [get_cells -of_objects $pins]
+                                  if {[llength $txfifo]} {
+                                      set_drv_prop $drv_handle axififo-connected "$txfifo" reference
+                                  }
                               }
                           }
                      }
@@ -195,7 +197,7 @@ proc generate {drv_handle} {
                 set sink_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $periph] $in1_pin]]
                 if {[llength $sink_pins]} {
                     set per [::hsi::get_cells -of_objects $sink_pins]
-                    if {[string match -nocase [get_property IP_NAME $per] "axis_dwidth_converter"]} {
+                    if {[llength $per] && [string match -nocase [get_property IP_NAME $per] "axis_dwidth_converter"]} {
                         set con_ip [hsi::utils::get_connected_stream_ip [get_cells -hier $per] "M_AXIS"]
                         if {[llength $con_ip]} {
                             if {[string match -nocase [get_property IP_NAME $con_ip] "axis_clock_converter"]} {
