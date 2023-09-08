@@ -491,9 +491,14 @@ proc generate {drv_handle} {
                    regsub -all " " $ini1 "" ini1
                    regsub -all "\<&||\t" $ini1 {} ini1
 		   if {[llength $dclk]} {
-                   append clkvals1  "$ini1, [lindex $clk_list $dclk_index], $index1>, <&$clks"
+			set dclk_ini1 [lindex $clk_list $dclk_index]
+			set dclk_ini1 [string trim $dclk_ini1]
+			if {![string match -nocase "<&*" "$dclk_ini1"]} {
+				set dclk_ini1 "<&$dclk_ini1"
+			}
+			append clkvals1  "$ini1, $dclk_ini1, $index1>, <&$clks"
 		   } else {
-                   append clkvals1  "$ini1, $index1>, <&$clks"
+			append clkvals1  "$ini1, $index1>, <&$clks"
 		   }
                    hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals1 reference
                    hsi::utils::add_new_dts_param "${eth_node}" "clock-names" $clk_names1 stringlist
@@ -513,9 +518,14 @@ proc generate {drv_handle} {
                   regsub -all " " $ini2 "" ini2
                   regsub -all "\<&||\t" $ini2 {} ini2
 		  if {[llength $dclk]} {
-                  append clkvals2  "$ini2, [lindex $clk_list $dclk_index], $index2>, <&$clks"
+			set dclk_ini2 [lindex $clk_list $dclk_index]
+			set dclk_ini2 [string trim $dclk_ini2]
+			if {![string match -nocase "<&*" "$dclk_ini2"]} {
+				set dclk_ini2 "<&$dclk_ini2"
+			}
+			append clkvals2  "$ini2, $dclk_ini2, $index2>, <&$clks"
 		  } else {
-                  append clkvals2  "$ini2, $index2>, <&$clks"
+			append clkvals2  "$ini2, $index2>, <&$clks"
 		  }
                   append clk_label2 $drv_handle "_" $core
                   hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals2 reference
@@ -536,9 +546,14 @@ proc generate {drv_handle} {
                  regsub -all " " $ini "" ini
                  regsub -all "\<&||\t" $ini {} ini
 		 if {[llength $dclk]} {
-                 append clkvals3 "$ini, [lindex $clk_list $dclk_index], $index3>, <&$clks"
+			set dclk_ini3 [lindex $clk_list $dclk_index]
+			set dclk_ini3 [string trim $dclk_ini3]
+			if {![string match -nocase "<&*" "$dclk_ini3"]} {
+				set dclk_ini3 "<&$dclk_ini3"
+			}
+			append clkvals3 "$ini, $dclk_ini3, $index3>, <&$clks"
 		 } else {
-                 append clkvals3 "$ini, $index3>, <&$clks"
+			append clkvals3 "$ini, $index3>, <&$clks"
 		 }
                  append clk_label3 $drv_handle "_" $core
                  hsi::utils::add_new_dts_param "${eth_node}" "clocks" $clkvals3 reference
