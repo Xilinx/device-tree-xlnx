@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal vmk180 revA with X-EBM-01-revA module
+ *
+ * (C) Copyright 2019-2022 Xilinx, Inc.
+ * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+#include "versal-vmk180-reva.dtsi"
+
+/ {
+        compatible = "xlnx,versal-vmk180-revA-x-ebm-01-revA",
+                     "xlnx,versal-vmk180-revA", "xlnx,versal";
+        model = "Xilinx Versal vmk180 Eval board revA (QSPI)";
+};
+
+&qspi {
+#include "versal-x-ebm-01-reva.dtsi"
+};

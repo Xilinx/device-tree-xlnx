@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx ZynqMP SMK-K26 rev1/B/A
+ *
+ * (C) Copyright 2021-2022 Xilinx, Inc.
+ * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@xilinx.com>
+ */
+
+#include "zynqmp-sm-k26-reva.dtsi"
+
+/ {
+        model = "ZynqMP SMK-K26 Rev1/B/A";
+        compatible = "xlnx,zynqmp-smk-k26-rev1", "xlnx,zynqmp-smk-k26-revB",
+                     "xlnx,zynqmp-smk-k26-revA", "xlnx,zynqmp-smk-k26",
+                     "xlnx,zynqmp";
+};
+
+&sdhci0 {
+	 status = "disabled";
+};
