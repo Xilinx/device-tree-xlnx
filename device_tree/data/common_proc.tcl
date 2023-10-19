@@ -3,7 +3,7 @@
 # Based on original code:
 # (C) Copyright 2007-2014 Michal Simek
 # (C) Copyright 2014-2022 Xilinx, Inc.
-# (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+# (C) Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 #
 # Michal SIMEK <monstr@monstr.eu>
 #
@@ -4992,7 +4992,8 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 				continue
 			}
 			set ip_name $intc
-			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+			if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || \
+				[string match -nocase $proctype "psx_cortexa78"] || [string match -nocase $proctype "microblaze"]} {
 				if {[llength $intc] > 1} {
 					foreach intr_cntr $intc {
 						if { [::hsi::utils::is_ip_interrupting_current_proc $intr_cntr] } {
