@@ -4323,30 +4323,7 @@ proc gen_clk_property {drv_handle} {
 				if {[llength $clk_pl]} {
 					set num [regexp -all -inline -- {[0-9]+} $clk_pl]
 				}
-				if {[string match -nocase $proctype "psu_cortexa53"]} {
-					switch $num {
-						"0" {
-							set def_dts [get_property CONFIG.pcw_dts [get_os]]
-							set fclk_node [add_or_get_dt_node -n "&fclk0" -d $def_dts]
-							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-						}
-						"1" {
-							set def_dts [get_property CONFIG.pcw_dts [get_os]]
-							set fclk_node [add_or_get_dt_node -n "&fclk1" -d $def_dts]
-							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-						}
-						"2" {
-							set def_dts [get_property CONFIG.pcw_dts [get_os]]
-							set fclk_node [add_or_get_dt_node -n "&fclk2" -d $def_dts]
-							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-						}
-						"3" {
-							set def_dts [get_property CONFIG.pcw_dts [get_os]]
-							set fclk_node [add_or_get_dt_node -n "&fclk3" -d $def_dts]
-							hsi::utils::add_new_dts_param "${fclk_node}" "status" "okay" string
-						}
-					}
-				}
+
 				set RpRm [get_rp_rm_for_drv $drv_handle]
 				regsub -all { } $RpRm "" RpRm
 				if {[llength $RpRm]} {
