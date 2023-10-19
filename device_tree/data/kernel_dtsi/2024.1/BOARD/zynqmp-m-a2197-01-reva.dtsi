@@ -89,7 +89,6 @@
 	phy-reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>;
 	phy0: ethernet-phy@0 {
 		reg = <0>;
-/*		xlnx,phy-type = <PHY_TYPE_SGMII>; */
 	};
 /*	phy-names = "...";
 	phys = <&lane0 PHY_TYPE_SGMII ... >

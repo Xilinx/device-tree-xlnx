@@ -433,7 +433,7 @@
 				reg = <0x5d>;
 				temperature-stability = <50>;
 				factory-fout = <300000000>;
-				clock-frequency = <300000000>;
+				clock-frequency = <156250000>;
 				clock-output-names = "si570_user_c0";
 			};
 		};
