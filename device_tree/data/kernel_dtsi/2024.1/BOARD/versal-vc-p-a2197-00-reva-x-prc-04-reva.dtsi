@@ -61,8 +61,6 @@
 
 &qspi {
 	num-cs = <2>;
-	is-dual = <0>;
-	is-stacked = <1>;
 	spi-rx-bus-width = <4>;
 	spi-tx-bus-width = <4>;
 
