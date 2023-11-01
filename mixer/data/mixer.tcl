@@ -60,8 +60,13 @@ proc generate {drv_handle} {
 				set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
 				set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port_node]
 				gen_endpoint $drv_handle "mixer_crtc$drv_handle"
-				hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" $outip$drv_handle reference
-				gen_remoteendpoint $drv_handle "$outip$drv_handle"
+				if {[string match -nocase [get_property IP_NAME $outip] "v_dp_txss1"]} {
+					hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" "dptx_out$outip" reference
+					gen_remoteendpoint $drv_handle "dptx_out$outip"
+				} else {
+					hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" $outip$drv_handle reference
+					gen_remoteendpoint $drv_handle "$outip$drv_handle"
+				}
 			} else {
 				if {[string match -nocase [get_property IP_NAME $outip] "system_ila"]} {
 					continue
@@ -70,9 +75,14 @@ proc generate {drv_handle} {
 				if {[llength $connectip]} {
 					set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port_node]
 					gen_endpoint $drv_handle "mixer_crtc$drv_handle"
-					hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" $connectip$drv_handle reference
-					gen_remoteendpoint $drv_handle "$connectip$drv_handle"
-                                }
+					if {[string match -nocase [get_property IP_NAME $outip] "v_dp_txss1"]} {
+						hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" "dptx_out$outip" reference
+						gen_remoteendpoint $drv_handle "dptx_out$outip"
+					} else {
+						hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" $connectip$drv_handle reference
+						gen_remoteendpoint $drv_handle "$connectip$drv_handle"
+					}
+				}
 			}
 		} else {
 			dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
