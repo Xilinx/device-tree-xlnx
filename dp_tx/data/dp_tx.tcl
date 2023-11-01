@@ -123,20 +123,30 @@ proc generate {drv_handle} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
 		if {[llength $ip_mem_handles]} {
 			set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
-			set dp_tx_node [add_or_get_dt_node -n "endpoint" -l dptx_out$drv_handle -p $ports_node]
+			set dp_tx_node [add_or_get_dt_node -n "endpoint" -l dptx_out$drv_handle -p $port0_node]
 			gen_endpoint $drv_handle "dptx_out$drv_handle"
-			hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $ip$drv_handle reference
-			gen_remoteendpoint $drv_handle $ip$drv_handle
+			if {[string match -nocase [get_property IP_NAME $ip] "v_mix"]} {
+				hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" "mixer_crtc$ip" reference
+				gen_remoteendpoint $drv_handle "mixer_crtc$ip"
+			} else {
+				hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $ip$drv_handle reference
+				gen_remoteendpoint $drv_handle $ip$drv_handle
+			}
 			if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_rd"]} {
 				gen_pl_disp_node $ip $drv_handle
 			}
 		} else {
 			set connectip [get_connect_ip $ip $intfpins]
 			if {[llength $connectip]} {
-				set dp_tx_node [add_or_get_dt_node -n "endpoint" -l dptx_out$drv_handle -p $port_node]
+				set dp_tx_node [add_or_get_dt_node -n "endpoint" -l dptx_out$drv_handle -p $port0_node]
 				gen_endpoint $drv_handle "dptx_out$drv_handle"
-				hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $connectip$drv_handle reference
-				gen_remoteendpoint $drv_handle $connectip$drv_handle
+				if {[string match -nocase [get_property IP_NAME $ip] "v_mix"]} {
+					hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" "mixer_crtc$connectip" reference
+					gen_remoteendpoint $drv_handle "mixer_crtc$connectip"
+				} else {
+					hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $connectip$drv_handle reference
+					gen_remoteendpoint $drv_handle $connectip$drv_handle
+				}
 				if {[string match -nocase [get_property IP_NAME $connectip] "axi_vdma"] || [string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_rd"]} {
 					gen_pl_disp_node $connectip $drv_handle
 				}
