@@ -126,7 +126,7 @@ proc generate {drv_handle} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
 		if {[llength $ip_mem_handles]} {
 			set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
-			set dp_rx_node [add_or_get_dt_node -n "endpoint" -l dprx_out$drv_handle -p $ports_node]
+			set dp_rx_node [add_or_get_dt_node -n "endpoint" -l dprx_out$drv_handle -p $port0_node]
 			gen_endpoint $drv_handle "dprx_out$drv_handle"
 			hsi::utils::add_new_dts_param "$dp_rx_node" "remote-endpoint" $ip$drv_handle reference
 			gen_remoteendpoint $drv_handle $ip$drv_handle
@@ -136,7 +136,7 @@ proc generate {drv_handle} {
 		} else {
 			set connectip [get_connect_ip $ip $intfpins]
 			if {[llength $connectip]} {
-				set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l dprx_out$drv_handle -p $port_node]
+				set sdi_rx_node [add_or_get_dt_node -n "endpoint" -l dprx_out$drv_handle -p $port0_node]
 				gen_endpoint $drv_handle "dprx_out$drv_handle"
 				hsi::utils::add_new_dts_param "$dp_rx_node" "remote-endpoint" $connectip$drv_handle reference
 				gen_remoteendpoint $drv_handle $connectip$drv_handle
