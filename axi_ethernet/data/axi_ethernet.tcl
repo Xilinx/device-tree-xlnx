@@ -148,6 +148,8 @@ proc generate {drv_handle} {
 
     if { [llength $intf] } {
         set connected_ip [get_connectedip $intf]
+    } else {
+        set connected_ip ""
     }
 
     foreach n "AXI_STR_RXD m_axis_tx_ts" {
@@ -212,6 +214,7 @@ proc generate {drv_handle} {
             }
         }
     }
+
     if {![string_is_empty $connected_ip]} {
       set_property axistream-connected "$connected_ip" $drv_handle
       set_property axistream-control-connected "$connected_ip" $drv_handle
