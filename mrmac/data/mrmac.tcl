@@ -485,7 +485,7 @@ proc generate {drv_handle} {
 				set sink_periph [::hsi::get_cells -of_objects $port_pins]
 			}
 		}
-		if {[string match -nocase [get_property IP_NAME $sink_periph] "xlconcat"]} {
+		if {[llength $sink_periph] && [string match -nocase [get_property IP_NAME $sink_periph] "xlconcat"]} {
 			set intf "dout"
 			set intr1_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$intf"]
 			set sink_pins [::hsi::utils::get_sink_pins $intr1_pin]
@@ -516,7 +516,7 @@ proc generate {drv_handle} {
 				set rx_periph [::hsi::get_cells -of_objects $port_pins]
 			}
 		}
-		if {[string match -nocase [get_property IP_NAME $rx_periph] "xlconcat"]} {
+		if {[llength $rx_periph] && [string match -nocase [get_property IP_NAME $rx_periph] "xlconcat"]} {
 			set intf "dout"
 			set in1_pin [::hsi::get_pins -of_objects $rx_periph -filter "NAME==$intf"]
 			set sink_pins [::hsi::utils::get_sink_pins $in1_pin]
@@ -575,7 +575,7 @@ proc generate {drv_handle} {
 	set gt_reset_per ""
 	if {[llength $gt_reset_pins]} {
 		set gt_reset_periph [::hsi::get_cells -of_objects $gt_reset_pins]
-		if {[string match -nocase [get_property IP_NAME $gt_reset_periph] "xlconcat"]} {
+		if {[llength $gt_reset_periph] && [string match -nocase [get_property IP_NAME $gt_reset_periph] "xlconcat"]} {
 			set intf "In0"
 			set in1_pin [::hsi::get_pins -of_objects $gt_reset_periph -filter "NAME==$intf"]
 			set sink_pins [::hsi::utils::get_source_pins [get_pins -of_objects [get_cells -hier $gt_reset_periph] $in1_pin]]
@@ -598,7 +598,7 @@ proc generate {drv_handle} {
 	set gt_pll_per ""
         if {[llength $gt_pll_pins]} {
                 set gt_pll_periph [::hsi::get_cells -of_objects $gt_pll_pins]
-                if {[string match -nocase [get_property IP_NAME $gt_pll_periph] "xlconcat"]} {
+                if {[llength $gt_pll_periph] && [string match -nocase [get_property IP_NAME $gt_pll_periph] "xlconcat"]} {
                         set intf "dout"
                         set in1_pin [::hsi::get_pins -of_objects $gt_pll_periph -filter "NAME==$intf"]
                         set sink_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $gt_pll_periph] $in1_pin]]
@@ -733,7 +733,7 @@ proc generate {drv_handle} {
 				set tod1_sink_periph [::hsi::get_cells -of_objects $port_pins]
 			}
 		}
-		if {[string match -nocase [get_property IP_NAME $tod1_sink_periph] "xlconcat"]} {
+		if {[llength $tod1_sink_periph] && [string match -nocase [get_property IP_NAME $tod1_sink_periph] "xlconcat"]} {
 			set intf "dout"
 			set in1_pin [::hsi::get_pins -of_objects $tod1_sink_periph -filter "NAME==$intf"]
 			set in1sink_pins [::hsi::utils::get_sink_pins $in1_pin]
@@ -765,7 +765,7 @@ proc generate {drv_handle} {
 				set rx_periph1 [::hsi::get_cells -of_objects $port_pins]
 			}
 		}
-		if {[string match -nocase [get_property IP_NAME $rx_periph1] "xlconcat"]} {
+		if {[llength $rx_periph1] && [string match -nocase [get_property IP_NAME $rx_periph1] "xlconcat"]} {
 			set intf "dout"
 			set inrx1_pin [::hsi::get_pins -of_objects $rx_periph1 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx1_pin]
@@ -1054,7 +1054,7 @@ proc generate {drv_handle} {
 			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $tod2_sink_periph] "tx_timestamp_tod"]]
 			set tod2_sink_periph [::hsi::get_cells -of_objects $port_pins]
 		}
-		if {[string match -nocase [get_property IP_NAME $tod2_sink_periph] "xlconcat"]} {
+		if {[llength $tod2_sink_periph] && [string match -nocase [get_property IP_NAME $tod2_sink_periph] "xlconcat"]} {
 			set intf "dout"
 			set in2_pin [::hsi::get_pins -of_objects $tod2_sink_periph -filter "NAME==$intf"]
 			set in2sink_pins [::hsi::utils::get_sink_pins $in2_pin]
@@ -1084,7 +1084,7 @@ proc generate {drv_handle} {
 			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_periph2] "rx_timestamp_tod"]]
 			set rx_periph2 [::hsi::get_cells -of_objects $port_pins]
 		}
-		if {[string match -nocase [get_property IP_NAME $rx_periph2] "xlconcat"]} {
+		if {[llength $rx_periph2] && [string match -nocase [get_property IP_NAME $rx_periph2] "xlconcat"]} {
 			set intf "dout"
 			set inrx2_pin [::hsi::get_pins -of_objects $rx_periph2 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx2_pin]
@@ -1355,7 +1355,7 @@ proc generate {drv_handle} {
 			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $tod3_sink_periph] "tx_timestamp_tod"]]
 			set tod3_sink_periph [::hsi::get_cells -of_objects $port_pins]
 		}
-		if {[string match -nocase [get_property IP_NAME $tod3_sink_periph] "xlconcat"]} {
+		if {[llength $tod3_sink_periph] && [string match -nocase [get_property IP_NAME $tod3_sink_periph] "xlconcat"]} {
 			set intf "dout"
 			set in3_pin [::hsi::get_pins -of_objects $tod3_sink_periph -filter "NAME==$intf"]
 			set in3sink_pins [::hsi::utils::get_sink_pins $in3_pin]
@@ -1384,7 +1384,7 @@ proc generate {drv_handle} {
 			set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_periph3] "rx_timestamp_tod"]]
 			set rx_periph3 [::hsi::get_cells -of_objects $port_pins]
 		}
-		if {[string match -nocase [get_property IP_NAME $rx_periph3] "xlconcat"]} {
+		if {[llength $rx_periph3] && [string match -nocase [get_property IP_NAME $rx_periph3] "xlconcat"]} {
 			set intf "dout"
 			set inrx3_pin [::hsi::get_pins -of_objects $rx_periph3 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx3_pin]
