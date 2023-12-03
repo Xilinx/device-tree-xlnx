@@ -820,11 +820,11 @@ proc set_drv_def_dts {drv_handle} {
 		}
 		set RpRm [get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
+		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 		if {[llength $RpRm]} {
 			if {$partial_image} {
                                 puts "frag0 ret"
 			} else {
-				set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 				set default_dts "pl-partial-$RpRm.dtsi"
 				set master_dts_obj [get_dt_trees ${default_dts}]
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
@@ -891,7 +891,11 @@ proc set_drv_def_dts {drv_handle} {
 								}
 								set rprmpartial [file tail [get_property $pdi_name [hsi::current_hw_design]]]
 								if {[llength $rprmpartial]} {
-									hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+									if {[string match -nocase $proctype "psu_cortexa53"]} {
+										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.bin" string
+									} else {
+										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+									}
 								}
 								append uid_prop ${RmName_prop} "_" "HW_DESIGN_ID"
 								set UID [get_property $uid_prop [hsi::current_hw_design]]
@@ -914,7 +918,11 @@ proc set_drv_def_dts {drv_handle} {
 							set rprm_bit_file_name [lindex $hw_name $i]
 							if {[regexp [lindex $RpRm1 1] $rprm_bit_file_name match]} {
 								set rprmpartial [lindex $hw_name $i]
-								hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+								if {[string match -nocase $proctype "psu_cortexa53"]} {
+									hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.bin" string
+								} else {
+									hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+								}
 								break
 							}
 						}
@@ -922,7 +930,11 @@ proc set_drv_def_dts {drv_handle} {
 				}
 				if {[llength $hw_name]} {
 					puts "rprmpartial:$hw_name"
-					hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name" string
+					if {[string match -nocase $proctype "psu_cortexa53"]} {
+						hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name.bin" string
+					} else {
+						hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name" string
+					}
 				}
 			}
 		} else {
