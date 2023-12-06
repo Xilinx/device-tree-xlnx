@@ -1813,6 +1813,9 @@ proc gen_fixed_factor_clk_node {misc_clk_node clk_freq} {
 	set pl1_clk_val [get_property CONFIG.C_PL_CLK1_BUF [get_cells -hier $zynq_periph]]
 	set pl2_clk_val [get_property CONFIG.C_PL_CLK2_BUF [get_cells -hier $zynq_periph]]
 	set pl3_clk_val [get_property CONFIG.C_PL_CLK3_BUF [get_cells -hier $zynq_periph]]
+	set parent_freq ""
+	set div ""
+	set mult ""
 	if {[string match -nocase $pl0_clk_val "true"]} {
 		set parent_freq [get_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ [get_cells -hier $zynq_periph]]
 		set parent_freq [expr $parent_freq * 1000000]
@@ -1830,18 +1833,23 @@ proc gen_fixed_factor_clk_node {misc_clk_node clk_freq} {
 		set parent_freq [expr $parent_freq * 1000000]
 		set clock_name "zynqmp_clk 74"
 	}
-	if {$parent_freq >= $clk_freq} {
-		set div [expr round($parent_freq / $clk_freq)]
-		set mult 1
-	} elseif {$parent_freq < $clk_freq} {
-		set mult [expr round($clk_freq / $parent_freq)]
-		set div 1
+
+	if {![string equal $parent_freq ""]} {
+		if {$parent_freq >= $clk_freq} {
+			set div [expr round($parent_freq / $clk_freq)]
+			set mult 1
+		} elseif {$parent_freq < $clk_freq} {
+			set mult [expr round($clk_freq / $parent_freq)]
+			set div 1
+		}
 	}
-	hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-factor-clock" stringlist
-	hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
-	hsi::utils::add_new_dts_param "${misc_clk_node}" "clocks" $clock_name reference
-	hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-div" $div int
-	hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-mult" $mult int
+	if {![string equal $div ""] && ![string equal $mult ""]} {
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-factor-clock" stringlist
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "clocks" $clock_name reference
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-div" $div int
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-mult" $mult int
+	}
 }
 
 proc zynq_gen_pl_clk_binding {drv_handle} {
