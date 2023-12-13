@@ -35,10 +35,9 @@ proc generate {drv_handle} {
     if {$node == 0} {
            return
     }
-    set compatible [get_comp_str $drv_handle]
-    set compatible [append compatible " " "xlnx,axi-dma-1.00.a"]
-    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set dma_ip [get_cells -hier $drv_handle]
+    set compatible [get_property CONFIG.compatible $dma_ip]
+    set_drv_prop $drv_handle compatible "$compatible" stringlist
     set dma_count [hsi::utils::get_os_parameter_value "dma_count"]
     if { [llength $dma_count] == 0 } {
         set dma_count 0
@@ -56,10 +55,6 @@ proc generate {drv_handle} {
     }
     set is_xxv [get_connected_ip $drv_handle "M_AXIS_MM2S"]
 
-    if { $axiethernetfound || $is_xxv == 1} {
-        set compatstring "xlnx,eth-dma"
-        set_property compatible "$compatstring" $drv_handle
-    }
     set tx_chan 0
     set rx_chan 0
     if { $axiethernetfound != 1 && $is_xxv != 1} {
@@ -265,7 +260,7 @@ proc get_connected_ip {drv_handle dma_pin} {
     # Check whether dma is connected to 10G/25G MAC
     # currently we are handling only data fifo
     set intf [::hsi::get_intf_pins -of_objects [get_cells -hier $drv_handle] $dma_pin]
-    set valid_eth_list "xxv_ethernet axi_ethernet axi_10g_ethernet usxgmii"
+    set valid_eth_list "xxv_ethernet axi_ethernet axi_10g_ethernet usxgmii ethernet_1_10_25g"
     if {[string_is_empty ${intf}]} {
         return 0
     }
