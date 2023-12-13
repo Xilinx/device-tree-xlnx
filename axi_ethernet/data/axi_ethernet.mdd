@@ -17,7 +17,7 @@ OPTION psf_version = 3.0;
 
 BEGIN driver axi_ethernet
 
-  OPTION supported_peripherals = (axi_ethernet axi_ethernet_buffer axi_10g_ethernet xxv_ethernet usxgmii);
+  OPTION supported_peripherals = (axi_ethernet axi_ethernet_buffer axi_10g_ethernet xxv_ethernet usxgmii ethernet_1_10_25g);
   OPTION driver_state = ACTIVE;
   OPTION NAME = axi_ethernet;
   OPTION supported_os_types = (DTS);
