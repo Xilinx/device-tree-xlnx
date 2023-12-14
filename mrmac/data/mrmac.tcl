@@ -1644,7 +1644,7 @@ proc gen_mrmac_clk_property {drv_handle} {
 	set updat ""
 	global bus_clk_list
 	set clocknames ""
-	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I}]
+	set clk_pins [get_pins -of_objects [get_cells -hier $drv_handle] -filter {TYPE==clk&&DIRECTION==I || TYPE==gt_usrclk&&DIRECTION==I}]
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 	foreach clk $clk_pins {
 		set ip [get_cells -hier $drv_handle]
@@ -2129,156 +2129,9 @@ proc gen_mrmac_clk_property {drv_handle} {
 	}
 	set_drv_prop_if_empty $drv_handle "zclock-names1" $clocknames stringlist
 	set ip [get_property IP_NAME [get_cells -hier $drv_handle]]
-	set len [llength $updat]
-	switch $len {
-		"1" {
-			set refs [lindex $updat 0]
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"2" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"3" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"4" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"5" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"6" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"7" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"8" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"9" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"10" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"11" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"12" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"13" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"14" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"15" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"16" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"17" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"18" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"19" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"20" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"21" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"22" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"23" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"24" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"25" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"26" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]>, <&[lindex $updat 25]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"27" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]>, <&[lindex $updat 25]>, <&[lindex $updat 26]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"28" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]>, <&[lindex $updat 25]>, <&[lindex $updat 26]>,<&[lindex $updat 27]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"29" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]>, <&[lindex $updat 25]>, <&[lindex $updat 26]>,<&[lindex $updat 27]>, <&[lindex $updat 28]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
-		"30" {
-			set refs [lindex $updat 0]
-			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]>, <&[lindex $updat 4]>, <&[lindex $updat 5]>, <&[lindex $updat 6]>, <&[lindex $updat 7]>, <&[lindex $updat 8]>, <&[lindex $updat 9]>, <&[lindex $updat 10]>, <&[lindex $updat 11]>, <&[lindex $updat 12]>, <&[lindex $updat 13]>, <&[lindex $updat 14]>, <&[lindex $updat 15]>, <&[lindex $updat 16]>, <&[lindex $updat 17]>, <&[lindex $updat 18]>, <&[lindex $updat 19]>, <&[lindex $updat 20]>, <&[lindex $updat 21]>, <&[lindex $updat 22]>, <&[lindex $updat 23]>, <&[lindex $updat 24]>, <&[lindex $updat 25]>, <&[lindex $updat 26]>,<&[lindex $updat 27]>, <&[lindex $updat 28]>, <&[lindex $updat 29]"
-			set_drv_prop $drv_handle "zclocks1" "$refs" reference
-		}
+	set refs [lindex $updat 0]
+	for {set clk_count 1} {$clk_count < [llength $updat]} {incr clk_count +1} {
+		append refs ">, <&[lindex $updat $clk_count]"
 	}
+	set_drv_prop $drv_handle "zclocks1" "$refs" reference
 }
