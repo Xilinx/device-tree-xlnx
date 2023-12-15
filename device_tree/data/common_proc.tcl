@@ -7222,12 +7222,20 @@ proc get_psu_interrupt_id { ip_name port_name } {
              }
 	} elseif {[regexp "^pl_ps_irq.*" "$sink_pin" match] && \
 			[expr [string trim "$sink_pin" "pl_ps_irq"] <= 15]} {
-		set intr_index [string trim "$sink_pin" "pl_ps_irq"]
-		set ret [expr 84 + $intr_index]
+                if {$concat_block == "0"} {
+			set intr_index [string trim "$sink_pin" "pl_ps_irq"]
+			set ret [expr 84 + $intr_index]
+		} else {
+			set ret [expr 84 + $number]
+		}
 	} elseif {[regexp "^pl_psx_irq.*" "$sink_pin" match] && \
 			[expr [string trim "$sink_pin" "pl_psx_irq"] <= 15]} {
-		set intr_index [string trim "$sink_pin" "pl_psx_irq"]
-		set ret [expr 104 + $intr_index]
+                if {$concat_block == "0"} {
+			set intr_index [string trim "$sink_pin" "pl_psx_irq"]
+			set ret [expr 104 + $intr_index]
+		} else {
+			set ret [expr 104 + $number]
+		}
         } else {
             set sink_periph [::hsi::get_cells -of_objects $sink_pin]
 	    if {[llength $sink_periph] == 0 } {
