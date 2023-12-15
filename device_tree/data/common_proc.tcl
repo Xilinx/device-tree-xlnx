@@ -5696,9 +5696,18 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		# For psv_cpm BASE_VALUE is different than the node unitaddr from versal.dtsi
 		# So reading proper xsct configs to add status okay
 		if {[string match -nocase $ip_type "psv_cpm"]} {
-			# CONFIG.CPM_SLCR is for cpm4
-			set cpm_unit_addr [get_property CONFIG.CPM_SLCR [get_cells -hier $ip]]
-			if {![llength $cpm_unit_addr]} {
+			set rev_num -1
+			foreach drv [get_cells -hier -filter IP_NAME==psv_cpm] {
+				if {![regexp "pspmc.*" "$drv" match]} {
+					set rev_num [llength [get_cells -hier $drv -filter CONFIG.CPM_REVISION_NUMBER==1]]
+				}
+			}
+			#for CPM4 designs the revision number will be 0
+			#for CPM5 designs the revision number will be 1
+			if {$rev_num == 0} {
+				# CONFIG.CPM_SLCR is for cpm4
+				set cpm_unit_addr [get_property CONFIG.CPM_SLCR [get_cells -hier $ip]]
+			} elseif {$rev_num == 1} {
 				# CONFIG.CPM5_SLCR_ADDR is for cpm5
 				set cpm_unit_addr [get_property CONFIG.CPM5_SLCR_ADDR [get_cells -hier $ip]]
 			}
