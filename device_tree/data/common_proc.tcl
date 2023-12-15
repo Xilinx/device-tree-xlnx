@@ -6273,12 +6273,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
 		}
 	} else {
-		set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-		if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
-			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -u 0 -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
-		} else {
-			set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
-		}
+		set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 
 		if {![string match "&*" $bus_node]} {
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
