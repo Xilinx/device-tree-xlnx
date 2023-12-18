@@ -5697,6 +5697,7 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		# So reading proper xsct configs to add status okay
 		if {[string match -nocase $ip_type "psv_cpm"]} {
 			set rev_num -1
+			set cpm_unit_addr ""
 			foreach drv [get_cells -hier -filter IP_NAME==psv_cpm] {
 				if {![regexp "pspmc.*" "$drv" match]} {
 					set rev_num [llength [get_cells -hier $drv -filter CONFIG.CPM_REVISION_NUMBER==1]]
