@@ -388,7 +388,7 @@ proc generate {drv_handle} {
 		set intr_names $int_names
 	    }
             if {![string_is_empty $intr_parent]} {
-                if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core!= 0 && [llength $eth_node]} {
+                if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core!= 0) && [llength $eth_node]} {
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupts" $intr_val int
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-parent" $intr_parent reference
                      hsi::utils::add_new_dts_param "${eth_node}" "interrupt-names" $intr_names stringlist
@@ -479,7 +479,7 @@ proc generate {drv_handle} {
                     set_property "clock-names" $clknames1 $drv_handle
                     set clknames1 ""
              }
-             if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core == 1 && [llength $eth_node]} {
+             if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core == 1) && [llength $eth_node]} {
 		   if {[llength $dclk]} {
                    lappend clknames1 "$core_clk_1" "$dclk" "$axi_aclk_1"
 		   } else {
@@ -506,7 +506,7 @@ proc generate {drv_handle} {
                    set clk_names1 ""
                    set clkvals1 ""
              }
-             if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core == 2 && [llength $eth_node]} {
+             if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core == 2) && [llength $eth_node]} {
 		  if {[llength $dclk]} {
                   lappend clknames2 "$core_clk_2" "$dclk" "$axi_aclk_2"
 		  } else {
@@ -534,7 +534,7 @@ proc generate {drv_handle} {
                   set clk_names2 ""
                   set clkvals2 ""
              }
-             if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core == 3 && [llength $eth_node]} {
+             if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core == 3) && [llength $eth_node]} {
 		 if {[llength $dclk]} {
                  lappend clknames3 "$core_clk_3" "$dclk" "$axi_aclk_3"
 		 } else {
@@ -565,7 +565,7 @@ proc generate {drv_handle} {
 	  }
         }
     }
-    if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core!= 0 && [llength $eth_node]} {
+    if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core!= 0) && [llength $eth_node]} {
               gen_drv_prop_eth_ip $drv_handle $eth_node
     }
     gen_dev_ccf_binding $drv_handle "s_axi_aclk"
