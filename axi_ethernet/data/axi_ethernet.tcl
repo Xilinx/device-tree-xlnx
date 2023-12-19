@@ -414,11 +414,11 @@ proc generate {drv_handle} {
 	    if {![string match -nocase $proctype "microblaze"]} {
                 set eth_clk_names [get_property CONFIG.clock-names $drv_handle]
                 set eth_clks [get_property CONFIG.clocks $drv_handle]
-		if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core == 0} {
+		if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core == 0)} {
 			set_property "zclocks" $eth_clks $drv_handle
 			set_drv_prop $drv_handle "zclock-names" $eth_clk_names stringlist
 		}
-		if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core != 0} {
+		if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core != 0)} {
 			set eth_clks [get_property CONFIG.zclocks $drv_handle]
 			set eth_clk_names [get_property CONFIG.zclock-names $drv_handle]
 		}
@@ -453,7 +453,7 @@ proc generate {drv_handle} {
               set null ""
               set_property "clock-names" $null $drv_handle
               set_property "clocks" $null $drv_handle
-              if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core== 0} {
+              if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core== 0)} {
 		    if {[llength $dclk]} {
                     lappend clknames "$core_clk_0" "$dclk" "$axi_aclk_0"
 		    } else {
