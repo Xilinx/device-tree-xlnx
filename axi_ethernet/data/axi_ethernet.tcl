@@ -58,7 +58,7 @@ proc generate {drv_handle} {
     set hasbuf [get_property CONFIG.processor_mode $eth_ip]
     set ip_name [get_property IP_NAME $eth_ip]
     set num_cores 1
-    if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g"} {
+    if {($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")} {
         set ip_mem_handles [hsi::utils::get_ip_mem_ranges [get_cells -hier $drv_handle]]
         set num 0
         set base [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $num]]]
@@ -72,7 +72,7 @@ proc generate {drv_handle} {
     set connected_ip ""
     set eth_node ""
     for {set core 0} {$core < $num_cores} {incr core} {
-          if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core != 0} {
+          if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core != 0)} {
                if {$dt_overlay} {
                      set bus_node "amba"
                } else {
@@ -92,7 +92,7 @@ proc generate {drv_handle} {
                   hsi::utils::add_new_dts_param "${eth_node}" "reg" $reg inthexlist
 	       }
           }
-    if {$hasbuf == "true" || $hasbuf == "" && $ip_name != "axi_10g_ethernet" && $ip_name != "ten_gig_eth_mac" && $ip_name != "xxv_ethernet" && $ip_name != "usxgmii" && $ip_name != "ethernet_1_10_25g"} {
+    if {(($hasbuf == "true") || ($hasbuf == "")) && ($ip_name != "axi_10g_ethernet") && ($ip_name != "ten_gig_eth_mac") && ($ip_name != "xxv_ethernet") && ($ip_name != "usxgmii") && ($ip_name != "ethernet_1_10_25g")} {
 
     foreach n "AXI_STR_RXD m_axis_rxd" {
         set intf [get_intf_pins -of_objects $eth_ip ${n}]
@@ -138,7 +138,7 @@ proc generate {drv_handle} {
         }
     }
 
-    if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" || $ip_name == "usxgmii"} {
+    if {($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g") || ($ip_name == "usxgmii")} {
     	foreach n "AXI_STR_RXD axis_rx_0" {
            set intf [get_intf_pins -of_objects $eth_ip ${n}]
            if {[string_is_empty ${intf}] != 1} {
@@ -220,7 +220,7 @@ proc generate {drv_handle} {
       add_cross_property $connected_ip $ip_prop $drv_handle "xlnx,include-dre" boolean
     }
       set_property xlnx,rxmem "$rxethmem" $drv_handle
-      if {$ip_name == "xxv_ethernet" || $ip_name == "ethernet_1_10_25g" && $core != 0} {
+      if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core != 0)} {
           set intf [get_intf_pins -of_objects $eth_ip "axis_rx_${core}"]
           if {[llength $intf] && [llength $eth_node]} {
                 set connected_ip [get_connectedip $intf]
