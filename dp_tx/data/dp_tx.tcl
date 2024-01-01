@@ -52,6 +52,8 @@ proc generate {drv_handle} {
 	if {[llength $hdcp_keymngmt]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp1x-keymgmt" [lindex $hdcp_keymngmt 1] reference
 	}
+	set clknames "s_axi_aclk tx_vid_clk"
+	overwrite_clknames $clknames $drv_handle
 	set i 0
 	set updat ""
 	while {$i < $lane_count} {
