@@ -30,7 +30,7 @@ proc generate {drv_handle} {
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
 	set main_memory  [get_property CONFIG.main_memory [get_os]]
 	if {![string match -nocase $main_memory "none"]} {
-		set ddr_ip [get_property IP_NAME [get_cells -hier $main_memory]]
+		set ddr_ip [get_property IP_NAME [get_cells -hier -nocase $main_memory]]
 	}
 	set drv_ip [get_property IP_NAME [get_cells -hier $drv_handle]]
 

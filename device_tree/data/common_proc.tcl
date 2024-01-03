@@ -6522,7 +6522,7 @@ proc add_memory_node {drv_handle} {
 	set ddr_ip ""
 	set main_memory  [get_property CONFIG.main_memory [get_os]]
 	if {![string match -nocase $main_memory "none"]} {
-		set ddr_ip [get_property IP_NAME [get_cells -hier $main_memory]]
+		set ddr_ip [get_property IP_NAME [get_cells -hier -nocase $main_memory]]
 	}
 	set ddr_list "psu_ddr ps7_ddr axi_emc mig_7series psv_ddr"
 	if {[lsearch -nocase $ddr_list $ddr_ip] >= 0} {
