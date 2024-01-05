@@ -737,7 +737,11 @@ proc set_drv_def_dts {drv_handle} {
 				} else {
 					set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
 				}
-				hsi::utils::add_new_dts_param "${child_node1}" "firmware-name" "$hw_name.bin" string
+				if {[string match -nocase $proctype "psu_cortexa53"]} {
+					hsi::utils::add_new_dts_param "${child_node1}" "firmware-name" "$hw_name.bin" string
+				} else {
+					hsi::utils::add_new_dts_param "${child_node1}" "firmware-name" "$hw_name.pdi" string
+				}
 				if {[string match -nocase $default_dts "pl-partial-$RpRm.dtsi"]} {
 					set_property DTS_VERSION "/dts-v1/;\n/plugin/" $default_dts
 					set child_node " "
@@ -816,7 +820,11 @@ proc set_drv_def_dts {drv_handle} {
 			}
 			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
 			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
-			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
+			if {[regexp ".*.pdi" $hw_name matched]} {
+				hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name" string
+			} else {
+				hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.pdi" string
+			}
 		}
 		set RpRm [get_rp_rm_for_drv $drv_handle]
 		regsub -all { } $RpRm "" RpRm
@@ -894,7 +902,11 @@ proc set_drv_def_dts {drv_handle} {
 									if {[string match -nocase $proctype "psu_cortexa53"]} {
 										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.bin" string
 									} else {
-										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+										if {[regexp ".*.pdi" $rprmpartial matched]} {
+											hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+										} else {
+											hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.pdi" string
+										}
 									}
 								}
 								append uid_prop ${RmName_prop} "_" "HW_DESIGN_ID"
@@ -921,7 +933,11 @@ proc set_drv_def_dts {drv_handle} {
 								if {[string match -nocase $proctype "psu_cortexa53"]} {
 									hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.bin" string
 								} else {
-									hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+									if {[regexp ".*.pdi" $rprmpartial matched]} {
+										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial" string
+									} else {
+										hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$rprmpartial.pdi" string
+									}
 								}
 								break
 							}
@@ -933,7 +949,11 @@ proc set_drv_def_dts {drv_handle} {
 					if {[string match -nocase $proctype "psu_cortexa53"]} {
 						hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name.bin" string
 					} else {
-						hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name" string
+						if {[regexp ".*.pdi" $hw_name matched]} {
+							hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name" string
+						} else {
+							hsi::utils::add_new_dts_param "${child_node2}" "firmware-name" "$hw_name.pdi" string
+						}
 					}
 				}
 			}
@@ -986,47 +1006,6 @@ proc set_drv_def_dts {drv_handle} {
 					}
 				}
 			}
-		}
-		if 0 {
-		if {[string match -nocase $proctype "psu_cortexa53"]} {
-			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
-			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
-		} else {
-			hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 1 int
-		}
-		set hw_name [get_property CONFIG.firmware_name [get_os]]
-		set rprmpartial ""
-		if {![llength $hw_name]} {
-			if {[string match -nocase $proctype "psu_cortexa53"]} {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == partial_bit"]
-			} else {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == partial_pdi"]
-			}
-                        set RpRm1 [get_rp_rm_for_drv $drv_handle]
-			regsub -all { } $RpRm1 "_" RpRm
-			if {[llength $RpRm]} {
-				set bitfiles_len [llength $hw_name]
-				for {set i 0} {$i < $bitfiles_len} {incr i} {
-					set rprm_bit_file_name [lindex $hw_name $i]
-					if {[regexp [lindex $RpRm1 1] $rprm_bit_file_name match]} {
-						set rprmpartial [lindex $hw_name $i]
-						break
-					}
-				}
-			}
-		}
-		if {[llength $rprmpartial]} {
-			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$rprmpartial.bin" string
-		}
-		if {![llength $RpRm]} {
-			if {[string match -nocase $proctype "psu_cortexa53"]} {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == bit"]
-			} else {
-				set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
-			}
-			hsi::utils::add_new_dts_param "${child_node}" "firmware-name" "$hw_name.bin" string
-		}
 		}
 		set overlay_custom_dts [get_property CONFIG.overlay_custom_dts [get_os]]
 		if {[llength $overlay_custom_dts] && ![llength $RpRm]} {
