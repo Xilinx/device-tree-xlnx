@@ -471,7 +471,6 @@ proc gen_mac0_node {periph addr size parent_node proc_type drv_handle numqueues 
 		set phymode "rgmii-id"
 	}
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phymode string
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,channel-ids" $id string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
@@ -619,7 +618,6 @@ proc gen_mac1_node {periph addr size numqueues intr_parent parent_node drv_handl
 		set phymode "rgmii-id"
 	}
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "phy-mode" $phymode string
-	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,phy-type" $phy_type string
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-tc" $numqueues noformating
 	hsi::utils::add_new_dts_param "$tsn_mac_node" "xlnx,num-queues" $queues noformating
 	global tsn_ep_node
