@@ -1828,6 +1828,10 @@ proc gen_fixed_factor_clk_node {misc_clk_node clk_freq} {
 		hsi::utils::add_new_dts_param "${misc_clk_node}" "clocks" $clock_name reference
 		hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-div" $div int
 		hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-mult" $mult int
+	} else {
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "compatible" "fixed-clock" stringlist
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "#clock-cells" 0 int
+		hsi::utils::add_new_dts_param "${misc_clk_node}" "clock-frequency" $clk_freq int
 	}
 }
 
