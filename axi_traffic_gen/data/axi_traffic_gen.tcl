@@ -39,7 +39,7 @@ proc generate {drv_handle} {
 	foreach irq ${intr_list} {
 		set intr_info [get_intr_id $drv_handle $irq]
 		if { [string match -nocase $intr_info "-1"] } {
-			if {[string match -nocase $proc_type "psv_cortexa72"]} {
+			if {[string match -nocase $proc_type "psv_cortexa72"] || [string match -nocase $proc_type "psx_cortexa78"]} {
 				continue
 			} else {
 				error "ERROR: ${drv_handle}: $irq port is not connected"
