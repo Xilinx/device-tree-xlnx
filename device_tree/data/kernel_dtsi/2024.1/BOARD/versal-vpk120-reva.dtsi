@@ -70,11 +70,17 @@
 &gem0 { /* PMC_MIO_48 - reset, LPD_MIO0-11 , mdio LPD_MIO24/25 */
 	phy-handle = <&phy1>; /* u198 */
 	phy-mode = "rgmii-id";
-	phy1: phy@1 {
-		reg = <1>;
-		ti,rx-internal-delay = <0xb>;
-		ti,tx-internal-delay = <0xa>;
-		ti,fifo-depth = <1>;
-		ti,dp83867-rxctrl-strap-quirk;
+	mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy1: phy@1 {
+			#phy-cells = <1>;
+			compatible = "ethernet-phy-id2000.a231";
+			reg = <1>;
+			ti,rx-internal-delay = <0xb>;
+			ti,tx-internal-delay = <0xa>;
+			ti,fifo-depth = <1>;
+			ti,dp83867-rxctrl-strap-quirk;
+		};
 	};
 };
