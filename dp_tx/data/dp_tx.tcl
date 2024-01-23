@@ -36,9 +36,13 @@ proc generate {drv_handle} {
 	set bits_per_color [get_property CONFIG.BITS_PER_COLOR [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,bpc" $bits_per_color int
 	set hdcp22_enable [get_property CONFIG.HDCP22_ENABLE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp22-enable" $hdcp22_enable int
+	if {$hdcp22_enable == 1} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp22-enable" "" boolean
+	}
 	set hdcp_enable [get_property CONFIG.HDCP_ENABLE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-enable" $hdcp_enable int
+	if {$hdcp_enable == 1} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-enable" "" boolean
+	}
 	set include_fec_ports [get_property CONFIG.INCLUDE_FEC_PORTS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,include-fec-ports" $include_fec_ports int
 	lappend reg_names "dp_base"
