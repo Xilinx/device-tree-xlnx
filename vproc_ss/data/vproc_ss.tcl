@@ -95,7 +95,11 @@ proc generate {drv_handle} {
 					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
 					set sca_node [add_or_get_dt_node -n "endpoint" -l sca_out$drv_handle -p $port1_node]
 					gen_endpoint $drv_handle "sca_out$drv_handle"
-					hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" $outip$drv_handle reference
+					if {[string match -nocase [get_property IP_NAME $outip] "v_mix"]} {
+						hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" "mixer_crtc$outip" reference
+					} else {
+						hsi::utils::add_new_dts_param "$sca_node" "remote-endpoint" $outip$drv_handle reference
+					}
 					gen_remoteendpoint $drv_handle "$outip$drv_handle"
 					if {[string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"] \
 						|| [string match -nocase [get_property IP_NAME $outip] "axi_vdma"]} {
