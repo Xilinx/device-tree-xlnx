@@ -46,8 +46,7 @@ proc generate {drv_handle} {
 	if {$enable_csc_coefficient_registers == 1} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,enable-csc-coefficient-register" "" boolean
 	}
-	set mixer_port_node [add_or_get_dt_node -n "port" -l crtc_mixer_port$drv_handle -u 0 -p $node]
-	hsi::utils::add_new_dts_param "$mixer_port_node" "reg" 0 int
+
 	set mix_outip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
 	if {![llength $mix_outip]} {
 		dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
@@ -55,14 +54,34 @@ proc generate {drv_handle} {
 	set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $mix_outip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
 	foreach outip $mix_outip {
 		if {[llength $outip] != 0} {
+			if {![string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"]} {
+				set mixer_port_node [add_or_get_dt_node -n "port" -l crtc_mixer_port$drv_handle -u 0 -p $node]
+				hsi::utils::add_new_dts_param "$mixer_port_node" "reg" 0 int
+				set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port_node]
+			} else {
+				set ports_node [add_or_get_dt_node -n "ports" -l crtc_mixer_ports$drv_handle -p $node]
+				hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+				hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+				set mixer_port0 [add_or_get_dt_node -n "port" -l crtc_mixer_port$drv_handle -u 0 -p $ports_node]
+				hsi::utils::add_new_dts_param "$mixer_port0" "reg" 0 int
+				set mixer0_endpoint [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port0]
+				set mixer_port1 [add_or_get_dt_node -n "port" -l crtc_mixer_port1$drv_handle -u 1 -p $ports_node]
+				hsi::utils::add_new_dts_param "$mixer_port1" "reg" 1 int
+				set mixer1_endpoint [add_or_get_dt_node -n "endpoint" -l mixer_out$drv_handle -p $mixer_port1]
+			}
+
 			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $outip]
 			if {[llength $ip_mem_handles]} {
-				set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
-				set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port_node]
 				gen_endpoint $drv_handle "mixer_crtc$drv_handle"
 				if {[string match -nocase [get_property IP_NAME $outip] "v_dp_txss1"]} {
 					hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" "dptx_out$outip" reference
 					gen_remoteendpoint $drv_handle "dptx_out$outip"
+				} elseif {[string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"]} {
+					set mix_inip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "s_axis_video"]
+					if {[llength $mix_inip]} {
+						hsi::utils::add_new_dts_param "$mixer0_endpoint" "remote-endpoint" "sca_out$mix_inip" reference
+					}
+					hsi::utils::add_new_dts_param "$mixer1_endpoint" "remote-endpoint" "v_frmbuf_wr$outip" reference
 				} else {
 					hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" $outip$drv_handle reference
 					gen_remoteendpoint $drv_handle "$outip$drv_handle"
@@ -73,7 +92,6 @@ proc generate {drv_handle} {
 				}
 				set connectip [get_connect_ip $outip $master_intf]
 				if {[llength $connectip]} {
-					set mixer_crtc [add_or_get_dt_node -n "endpoint" -l mixer_crtc$drv_handle -p $mixer_port_node]
 					gen_endpoint $drv_handle "mixer_crtc$drv_handle"
 					if {[string match -nocase [get_property IP_NAME $outip] "v_dp_txss1"]} {
 						hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" "dptx_out$outip" reference
