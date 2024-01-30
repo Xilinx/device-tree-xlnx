@@ -5868,6 +5868,25 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 	return $rt_node
 }
 
+proc detect_bus_label {bus_name} {
+	# Using amba_pl as label for pl-bus node
+	# to support backward compatibility
+	if {[regexp "pl-bus" $bus_name match]} {
+		return "amba_pl"
+	}
+	return $bus_name
+}
+
+proc detect_fpga_noderef {} {
+	set proc_name [get_property IP_NAME [get_cell -hier [get_sw_processor]]]
+	if {[string match -nocase $proc_name "psv_cortexa72"] || [string match -nocase $proc_name "psx_cortexa78"]} {
+		set targets "&fpga"
+	} else {
+		set targets "&fpga_full"
+	}
+	return $targets
+}
+
 proc detect_bus_name {ip_drv} {
 	# FIXME: currently use single bus assumption
 	# TODO: detect bus connection
@@ -5890,12 +5909,12 @@ proc detect_bus_name {ip_drv} {
 			if {!$dt_overlay} {
 				set root_node [add_or_get_dt_node -n / -d ${default_dts}]
 			}
-			return "amba_pl"
+			return "pl-bus"
 		}
 		return "amba"
 	}
 
-	return "amba_pl"
+	return "pl-bus"
 }
 
 proc get_afi_val {val} {
@@ -5946,8 +5965,9 @@ proc get_axi_datawidth {val} {
 
 proc add_or_get_bus_node {ip_drv dts_file} {
 	set bus_name [detect_bus_name $ip_drv]
+	set bus_label [detect_bus_label $bus_name]
 	dtg_debug "bus_name: $bus_name"
-	dtg_debug "bus_label: $bus_name"
+	dtg_debug "bus_label: $bus_label"
 
 	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
 	set remove_pl [get_property CONFIG.remove_pl [get_os]]
@@ -6270,7 +6290,7 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			hsi::utils::add_new_dts_param "${bus_node}" "#size-cells" 1 int
 		}
 	} else {
-		set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_name} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
+		set bus_node [add_or_get_dt_node -n ${bus_name} -l ${bus_label} -d [get_dt_tree ${dts_file}] -p "/" -disable_auto_ref -auto_ref_parent]
 
 		if {![string match "&*" $bus_node]} {
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
