@@ -1101,6 +1101,10 @@ proc add_or_get_dt_node args {
 		error "Node name must be provided..."
 	}
 
+	# rename '_' to '-' for node_name
+	if {![regexp "^&.*" "$node_name" match]} {
+		regsub -all {_} $node_name {-} node_name
+	}
 	# Generate unique label name to prevent issue caused by static dtsi
 	# better way of handling this issue is required
 	set label_list [get_all_dt_labels]
