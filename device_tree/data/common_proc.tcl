@@ -784,6 +784,11 @@ proc set_drv_def_dts {drv_handle} {
 			set UID [get_property HW_DESIGN_ID [hsi::current_hw_design]]
 			set PID [get_property HW_PARENT_ID [hsi::current_hw_design]]
 			if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
+				if {![llength $pr_regions]} {
+					#fpga node required to add non-reg nodes for versal{-net}
+					hsi::utils::add_new_dts_param "${child_node}" "#address-cells" 2 int
+					hsi::utils::add_new_dts_param "${child_node}" "#size-cells" 2 int
+				}
 				if {![llength $hw_name]} {
 					set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 				}

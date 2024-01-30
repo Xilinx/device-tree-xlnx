@@ -879,6 +879,47 @@ proc generate {lib_handle} {
 	gen_ext_axi_interface
 }
 
+proc update_nonregnodes {} {
+	# Check the each node and if any node doesnot have
+	# reg property move them to root node or fpga node
+	set dts_files [get_dt_trees]
+	foreach dts_file $dts_files {
+		if {[regexp "pl.*.dtsi" $dts_file match]} {
+			current_dt_tree $dts_file
+			set dts_nodes [get_all_tree_nodes $dts_file]
+			set overlay_parent "[detect_fpga_noderef]"
+			foreach dts_node $dts_nodes {
+				# Using firmware-name prop to detect the fpga node
+				if {[llength [get_property CONFIG.firmware-name $dts_node]]} {
+					set overlay_parent "${dts_node}"
+				}
+			}
+			foreach dts_node $dts_nodes {
+				if {[regexp "/" $dts_node match]} {
+					continue
+				}
+				set current_parent [get_property PARENT $dts_node]
+				set reg_prop [get_property CONFIG.reg $dts_node]
+				# If no reg prop in node move them from amba or amba_pl to
+				# fpga node if its overlay else root(/) node
+				if {![llength "${reg_prop}"]} {
+					if {[regexp "&amba" ${current_parent} match]} {
+						# Overlay cases
+						if {[lsearch $dts_nodes $overlay_parent] >= 0} {
+							set_property PARENT "${overlay_parent}" $dts_node
+						} else {
+							dtg_debug "Fpga parent not found $overlay_parent in $dts_file"
+						}
+					} elseif {[regexp "amba_pl:pl-bus" ${current_parent} match]} {
+						# Non Overlay cases
+						set_property PARENT "/" $dts_node
+					}
+				}
+			}
+		}
+	}
+}
+
 proc post_generate {os_handle} {
     update_chosen $os_handle
     update_alias $os_handle
@@ -892,6 +933,7 @@ proc post_generate {os_handle} {
     delete_objs [get_dt_tree $zynq_soc_dt_tree]
     remove_empty_reference_node
     remove_main_memory_node
+    update_nonregnodes
 }
 
 proc add_skeleton {} {
