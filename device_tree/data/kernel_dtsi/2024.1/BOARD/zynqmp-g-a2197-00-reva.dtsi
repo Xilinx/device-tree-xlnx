@@ -3,7 +3,7 @@
  * dts file for Xilinx Versal a2197 RevA System Controller on MGT
  *
  * (C) Copyright 2021-2022 Xilinx, Inc.
- * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */

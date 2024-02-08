@@ -3,7 +3,7 @@
  * dts file for Xilinx ZynqMP SM-K26 rev1/B/A
  *
  * (C) Copyright 2021-2022 Xilinx, Inc.
- * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */

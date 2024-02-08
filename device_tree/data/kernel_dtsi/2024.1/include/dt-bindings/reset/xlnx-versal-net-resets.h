@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2020-2022 Xilinx, Inc.
- * Copyright (C) 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 
 #ifndef _DT_BINDINGS_VERSAL_NET_RESETS_H

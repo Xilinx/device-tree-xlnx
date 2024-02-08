@@ -3,7 +3,7 @@
  * dts file for Xilinx Versal vmk180 rev1.1 with X-EBM-02-revA module
  *
  * (C) Copyright 2020-2022 Xilinx, Inc.
- * (C) Copyright 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@xilinx.com>
  */

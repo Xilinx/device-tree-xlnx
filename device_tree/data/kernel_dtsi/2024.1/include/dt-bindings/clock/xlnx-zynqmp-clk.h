@@ -3,7 +3,7 @@
  * Xilinx Zynq MPSoC Firmware layer
  *
  * Copyright (C) 2014-2022 Xilinx, Inc.
- * Copyright (C) 2022 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  */
 
