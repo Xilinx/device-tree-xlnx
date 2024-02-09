@@ -28,9 +28,10 @@ proc generate {drv_handle} {
 	if {$node == 0} {
 		return
 	}
-	set mcdma_ip [get_cells -hier $drv_handle]
-        set compatible [get_property CONFIG.compatible $mcdma_ip]
+	set compatible [get_comp_str $drv_handle]
+	set compatible [append compatible " " "xlnx,axi-mcdma-1.00.a xlnx,eth-dma"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
+	set mcdma_ip [get_cells -hier $drv_handle]
 	set dma_count [hsi::utils::get_os_parameter_value "dma_count"]
 	if { [llength $dma_count] == 0 } {
 		set dma_count 0
@@ -50,6 +51,10 @@ proc generate {drv_handle} {
 	set is_mrmac [is_mrmac_connected $drv_handle "M_AXIS_MM2S"]
 	# if tsn ip exists in the design then it is through mcdma so changing the compatible string
 	set tsn_inst_name [get_cells -filter {IP_NAME =~ "*tsn*"}]
+	if { $axiethernetfound || $is_xxv == 1 || $is_mrmac == 1 || [llength $tsn_inst_name] } {
+		set compatstring "xlnx,eth-dma"
+		set_property compatible "$compatstring" $drv_handle
+	}
 	if { $axiethernetfound != 1 && $is_xxv != 1 && $is_mrmac != 1} {
 		set ip_prop CONFIG.c_include_mm2s_dre
 		add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
