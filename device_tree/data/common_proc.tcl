@@ -5224,6 +5224,11 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 				}
 			}
 			set high [string tolower [get_property HIGH_VALUE $mem_handle]]
+			if {[string match -nocase $ip_name "ai_engine"]} {
+				set ip [get_cells -hier $drv_handle]
+				set base [get_property CONFIG.C_BASEADDR $ip]
+				set high [get_property CONFIG.C_HIGHADDR $ip]
+			}
 			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 			if {[string_is_empty $reg]} {
