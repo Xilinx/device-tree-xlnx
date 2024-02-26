@@ -24,7 +24,7 @@
 };
 
 &qspi {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	num-cs = <1>;
 	flash@0 {
 		compatible = "n25q128a11", "jedec,spi-nor";
@@ -58,11 +58,11 @@
 };
 
 &sdhci0 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 };
 
 &uart1 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 };
 
 &usb0 {

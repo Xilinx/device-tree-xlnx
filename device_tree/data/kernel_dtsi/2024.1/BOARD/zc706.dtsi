@@ -293,7 +293,7 @@
 };
 
 &qspi {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	is-dual = <1>;
 	num-cs = <2>;
 	flash@0 {
@@ -329,13 +329,13 @@
 };
 
 &sdhci0 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci0_default>;
 };
 
 &uart1 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1_default>;
 };

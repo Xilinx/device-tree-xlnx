@@ -37,7 +37,7 @@
 	};
 
 	clk25: clk25 {
-		u-boot,dm-pre-reloc;
+		bootph-all;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <25000000>;

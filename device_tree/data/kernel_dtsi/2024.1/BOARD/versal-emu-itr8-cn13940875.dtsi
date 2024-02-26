@@ -21,14 +21,14 @@
 	};
 
 	clk0212: clk0212 {
-		u-boot,dm-pre-reloc;
+		bootph-all;
 		compatible = "fixed-clock";
 		#clock-cells = <0x0>;
 		clock-frequency = <212000>;
 	};
 
 	clk25: clk25 {
-		u-boot,dm-pre-reloc;
+		bootph-all;
 		compatible = "fixed-clock";
 		#clock-cells = <0x0>;
 		clock-frequency = <25000000>;
