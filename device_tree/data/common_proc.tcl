@@ -5210,6 +5210,22 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 	#set ip_skip_list "ddr4_*"
 	set slave [get_cells -hier ${drv_handle}]
 	set ip_mem_handles [hsi::utils::get_ip_mem_ranges $slave]
+	set base_val 0
+	set high_val 0
+	set size_val 0
+	foreach mem_handle ${ip_mem_handles} {
+		if {[string match -nocase $ip_name "ai_engine"]} {
+			set base [string tolower [get_property BASE_VALUE $mem_handle]]
+			set high [string tolower [get_property HIGH_VALUE $mem_handle]]
+			set size [format 0x%x [expr {${high} - ${base} + 1}]]
+			if { $base_val == 0 } {
+				set base_val $base
+			}
+			if { $high > $high_val } {
+				set high_val $high
+			}
+		}
+	}
 	foreach mem_handle ${ip_mem_handles} {
 	#	if {![regexp $ip_skip_list $mem_handle match]} {
 			set base [string tolower [get_property BASE_VALUE $mem_handle]]
@@ -5220,12 +5236,13 @@ proc gen_reg_property {drv_handle {skip_ps_check ""}} {
 				}
 			}
 			set high [string tolower [get_property HIGH_VALUE $mem_handle]]
+			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			if {[string match -nocase $ip_name "ai_engine"]} {
 				set ip [get_cells -hier $drv_handle]
-				set base [get_property CONFIG.C_BASEADDR $ip]
-				set high [get_property CONFIG.C_HIGHADDR $ip]
+				set high $high_val
+				set base $base_val
+				set size [format 0x%x [expr {${high_val} - ${base} + 1}]]
 			}
-			set size [format 0x%x [expr {${high} - ${base} + 1}]]
 			set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
 			if {[string_is_empty $reg]} {
 				if {[string match -nocase $proctype "psu_cortexa53"] || [string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
