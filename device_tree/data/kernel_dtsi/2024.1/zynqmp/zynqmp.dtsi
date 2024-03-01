@@ -281,9 +281,6 @@
 			     <1 10 0xf08>;
 	};
 
-	edac {
-		compatible = "arm,cortex-a53-edac";
-	};
 
 	fpga_full: fpga-region {
 		compatible = "fpga-region";
