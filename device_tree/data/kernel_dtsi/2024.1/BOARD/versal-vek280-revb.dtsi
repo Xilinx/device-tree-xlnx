@@ -15,6 +15,11 @@
 		     "xlnx,versal";
 	model = "Xilinx Versal vek280 Eval board revB";
 
+	chosen {
+		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8";
+		stdout-path = "serial0:115200";
+	};
+
 	aliases {
 		serial0 = &serial0;
 		serial2 = &dcc;
