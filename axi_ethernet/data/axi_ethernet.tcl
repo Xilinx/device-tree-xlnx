@@ -322,13 +322,16 @@ proc generate {drv_handle} {
     }
     if {$ip_name == "xxv_ethernet"} {
        set phytype [string tolower [get_property CONFIG.BASE_R_KR $eth_ip]]
-       set_property phy-mode "$phytype" $drv_handle
+       set linerate [get_property CONFIG.LINE_RATE $eth_ip]
+       set_property phy-mode "${linerate}g${phytype}" $drv_handle
        set compatible [get_comp_str $drv_handle]
        set compatible [append compatible " " "xlnx,xxv-ethernet-1.0"]
        set_property compatible "$compatible" $drv_handle
+       set_property "managed" "in-band-status" $drv_handle
        if { $core!= 0 && [llength $eth_node]} {
            hsi::utils::add_new_dts_param $eth_node "compatible" $compatible stringlist
-           hsi::utils::add_new_dts_param $eth_node "phy-mode" $phytype string
+           hsi::utils::add_new_dts_param $eth_node "phy-mode" "${linerate}g${phytype}" string
+           hsi::utils::add_new_dts_param $eth_node "managed" "in-band-status" string
        }
     }
     if {$ip_name == "usxgmii"} {
