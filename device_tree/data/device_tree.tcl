@@ -1207,6 +1207,10 @@ proc update_alias {os_handle} {
             set alias_count [get_os_dev_count alias_${alias_str}_count]
             set conf_name ${alias_str}${alias_count}
             set value [ps_node_mapping $drv_handle label]
+            # When coresight dcc is enabled then set the serial0=dcc in aliases node
+            if {[regexp ".*coresight.*" $value match]} {
+		set value "dcc"
+		}
             set ip_list "i2c spi serial"
             # TODO: need to check if the label already exists in the current system
 			if {[lsearch $all_labels $conf_name] >=0} {
@@ -1253,6 +1257,10 @@ proc update_alias {os_handle} {
 		for {set i 0} {$i < $uart_pslen} {incr i} {
 			set drv_name [lindex $psuartlist $i]
 			set value [ps_node_mapping $drv_name label]
+			# When coresight dcc is enabled then set the serial0=dcc in aliases node
+			if {[regexp ".*coresight.*" $value match]} {
+				set value "dcc"
+			}
 			set name "serial$i"
 			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
 		}
