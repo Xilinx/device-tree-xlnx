@@ -1249,6 +1249,10 @@ proc update_alias {os_handle} {
 		for {set i 0} {$i < $uartlen} {incr i} {
 			set drv_name [lindex $uartate $i]
 			set value [ps_node_mapping $drv_name label]
+			# When coresight dcc is enabled then set the serial0=dcc in aliases node
+			if {[regexp ".*coresight.*" $value match]} {
+				set value "dcc"
+			}
 			set name "serial$i"
 			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
 		}
@@ -1269,6 +1273,10 @@ proc update_alias {os_handle} {
 		for {set i $uart_pslen} {$i < $uartlen1} {incr i} {
 			set drv_name [lindex $pluartlist [expr {$i - $uart_pslen}]]
 			set value [ps_node_mapping $drv_name label]
+			# When coresight dcc is enabled then set the serial0=dcc in aliases node
+			if {[regexp ".*coresight.*" $value match]} {
+				set value "dcc"
+			}
 			set name "serial$i"
 			hsi::utils::add_new_dts_param "${alias_node}" ${name} ${value} aliasref
 		}
