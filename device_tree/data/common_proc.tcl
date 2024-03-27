@@ -6007,8 +6007,6 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 			set bus_node "$fpga_node"
 			set RpRm [get_rp_rm_for_drv $ip_drv]
 			regsub -all { } $RpRm "" RpRm
-			set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -p $bus_node]
-			hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
 			set config_afi " "
 			if {[lsearch -nocase $avail_param "CONFIG.C_SAXIGP0_DATA_WIDTH"] >= 0} {
 				set val [get_property CONFIG.C_SAXIGP0_DATA_WIDTH [get_cells -hier $zynq_periph]]
@@ -6073,7 +6071,6 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 				}
 				append config_afi " <15 $afival"
 			}
-			hsi::utils::add_new_dts_param "${afi_node}" "config-afi" "$config_afi" int
 			if {[lsearch -nocase $avail_param "CONFIG.C_PL_CLK0_BUF"] >= 0} {
 				set val [get_property CONFIG.C_PL_CLK0_BUF [get_cells -hier $zynq_periph]]
 				if {[string match -nocase $val "true"]} {
@@ -6126,6 +6123,11 @@ proc add_or_get_bus_node {ip_drv dts_file} {
 					hsi::utils::add_new_dts_param "${clocking_node}" "assigned-clock-rates" [scan [expr $freq * 1000000] "%d"] int
 				}
 			}
+			set afi_node [add_or_get_dt_node -n "afi0" -l "afi0" -p $bus_node]
+			hsi::utils::add_new_dts_param "${afi_node}" "compatible" "xlnx,afi-fpga" string
+			hsi::utils::add_new_dts_param "${afi_node}" "config-afi" "$config_afi" int
+			set resets "zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118>, <&zynqmp_reset 119"
+			hsi::utils::add_new_dts_param "${afi_node}" "resets" "$resets" reference
 		}
 		if {[string match -nocase $proctype "ps7_cortexa9"]} {
 			set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
