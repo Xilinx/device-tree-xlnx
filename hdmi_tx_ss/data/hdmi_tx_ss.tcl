@@ -13,6 +13,7 @@
 # GNU General Public License for more details.
 #
 
+
 proc generate {drv_handle} {
 	foreach i [get_sw_cores device_tree] {
 		set common_tcl_file "[get_property "REPOSITORY" $i]/data/common_proc.tcl"
@@ -34,7 +35,11 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
 	set vid_interface [get_property CONFIG.C_VID_INTERFACE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-interface" $vid_interface int
-
+        set vtcip [get_cells -hier -filter {IP_NAME == "v_tc"}]
+	set base_addr [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
+        if {[llength $vtcip]} {
+		generate_vtc_node $drv_handle $base_addr
+        }
 	set phy_names ""
 	set phys ""
 	set link_data0 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_OUT"]

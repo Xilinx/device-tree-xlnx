@@ -42,18 +42,26 @@ proc generate {drv_handle} {
 	if {[string match -nocase $logo_layer "true"]} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,logo-layer" ""  boolean
 	}
+	set vtcip [get_cells -hier -filter {IP_NAME == "v_tc"}]
+	set mix_outip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
+	if {![llength $mix_outip]} {
+		dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
+	}
 	set enable_csc_coefficient_registers [get_property CONFIG.ENABLE_CSC_COEFFICIENT_REGISTERS [get_cells -hier $drv_handle]]
 	if {$enable_csc_coefficient_registers == 1} {
 		hsi::utils::add_new_dts_param "$node" "xlnx,enable-csc-coefficient-register" "" boolean
 	}
 
-	set mix_outip [hsi::utils::get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
-	if {![llength $mix_outip]} {
-		dtg_warning "$drv_handle pin m_axis_video is not connected ...check your design"
-	}
 	set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $mix_outip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
 	foreach outip $mix_outip {
 		if {[llength $outip] != 0} {
+			if {[string match -nocase [get_property IP_NAME $outip] "v_hdmi_tx_ss"] || [string match -nocase [get_property IP_NAME $outip] "v_hdmi_txss1"]} {
+				if {[llength $vtcip]} {
+					# Adding bridge param when v_tc ip connected as subcore
+					# in the subsystem core by appending subsystem name.
+					hsi::utils::add_new_dts_param "${node}" "xlnx,bridge" "v_tc_$outip" reference
+				}
+			}
 			if {![string match -nocase [get_property IP_NAME $outip] "v_frmbuf_wr"]} {
 				set mixer_port_node [add_or_get_dt_node -n "port" -l crtc_mixer_port$drv_handle -u 0 -p $node]
 				hsi::utils::add_new_dts_param "$mixer_port_node" "reg" 0 int
@@ -92,6 +100,13 @@ proc generate {drv_handle} {
 				}
 				set connectip [get_connect_ip $outip $master_intf]
 				if {[llength $connectip]} {
+					if {[string match -nocase [get_property IP_NAME $connectip] "v_hdmi_tx_ss"] || [string match -nocase [get_property IP_NAME $connectip] "v_hdmi_txss1"]} {
+						if {[llength $vtcip]} {
+							# Adding bridge param when v_tc ip connected as subcore
+							# in the subsystem core by appending subsystem name.
+							hsi::utils::add_new_dts_param "${node}" "xlnx,bridge" "v_tc_$connectip" reference
+						}
+					}
 					gen_endpoint $drv_handle "mixer_crtc$drv_handle"
 					if {[string match -nocase [get_property IP_NAME $outip] "v_dp_txss1"]} {
 						hsi::utils::add_new_dts_param "$mixer_crtc" "remote-endpoint" "dptx_out$outip" reference

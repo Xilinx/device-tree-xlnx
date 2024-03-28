@@ -7411,3 +7411,22 @@ proc generate_reg_property {base high} {
 	}
 	return $reg
 }
+
+# Generating static vtc node
+# As it is subcore inside subsystem(ex:hdmi_tx)
+proc generate_vtc_node {drv_handle base_addr} {
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	set dts_file [current_dt_tree]
+	set baseaddr_v_tc  [format 0x%x [expr $base_addr + 0x10000]]
+	set regval "0x0 $baseaddr_v_tc 0x0 0x10000"
+	if {$dt_overlay} {
+		set bus_node "amba"
+	} else {
+		set bus_node "amba_pl"
+	}
+	set vtc_node [add_or_get_dt_node -n "v_tc_$drv_handle" -l "v_tc_$drv_handle" -u ${baseaddr_v_tc} -d ${dts_file} -p $bus_node]
+	hsi::utils::add_new_dts_param "${vtc_node}" "clock-names" "clk, s_axi_aclk" stringlist
+	hsi::utils::add_new_dts_param "${vtc_node}" "clocks" "misc_clk_2" reference
+	hsi::utils::add_new_dts_param "${vtc_node}" "compatible" "xlnx,bridge-v-tc-6.1" string
+	hsi::utils::add_new_dts_param "${vtc_node}" "reg" $regval intlist
+}
