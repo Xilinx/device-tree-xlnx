@@ -515,7 +515,6 @@ proc gen_opp_freq {} {
 				set clkoutdiv ""
 				if {[dict exists $ps_pmc_params "PMC_REF_CLK_FREQMHZ"]} {
 					set act_freq [dict get $ps_pmc_params PMC_REF_CLK_FREQMHZ]
-					set act_freq [expr $act_freq * 1000000]
 				}
 				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_FBDIV"]} {
 					set div [dict get $ps_pmc_params PS_CRF_APLL_CTRL_FBDIV]
@@ -524,7 +523,7 @@ proc gen_opp_freq {} {
 					set clkoutdiv [dict get $ps_pmc_params PS_CRF_APLL_CTRL_CLKOUTDIV]
 				}
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr ($act_freq * $div) / $clkoutdiv]
+					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
 			}
 			# Remove default opps
@@ -554,7 +553,6 @@ proc gen_opp_freq {} {
 				set clkoutdiv ""
 				if {[dict exists $psx_pmcx_params "PMCX_REF_CLK_FREQMHZ"]} {
 					set act_freq [dict get $psx_pmcx_params PMCX_REF_CLK_FREQMHZ]
-					set act_freq [expr $act_freq * 1000000]
 				}
 				if {[dict exists $psx_pmcx_params "PSX_CRF_APLL1_CTRL_FBDIV"]} {
 					set div [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_FBDIV]
@@ -563,7 +561,7 @@ proc gen_opp_freq {} {
 					set clkoutdiv [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_CLKOUTDIV]
 				}
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr ($act_freq * $div) / $clkoutdiv]
+					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
 			}
 			# Remove default opps
