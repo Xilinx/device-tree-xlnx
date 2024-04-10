@@ -593,13 +593,11 @@ proc update_system_dts_include {include_file} {
 	set cur_dts [current_dt_tree]
 	set master_dts_obj [get_dt_trees ${master_dts}]
 	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
-	if {[string match -nocase $proctype "microblaze"]} {
-		set overrides [get_property CONFIG.periph_type_overrides [get_os]]
-		set dtsi_file " "
-		foreach override $overrides {
-			if {[lindex $override 0] == "BOARD"} {
-				set dtsi_file [lindex $override 1]
-			}
+	set overrides [get_property CONFIG.periph_type_overrides [get_os]]
+	set dtsi_file " "
+	foreach override $overrides {
+		if {[lindex $override 0] == "BOARD"} {
+			set dtsi_file [lindex $override 1]
 		}
 	}
 
@@ -624,10 +622,25 @@ proc update_system_dts_include {include_file} {
 					set cur_inc_list [join $cur_inc_list ","]
 				}
 			} else {
-				append cur_inc_list "," $include_file
-				set field [split $cur_inc_list ","]
-				set cur_inc_list [lsort -decreasing $field]
-				set cur_inc_list [join $cur_inc_list ","]
+				# -decreasing order doens not works for versal when boardfile specified as versal-vc-p-a2197-00-...
+				# Make sure the board file always after versal-net.dtsi or versal-net-clk-ccf.dtsi if exists
+				set pclk_index -1
+				foreach pfile {"versal-clk.dtsi" "versal-net-clk-ccf.dtsi"} {
+					set tmp_pclk_index [lsearch -exact [split $cur_inc_list ","] "$pfile"]
+					if {$tmp_pclk_index >= 0} {
+						set pclk_index $tmp_pclk_index
+					}
+				}
+				if {[regexp $dtsi_file $include_file match] && $pclk_index >= 0} {
+					set field [split $cur_inc_list ","]
+					set cur_inc_list [linsert $field [expr $pclk_index + 1] $include_file]
+					set cur_inc_list [join $cur_inc_list ","]
+				} else {
+					append cur_inc_list "," $include_file
+					set field [split $cur_inc_list ","]
+					set cur_inc_list [lsort -decreasing $field]
+					set cur_inc_list [join $cur_inc_list ","]
+				}
 			}
 		}
 		set_property INCLUDE_FILES ${cur_inc_list} $master_dts_obj
