@@ -505,6 +505,15 @@ proc gen_opp_freq {} {
 				if {[llength $act_freq] && [llength $div]} {
 					set opp_freq  [expr $act_freq * $div]
 				}
+				# if design don't have clock configs then skip adding new opps
+				if {$opp_freq == ""} {
+					return
+				}
+				# Remove default opps
+				hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp00" "" boolean
+				hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp01" "" boolean
+				hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp02" "" boolean
+				hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp03" "" boolean
 			}
 		}
 		if { $proc_ps in { "versal_cips" "ps_wizard" }} {
@@ -525,13 +534,16 @@ proc gen_opp_freq {} {
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
 					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
+				# if design don't have clock configs then skip adding new opps
+				if {$opp_freq == ""} {
+					return
+				}
 			}
 			# Remove default opps
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp00" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp01" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp02" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp03" "" boolean
-			set add_opp_prop "1"
 		}
 		if {[string match -nocase $proc_ps "psx_wizard"] } {
 			set overrides [get_property CONFIG.periph_type_overrides [get_os]]
@@ -564,6 +576,10 @@ proc gen_opp_freq {} {
 					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
 			}
+			# if design don't have clock configs then skip adding new opps
+			if {$opp_freq == ""} {
+				return
+			}
 			# Remove default opps
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-1066000000" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-1866000000" "" boolean
@@ -573,7 +589,6 @@ proc gen_opp_freq {} {
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-2100000000" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-2200000000" "" boolean
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-2400000000" "" boolean
-			set add_opp_prop "1"
 		}
 	}
 
@@ -591,28 +606,20 @@ proc gen_opp_freq {} {
 		# Create opp table as per dt-bindings
 		set opp00_table [add_or_get_dt_node -n "opp-${opp00_result}" -d $default_dts -p $cpu_opp_table]
 		hsi::utils::add_new_dts_param "$opp00_table" "opp-hz" $opp00 noformating
-		if {[llength $add_opp_prop]} {
-			hsi::utils::add_new_dts_param "$opp00_table" "opp-microvolt" $opp_microvolt noformating
-			hsi::utils::add_new_dts_param "$opp00_table" "clock-latency-ns" $clock_latency noformating
-		}
+		hsi::utils::add_new_dts_param "$opp00_table" "opp-microvolt" $opp_microvolt noformating
+		hsi::utils::add_new_dts_param "$opp00_table" "clock-latency-ns" $clock_latency noformating
 		set opp01_table [add_or_get_dt_node -n "opp-${opp01_result}" -d $default_dts -p $cpu_opp_table]
 		hsi::utils::add_new_dts_param "$opp01_table" "opp-hz" $opp01 noformating
-		if {[llength $add_opp_prop]} {
-			hsi::utils::add_new_dts_param "$opp01_table" "opp-microvolt" $opp_microvolt noformating
-			hsi::utils::add_new_dts_param "$opp01_table" "clock-latency-ns" $clock_latency noformating
-		}
+		hsi::utils::add_new_dts_param "$opp01_table" "opp-microvolt" $opp_microvolt noformating
+		hsi::utils::add_new_dts_param "$opp01_table" "clock-latency-ns" $clock_latency noformating
 		set opp02_table [add_or_get_dt_node -n "opp-${opp02_result}" -d $default_dts -p $cpu_opp_table]
 		hsi::utils::add_new_dts_param "$opp02_table" "opp-hz" $opp02 noformating
-		if {[llength $add_opp_prop]} {
-			hsi::utils::add_new_dts_param "$opp02_table" "opp-microvolt" $opp_microvolt noformating
-			hsi::utils::add_new_dts_param "$opp02_table" "clock-latency-ns" $clock_latency noformating
-		}
+		hsi::utils::add_new_dts_param "$opp02_table" "opp-microvolt" $opp_microvolt noformating
+		hsi::utils::add_new_dts_param "$opp02_table" "clock-latency-ns" $clock_latency noformating
 		set opp03_table [add_or_get_dt_node -n "opp-${opp03_result}" -d $default_dts -p $cpu_opp_table]
 		hsi::utils::add_new_dts_param "$opp03_table" "opp-hz" $opp03 noformating
-		if {[llength $add_opp_prop]} {
-			hsi::utils::add_new_dts_param "$opp03_table" "opp-microvolt" $opp_microvolt noformating
-			hsi::utils::add_new_dts_param "$opp03_table" "clock-latency-ns" $clock_latency noformating
-		}
+		hsi::utils::add_new_dts_param "$opp03_table" "opp-microvolt" $opp_microvolt noformating
+		hsi::utils::add_new_dts_param "$opp03_table" "clock-latency-ns" $clock_latency noformating
 	}
 }
 
