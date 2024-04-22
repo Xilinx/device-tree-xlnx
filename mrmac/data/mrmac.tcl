@@ -489,8 +489,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set intr1_pin [::hsi::get_pins -of_objects $sink_periph -filter "NAME==$intf"]
 			set sink_pins [::hsi::utils::get_sink_pins $intr1_pin]
-			set xl_per [::hsi::get_cells -of_objects $sink_pins]
-			if {[string match -nocase [get_property IP_NAME $xl_per] "axis_dwidth_converter"]} {
+			set xl_per ""
+			if {[llength $sink_pins]} {
+				set xl_per [::hsi::get_cells -of_objects $sink_pins]
+			}
+			if {[llength $xl_per] && [string match -nocase [get_property IP_NAME $xl_per] "axis_dwidth_converter"]} {
 				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per] "m_axis_tdata"]]
 				set axis_per [::hsi::get_cells -of_objects $port_pins]
 				if {[string match -nocase [get_property IP_NAME $axis_per] "axis_clock_converter"]} {
@@ -520,8 +523,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set in1_pin [::hsi::get_pins -of_objects $rx_periph -filter "NAME==$intf"]
 			set sink_pins [::hsi::utils::get_sink_pins $in1_pin]
-			set rxxl_per [::hsi::get_cells -of_objects $sink_pins]
-			if {[string match -nocase [get_property IP_NAME $rxxl_per] "axis_dwidth_converter"]} {
+			set rxxl_per ""
+			if {[llength $sink_pins]} {
+				set rxxl_per [::hsi::get_cells -of_objects $sink_pins]
+			}
+			if {[llength $rxxl_per] && [string match -nocase [get_property IP_NAME $rxxl_per] "axis_dwidth_converter"]} {
 				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rxxl_per] "m_axis_tdata"]]
 				set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
 				if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
@@ -737,8 +743,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set in1_pin [::hsi::get_pins -of_objects $tod1_sink_periph -filter "NAME==$intf"]
 			set in1sink_pins [::hsi::utils::get_sink_pins $in1_pin]
-			set xl_per1 [::hsi::get_cells -of_objects $in1sink_pins]
-			if {[string match -nocase [get_property IP_NAME $xl_per1] "axis_dwidth_converter"]} {
+			set xl_per1 ""
+			if {[llength $in1sink_pins]} {
+				set xl_per1 [::hsi::get_cells -of_objects $in1sink_pins]
+			}
+			if {[llength $xl_per1] && [string match -nocase [get_property IP_NAME $xl_per1] "axis_dwidth_converter"]} {
 				set port1_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per1] "m_axis_tdata"]]
 				set axis_per1 [::hsi::get_cells -of_objects $port1_pins]
 				if {[string match -nocase [get_property IP_NAME $axis_per1] "axis_clock_converter"]} {
@@ -769,8 +778,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set inrx1_pin [::hsi::get_pins -of_objects $rx_periph1 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx1_pin]
-			set rx_per [::hsi::get_cells -of_objects $rxtodsink_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_per] "axis_dwidth_converter"]} {
+			set rx_per ""
+			if {[llength $rxtodsink_pins]} {
+				set rx_per [::hsi::get_cells -of_objects $rxtodsink_pins]
+			}
+			if {[llength $rx_per] && [string match -nocase [get_property IP_NAME $rx_per] "axis_dwidth_converter"]} {
 				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per] "m_axis_tdata"]]
 				set rx_axis_per [::hsi::get_cells -of_objects $port_pins]
 				if {[string match -nocase [get_property IP_NAME $rx_axis_per] "axis_clock_converter"]} {
@@ -1058,8 +1070,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set in2_pin [::hsi::get_pins -of_objects $tod2_sink_periph -filter "NAME==$intf"]
 			set in2sink_pins [::hsi::utils::get_sink_pins $in2_pin]
-			set xl_per2 [::hsi::get_cells -of_objects $in2sink_pins]
-			if {[string match -nocase [get_property IP_NAME $xl_per2] "axis_dwidth_converter"]} {
+			set xl_per2 ""
+			if {[llength $in2sink_pins]} {
+				set xl_per2 [::hsi::get_cells -of_objects $in2sink_pins]
+			}
+			if {[llength $xl_per2] && [string match -nocase [get_property IP_NAME $xl_per2] "axis_dwidth_converter"]} {
 				set port2pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per2] "m_axis_tdata"]]
 				set axis_per2 [::hsi::get_cells -of_objects $port2pins]
 				if {[string match -nocase [get_property IP_NAME $axis_per2] "axis_clock_converter"]} {
@@ -1088,8 +1103,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set inrx2_pin [::hsi::get_pins -of_objects $rx_periph2 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx2_pin]
-			set rx_per2 [::hsi::get_cells -of_objects $rxtodsink_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_per2] "axis_dwidth_converter"]} {
+			set rx_per2 ""
+			if {[llength $rxtodsink_pins]} {
+				set rx_per2 [::hsi::get_cells -of_objects $rxtodsink_pins]
+			}
+			if {[llength $rx_per2] && [string match -nocase [get_property IP_NAME $rx_per2] "axis_dwidth_converter"]} {
 				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per2] "m_axis_tdata"]]
 				set rx_axis_per2 [::hsi::get_cells -of_objects $port_pins]
 				if {[string match -nocase [get_property IP_NAME $rx_axis_per2] "axis_clock_converter"]} {
@@ -1359,8 +1377,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set in3_pin [::hsi::get_pins -of_objects $tod3_sink_periph -filter "NAME==$intf"]
 			set in3sink_pins [::hsi::utils::get_sink_pins $in3_pin]
-			set xl_per3 [::hsi::get_cells -of_objects $in3sink_pins]
-			if {[string match -nocase [get_property IP_NAME $xl_per3] "axis_dwidth_converter"]} {
+			set xl_per3 ""
+			if {[llength $in3sink_pins]} {
+				set xl_per3 [::hsi::get_cells -of_objects $in3sink_pins]
+			}
+			if {[llength $xl_per3] && [string match -nocase [get_property IP_NAME $xl_per3] "axis_dwidth_converter"]} {
 				set port3pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $xl_per3] "m_axis_tdata"]]
 				set axis_per3 [::hsi::get_cells -of_objects $port3pins]
 				if {[string match -nocase [get_property IP_NAME $axis_per3] "axis_clock_converter"]} {
@@ -1388,8 +1409,11 @@ proc generate {drv_handle} {
 			set intf "dout"
 			set inrx3_pin [::hsi::get_pins -of_objects $rx_periph3 -filter "NAME==$intf"]
 			set rxtodsink_pins [::hsi::utils::get_sink_pins $inrx3_pin]
-			set rx_per3 [::hsi::get_cells -of_objects $rxtodsink_pins]
-			if {[string match -nocase [get_property IP_NAME $rx_per3] "axis_dwidth_converter"]} {
+			set rx_per3 ""
+			if {[llength $rxtodsink_pins]} {
+				set rx_per3 [::hsi::get_cells -of_objects $rxtodsink_pins]
+			}
+			if {[llength $rx_per3] && [string match -nocase [get_property IP_NAME $rx_per3] "axis_dwidth_converter"]} {
 				set port_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $rx_per3] "m_axis_tdata"]]
 				set rx_axis_per3 [::hsi::get_cells -of_objects $port_pins]
 				if {[string match -nocase [get_property IP_NAME $rx_axis_per3] "axis_clock_converter"]} {
