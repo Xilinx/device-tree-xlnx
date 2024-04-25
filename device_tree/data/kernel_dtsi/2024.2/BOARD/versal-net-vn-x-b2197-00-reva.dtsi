@@ -3,10 +3,11 @@
  * dts file for Xilinx Versal Net VNX board
  *
  * (C) Copyright 2022, Xilinx, Inc.
- * (C) Copyright 2022 - 2023, Advanced Micro Devices, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
+
 
 #include "include/dt-bindings/gpio/gpio.h"
 
@@ -15,49 +16,19 @@
 		     "xlnx,versal-net-vn-x-b2197-00", "xlnx,versal-net";
 	model = "Xilinx Versal Net VNX";
 
+
+	chosen {
+		bootargs = "console=ttyAMA1,115200 clk_ignore_unused";
+		stdout-path = "serial1:115200";
+	};
+
 	aliases {
 		nvmem0 = &eeprom0;
 	};
 };
 
-&adma0 {
-	status = "okay";
-};
-
-&adma1 {
-	status = "okay";
-};
-
-&adma2 {
-	status = "okay";
-};
-
-&adma3 {
-	status = "okay";
-};
-
-&adma4 {
-	status = "okay";
-};
-
-&adma5 {
-	status = "okay";
-};
-
-&adma6 {
-	status = "okay";
-};
-
-&adma7 {
-	status = "okay";
-};
-
-&lpd_wwdt0 {
-	status = "okay";
-};
 
 &gem1 {
-	status = "okay";
 	#address-cells = <1>;
 	#size-cells = <0>;
 	phy-handle = <&phy>;
@@ -71,16 +42,8 @@
 	};
 };
 
-&gpio0 {
-	status = "okay";
-};
-
-&gpio1 {
-	status = "okay";
-};
 
 &i2c0 {
-	status = "okay";
 	eeprom0: eeprom@51 {
 		compatible = "st,24c128", "atmel,24c128";
 		reg = <0x51>;
@@ -89,7 +52,6 @@
 };
 
 &i2c1 {
-	status = "okay";
 	eeprom1: eeprom@55 {
 		compatible = "st,24c128", "atmel,24c128";
 		reg = <0x55>;
@@ -98,9 +60,7 @@
 };
 
 &ospi {
-	status = "okay";
-	is-dual = <0>;
-	is-stacked = <1>;
+	num-cs = <2>;
 	reset-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
 	reset-names = "qspi";
 	#address-cells = <1>;
@@ -108,7 +68,8 @@
 
 	mt35xu02g: flash@0 {
 		compatible = "micron,m25p80", "jedec,spi-nor";
-		reg = <0>;
+		reg = <0>, <1>;
+		stacked-memories = /bits/ 64 <0x8000000 0x8000000>; /* 128MB */
 		#address-cells = <1>;
 		#size-cells = <1>;
 		cdns,read-delay = <0>;
@@ -134,39 +95,22 @@
 };
 
 &sdhci1 {
-	status = "okay";
 	non-removable;
 	disable-wp;
 	bus-width = <8>;
 	no-1-8-v;
 };
 
-&serial0 {
-	status = "okay";
-};
-
-&serial1 {
-	status = "okay";
-};
 
 &spi1 {
-	status = "okay";
 	#address-cells = <1>;
 	#size-cells = <0>;
 	num-cs = <3>;
 };
 
-&usb1 {
-	status = "okay";
-};
 
 &dwc3_1 {
-	status = "okay";
 	snps,refclk_fladj;
 	snps,mask_phy_reset;
 	phy-names = "usb3-phy";
-};
-
-&wwdt0 {
-	status = "okay";
 };

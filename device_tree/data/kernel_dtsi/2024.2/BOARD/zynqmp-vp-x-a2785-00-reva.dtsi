@@ -5,12 +5,12 @@
  * (C) Copyright 2021-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
+#include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
-#include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/phy/phy.h"
 
 / {
@@ -19,17 +19,23 @@
 		     "xlnx,zynqmp-vp-x-a2785-00", "xlnx,zynqmp";
 
 	aliases {
-                ethernet0 = &gem0;
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci0;
-                serial0 = &uart0;
-                serial1 = &dcc;
-                spi0 = &qspi;
-                usb0 = &usb0;
-                usb1 = &usb1;
-                nvmem0 = &eeprom;
-        };
+		ethernet0 = &gem0;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci0;
+		serial0 = &uart0;
+		serial1 = &dcc;
+		spi0 = &qspi;
+		usb0 = &usb0;
+		usb1 = &usb1;
+		nvmem0 = &eeprom;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -52,29 +58,23 @@
 		};
 	};
 
-	si5332_0: si5332_0 { /* ps_ref_clk - u142 */
+	si5332_0: si5332-0 { /* ps_ref_clk - u142 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <33333333>;
 	};
 
-	si5332_1: si5332_1 { /* clk0_sgmii - u142 */
+	si5332_1: si5332-1 { /* clk0_sgmii - u142 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <33333333>; /* FIXME */
 	};
 
-	si5332_2: si5332_2 { /* clk1_usb - u142 */
+	si5332_2: si5332-2 { /* clk1_usb - u142 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <27000000>;
 	};
-};
-
-&psgtr {
-	/* sgmii, usb3 */
-	clocks = <&si5332_1>, <&si5332_2>;
-	clock-names = "ref0", "ref1";
 };
 
 &qspi { /* MIO 0-5 */
@@ -108,9 +108,13 @@
 	phy-mode = "sgmii"; /* DTG generates this properly 1512 */
 	is-internal-pcspma;
 	/* phys = <&psgtr 0 PHY_TYPE_SGMII 0 0>; */
-	/* phy-reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>; */
-	phy0: ethernet-phy@0 { /* u131 - M88e1512 */
-		reg = <0>;
+	mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		/* reset-gpios = <&gpio 142 GPIO_ACTIVE_LOW>; */
+		phy0: ethernet-phy@0 { /* u131 - M88e1512 */
+			reg = <0>;
+		};
 	};
 };
 
@@ -338,12 +342,20 @@
 	phys = <&psgtr 1 PHY_TYPE_USB3 0 1>;
 };
 
+&psgtr {
+	status = "okay";
+	/* sgmii, usb3 */
+	clocks = <&si5332_1>, <&si5332_2>;
+	clock-names = "ref0", "ref1";
+};
+
 &dwc3_0 {
 	dr_mode = "peripheral";
 	snps,dis_u2_susphy_quirk;
 	snps,dis_u3_susphy_quirk;
 	maximum-speed = "super-speed";
 };
+
 
 &pinctrl0 {
 	status = "okay";
@@ -361,7 +373,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_34_grp", "gpio0_35_grp";
 			function = "gpio0";
@@ -388,7 +400,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_36_grp", "gpio0_37_grp";
 			function = "gpio0";

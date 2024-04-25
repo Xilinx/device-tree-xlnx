@@ -5,19 +5,27 @@
  * (C) Copyright 2017-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 / {
 	model = "ZynqMP ZC1232 RevA";
 	compatible = "xlnx,zynqmp-zc1232-revA", "xlnx,zynqmp-zc1232", "xlnx,zynqmp";
 
-	 aliases {
-                serial0 = &uart0;
-                serial1 = &dcc;
-                spi0 = &qspi;
-        };
+	aliases {
+		serial0 = &uart0;
+		serial1 = &dcc;
+		spi0 = &qspi;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
 };
+
 
 &qspi {
 	flash@0 {

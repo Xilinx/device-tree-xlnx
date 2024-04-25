@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal Embedded+ VE2302 revA
  *
- * (C) Copyright 2023 - 2024, Advanced Micro Devices, Inc
+ * (C) Copyright 2023-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -14,6 +14,7 @@
 		     "xlnx,versal-emb-plus-ve2302",
 		     "xlnx,versal";
 	model = "Xilinx Versal Embedded+ VE2302 revA";
+
 
 	chosen {
 		bootargs = "earlycon clk_ignore_unused";
@@ -32,6 +33,7 @@
 		gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
 	};
 };
+
 
 &gpio0 {
 	gpio-line-names = "GPIO_LED2", "GPIO_LED3", "GPIO_LED4", "", "1WIRE", /* 0 - 4 */

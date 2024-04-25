@@ -2,8 +2,8 @@
 /*
  * dts file for Xilinx ZynqMP SM-K24 RevA
  *
- * (C) Copyright 2020 - 2021, Xilinx, Inc.
- * (C) Copyright 2022-2024, Advanced Micro Devices, Inc.
+ * (C) Copyright 2020-2022 Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -15,4 +15,5 @@
 	compatible = "xlnx,zynqmp-sm-k24-rev1", "xlnx,zynqmp-sm-k24-revB",
 		     "xlnx,zynqmp-sm-k24-revA", "xlnx,zynqmp-sm-k24",
 		     "xlnx,zynqmp";
+
 };

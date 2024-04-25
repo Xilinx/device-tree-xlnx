@@ -2,10 +2,10 @@
 /*
  * dts file for Xilinx Versal a2197 RevA System Controller
  *
- * (C) Copyright 2021-2022 Xilinx, Inc.
- * (C) Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-
- * Michal Simek <michal.simek@xilinx.com>
+ * (C) Copyright 2019-2022 Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "include/dt-bindings/gpio/gpio.h"
@@ -17,18 +17,23 @@
 		     "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	aliases {
-                ethernet0 = &gem0;
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci1;
-                nvmem0 = &eeprom;
-                nvmem1 = &eeprom_ebm;
-                nvmem2 = &eeprom_fmc1;
-                nvmem3 = &eeprom_fmc2;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &dcc;
-        };
+		ethernet0 = &gem0;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci1;
+		nvmem0 = &eeprom;
+		nvmem1 = &eeprom_ebm;
+		nvmem2 = &eeprom_fmc1;
+		nvmem3 = &eeprom_fmc2;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &dcc;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
 
 
 	ref_clk: ref-clk {
@@ -73,7 +78,7 @@
 		clocks = <&si570_user1>;
 	};
 
-	si5332_1: si5332_1 { /* u142 - GEM0 */
+	si5332_1: si5332-1 { /* u142 - GEM0 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <125000000>;
@@ -159,8 +164,8 @@
 		compatible = "iio-hwmon";
 		io-channels = <&mgtyvccaux 0>, <&mgtyvccaux 1>, <&mgtyvccaux 2>, <&mgtyvccaux 3>;
 	};
-
 };
+
 
 &sdhci1 { /* sd1 MIO45-51 cd in place */
 	no-1-8-v;
@@ -226,11 +231,12 @@
 		  "", "", "", "", "", /* 155 - 159 */
 		  "", "", "", "", "", /* 160 - 164 */
 		  "", "", "", "", "", /* 165 - 169 */
-		  "", "", "", ""; /* 170 - 174 */
+		  "", "", "", ""; /* 170 - 173 */
 };
 
 &i2c0 { /* MIO 34-35 - can't stay here */
 	clock-frequency = <400000>;
+
 	tca6416_u233: gpio@20 { /* u233 */
 		compatible = "ti,tca6416";
 		reg = <0x20>;
@@ -241,6 +247,7 @@
 				"FMCP1_FMC_PRSNT_M2C_B", "FMCP2_FMC_PRSNT_M2C_B", "FMCP1_FMCP_PRSNT_M2C_B", "FMCP2_FMCP_PRSNT_M2C_B", /* 10 - 13 */
 				"VCCINT_VRHOT_B", "8A34001_EXP_RST_B", "PMBUS_ALERT", "PMBUS1_INA226_ALERT"; /* 14 - 17 */
 	};
+
 	i2c-mux@74 { /* u33 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
@@ -278,7 +285,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			/* FIXME check alerts comming to SC */
+			/* FIXME check alerts coming to SC */
 			vccint: ina226@40 { /* u65 */
 				compatible = "ti,ina226";
 				#io-channel-cells = <1>;
@@ -338,7 +345,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			/* FIXME check alerts comming to SC */
+			/* FIXME check alerts coming to SC */
 			vccaux: ina226@40 { /* u166 */
 				compatible = "ti,ina226";
 				#io-channel-cells = <1>;
@@ -480,7 +487,7 @@
 			si570_user1: clock-generator@5f { /* u205 */
 				#clock-cells = <0>;
 				compatible = "silabs,si570";
-				reg = <0x5f>; /* FIXME check address */
+				reg = <0x5f>;
 				temperature-stability = <50>;
 				factory-fout = <100000000>;
 				clock-frequency = <100000000>;

@@ -5,18 +5,18 @@
  * (C) Copyright 2016-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "zcu102-reva.dtsi"
 
 / {
-        model = "ZynqMP ZCU102 RevB";
-        compatible = "xlnx,zynqmp-zcu102-revB", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
+	model = "ZynqMP ZCU102 RevB";
+	compatible = "xlnx,zynqmp-zcu102-revB", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
 };
 
 &gem3 {
-        phy-handle = <&phyc>;
+	phy-handle = <&phyc>;
 	mdio: mdio {
 		phyc: ethernet-phy@c {
 			#phy-cells = <0x1>;
@@ -30,18 +30,18 @@
 		};
 		/* Cleanup from RevA */
 		/delete-node/ ethernet-phy@21;
-        };
+	};
 };
 
 /* Fix collision with u61 */
 &i2c0 {
-        i2c-mux@75 {
-                i2c@2 {
-                        max15303@1b { /* u8 */
-                                compatible = "maxim,max15303";
-                                reg = <0x1b>;
-                        };
-                        /delete-node/ max15303@20;
-                };
-        };
+	i2c-mux@75 {
+		i2c@2 {
+			max15303@1b { /* u8 */
+				compatible = "maxim,max15303";
+				reg = <0x1b>;
+			};
+			/delete-node/ max15303@20;
+		};
+	};
 };

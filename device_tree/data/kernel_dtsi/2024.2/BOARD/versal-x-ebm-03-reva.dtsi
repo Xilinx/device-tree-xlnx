@@ -5,11 +5,12 @@
  * (C) Copyright 2020-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/reset/xlnx-versal-resets.h"
+
 /* U97 MT35XU02G */
 compatible = "xlnx,versal-ospi-1.0", "cadence,qspi", "cdns,qspi-nor";
 bus-num = <2>;

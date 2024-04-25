@@ -1,36 +1,43 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2011-2022 Xilinx, Inc.
- * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ *  Copyright (C) 2011 - 2015 Xilinx
  *  Copyright (C) 2012 National Instruments Corp.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  */
-
-#include <dt-bindings/gpio/gpio.h>
+#include "include/dt-bindings/gpio/gpio.h"
 
 / {
-	model = "Zynq ZC702 Development Board";
+	model = "Xilinx ZC702 board";
 	compatible = "xlnx,zynq-zc702", "xlnx,zynq-7000";
 
 	aliases {
-                ethernet0 = &gem0;
-                i2c0 = &i2c0;
-                serial0 = &uart1;
-                spi0 = &qspi;
-                mmc0 = &sdhci0;
-                usb0 = &usb0;
-        };
+		ethernet0 = &gem0;
+		i2c0 = &i2c0;
+		serial0 = &uart1;
+		spi0 = &qspi;
+		mmc0 = &sdhci0;
+		usb0 = &usb0;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+	};
+
+
+	chosen {
+		bootargs = "";
+		stdout-path = "serial0:115200n8";
+	};
 
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;
-        switch-14 {
+		switch-14 {
 			label = "sw14";
 			gpios = <&gpio0 12 0>;
 			linux,code = <108>; /* down */
 			wakeup-source;
 			autorepeat;
 		};
-        switch-13 {
+		switch-13 {
 			label = "sw13";
 			gpios = <&gpio0 14 0>;
 			linux,code = <103>; /* up */
@@ -42,7 +49,7 @@
 	leds {
 		compatible = "gpio-leds";
 
-		ds23 {
+		led-ds23 {
 			label = "ds23";
 			gpios = <&gpio0 10 0>;
 			linux,default-trigger = "heartbeat";
@@ -68,6 +75,7 @@
 };
 
 &gem0 {
+	phy-mode = "rgmii-id";
 	phy-handle = <&ethernet_phy>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem0_default>;
@@ -76,7 +84,6 @@
 
 	ethernet_phy: ethernet-phy@7 {
 		reg = <7>;
-		device_type = "ethernet-phy";
 	};
 };
 
@@ -86,6 +93,7 @@
 };
 
 &i2c0 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
@@ -131,7 +139,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			eeprom@54 {
+			eeprom: eeprom@54 {
 				compatible = "atmel,24c08";
 				reg = <0x54>;
 			};
@@ -153,7 +161,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			rtc@51 {
+			rtc: rtc@51 {
 				compatible = "nxp,pcf8563";
 				reg = <0x51>;
 			};
@@ -281,7 +289,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_50_grp", "gpio0_51_grp";
 			function = "gpio0";
@@ -384,7 +392,6 @@
 
 &qspi {
 	bootph-all;
-	is-dual = <0>;
 	num-cs = <1>;
 	flash@0 {
 		compatible = "n25q128a11", "jedec,spi-nor";
@@ -392,27 +399,30 @@
 		spi-tx-bus-width = <1>;
 		spi-rx-bus-width = <4>;
 		spi-max-frequency = <50000000>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		partition@0 {
-			label = "qspi-fsbl-uboot";
-			reg = <0x0 0x100000>;
-		};
-		partition@100000 {
-			label = "qspi-linux";
-			reg = <0x100000 0x500000>;
-		};
-		partition@600000 {
-			label = "qspi-device-tree";
-			reg = <0x600000 0x20000>;
-		};
-		partition@620000 {
-			label = "qspi-rootfs";
-			reg = <0x620000 0x5E0000>;
-		};
-		partition@c00000 {
-			label = "qspi-bitstream";
-			reg = <0xC00000 0x400000>;
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			partition@0 {
+				label = "qspi-fsbl-uboot";
+				reg = <0x0 0x100000>;
+			};
+			partition@100000 {
+				label = "qspi-linux";
+				reg = <0x100000 0x500000>;
+			};
+			partition@600000 {
+				label = "qspi-device-tree";
+				reg = <0x600000 0x20000>;
+			};
+			partition@620000 {
+				label = "qspi-rootfs";
+				reg = <0x620000 0x5e0000>;
+			};
+			partition@c00000 {
+				label = "qspi-bitstream";
+				reg = <0xc00000 0x400000>;
+			};
 		};
 	};
 };

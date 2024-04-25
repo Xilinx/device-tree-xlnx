@@ -1,25 +1,33 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * dts file for Xilinx Versal a2197 RevA System Controller on MGT
+ * dts file for Xilinx Versal a2197 RevA System Controller
  *
  * (C) Copyright 2019-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
+#include "include/dt-bindings/gpio/gpio.h"
 
 / {
 	model = "Versal System Controller on a2197 board RevA";
 	compatible = "xlnx,zynqmp-a2197-revA", "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
 	aliases {
-                i2c0 = &i2c0;
-                nvmem0 = &eeprom1;
-                nvmem1 = &eeprom0;
-                serial0 = &uart0;
-        };
+		i2c0 = &i2c0;
+		nvmem0 = &eeprom1;
+		nvmem1 = &eeprom0;
+		serial0 = &uart0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
 
 };
+
 
 &i2c0 {
 	bootph-all;

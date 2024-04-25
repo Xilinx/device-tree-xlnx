@@ -5,33 +5,39 @@
  * (C) Copyright 2021-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/gpio/gpio.h"
-#include "include/dt-bindings/phy/phy.h"
 #include "include/dt-bindings/input/input.h"
-#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+#include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/net/ti-dp83867.h"
+#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
+#include "include/dt-bindings/phy/phy.h"
 
 / {
 	model = "ZynqMP Generic System Controller";
 	compatible = "xlnx,zynqmp-sc-revB", "xlnx,zynqmp-sc", "xlnx,zynqmp";
 
 	aliases {
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci0;
-                mmc1 = &sdhci1;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &uart1;
-                serial2 = &dcc;
-                spi0 = &qspi;
-                spi1 = &spi0;
-                spi2 = &spi1;
-        };
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &dcc;
+		spi0 = &qspi;
+		spi1 = &spi0;
+		spi2 = &spi1;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial1:115200n8";
+	};
+
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -58,16 +64,16 @@
 		};
 	};
 
-	si5332_2: si5332_2 { /* u42 */
+	si5332_2: si5332-2 { /* u42 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <26000000>;
 	};
+
 	pwm-fan {
 		compatible = "pwm-fan";
 		pwms = <&ttc0 2 40000 1>;
 	};
-
 };
 
 &gpio {
@@ -137,7 +143,6 @@
 &i2c0 {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	status = "okay";
 	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
@@ -154,7 +159,7 @@
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
 	scl-gpios = <&gpio 24 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 	sda-gpios = <&gpio 25 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
-	/* No reason to do pinctrl setup at u-boot stage */
+
 	/* Use for storing information about SC board */
 	eeprom: eeprom@54 { /* u34 - m24128 16kB */
 		compatible = "st,24c128", "atmel,24c128";
@@ -165,6 +170,7 @@
 
 /* USB 3.0 only */
 &psgtr {
+	status = "okay";
 	/* nc, nc, usb3 */
 	clocks = <&si5332_2>;
 	clock-names = "ref2";
@@ -283,6 +289,7 @@
 
 &pinctrl0 { /* required by spec */
 	status = "okay";
+
 	pinctrl_uart1_default: uart1-default {
 		conf {
 			groups = "uart1_9_grp";
@@ -321,7 +328,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_34_grp", "gpio0_35_grp";
 			function = "gpio0";
@@ -348,7 +355,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		conf {
 			groups = "gpio0_24_grp", "gpio0_25_grp";
 			slew-rate = <SLEW_RATE_SLOW>;
@@ -404,5 +411,4 @@
 			groups = "ethernet1_0_grp";
 		};
 	};
-
 };

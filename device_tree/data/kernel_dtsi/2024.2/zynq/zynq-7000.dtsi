@@ -1,16 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright (C) 2011-2022 Xilinx, Inc.
- * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Xilinx Zynq 7000 DTSI
+ * Describes the hardware common to all Zynq 7000-based boards.
  *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *  Copyright (C) 2011 - 2015 Xilinx
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 
 / {
@@ -63,7 +57,8 @@
 		compatible = "arm,cortex-a9-pmu";
 		interrupts = <0 5 4>, <0 6 4>;
 		interrupt-parent = <&intc>;
-		reg = < 0xf8891000 0x1000 0xf8893000 0x1000 >;
+		reg = <0xf8891000 0x1000>,
+		      <0xf8893000 0x1000>;
 	};
 
 	regulator_vccpint: fixedregulator {
@@ -164,9 +159,9 @@
 			compatible = "cdns,i2c-r1p10";
 			status = "disabled";
 			clocks = <&clkc 38>;
-			clock-frequency = <400000>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 25 4>;
+			clock-frequency = <400000>;
 			reg = <0xe0004000 0x1000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -176,9 +171,9 @@
 			compatible = "cdns,i2c-r1p10";
 			status = "disabled";
 			clocks = <&clkc 39>;
-			clock-frequency = <400000>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 48 4>;
+			clock-frequency = <400000>;
 			reg = <0xe0005000 0x1000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -210,6 +205,12 @@
 		ocm: sram@fffc0000 {
 			compatible = "mmio-sram";
 			reg = <0xfffc0000 0x10000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0 0xfffc0000 0x10000>;
+			ocm-sram@0 {
+				reg = <0x0 0x10000>;
+			};
 		};
 
 		uart0: serial@e0000000 {
@@ -267,7 +268,7 @@
 		};
 
 		gem0: ethernet@e000b000 {
-            compatible = "xlnx,zynq-gem", "cdns,gem";
+			compatible = "xlnx,zynq-gem", "cdns,gem";
 			reg = <0xe000b000 0x1000>;
 			status = "disabled";
 			interrupts = <0 22 4>;
@@ -278,7 +279,7 @@
 		};
 
 		gem1: ethernet@e000c000 {
-            compatible = "xlnx,zynq-gem", "cdns,gem";
+			compatible = "xlnx,zynq-gem", "cdns,gem";
 			reg = <0xe000c000 0x1000>;
 			status = "disabled";
 			interrupts = <0 45 4>;
@@ -301,19 +302,16 @@
 			#size-cells = <1>;
 			interrupt-parent = <&intc>;
 			interrupts = <0 18 4>;
+
 			nfc0: nand-controller@0,0 {
 				compatible = "arm,pl353-nand-r2p1";
 				reg = <0 0 0x1000000>;
 				status = "disabled";
-				#address-cells = <0x1>;
-				#size-cells = <0x0>;
 			};
 			nor0: flash@1,0 {
 				status = "disabled";
 				compatible = "cfi-flash";
 				reg = <1 0 0x2000000>;
-				#address-cells = <1>;
-				#size-cells = <1>;
 			};
 		};
 
@@ -377,11 +375,11 @@
 			};
 		};
 
-        dmac_s: dma-controller@f8003000 {
+		dmac_s: dma-controller@f8003000 {
 			compatible = "arm,pl330", "arm,primecell";
 			reg = <0xf8003000 0x1000>;
 			interrupt-parent = <&intc>;
-            /*
+			/*
 			 * interrupt-names = "abort", "dma0", "dma1", "dma2", "dma3",
 			 * "dma4", "dma5", "dma6", "dma7";
 			 */
@@ -537,8 +535,6 @@
 
 				port@2 {
 					reg = <2>;
-					funnel0_in_port2: endpoint {
-					};
 				};
 				/* The other input ports are not connect to anything */
 			};

@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP VN-P-B2197-00 (Tenzing2)
  *
- * (C) Copyright 2022-2024, Advanced Micro Devices, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -11,6 +11,17 @@
 / {
 	compatible = "xlnx,versal-net-vn-p-b2197-00-revA",
 		     "xlnx,versal-net-vn-p-b2197-00", "xlnx,versal-net";
+
+
+	chosen {
+		bootargs = "earlycon=pl011,mmio32,0xf1920000 console=ttyAMA0,115200n8 clk_ignore_unused root=/dev/ram0 rw";
+		stdout-path = "serial0:115200n8";
+	};
+
+/*	aliases {
+		nvmem0 = &eeprom0;
+		nvmem1 = &eeprom1;
+	}; */
 };
 
 &i2c0 {

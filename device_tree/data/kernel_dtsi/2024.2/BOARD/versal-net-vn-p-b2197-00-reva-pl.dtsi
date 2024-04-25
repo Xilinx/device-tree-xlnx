@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx ZynqMP VN-P-B2197 (Tenzing2)
  *
- * (C) Copyright 2022-2024, Advanced Micro Devices, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -58,5 +58,4 @@
 	GPIO_LED0-1
 	GPIO_PB0-1
 	GPIO_SMA
-
 */

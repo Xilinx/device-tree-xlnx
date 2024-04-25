@@ -5,7 +5,9 @@
  * (C) Copyright 2017-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>  */
+ * Michal Simek <michal.simek@amd.com>
+ */
+
 
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
@@ -17,17 +19,22 @@
 	compatible = "xlnx,zynqmp-zcu216-revA", "xlnx,zynqmp-zcu216", "xlnx,zynqmp";
 
 	aliases {
-                ethernet0 = &gem3;
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci1;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &dcc;
-                spi0 = &qspi;
-                usb0 = &usb0;
-        };
+		ethernet0 = &gem3;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci1;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &dcc;
+		spi0 = &qspi;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
 
 
 	gpio-keys {
@@ -117,14 +124,12 @@
 };
 
 &psgtr {
+	status = "okay";
 	/* nc, nc, usb3, sata */
 	clocks = <&si5341 0 2>, <&si5341 0 3>;
 	clock-names = "ref2", "ref3";
 };
 
-&dcc {
-	status = "okay";
-};
 
 &gem3 {
 	phy-handle = <&phy0>;
@@ -144,7 +149,6 @@
 		};
 	};
 };
-
 &gpio {
 	gpio-line-names = "QSPI_LWR_CLK", "QSPI_LWR_DQ1", "QSPI_LWR_DQ2", "QSPI_LWR_DQ3", "QSPI_LWR_DQ0", /* 0 - 4 */
 		  "QSPI_LWR_CS_B", "", "QSPI_UPR_CS_B", "QSPI_UPR_DQ0", "QSPI_UPR_DQ1", /* 5 - 9 */
@@ -183,6 +187,7 @@
 		  "", "", "", "", "", /* 165 - 169 */
 		  "", "", "", ""; /* 170 - 173 */
 };
+
 
 &i2c0 {
 	clock-frequency = <400000>;
@@ -398,30 +403,29 @@
 				si5341_2: out@2 {
 					/* refclk2 for PS-GT, used for USB3 */
 					reg = <2>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_3: out@3 {
 					/* refclk3 for PS-GT, used for SATA */
 					reg = <3>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_5: out@5 {
 					/* refclk5 PL CLK100 */
 					reg = <5>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_6: out@6 {
 					/* refclk6 PL CLK125 */
 					reg = <6>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_9: out@9 {
 					/* refclk9 used for PS_REF_CLK 33.3 MHz */
 					reg = <9>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 			};
-
 		};
 		i2c_si570_user_c0: i2c@2 {
 			#address-cells = <1>;
@@ -558,7 +562,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_14_grp", "gpio0_15_grp";
 			function = "gpio0";
@@ -585,7 +589,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_16_grp", "gpio0_17_grp";
 			function = "gpio0";
@@ -613,6 +617,7 @@
 	};
 };
 
+
 &sata {
 	/* SATA OOB timing settings */
 	ceva,p0-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
@@ -630,12 +635,13 @@
 /* SD1 with level shifter */
 &sdhci1 {
 	disable-wp;
-	xlnx,mio-bank = <1>;
 	/*
 	 * This property should be removed for supporting UHS mode
 	 */
 	no-1-8-v;
+	xlnx,mio-bank = <1>;
 };
+
 
 /* ULPI SMSC USB3320 */
 &usb0 {

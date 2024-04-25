@@ -5,6 +5,7 @@
  * Author: Nagaraju Lakkaraju
  *
  * Copyright (c) 2017 Microsemi Corporation
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 
 #ifndef _DT_BINDINGS_MSCC_VSC8531_H
@@ -27,14 +28,5 @@
 #define VSC8531_SERIAL_MODE			13
 #define VSC8531_FORCE_LED_OFF			14
 #define VSC8531_FORCE_LED_ON			15
-
-#define VSC8531_RGMII_CLK_DELAY_0_2_NS	0
-#define VSC8531_RGMII_CLK_DELAY_0_8_NS	1
-#define VSC8531_RGMII_CLK_DELAY_1_1_NS	2
-#define VSC8531_RGMII_CLK_DELAY_1_7_NS	3
-#define VSC8531_RGMII_CLK_DELAY_2_0_NS	4
-#define VSC8531_RGMII_CLK_DELAY_2_3_NS	5
-#define VSC8531_RGMII_CLK_DELAY_2_6_NS	6
-#define VSC8531_RGMII_CLK_DELAY_3_4_NS	7
 
 #endif

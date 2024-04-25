@@ -5,8 +5,9 @@
  * (C) Copyright 2015-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
@@ -18,18 +19,24 @@
 	compatible = "xlnx,zynqmp-zcu102-revA", "xlnx,zynqmp-zcu102", "xlnx,zynqmp";
 
 	aliases {
-                ethernet0 = &gem3;
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci1;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &uart1;
-                serial2 = &dcc;
-                spi0 = &qspi;
-                usb0 = &usb0;
-        };
+		ethernet0 = &gem3;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci1;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &dcc;
+		spi0 = &qspi;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -37,7 +44,7 @@
 		switch-19 {
 			label = "sw19";
 			gpios = <&gpio 22 GPIO_ACTIVE_HIGH>;
-			linux,code = <KEY_DOWN>; /* down */
+			linux,code = <KEY_DOWN>;
 			wakeup-source;
 			autorepeat;
 		};
@@ -144,8 +151,10 @@
 	pinctrl-0 = <&pinctrl_can1_default>;
 };
 
+
 &gem3 {
 	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem3_default>;
 	mdio: mdio {
@@ -169,7 +178,9 @@
 	pinctrl-0 = <&pinctrl_gpio_default>;
 };
 
+
 &i2c0 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
@@ -184,6 +195,30 @@
 		gpio-line-names = "PS_GTR_LAN_SEL0", "PS_GTR_LAN_SEL1", "PS_GTR_LAN_SEL2", "PS_GTR_LAN_SEL3",
 				"PCI_CLK_DIR_SEL", "IIC_MUX_RESET_B", "GEM3_EXP_RESET_B",
 				"", "", "", "", "", "", "", "", "";
+		gtr-sel0-hog {
+			gpio-hog;
+			gpios = <0 0>;
+			output-low; /* PCIE = 0, DP = 1 */
+			line-name = "sel0";
+		};
+		gtr-sel1-hog {
+			gpio-hog;
+			gpios = <1 0>;
+			output-high; /* PCIE = 0, DP = 1 */
+			line-name = "sel1";
+		};
+		gtr-sel2-hog {
+			gpio-hog;
+			gpios = <2 0>;
+			output-high; /* PCIE = 0, USB0 = 1 */
+			line-name = "sel2";
+		};
+		gtr-sel3-hog {
+			gpio-hog;
+			gpios = <3 0>;
+			output-high; /* PCIE = 0, SATA = 1 */
+			line-name = "sel3";
+		};
 	};
 
 	tca6416_u61: gpio@21 {
@@ -191,25 +226,6 @@
 		reg = <0x21>;
 		gpio-controller; /* IRQ not connected */
 		#gpio-cells = <2>;
-		/*
-		 * IRQ not connected
-		 * Lines:
-		 * 0 - VCCPSPLL_EN
-		 * 1 - MGTRAVCC_EN
-		 * 2 - MGTRAVTT_EN
-		 * 3 - VCCPSDDRPLL_EN
-		 * 4 - MIO26_PMU_INPUT_LS
-		 * 5 - PL_PMBUS_ALERT
-		 * 6 - PS_PMBUS_ALERT
-		 * 7 - MAXIM_PMBUS_ALERT
-		 * 10 - PL_DDR4_VTERM_EN
-		 * 11 - PL_DDR4_VPP_2V5_EN
-		 * 12 - PS_DIMM_VDDQ_TO_PSVCCO_ON
-		 * 13 - PS_DIMM_SUSPEND_EN
-		 * 14 - PS_DDR4_VTERM_EN
-		 * 15 - PS_DDR4_VPP_2V5_EN
-		 * 16 - 17 - not connected
-		 */
 		gpio-line-names = "VCCPSPLL_EN", "MGTRAVCC_EN", "MGTRAVTT_EN", "VCCPSDDRPLL_EN", "MIO26_PMU_INPUT_LS",
 				"PL_PMBUS_ALERT", "PS_PMBUS_ALERT", "MAXIM_PMBUS_ALERT", "PL_DDR4_VTERM_EN",
 				"PL_DDR4_VPP_2V5_EN", "PS_DIMM_VDDQ_TO_PSVCCO_ON", "PS_DIMM_SUSPEND_EN",
@@ -413,12 +429,11 @@
 				status = "disabled"; /* unreachable */
 				reg = <0x20>;
 			};
-
 			max20751@72 { /* u95 */
 				compatible = "maxim,max20751";
 				reg = <0x72>;
 			};
-			max20751@73 { /* u96 FIXME - not detected */
+			max20751@73 { /* u96 */
 				compatible = "maxim,max20751";
 				reg = <0x73>;
 			};
@@ -428,6 +443,7 @@
 };
 
 &i2c1 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
@@ -474,45 +490,44 @@
 				si5341_0: out@0 {
 					/* refclk0 for PS-GT, used for DP */
 					reg = <0>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_2: out@2 {
 					/* refclk2 for PS-GT, used for USB3 */
 					reg = <2>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_3: out@3 {
 					/* refclk3 for PS-GT, used for SATA */
 					reg = <3>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_4: out@4 {
 					/* refclk4 for PS-GT, used for PCIE slot */
 					reg = <4>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_5: out@5 {
 					/* refclk5 for PS-GT, used for PCIE */
 					reg = <5>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_6: out@6 {
 					/* refclk6 PL CLK125 */
 					reg = <6>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_7: out@7 {
 					/* refclk7 PL CLK74 */
 					reg = <7>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_9: out@9 {
 					/* refclk9 used for PS_REF_CLK 33.3 MHz */
 					reg = <9>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 			};
-
 		};
 		i2c@2 {
 			#address-cells = <1>;
@@ -643,7 +658,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_14_grp", "gpio0_15_grp";
 			function = "gpio0";
@@ -670,7 +685,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_16_grp", "gpio0_17_grp";
 			function = "gpio0";
@@ -893,7 +908,9 @@
 	};
 };
 
+
 &psgtr {
+	status = "okay";
 	/* pcie, sata, usb3, dp */
 	clocks = <&si5341 0 5>, <&si5341 0 3>, <&si5341 0 2>, <&si5341 0 0>;
 	clock-names = "ref0", "ref1", "ref2", "ref3";
@@ -929,13 +946,13 @@
 	};
 };
 
+
 &sata {
 	/* SATA OOB timing settings */
 	ceva,p0-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
 	ceva,p0-comwake-params = /bits/ 8 <0x06 0x14 0x08 0x0E>;
 	ceva,p0-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
 	ceva,p0-retry-params = /bits/ 16 <0x96A4 0x3FFC>;
-
 	ceva,p1-cominit-params = /bits/ 8 <0x18 0x40 0x18 0x28>;
 	ceva,p1-comwake-params = /bits/ 8 <0x06 0x14 0x08 0x0E>;
 	ceva,p1-burst-params = /bits/ 8 <0x13 0x08 0x4A 0x06>;
@@ -953,6 +970,7 @@
 	no-1-8-v;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci1_default>;
+	xlnx,mio-bank = <1>;
 };
 
 &uart0 {
@@ -977,4 +995,10 @@
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	maximum-speed = "super-speed";
+};
+
+
+&zynqmp_dpsub {
+	phy-names = "dp-phy0";
+	phys = <&psgtr 1 PHY_TYPE_DP 0 3>;
 };

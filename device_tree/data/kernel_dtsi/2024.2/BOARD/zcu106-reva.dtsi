@@ -5,8 +5,9 @@
  * (C) Copyright 2016-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/gpio/gpio.h"
@@ -19,17 +20,23 @@
 
 	aliases {
 		ethernet0 = &gem3;
-                i2c0 = &i2c0;
-                i2c1 = &i2c1;
-                mmc0 = &sdhci1;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &uart1;
-                serial2 = &dcc;
-                spi0 = &qspi;
-                usb0 = &usb0;
-        };
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci1;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &dcc;
+		spi0 = &qspi;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -37,7 +44,7 @@
 		switch-19 {
 			label = "sw19";
 			gpios = <&gpio 22 GPIO_ACTIVE_HIGH>;
-			linux,code = <KEY_DOWN>; /* down */
+			linux,code = <KEY_DOWN>;
 			wakeup-source;
 			autorepeat;
 		};
@@ -51,7 +58,6 @@
 			linux,default-trigger = "heartbeat";
 		};
 	};
-
 
 	ina226-u76 {
 		compatible = "iio-hwmon";
@@ -138,6 +144,18 @@
 		#clock-cells = <0>;
 		clock-frequency = <114285000>;
 	};
+
+	dpcon {
+		compatible = "dp-connector";
+		label = "P11";
+		type = "full-size";
+
+		port {
+			dpcon_in: endpoint {
+				remote-endpoint = <&dpsub_dp_out>;
+			};
+		};
+	};
 };
 
 &can1 {
@@ -145,8 +163,10 @@
 	pinctrl-0 = <&pinctrl_can1_default>;
 };
 
+
 &gem3 {
 	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem3_default>;
 	mdio: mdio {
@@ -170,7 +190,9 @@
 	pinctrl-0 = <&pinctrl_gpio_default>;
 };
 
+
 &i2c0 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c0_default>;
 	pinctrl-1 = <&pinctrl_i2c0_gpio>;
@@ -432,6 +454,7 @@
 };
 
 &i2c1 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
@@ -478,32 +501,32 @@
 				si5341_0: out@0 {
 					/* refclk0 for PS-GT, used for DP */
 					reg = <0>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_2: out@2 {
 					/* refclk2 for PS-GT, used for USB3 */
 					reg = <2>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_3: out@3 {
 					/* refclk3 for PS-GT, used for SATA */
 					reg = <3>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_6: out@6 {
 					/* refclk6 PL CLK125 */
 					reg = <6>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_7: out@7 {
 					/* refclk7 PL CLK74 */
 					reg = <7>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 				si5341_9: out@9 {
 					/* refclk9 used for PS_REF_CLK 33.3 MHz */
 					reg = <9>;
-					always-on; /* assigned-clocks does not enable, so do it here */
+					always-on;
 				};
 			};
 
@@ -602,26 +625,6 @@
 			#size-cells = <0>;
 			reg = <3>;
 			/* DDR4 SODIMM */
-			dev@19 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x19>;
-			};
-			dev@30 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x30>;
-			};
-			dev@35 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x35>;
-			};
-			dev@36 { /* u-boot detection */
-				compatible = "xxx";
-				reg = <0x36>;
-			};
-			dev@51 { /* u-boot detection - maybe SPD */
-				compatible = "xxx";
-				reg = <0x51>;
-			};
 		};
 		i2c@4 {
 			#address-cells = <1>;
@@ -666,7 +669,7 @@
 		};
 	};
 
-	pinctrl_i2c0_gpio: i2c0-gpio {
+	pinctrl_i2c0_gpio: i2c0-gpio-grp {
 		mux {
 			groups = "gpio0_14_grp", "gpio0_15_grp";
 			function = "gpio0";
@@ -693,7 +696,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_16_grp", "gpio0_17_grp";
 			function = "gpio0";
@@ -916,6 +919,13 @@
 	};
 };
 
+&psgtr {
+	status = "okay";
+	/* nc, sata, usb3, dp */
+	clocks = <&si5341 0 3>, <&si5341 0 2>, <&si5341 0 0>;
+	clock-names = "ref1", "ref2", "ref3";
+};
+
 &qspi {
 	num-cs = <2>;
 	flash@0 {
@@ -946,11 +956,6 @@
 	};
 };
 
-&psgtr {
-	/* nc, sata, usb3, dp */
-	clocks = <&si5341 0 3>, <&si5341 0 2>, <&si5341 0 0>;
-	clock-names = "ref1", "ref2", "ref3";
-};
 
 &sata {
 	/* SATA OOB timing settings */
@@ -968,12 +973,13 @@
 
 /* SD1 with level shifter */
 &sdhci1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_sdhci1_default>;
 	/*
 	 * This property should be removed for supporting UHS mode
 	 */
 	no-1-8-v;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci1_default>;
+	xlnx,mio-bank = <1>;
 };
 
 &uart0 {
@@ -998,4 +1004,19 @@
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	maximum-speed = "super-speed";
+};
+
+
+&zynqmp_dpsub {
+	phy-names = "dp-phy0", "dp-phy1";
+	phys = <&psgtr 1 PHY_TYPE_DP 0 3>,
+	       <&psgtr 0 PHY_TYPE_DP 1 3>;
+
+	ports {
+		port@5 {
+			dpsub_dp_out: endpoint {
+				remote-endpoint = <&dpcon_in>;
+			};
+		};
+	};
 };

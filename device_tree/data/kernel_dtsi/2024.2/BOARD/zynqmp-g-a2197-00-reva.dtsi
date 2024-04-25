@@ -2,28 +2,34 @@
 /*
  * dts file for Xilinx Versal a2197 RevA System Controller on MGT
  *
- * (C) Copyright 2021-2022 Xilinx, Inc.
+ * (C) Copyright 2019-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 #include "include/dt-bindings/gpio/gpio.h"
 
 / {
 	model = "Versal System Controller on a2197 MGT Char board RevA";
 	compatible = "xlnx,zynqmp-g-a2197-00-revA", "xlnx,zynqmp-a2197-revA",
-			"xlnx,zynqmp-a2197", "xlnx,zynqmp";
+		     "xlnx,zynqmp-a2197", "xlnx,zynqmp";
 
-	 aliases {
-                ethernet0 = &gem0;
-                i2c0 = &i2c0;
-                mmc0 = &sdhci0;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &dcc;
-                usb0 = &usb0;
-        };
+	aliases {
+		ethernet0 = &gem0;
+		i2c0 = &i2c0;
+		mmc0 = &sdhci0;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &dcc;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
 
 
 	ina226-u74 {
@@ -59,17 +65,20 @@
 	xlnx,mio-bank = <0>;
 };
 
+
 &gem0 { /* eth MDIO 76/77 */
 	phy-handle = <&phy0>;
 	phy-mode = "sgmii";
 	is-internal-pcspma;
-	phy0: ethernet-phy@0 { /* marwell m88e1512 */
-		reg = <0>;
-		reset-gpios = <&gpio 42 GPIO_ACTIVE_LOW>;
+	mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy0: ethernet-phy@0 { /* marwell m88e1512 */
+			reg = <0>;
+			reset-gpios = <&gpio 42 GPIO_ACTIVE_LOW>;
+/*		xlnx,phy-type = <PHY_TYPE_SGMII>; */
+		};
 	};
-/*	phy-names = "...";
-	phys = <&lane0 PHY_TYPE_SGMII ... >
-	Note: lane0 sgmii/lane1 usb3 */
 };
 
 &gpio {
@@ -210,7 +219,7 @@
 			u75: ina226@41 { /* u75 */
 				compatible = "ti,ina226";
 				#io-channel-cells = <1>;
-				label = "ina226-u75"
+				label = "ina226-u75";
 				reg = <0x41>;
 				shunt-resistor = <1000>;
 			};
@@ -242,7 +251,7 @@
 				reg = <0x45>;
 				shunt-resistor = <5000>;
 			};
-			tps53681@60 { /* u53- 0xc0 - FIXME name - don't know what it does - also vcc_io_soc */
+			tps53681@60 { /* u53 - 0xc0 - FIXME name - don't know what it does - also vcc_io_soc */
 				compatible = "ti,tps53681", "ti,tps53679";
 				reg = <0x60>;
 			};
@@ -256,7 +265,7 @@
 				reg = <0x50>;
 			};
 		};
-		i2c@4 { /* fmc2  via JA3G */
+		i2c@4 { /* fmc2 via JA3G */
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
@@ -282,6 +291,7 @@
 		/* 7 unused */
 	};
 };
+
 
 &dwc3_0 {
 	dr_mode = "peripheral";

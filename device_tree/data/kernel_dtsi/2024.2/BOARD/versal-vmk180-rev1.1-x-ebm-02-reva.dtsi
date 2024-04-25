@@ -5,7 +5,7 @@
  * (C) Copyright 2020-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "versal-vmk180-rev1.1.dtsi"

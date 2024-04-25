@@ -5,12 +5,14 @@
  * (C) Copyright 2017-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
-#include "include/dt-bindings/clock/xlnx-versal-clk.h"
+
 #include "include/dt-bindings/power/xlnx-versal-power.h"
 #include "include/dt-bindings/power/xlnx-versal-regnode.h"
+#include "include/dt-bindings/clock/xlnx-versal-clk.h"
 #include "include/dt-bindings/reset/xlnx-versal-resets.h"
+
 / {
 	pl_alt_ref_clk: pl_alt_ref_clk {
 		bootph-all;
@@ -61,6 +63,7 @@
 			zynqmp_power: zynqmp-power {
 				compatible = "xlnx,zynqmp-power";
 			};
+
 			versal_reset: reset-controller {
 				compatible = "xlnx,versal-reset";
 				#reset-cells = <1>;
@@ -142,12 +145,16 @@
 };
 
 &gem0 {
-	clocks = <&versal_clk LPD_LSBUS>, <&versal_clk GEM0_REF>, <&versal_clk GEM0_TX>, <&versal_clk GEM0_RX>, <&versal_clk GEM_TSU>;
+	clocks = <&versal_clk LPD_LSBUS>,
+		 <&versal_clk GEM0_REF>, <&versal_clk GEM0_TX>,
+		 <&versal_clk GEM0_RX>, <&versal_clk GEM_TSU>;
 	power-domains = <&versal_firmware PM_DEV_GEM_0>;
 };
 
 &gem1 {
-	clocks = <&versal_clk LPD_LSBUS>, <&versal_clk GEM1_REF>, <&versal_clk GEM1_TX>, <&versal_clk GEM1_RX>, <&versal_clk GEM_TSU>;
+	clocks = <&versal_clk LPD_LSBUS>,
+		 <&versal_clk GEM1_REF>, <&versal_clk GEM1_TX>,
+		 <&versal_clk GEM1_RX>, <&versal_clk GEM_TSU>;
 	power-domains = <&versal_firmware PM_DEV_GEM_1>;
 };
 

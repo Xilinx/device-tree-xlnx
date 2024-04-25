@@ -3,11 +3,12 @@
  * dts file for Xilinx ZynqMP ZCU100 revC
  *
  * (C) Copyright 2016-2022 Xilinx, Inc.
- * (C) Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  * Nathalie Chan King Choy
  */
+
 
 #include "include/dt-bindings/input/input.h"
 #include "include/dt-bindings/interrupt-controller/irq.h"
@@ -19,19 +20,25 @@
 	model = "ZynqMP ZCU100 RevC";
 	compatible = "xlnx,zynqmp-zcu100-revC", "xlnx,zynqmp-zcu100", "xlnx,zynqmp";
 
-	 aliases {
-                i2c0 = &i2c1;
-                rtc0 = &rtc;
-                serial0 = &uart1;
-                serial1 = &uart0;
-                serial2 = &dcc;
-                spi0 = &spi0;
-                spi1 = &spi1;
-                usb0 = &usb0;
-                usb1 = &usb1;
-                mmc0 = &sdhci0;
-                mmc1 = &sdhci1;
-        };
+	aliases {
+		i2c0 = &i2c1;
+		rtc0 = &rtc;
+		serial0 = &uart1;
+		serial1 = &uart0;
+		serial2 = &dcc;
+		spi0 = &spi0;
+		spi1 = &spi1;
+		usb0 = &usb0;
+		usb1 = &usb1;
+		mmc0 = &sdhci0;
+		mmc1 = &sdhci1;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
 
 	gpio-keys {
 		compatible = "gpio-keys";
@@ -39,7 +46,7 @@
 		switch-4 {
 			label = "sw4";
 			gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_POWER>; /* down */
+			linux,code = <KEY_POWER>;
 			wakeup-source;
 			autorepeat;
 		};
@@ -56,33 +63,33 @@
 
 	leds {
 		compatible = "gpio-leds";
-		ds2 {
+		led-ds2 {
 			label = "ds2";
 			gpios = <&gpio 20 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 		};
 
-		ds3 {
+		led-ds3 {
 			label = "ds3";
 			gpios = <&gpio 19 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "phy0tx"; /* WLAN tx */
 			default-state = "off";
 		};
 
-		ds4 {
+		led-ds4 {
 			label = "ds4";
 			gpios = <&gpio 18 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "phy0rx"; /* WLAN rx */
 			default-state = "off";
 		};
 
-		ds5 {
+		led-ds5 {
 			label = "ds5";
 			gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "bluetooth-power";
 		};
 
-        led-vbus-det { /* U5 USB5744 VBUS detection via MIO25 */
+		led-vbus-det { /* U5 USB5744 VBUS detection via MIO25 */
 			label = "vbus_det";
 			gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
@@ -109,48 +116,50 @@
 		io-channels = <&u35 0>, <&u35 1>, <&u35 2>, <&u35 3>;
 	};
 
-	si5335_0: si5335_0 { /* clk0_usb - u23 */
+	si5335_0: si5335-0 { /* clk0_usb - u23 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <26000000>;
 	};
 
-	si5335_1: si5335_1 { /* clk1_dp - u23 */
+	si5335_1: si5335-1 { /* clk1_dp - u23 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <27000000>;
 	};
 };
 
+
 &gpio {
 	gpio-line-names = "UART1_TX", "UART1_RX", "UART0_RX", "UART0_TX", "I2C1_SCL",
-		  "I2C1_SDA", "SPI1_SCLK", "WLAN_EN", "BT_EN", "SPI1_CS",
-		  "SPI1_MISO", "SPI1_MOSI", "I2C_MUX_RESET", "SD0_DAT0", "SD0_DAT1",
-		  "SD0_DAT2", "SD0_DAT3", "PS_LED3", "PS_LED2", "PS_LED1",
-		  "PS_LED0", "SD0_CMD", "SD0_CLK", "GPIO_PB", "SD0_DETECT",
-		  "VBUS_DET", "POWER_INT", "DP_AUX", "DP_HPD", "DP_OE",
-		  "DP_AUX_IN", "INA226_ALERT", "PS_FP_PWR_EN", "PL_PWR_EN", "POWER_KILL",
-		  "", "GPIO-A", "GPIO-B", "SPI0_SCLK", "GPIO-C",
-		  "GPIO-D", "SPI0_CS", "SPI0_MISO", "SPI_MOSI", "GPIO-E",
-		  "GPIO-F", "SD1_D0", "SD1_D1", "SD1_D2", "SD1_D3",
-		  "SD1_CMD", "SD1_CLK", "USB0_CLK", "USB0_DIR", "USB0_DATA2",
-		  "USB0_NXT", "USB0_DATA0", "USB0_DATA1", "USB0_STP", "USB0_DATA3",
-		  "USB0_DATA4", "USB0_DATA5", "USB0_DATA6", "USB0_DATA7", "USB1_CLK",
-		  "USB1_DIR", "USB1_DATA2", "USB1_NXT", "USB1_DATA0", "USB1_DATA1",
-		  "USB1_STP", "USB1_DATA3", "USB1_DATA4", "USB1_DATA5", "USB1_DATA6",
-		  "USB_DATA7", "WLAN_IRQ", "PMIC_IRQ", /* MIO end and EMIO start */
-		  "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "", "", "", "", "", "", "",
-		  "", "", "", "";
+			  "I2C1_SDA", "SPI1_SCLK", "WLAN_EN", "BT_EN", "SPI1_CS",
+			  "SPI1_MISO", "SPI1_MOSI", "I2C_MUX_RESET", "SD0_DAT0", "SD0_DAT1",
+			  "SD0_DAT2", "SD0_DAT3", "PS_LED3", "PS_LED2", "PS_LED1",
+			  "PS_LED0", "SD0_CMD", "SD0_CLK", "GPIO_PB", "SD0_DETECT",
+			  "VBUS_DET", "POWER_INT", "DP_AUX", "DP_HPD", "DP_OE",
+			  "DP_AUX_IN", "INA226_ALERT", "PS_FP_PWR_EN", "PL_PWR_EN", "POWER_KILL",
+			  "", "GPIO-A", "GPIO-B", "SPI0_SCLK", "GPIO-C",
+			  "GPIO-D", "SPI0_CS", "SPI0_MISO", "SPI_MOSI", "GPIO-E",
+			  "GPIO-F", "SD1_D0", "SD1_D1", "SD1_D2", "SD1_D3",
+			  "SD1_CMD", "SD1_CLK", "USB0_CLK", "USB0_DIR", "USB0_DATA2",
+			  "USB0_NXT", "USB0_DATA0", "USB0_DATA1", "USB0_STP", "USB0_DATA3",
+			  "USB0_DATA4", "USB0_DATA5", "USB0_DATA6", "USB0_DATA7", "USB1_CLK",
+			  "USB1_DIR", "USB1_DATA2", "USB1_NXT", "USB1_DATA0", "USB1_DATA1",
+			  "USB1_STP", "USB1_DATA3", "USB1_DATA4", "USB1_DATA5", "USB1_DATA6",
+			  "USB_DATA7", "WLAN_IRQ", "PMIC_IRQ", /* MIO end and EMIO start */
+			  "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "", "", "", "", "", "", "",
+			  "", "", "", "";
 };
+
 
 &i2c1 {
 	pinctrl-names = "default", "gpio";
@@ -168,36 +177,24 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
-			/*
-			 * LSEXP_I2C0
-			 */
 			label = "LS-I2C0";
 		};
 		i2csw_1: i2c@1 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			/*
-			 * LSEXP_I2C1
-			 */
 			label = "LS-I2C1";
 		};
 		i2csw_2: i2c@2 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			/*
-			 * HSEXP_I2C2
-			 */
 			label = "HS-I2C2";
 		};
 		i2csw_3: i2c@3 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			/*
-			 * HSEXP_I2C3
-			 */
 			label = "HS-I2C3";
 		};
 		i2csw_4: i2c@4 {
@@ -263,7 +260,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_4_grp", "gpio0_5_grp";
 			function = "gpio0";
@@ -469,19 +466,27 @@
 };
 
 &psgtr {
+	status = "okay";
 	/* usb3, dp */
 	clocks = <&si5335_0>, <&si5335_1>;
 	clock-names = "ref0", "ref1";
 };
 
+
 /* SD0 only supports 3.3V, no level shifter */
 &sdhci0 {
 	no-1-8-v;
 	disable-wp;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci0_default>;
+	xlnx,mio-bank = <0>;
 };
 
 &sdhci1 {
 	bus-width = <0x4>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci1_default>;
+	xlnx,mio-bank = <0>;
 	non-removable;
 	disable-wp;
 	cap-power-off-card;
@@ -497,16 +502,36 @@
 	};
 };
 
+&spi0 { /* Low Speed connector */
+	label = "LS-SPI0";
+	num-cs = <1>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_spi0_default>;
+};
+
+&spi1 { /* High Speed connector */
+	label = "HS-SPI1";
+	num-cs = <1>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_spi1_default>;
+};
+
 &uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0_default>;
 	bluetooth {
 		compatible = "ti,wl1831-st";
 		enable-gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
 	};
 };
 
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1_default>;
+};
+
 /* ULPI SMSC USB3320 */
 &usb0 {
-	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb0_default>;
 	phy-names = "usb3-phy";
@@ -521,7 +546,6 @@
 
 /* ULPI SMSC USB3320 */
 &usb1 {
-	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb1_default>;
 	phy-names = "usb3-phy";
@@ -532,4 +556,11 @@
 &dwc3_1 {
 	dr_mode = "host";
 	maximum-speed = "super-speed";
+};
+
+
+&zynqmp_dpsub {
+	phy-names = "dp-phy0", "dp-phy1";
+	phys = <&psgtr 1 PHY_TYPE_DP 0 1>,
+	       <&psgtr 0 PHY_TYPE_DP 1 1>;
 };

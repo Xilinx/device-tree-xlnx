@@ -1,12 +1,13 @@
-// SPDX-License-Identifier: GPL-2.0+
+// SPDX-License-Identifier: GPL-2.0
 /*
  * dts file for Xilinx ZynqMP ZCU104
  *
  * (C) Copyright 2017-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
@@ -17,17 +18,22 @@
 	compatible = "xlnx,zynqmp-zcu104-revC", "xlnx,zynqmp-zcu104", "xlnx,zynqmp";
 
 	aliases {
-                ethernet0 = &gem3;
-                i2c0 = &i2c1;
-                mmc0 = &sdhci1;
-                nvmem0 = &eeprom;
-                rtc0 = &rtc;
-                serial0 = &uart0;
-                serial1 = &uart1;
-                serial2 = &dcc;
-                spi0 = &qspi;
-                usb0 = &usb0;
-        };
+		ethernet0 = &gem3;
+		i2c0 = &i2c1;
+		mmc0 = &sdhci1;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &dcc;
+		spi0 = &qspi;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
 
 
 	ina226 {
@@ -59,8 +65,10 @@
 	pinctrl-0 = <&pinctrl_can1_default>;
 };
 
+
 &gem3 {
 	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem3_default>;
 	mdio: mdio {
@@ -79,7 +87,9 @@
 	};
 };
 
+
 &i2c1 {
+	clock-frequency = <400000>;
 	pinctrl-names = "default", "gpio";
 	pinctrl-0 = <&pinctrl_i2c1_default>;
 	pinctrl-1 = <&pinctrl_i2c1_gpio>;
@@ -92,17 +102,17 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 		/*
-		  * IRQ not connected
-		  * Lines:
-		  * 0 - IRPS5401_ALERT_B
-		  * 1 - HDMI_8T49N241_INT_ALM
-		  * 2 - MAX6643_OT_B
-		  * 3 - MAX6643_FANFAIL_B
-		  * 5 - IIC_MUX_RESET_B
-		  * 6 - GEM3_EXP_RESET_B
-		  * 7 - FMC_LPC_PRSNT_M2C_B
-		  * 4, 10 - 17 - not connected
-		  */
+		 * IRQ not connected
+		 * Lines:
+		 * 0 - IRPS5401_ALERT_B
+		 * 1 - HDMI_8T49N241_INT_ALM
+		 * 2 - MAX6643_OT_B
+		 * 3 - MAX6643_FANFAIL_B
+		 * 5 - IIC_MUX_RESET_B
+		 * 6 - GEM3_EXP_RESET_B
+		 * 7 - FMC_LPC_PRSNT_M2C_B
+		 * 4, 10 - 17 - not connected
+		 */
 	};
 
 	/* Another connection to this bus via PL i2c via PCA9306 - u45 */
@@ -222,7 +232,7 @@
 		};
 	};
 
-	pinctrl_i2c1_gpio: i2c1-gpio {
+	pinctrl_i2c1_gpio: i2c1-gpio-grp {
 		mux {
 			groups = "gpio0_16_grp", "gpio0_17_grp";
 			function = "gpio0";
@@ -380,6 +390,13 @@
 	};
 };
 
+&psgtr {
+	status = "okay";
+	/* nc, sata, usb3, dp */
+	clocks = <&clock_8t49n287_5>, <&clock_8t49n287_2>, <&clock_8t49n287_3>;
+	clock-names = "ref1", "ref2", "ref3";
+};
+
 &qspi {
 	flash@0 {
 		compatible = "m25p80", "jedec,spi-nor"; /* n25q512a 128MiB */
@@ -408,11 +425,6 @@
 	};
 };
 
-&psgtr {
-	/* nc, sata, usb3, dp */
-	clocks = <&clock_8t49n287_5>, <&clock_8t49n287_2>, <&clock_8t49n287_3>;
-	clock-names = "ref1", "ref2", "ref3";
-};
 
 &sata {
 	/* SATA OOB timing settings */
@@ -459,4 +471,11 @@
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	maximum-speed = "super-speed";
+};
+
+
+&zynqmp_dpsub {
+	phy-names = "dp-phy0", "dp-phy1";
+	phys = <&psgtr 1 PHY_TYPE_DP 0 3>,
+	       <&psgtr 0 PHY_TYPE_DP 1 3>;
 };

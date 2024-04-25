@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * dts file for Xilinx Versal VMK180 revA
+ * dts file for Xilinx Versal vmk180 revA
  *
  * (C) Copyright 2019-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "include/dt-bindings/gpio/gpio.h"
@@ -13,6 +13,7 @@
 / {
 	compatible = "xlnx,versal-vmk180-revA", "xlnx,versal";
 	model = "Xilinx Versal vmk180 Eval board revA";
+
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
@@ -36,14 +37,12 @@
 /* PMC_MIO 0 -12 - configuration header QSPI/OSPI/EMMC */
 /* FIXME PMC_MIO37 ZU4_TRIGGER/PMC_MIO37/38 PCIE */
 
-&dcc {
-	status = "okay";
-};
 
 &sdhci1 { /* PMC_MIO26-36/51 */
 	xlnx,mio-bank = <1>;
 	no-1-8-v;
 };
+
 
 &gem0 { /* PMC_MIO_48, LPD_MIO0-11/24/25 */
 	phy-handle = <&phy1>; /* u198 */
@@ -83,6 +82,7 @@
 	phy-handle = <&phy2>; /* u134 */
 	phy-mode = "rgmii-id";
 };
+
 
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";

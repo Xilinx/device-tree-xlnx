@@ -109,18 +109,15 @@
 		};
 	};
 
-	memory: memory@0 {
-		reg = <0 0 0 0x80000000>;
-		device_type = "memory";
-	};
 
 	aliases {
 		serial0 = &serial0;
 		serial1 = &serial1;
-		serail2 = &dcc;
+		serial2 = &dcc;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 	};
+
 	dcc: dcc {
 		compatible = "arm,dcc";
 		status = "disabled";
@@ -318,7 +315,7 @@
 		};
 
 		gem0: ethernet@f19e0000 {
-			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,gem";
 			reg = <0 0xf19e0000 0 0x1000>;
 			interrupts = <0 39 4>, <0 39 4>;
 			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
@@ -347,7 +344,7 @@
 		};
 
 		gem1: ethernet@f19f0000 {
-			compatible = "xlnx,versal-gem", "cdns,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,gem";
 			reg = <0 0xf19f0000 0 0x1000>;
 			interrupts = <0 41 4>, <0 41 4>;
 			clock-names = "pclk", "hclk", "tx_clk", "rx_clk", "tsu_clk";
@@ -539,8 +536,8 @@
 			interrupts = <0 184 4>;
 			clock-names = "clk_xin", "clk_ahb";
 			no-1-8-v;
-			clocks = <&versal_net_clk SDIO1_REF>, <&versal_net_clk LPD_LSBUS>;
-			power-domains = <&versal_net_firmware PM_DEV_SDIO_1>;
+			clocks = <&versal_net_clk SDIO0_REF>, <&versal_net_clk LPD_LSBUS>;
+			power-domains = <&versal_net_firmware PM_DEV_SDIO_0>;
 		};
 
 		sdhci1: mmc@f1050000 {
@@ -549,8 +546,8 @@
 			interrupts = <0 186 4>;
 			clock-names = "clk_xin", "clk_ahb";
 			no-1-8-v;
-			clocks = <&versal_net_clk SDIO0_REF>, <&versal_net_clk LPD_LSBUS>;
-			power-domains = <&versal_net_firmware PM_DEV_SDIO_0>;
+			clocks = <&versal_net_clk SDIO1_REF>, <&versal_net_clk LPD_LSBUS>;
+			power-domains = <&versal_net_firmware PM_DEV_SDIO_1>;
 		};
 
 		serial0: serial@f1920000 {

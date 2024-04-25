@@ -5,7 +5,7 @@
  * (C) Copyright 2019-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
 #include "include/dt-bindings/gpio/gpio.h"
@@ -25,10 +25,7 @@
 		serial2 = &dcc;
 		spi0 = &ospi;
 	};
-};
 
-&dcc {
-	status = "okay";
 };
 
 &ospi {
@@ -59,6 +56,7 @@
 	};
 };
 
+
 &serial1 {
-	 status = "disabled";
+	status = "disabled"; /* communication with MSP432 */
 };

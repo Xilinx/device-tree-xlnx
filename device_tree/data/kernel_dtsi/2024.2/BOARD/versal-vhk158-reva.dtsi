@@ -2,24 +2,20 @@
 /*
  * dts file for Xilinx Versal VHK158 revA
  *
- * (C) Copyright 2022-2022 Xilinx, Inc.
+ * (C) Copyright 2022, Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/net/ti-dp83867.h"
+#include "include/dt-bindings/gpio/gpio.h"
 
 / {
 	compatible = "xlnx,versal-vhk158-revA", "xlnx,versal-vhk158",
 		     "xlnx,versal";
 	model = "Xilinx Versal vhk158 Eval board revA";
 
-	memory: memory@0 {
-		device_type = "memory";
-		reg = <0 0 0 0x80000000>, <0x8 0x0 0x7 0x80000000>; /* 32GB */
-	};
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
@@ -53,7 +49,6 @@
 /* VADJ_FMC_EN - LPD MIO23 */
 
 &ospi { /* PMC MIO0 - 12, U297 MT35XU02G */
-	status = "okay";
 	compatible = "xlnx,versal-ospi-1.0", "cadence,qspi", "cdns,qspi-nor";
 	bus-num = <2>;
 	num-cs = <1>;
@@ -82,6 +77,7 @@
 	};
 };
 
+
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed";
@@ -94,6 +90,7 @@
 	xlnx,mio-bank = <1>;
 	no-1-8-v;
 };
+
 
 &gem0 { /* PMC_MIO_48, LPD_MIO0-11/24/25 */
 	phy-handle = <&phy1>;

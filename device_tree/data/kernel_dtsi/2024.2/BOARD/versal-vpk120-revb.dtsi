@@ -5,13 +5,15 @@
  * (C) Copyright 2021-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 / {
 	model = "Xilinx Versal vpk120 Eval board revB";
 	compatible = "xlnx,versal-vpk120-revB", "xlnx,versal-vpk120",
 		     "xlnx,versal";
+
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
@@ -53,6 +55,7 @@
 	};
 };
 
+
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed"; /* FIXME */
@@ -69,14 +72,17 @@
 	clk-phase-uhs-ddr50 = <126>, <36>;
 };
 
+/* PWM via MIO 41/FAN TACH MIO 49 - FIXME */
+
+
 &i2c1 { /* PMC_MIO44/45 */
+
 	/* Use for storing information about board */
 	eeprom: eeprom@54 { /* u34 - m24128 16kB */
 		compatible = "st,24c128", "atmel,24c128";
 		reg = <0x54>; /* & 0x5c */
 		bootph-all;
 	};
-
 };
 
 /* PCIe at MIO 38/39/40/50 */
@@ -97,4 +103,15 @@
 			ti,dp83867-rxctrl-strap-quirk;
 		};
 	};
+};
+
+/* LPD_MIO12-23 - PM */
+
+
+&gpio0 {
+	/* FIXME Fill names when versal starts */
+};
+
+&gpio1 {
+	/* FIXME Fill names when versal starts */
 };

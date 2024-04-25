@@ -2,12 +2,13 @@
 /*
  * dts file for Xilinx Versal NET fixed clock
  *
- * (C) Copyright 2022-2024, Xilinx, Inc.
+ * (C) Copyright 2022, Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/reset/xlnx-versal-net-resets.h"
+#include "include/dt-bindings/reset/xlnx-versal-resets.h"
 
 / {
 	clk60: clk60 {
@@ -131,7 +132,6 @@
 &gem1 {
 	clocks = <&clk125>, <&clk125>, <&clk125>, <&clk125>, <&clk250>;
 };
-
 
 &gpio0 {
 	clocks = <&clk100>;

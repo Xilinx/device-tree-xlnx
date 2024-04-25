@@ -2,21 +2,22 @@
 /*
  * dts file for Xilinx Versal VEK280 revB
  *
- * (C) Copyright 2022-2024, Advanced Micro Devices, Inc
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/net/ti-dp83867.h"
+#include "include/dt-bindings/gpio/gpio.h"
 
 / {
 	compatible = "xlnx,versal-vek280-revB", "xlnx,versal-vek280",
 		     "xlnx,versal";
 	model = "Xilinx Versal vek280 Eval board revB";
 
+
 	chosen {
-		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8";
+		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
 		stdout-path = "serial0:115200";
 	};
 
@@ -43,6 +44,7 @@
 /* PCIE_PWRBRK - PMC MIO38 */
 /* ZU4_TRIGGER - PMC MIO37 */
 /* VCC_AUX_1V2 - MIO11 */
+
 
 &ospi { /* PMC MIO0-10, 12, U297 MT35XU02G */
 	compatible = "xlnx,versal-ospi-1.0", "cadence,qspi", "cdns,qspi-nor";
@@ -74,6 +76,7 @@
 	};
 };
 
+
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed";
@@ -87,6 +90,7 @@
 	no-1-8-v;
 };
 
+
 &gem0 { /* PMC_MIO_48, LPD_MIO0-11/24/25 */
 	phy-handle = <&phy0>;
 	phy-mode = "rgmii-id";
@@ -97,7 +101,7 @@
 			#phy-cells = <1>;
 			compatible = "ethernet-phy-id0283.bc30";
 			reg = <1>;
-		        adi,rx-internal-delay-ps = <2000>;
+			adi,rx-internal-delay-ps = <2000>;
 			adi,tx-internal-delay-ps = <2000>;
 			adi,fifo-depth-bits = <8>;
 			reset-gpios = <&gpio1 48 GPIO_ACTIVE_LOW>;

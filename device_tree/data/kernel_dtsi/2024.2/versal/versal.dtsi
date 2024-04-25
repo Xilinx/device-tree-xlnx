@@ -5,8 +5,9 @@
  * (C) Copyright 2017-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 / {
 	compatible = "xlnx,versal";
@@ -224,7 +225,6 @@
 			/* dma-coherent; */
 		};
 
-
 		lpd_dma_chan3: dma-controller@ffab0000 {
 			compatible = "xlnx,zynqmp-dma-1.0";
 			status = "disabled";
@@ -286,7 +286,7 @@
 		};
 
 		gem0: ethernet@ff0c0000 {
-            compatible = "xlnx,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,gem";
 			status = "disabled";
 			reg = <0 0xff0c0000 0 0x1000>;
 			interrupts = <0 56 4>, <0 56 4>;
@@ -298,7 +298,7 @@
 		};
 
 		gem1: ethernet@ff0d0000 {
-            compatible = "xlnx,versal-gem", "cdns,gem";
+			compatible = "xlnx,versal-gem", "cdns,gem";
 			status = "disabled";
 			reg = <0 0xff0d0000 0 0x1000>;
 			interrupts = <0 58 4>, <0 58 4>;
@@ -308,7 +308,6 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 		};
-
 
 		gpio0: gpio@ff0b0000 {
 			compatible = "xlnx,versal-gpio-1.0";
@@ -333,7 +332,7 @@
 		};
 
 		i2c0: i2c@ff020000 {
-			compatible = "cdns,i2c-r1p14", "cdns,i2c-r1p10";
+			compatible = "cdns,i2c-r1p14";
 			status = "disabled";
 			reg = <0 0xff020000 0 0x1000>;
 			interrupts = <0 14 4>;
@@ -343,7 +342,7 @@
 		};
 
 		i2c1: i2c@ff030000 {
-			compatible = "cdns,i2c-r1p14", "cdns,i2c-r1p10";
+			compatible = "cdns,i2c-r1p14";
 			status = "disabled";
 			reg = <0 0xff030000 0 0x1000>;
 			interrupts = <0 15 4>;
@@ -353,7 +352,7 @@
 		};
 
 		i2c2: i2c@f1000000 {
-			compatible = "cdns,i2c-r1p14", "cdns,i2c-r1p10";
+			compatible = "cdns,i2c-r1p14";
 			status = "disabled";
 			reg = <0 0xf1000000 0 0x1000>;
 			interrupts = <0 123 4>;
@@ -498,7 +497,6 @@
 			#size-cells = <0>;
 		};
 
-
 		spi0: spi@ff040000 {
 			compatible = "cdns,spi-r1p6";
 			status = "disabled";
@@ -537,18 +535,18 @@
 
 		sysmon2: sysmon@111270000 {
 			compatible = "xlnx,versal-sysmon";
+			status = "disabled";
 			#address-cells = <2>;
 			#size-cells = <2>;
-			status = "disabled";
 			reg = <0x1 0x11270000 0x0 0x4000>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
 
 		sysmon3: sysmon@119270000 {
 			compatible = "xlnx,versal-sysmon";
+			status = "disabled";
 			#address-cells = <2>;
 			#size-cells = <2>;
-			status = "disabled";
 			reg = <0x1 0x19270000 0x0 0x4000>;
 			xlnx,numchannels = /bits/8 <0>;
 		};
@@ -674,17 +672,18 @@
 			reg = <0 0xfd4d0000 0 0x10000>;
 			timeout-sec = <30>;
 		};
+
 		watchdog1: watchdog@ff120000 {
 			compatible = "xlnx,versal-wwdt";
 			status = "disabled";
 			reg = <0 0xff120000 0 0x10000>;
 			timeout-sec = <30>;
 		};
+
 		xilsem_edac: edac@f2014050 {
 			compatible = "xlnx,versal-xilsem-edac";
 			status = "disabled";
 			reg = <0x0 0xf2014050 0x0 0xc4>;
 		};
 	};
-
 };

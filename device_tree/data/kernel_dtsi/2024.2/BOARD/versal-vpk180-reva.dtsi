@@ -5,13 +5,15 @@
  * (C) Copyright 2021-2022 Xilinx, Inc.
  * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
  *
- * Michal Simek <michal.simek@xilinx.com>
+ * Michal Simek <michal.simek@amd.com>
  */
+
 
 / {
 	model = "Xilinx Versal vpk180 Eval board revA";
 	compatible = "xlnx,versal-vpk180-revA", "xlnx,versal-vpk180",
 		     "xlnx,versal";
+
 
 	chosen {
 		bootargs = "console=ttyAMA0 earlycon=pl011,mmio32,0xFF000000,115200n8 clk_ignore_unused";
@@ -53,6 +55,7 @@
 	};
 };
 
+
 &dwc3_0 { /* USB 2.0 host */
 	dr_mode = "host";
 	maximum-speed = "high-speed"; /* FIXME */
@@ -68,6 +71,7 @@
 	clk-phase-uhs-sdr25 = <114>, <48>;
 	clk-phase-uhs-ddr50 = <126>, <36>;
 };
+
 
 &i2c1 { /* PMC_MIO44/45 */
 
@@ -96,6 +100,7 @@
 		};
 	};
 };
+
 
 &gpio0 {
 	/* FIXME Fill names when versal starts */

@@ -14,9 +14,6 @@
 	model = "Xilinx Versal NET SPP 5.0/IPP 1.9 OSPI";
 };
 
-&ospi {
-	status = "okay";
-};
 
 &qspi {
 	status = "disabled";
