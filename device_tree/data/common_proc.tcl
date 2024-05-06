@@ -7193,6 +7193,13 @@ proc get_psu_interrupt_id { ip_name port_name } {
 			set sink_pins [::hsi::utils::get_sink_pins "$intr_pin"]
 			set sink_periph [::hsi::get_cells -of_objects $sink_pins]
 			set connected_ip [get_property IP_NAME [get_cells -hier $sink_periph]]
+			# When xlconcate connected via util_reduced_logic(OR) there is only one
+			# possiblity to get the interrupt so dont treat it as concat to assign the single
+			# interrupt number for all ip's connected to xlconcate
+			if {[llength $connected_ip] && [string match -nocase "$connected_ip" "util_reduced_logic"]} {
+				set concat_block 0
+			}
+
 			while {[llength $connected_ip]} {
 				if {![string match -nocase "$connected_ip" "xlconcat"]} {
 					break
