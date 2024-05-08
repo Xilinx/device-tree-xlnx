@@ -334,6 +334,16 @@ proc generate {drv_handle} {
            hsi::utils::add_new_dts_param $eth_node "managed" "in-band-status" string
        }
     }
+    if {$ip_name == "ethernet_1_10_25g"} {
+       set phytype [string tolower [get_property CONFIG.BASE_R_KR $eth_ip]]
+       set linerate [get_property CONFIG.LINE_RATE $eth_ip]
+       set_property phy-mode "${linerate}g${phytype}" $drv_handle
+       set_property "managed" "in-band-status" $drv_handle
+       if {[llength $node]} {
+           hsi::utils::add_new_dts_param $node "phy-mode" "${linerate}g${phytype}" string
+           hsi::utils::add_new_dts_param $node "managed" "in-band-status" string
+       }
+    }
     if {$ip_name == "usxgmii"} {
        set compatible [get_comp_str $drv_handle]
        set compatible [append compatible " " "xlnx,xxv-usxgmii-ethernet-1.0"]
