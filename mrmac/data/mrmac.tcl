@@ -447,7 +447,7 @@ proc generate {drv_handle} {
 						}
 					}
 				}
-				if {[string match -nocase [get_property IP_NAME $mux_per] "axi_mcdma"]} {
+				if {[llength $mux_per] && [string match -nocase [get_property IP_NAME $mux_per] "axi_mcdma"]} {
 					set fiforx_connect_ip $mux_per
 				}
 				if {[llength $fiforx_connect_ip]} {
@@ -702,7 +702,7 @@ proc generate {drv_handle} {
 						}
 					}
 				}
-				if {[string match -nocase [get_property IP_NAME $mux_per1] "axi_mcdma"]} {
+				if {[llength $mux_per1] && [string match -nocase [get_property IP_NAME $mux_per1] "axi_mcdma"]} {
 					set fiforx_connect_ip1 $mux_per1
 				}
 				if {[llength $fiforx_connect_ip1]} {
@@ -1031,7 +1031,7 @@ proc generate {drv_handle} {
 						}
 					}
 				}
-				if {[string match -nocase [get_property IP_NAME $mux_per2] "axi_mcdma"]} {
+				if {[llength $mux_per2] && [string match -nocase [get_property IP_NAME $mux_per2] "axi_mcdma"]} {
 					set fiforx_connect_ip2 $mux_per2
 				}
 				if {[llength $fiforx_connect_ip2]} {
@@ -1339,7 +1339,7 @@ proc generate {drv_handle} {
 						}
 					}
 				}
-				if {[string match -nocase [get_property IP_NAME $mux_per3] "axi_mcdma"]} {
+				if {[llength $mux_per3] && [string match -nocase [get_property IP_NAME $mux_per3] "axi_mcdma"]} {
 					set fiforx_connect_ip3 $mux_per3
 				}
 				if {[llength $fiforx_connect_ip3]} {
