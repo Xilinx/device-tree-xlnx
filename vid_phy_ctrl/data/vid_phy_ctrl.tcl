@@ -56,6 +56,14 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,tx-buffer-bypass" $tx_buffer_bypass int
 	set transceiver_width [get_property CONFIG.Transceiver_Width [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,transceiver-width" $transceiver_width int
+        set rx_primitive [get_property CONFIG.C_Rx_Clk_Primitive [get_cells -hier $drv_handle]]
+        if {[llength $rx_primitive]} {
+            hsi::utils::add_new_dts_param "${node}" "xlnx,rx-clk-primitive" $rx_primitive hex
+        }
+        set tx_primitive [get_property CONFIG.C_Tx_Clk_Primitive [get_cells -hier $drv_handle]]
+        if {[llength $tx_primitive]} {
+            hsi::utils::add_new_dts_param "${node}" "xlnx,tx-clk-primitive" $tx_primitive hex
+        }
 	set use_gt_ch4_hdmi [get_property CONFIG.C_Use_GT_CH4_HDMI [get_cells -hier $drv_handle]]
 	if {[llength $use_gt_ch4_hdmi]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,use-gt-ch4-hdmi" $use_gt_ch4_hdmi int
