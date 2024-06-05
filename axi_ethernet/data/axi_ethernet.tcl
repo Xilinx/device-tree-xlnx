@@ -337,10 +337,15 @@ proc generate {drv_handle} {
     if {$ip_name == "ethernet_1_10_25g"} {
        set phytype [string tolower [get_property CONFIG.BASE_R_KR $eth_ip]]
        set linerate [get_property CONFIG.LINE_RATE $eth_ip]
-       set_property phy-mode "${linerate}g${phytype}" $drv_handle
+       if {$linerate == "1000"} {
+           set phytype "base-x"
+       } else {
+           set phytype "g${phytype}"
+       }
+       set_property phy-mode "${linerate}${phytype}" $drv_handle
        set_property "managed" "in-band-status" $drv_handle
        if {[llength $node]} {
-           hsi::utils::add_new_dts_param $node "phy-mode" "${linerate}g${phytype}" string
+           hsi::utils::add_new_dts_param $node "phy-mode" "${linerate}${phytype}" string
            hsi::utils::add_new_dts_param $node "managed" "in-band-status" string
        }
     }
