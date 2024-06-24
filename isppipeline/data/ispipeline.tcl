@@ -45,7 +45,7 @@ proc gen_reset_gpio {drv_handle node} {
 						}
 					}
 					if {[string match -nocase $ip "axi_gpio"]} {
-						hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 0 1" reference
+						hsi::utils::add_new_dts_param "$node" "reset-gpios" "$periph $gpio 1" reference
 					}
 					} else {
 						dtg_warning "periph for the pin:$pin is NULL $periph...check the design"
