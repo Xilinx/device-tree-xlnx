@@ -776,7 +776,6 @@ proc set_drv_def_dts {drv_handle} {
 			set fpga_node [add_or_get_dt_node -n "&$targets" -d ${defaultdts}]
 			set child_node $fpga_node
 			set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
-			set classic_soc [get_property CONFIG.classic_soc [get_os]]
 			if {[llength $pr_regions]} {
 				set pr_len [llength $pr_regions]
 				for {set pr 0} {$pr < $pr_len} {incr pr} {
@@ -806,7 +805,7 @@ proc set_drv_def_dts {drv_handle} {
 					set hw_name [::hsi::get_hw_files -filter "TYPE == pdi"]
 				}
 				#external-fpga-config is required only in dfx case
-				if {!$classic_soc && [llength $pr_regions]} {
+				if {[llength $pr_regions]} {
 					hsi::utils::add_new_dts_param "${child_node}" "external-fpga-config" "" boolean
 				}
 			}
@@ -856,11 +855,6 @@ proc set_drv_def_dts {drv_handle} {
 				set_property DTS_VERSION "/dts-v1/;\n/plugin/" $master_dts_obj
 				set fpga_node [add_or_get_dt_node -n "&$targets" -d ${default_dts}]
 				set child_node2 "$fpga_node"
-				set classic_soc [get_property CONFIG.classic_soc [get_os]]
-				if {$classic_soc} {
-					hsi::utils::add_new_dts_param "${child_node2}" "#address-cells" 2 int
-					hsi::utils::add_new_dts_param "${child_node2}" "#size-cells" 2 int
-				}
 				set pr_regions [hsi::get_cells -hier -filter BD_TYPE==BLOCK_CONTAINER]
 				if {[llength $pr_regions]} {
 					set pr_len [llength $pr_regions]
@@ -868,9 +862,6 @@ proc set_drv_def_dts {drv_handle} {
 						set pr1 [lindex $pr_regions $pr]
 						if {[regexp $pr1 $RpRm match]} {
 							set targets "fpga_PR$pr"
-							if {$classic_soc} {
-								set targets "fpga"
-							}
 							break
 						}
 					}
@@ -881,9 +872,6 @@ proc set_drv_def_dts {drv_handle} {
 						set pr0 [lindex $pr_regions $pr]
 						if {[regexp $pr0 $RpRm match]} {
 							set targets "fpga_PR$pr"
-							if {$classic_soc} {
-								set targets "fpga"
-							}
 							set fpga_node [add_or_get_dt_node -n "&$targets" -d ${default_dts}]
 							set child_node2 "$fpga_node"
 							set intf_pins [::hsi::get_intf_pins -of_objects $pr0]
@@ -898,7 +886,7 @@ proc set_drv_def_dts {drv_handle} {
 						}
 					}
 				}
-				if {!$classic_soc} {
+				if {[llength $pr_regions]} {
 					hsi::utils::add_new_dts_param $child_node2 "partial-fpga-config" "" boolean
 				}
 				set hw_name [get_property CONFIG.firmware_name [get_os]]
