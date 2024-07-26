@@ -12,6 +12,7 @@
 #include "include/dt-bindings/reset/xlnx-versal-resets.h"
 
 /* U97 MT35XU02G */
+compatible = "xlnx,versal-ospi-1.0", "cdns,qspi-nor";
 bus-num = <2>;
 num-cs = <1>;
 #address-cells = <1>;
