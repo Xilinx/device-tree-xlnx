@@ -89,7 +89,7 @@
 		bootph-all;
 	};
 
-	fpga: fpga-region {
+	fpga: fpga {
 		compatible = "fpga-region";
 		fpga-mgr = <&versal_fpga>;
 		#address-cells = <2>;
