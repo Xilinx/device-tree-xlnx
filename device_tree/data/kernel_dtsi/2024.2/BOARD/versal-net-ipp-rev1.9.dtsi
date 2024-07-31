@@ -711,7 +711,7 @@
 			compatible = "xlnx,versal-wwdt";
 			reg = <0 0xecc10000 0 0x10000>;
 			timeout-sec = <30>;
-			clocks = <&versal_net_clk FPD_WWDT>;
+			clocks = <&versal_net_clk FPD_WWDT0>;
 			power-domains = <&versal_net_firmware PM_DEV_FPD_SWDT_0>;
 		};
 
@@ -719,7 +719,7 @@
 			compatible = "xlnx,versal-wwdt";
 			reg = <0 0xecd10000 0 0x10000>;
 			timeout-sec = <30>;
-			clocks = <&versal_net_clk FPD_WWDT>;
+			clocks = <&versal_net_clk FPD_WWDT1>;
 			power-domains = <&versal_net_firmware PM_DEV_FPD_SWDT_1>;
 		};
 
@@ -727,7 +727,7 @@
 			compatible = "xlnx,versal-wwdt";
 			reg = <0 0xece10000 0 0x10000>;
 			timeout-sec = <30>;
-			clocks = <&versal_net_clk FPD_WWDT>;
+			clocks = <&versal_net_clk FPD_WWDT2>;
 			power-domains = <&versal_net_firmware PM_DEV_FPD_SWDT_2>;
 		};
 
@@ -735,7 +735,7 @@
 			compatible = "xlnx,versal-wwdt";
 			reg = <0 0xecf10000 0 0x10000>;
 			timeout-sec = <30>;
-			clocks = <&versal_net_clk FPD_WWDT>;
+			clocks = <&versal_net_clk FPD_WWDT3>;
 			power-domains = <&versal_net_firmware PM_DEV_FPD_SWDT_3>;
 		};
 	};
