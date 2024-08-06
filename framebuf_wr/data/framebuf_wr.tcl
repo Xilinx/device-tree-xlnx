@@ -172,6 +172,12 @@ proc gen_gpio_reset {drv_handle node} {
 					}
 				}
 			}
+			# add reset-gpio pin when no slice is connected between v_tpg ip and axi_gpio ip
+			set ip_name [get_property IP_NAME $sink_periph]
+			if {[string match -nocase $ip_name "axi_gpio"]} {
+				set gpio_number [get_property LEFT [get_pins -of_objects [get_cells -hier "$sink_periph"] "gpio_io_o" ]]
+				hsi::utils::add_new_dts_param "$node" "reset-gpios" "$sink_periph $gpio_number 1" reference
+			}
 		} else {
 			dtg_warning "$drv_handle peripheral is NULL for the $pin $sink_periph"
 		}
