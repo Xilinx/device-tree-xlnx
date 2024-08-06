@@ -99,7 +99,7 @@
 
 	pwm-fan {
 		compatible = "pwm-fan";
-		pwms = <&ttc0 2 40000 0>;
+		pwms = <&ttc0 2 40000 1>;
 	};
 };
 
