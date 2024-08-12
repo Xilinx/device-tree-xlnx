@@ -437,6 +437,10 @@ proc gen_switch_node {periph addr size numqueues parent_node drv_handle proc_typ
                         hsi::utils::add_new_dts_param "${switch_node}" "ports" "$ref_id" reference
                 }
         }
+        set en_pkt_switch [get_property CONFIG.EN_EP_PKT_SWITCH $eth_ip]
+        if {[string match -nocase $en_pkt_switch "true"]} {
+                hsi::utils::add_new_dts_param "$switch_node" "packet-switch" 1 int
+        }
 
 }
 
