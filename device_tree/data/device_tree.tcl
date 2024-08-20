@@ -532,7 +532,7 @@ proc gen_opp_freq {} {
 					set clkoutdiv [dict get $ps_pmc_params PS_CRF_APLL_CTRL_CLKOUTDIV]
 				}
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
+					set opp_freq [expr ceil([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
 				# if design don't have clock configs then skip adding new opps
 				if {$opp_freq == ""} {
@@ -573,7 +573,7 @@ proc gen_opp_freq {} {
 					set clkoutdiv [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_CLKOUTDIV]
 				}
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr round([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
+					set opp_freq [expr ceil([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
 				}
 			}
 			# if design don't have clock configs then skip adding new opps
