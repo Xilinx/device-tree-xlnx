@@ -631,7 +631,6 @@
 			interrupts = <0 25 4>;
 			reg-io-width = <4>;
 			clock-names = "uartclk", "apb_pclk";
-			current-speed = <115200>;
 		};
 
 		serial1: serial@f1930000 {
@@ -642,7 +641,6 @@
 			interrupts = <0 26 4>;
 			reg-io-width = <4>;
 			clock-names = "uartclk", "apb_pclk";
-			current-speed = <115200>;
 		};
 
 		smmu: iommu@ec000000 {
