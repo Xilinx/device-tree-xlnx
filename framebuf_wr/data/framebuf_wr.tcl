@@ -131,6 +131,14 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
 			set frmbuf_crtc [add_or_get_dt_node -n "endpoint" -l v_frmbuf_wr$drv_handle -p $port0_node]
 			hsi::utils::add_new_dts_param "$frmbuf_crtc" "remote-endpoint" "mixer_out$inip" reference
+		} elseif {[string match -nocase [get_property IP_NAME $inip] "ISPPipeline_accel"] } {
+			set ports_node [add_or_get_dt_node -n "ports" -l frmbuf_wr_ports$drv_handle -p $node]
+			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
+			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
+			set port0_node [add_or_get_dt_node -n "port" -l frmbuf_wr$drv_handle -u 0 -p $ports_node]
+			hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+			set frmbuf_crtc [add_or_get_dt_node -n "endpoint" -l $drv_handle$inip -p $port0_node]
+			hsi::utils::add_new_dts_param "$frmbuf_crtc" "remote-endpoint" "$inip$drv_handle" reference
 		}
 	}
 }
