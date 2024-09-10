@@ -21,7 +21,6 @@ proc generate_aie_array_device_info {node drv_handle bus_node} {
 	set compatible [append compatible " " "xlnx,ai-engine-v2.0"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 
-	#set default values for S80 device
 	set hw_gen "AIE"
 	set aie_rows_start 1
 	set aie_rows_num 8
