@@ -81,7 +81,11 @@ proc get_clock_frequency {ip_handle portname} {
 			regsub -all ":" $clk { } clk
 			set clklen [llength $clk]
 			if {$clklen > 1} {
-				set clk [lindex $clk 0]
+				foreach clk_e $clk {
+					if { $clk_e != "NULL" } {
+						set clk $clk_e
+					}
+				}
 			}
 		} else {
 			set clk [get_property CLK_FREQ $clkhandle ]
