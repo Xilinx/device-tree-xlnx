@@ -132,15 +132,36 @@ proc generate {drv_handle} {
 			set frmbuf_crtc [add_or_get_dt_node -n "endpoint" -l v_frmbuf_wr$drv_handle -p $port0_node]
 			hsi::utils::add_new_dts_param "$frmbuf_crtc" "remote-endpoint" "mixer_out$inip" reference
 		} elseif {[string match -nocase [get_property IP_NAME $inip] "ISPPipeline_accel"] } {
-			set ports_node [add_or_get_dt_node -n "ports" -l frmbuf_wr_ports$drv_handle -p $node]
-			hsi::utils::add_new_dts_param "$ports_node" "#address-cells" 1 int
-			hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
-			set port0_node [add_or_get_dt_node -n "port" -l frmbuf_wr$drv_handle -u 0 -p $ports_node]
-			hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
-			set frmbuf_crtc [add_or_get_dt_node -n "endpoint" -l $drv_handle$inip -p $port0_node]
-			hsi::utils::add_new_dts_param "$frmbuf_crtc" "remote-endpoint" "$inip$drv_handle" reference
+			gen_frmbuf_node $inip $drv_handle
 		}
 	}
+}
+
+proc gen_frmbuf_node {ip drv_handle} {
+	set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
+	set dt_overlay [get_property CONFIG.dt_overlay [get_os]]
+	if {$dt_overlay} {
+		set bus_node "amba"
+	} else {
+		set bus_node "amba_pl"
+	}
+	set vcap [add_or_get_dt_node -n "vcap_$drv_handle" -p $bus_node]
+	hsi::utils::add_new_dts_param $vcap "compatible" "xlnx,video" string
+	hsi::utils::add_new_dts_param $vcap "dmas" "$ip 0" reference
+	hsi::utils::add_new_dts_param $vcap "dma-names" "port0" string
+	set vcap_ports_node [add_or_get_dt_node -n "ports" -l vcap_ports$drv_handle -p $vcap]
+	hsi::utils::add_new_dts_param "$vcap_ports_node" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$vcap_ports_node" "#size-cells" 0 int
+	if {[string match -nocase $proctype "ps7_cortexa9"]} {
+		#Workaround for issue (TBF)
+		set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -p $vcap_ports_node]
+	} else {
+		set vcap_port_node [add_or_get_dt_node -n "port" -l vcap_port$drv_handle -u 0 -p $vcap_ports_node]
+	}
+	hsi::utils::add_new_dts_param "$vcap_port_node" "reg" 0 int
+	hsi::utils::add_new_dts_param "$vcap_port_node" "direction" input string
+	set vcap_in_node [add_or_get_dt_node -n "endpoint" -l $drv_handle$ip -p $vcap_port_node]
+	hsi::utils::add_new_dts_param "$vcap_in_node" "remote-endpoint" $ip$drv_handle reference
 }
 
 proc gen_gpio_reset {drv_handle node} {
