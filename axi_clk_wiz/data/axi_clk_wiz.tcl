@@ -24,7 +24,11 @@ proc generate {drv_handle} {
 		}
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,clocking-wizard"]
+	if {[string equal $compatible "xlnx,clk-wizard-1.0"]} {
+		set compatible [append compatible " " "xlnx,versal-clk-wizard"]
+	} else {
+		set compatible [append compatible " " "xlnx,clocking-wizard"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set ip [get_cells -hier $drv_handle]
 	gen_speedgrade $drv_handle
