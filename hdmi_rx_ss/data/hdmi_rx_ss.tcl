@@ -77,7 +77,7 @@ proc generate {drv_handle} {
 		if {[llength $ip_mem_handles]} {
 			set link_data0_inst $link_data0
 			set link_data0 [get_property IP_NAME $link_data0]
-			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"] || [string match -nocase $link_data0 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy0"
 				if {[llength $link_data1]} {
 					append phys  "${link_data0_inst}rxphy_lane0 0 1 1 0>,"
@@ -94,7 +94,7 @@ proc generate {drv_handle} {
 		if {[llength $ip_mem_handles]} {
 			set link_data1_inst $link_data1
 			set link_data1 [get_property IP_NAME $link_data1]
-			if {[string match -nocase $link_data1 "vid_phy_controller"] || [string match -nocase $link_data1 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"] || [string match -nocase $link_data0 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy1"
 				if {[llength $link_data2]} {
 					append phys  " <&${link_data1_inst}rxphy_lane1 0 1 1 0>,"
@@ -111,7 +111,7 @@ proc generate {drv_handle} {
 		if {[llength $ip_mem_handles]} {
 			set link_data2_inst $link_data2
 			set link_data2 [get_property IP_NAME $link_data2]
-			if {[string match -nocase $link_data2 "vid_phy_controller"] || [string match -nocase $link_data2 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"] || [string match -nocase $link_data0 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy2"
 				if {[llength $link_data3]} {
 					append phys " <&${link_data2_inst}rxphy_lane2 0 1 1 0>,"
@@ -128,7 +128,7 @@ proc generate {drv_handle} {
 		if {[llength $ip_mem_handles]} {
 			set link_data3_inst $link_data3
 			set link_data3 [get_property IP_NAME $link_data3]
-			if {[string match -nocase $link_data3 "vid_phy_controller"] || [string match -nocase $link_data3 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"] || [string match -nocase $link_data0 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy3"
 				append phys " <&${link_data3_inst}rxphy_lane3 0 1 1 0"
 			}
@@ -142,12 +142,35 @@ proc generate {drv_handle} {
 	if {![string match -nocase $phys ""]} {
 		hsi::utils::add_new_dts_param "$node" "phys" $phys reference
 	}
-	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
-	set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
+	set in_ppc [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
+	set inhex [format %x $in_ppc]
+	append input_pixels_per_clock "/bits/ 8 <0x$inhex>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock noformating
+
+	set max_bpc [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
+	set inhex [format %x $max_bpc]
+	append max_bits_per_component "/bits/ 8 <0x$inhex>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component noformating
+
 	set edid_ram_size [get_property CONFIG.C_EDID_RAM_SIZE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram_size hexint
+	set inhex [format %x $edid_ram_size]
+	append edid_ram "/bits/ 16 <0x$inhex>"
+	hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram noformating
+
+	set max_frl_rate [get_property CONFIG.C_MAX_FRL_RATE [get_cells -hier $drv_handle]]
+	if {[llength $max_frl_rate]} {
+		set inhex [format %x $max_frl_rate]
+		append frlrate "/bits/ 8 <0x$inhex>"
+		hsi::utils::add_new_dts_param "${node}" "xlnx,max-frl-rate" $frlrate noformating
+	}
+	set vid_clk_freq [get_property CONFIG.C_VID_CLK_FREQ_KHZ [get_cells -hier $drv_handle]]
+	if {[llength $vid_clk_freq]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,vid-clk-freq-khz" $vid_clk_freq hexint
+	}
+	set frl_clk_freq [get_property CONFIG.C_FRL_CLK_FREQ_KHZ [get_cells -hier $drv_handle]]
+	if {[llength $frl_clk_freq]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,frl-clk-freq-khz" $frl_clk_freq hexint
+	}
 	set include_hdcp_1_4 [get_property CONFIG.C_INCLUDE_HDCP_1_4 [get_cells -hier $drv_handle]]
 	if {[string match -nocase $include_hdcp_1_4 "true"]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,include-hdcp-1-4" "" boolean
