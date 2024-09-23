@@ -147,9 +147,18 @@ proc gen_edac_node {} {
 	set dts_file [get_property CONFIG.pcw_dts [get_os]]
 	set edac_node [add_or_get_dt_node -n &xilsem_edac -d $dts_file]
 	set pspmc [get_cells -hier -filter {IP_NAME == "pspmc"}]
+	set psxwizard [get_cells -hier -filter {IP_NAME == "psx_wizard"}]
 	if {[llength $pspmc]} {
 		if { [get_property CONFIG.SEM_MEM_SCAN $pspmc] || [get_property CONFIG.SEM_NPI_SCAN $pspmc] } {
 			hsi::utils::add_new_dts_param "${edac_node}" "status" "okay" string
+		}
+	# put status=okay in edac node for versal-net when any of the CIPS parameters "CONFIG.SEM_MEM_SCAN" or "CONFIG.SEM_NPI_SCAN" are enabled in the design
+	} elseif {[llength $psxwizard]} {
+		set psx_pmcx_config [get_property CONFIG.PSX_PMCX_CONFIG [get_cells -hier $psxwizard]]
+		if {[llength $psx_pmcx_config]} {
+			if {[dict exists $psx_pmcx_config "SEM_MEM_SCAN"] || [dict exists $psx_pmcx_config "SEM_NPI_SCAN"]} {
+				hsi::utils::add_new_dts_param "${edac_node}" "status" "okay" string
+			}
 		}
 	}
 }
@@ -883,7 +892,7 @@ proc generate {lib_handle} {
 			gen_opp_freq
 			gen_zynqmp_pinctrl
 			gen_zocl_node
-			if {[string match -nocase $proctype "psv_cortexa72"]} {
+			if {[string match -nocase $proctype "psv_cortexa72"] || [string match -nocase $proctype "psx_cortexa78"]} {
 				gen_edac_node
 				gen_ddrmc_node
 			}

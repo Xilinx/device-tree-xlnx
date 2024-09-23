@@ -61,6 +61,9 @@
 &sdhci0 { /* emmc MIO 13-23 16GB */
 	non-removable;
 	disable-wp;
+	no-sd;
+	no-sdio;
+	cap-mmc-hw-reset;
 	bus-width = <8>;
 	xlnx,mio-bank = <0>;
 };
