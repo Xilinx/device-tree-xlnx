@@ -124,9 +124,10 @@ proc generate {drv_handle} {
 	if { [llength $MAC_PORT0_RATE_C0] } {
 		if {[string match -nocase $MAC_PORT0_RATE_C0 "10GE"]} {
 			set number 10000
-			hsi::utils::add_new_dts_param "${node}" "xlnx,mrmac-rate" $number int
+			hsi::utils::add_new_dts_param "${node}" "max-speed" $number int
 		} else {
-			hsi::utils::add_new_dts_param "${node}" "xlnx,mrmac-rate" $MAC_PORT0_RATE_C0 string
+			set number 25000
+			hsi::utils::add_new_dts_param "${node}" "max-speed" $number int
 		}
 	}
 	add_prop_ifexists $drv_handle CONFIG.MAC_PORT0_RATE_C1 "xlnx,mac-port0-rate-c1" ${node}
@@ -831,9 +832,10 @@ proc generate {drv_handle} {
 	if {[llength $MAC_PORT1_RATE_C0]} {
 		if {[string match -nocase $MAC_PORT1_RATE_C0 "10GE"]} {
 			set number 10000
-			hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mrmac-rate" $number int
+			hsi::utils::add_new_dts_param "${mrmac1_node}" "max-speed" $number int
 		} else {
-			hsi::utils::add_new_dts_param "${mrmac1_node}" "xlnx,mrmac-rate" $MAC_PORT1_RATE_C0 string
+			set number 25000
+			hsi::utils::add_new_dts_param "${mrmac1_node}" "max-speed" $number int
 		}
 	}
 	add_prop_ifexists $drv_handle CONFIG.MAC_PORT1_RATE_C1 "xlnx,mac-port1-rate-c1" ${mrmac1_node}
@@ -1156,9 +1158,10 @@ proc generate {drv_handle} {
 	if {[llength ${MAC_PORT2_RATE_C0}]} {
 		if {[string match -nocase $MAC_PORT2_RATE_C0 "10GE"]} {
 			set number 10000
-			hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mrmac-rate" $number int
+			hsi::utils::add_new_dts_param "${mrmac2_node}" "max-speed" $number int
 		} else {
-			hsi::utils::add_new_dts_param "${mrmac2_node}" "xlnx,mrmac-rate" $MAC_PORT2_RATE_C0 string
+			set number 25000
+			hsi::utils::add_new_dts_param "${mrmac2_node}" "max-speed" $number int
 		}
 	}
 
@@ -1482,9 +1485,10 @@ proc generate {drv_handle} {
 	if {[llength $MAC_PORT3_RATE_C0]} {
 		if {[string match -nocase $MAC_PORT3_RATE_C0 "10GE"]} {
 			set number 10000
-			hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mrmac-rate" $number int
+			hsi::utils::add_new_dts_param "${mrmac3_node}" "max-speed" $number int
 		} else {
-			hsi::utils::add_new_dts_param "${mrmac3_node}" "xlnx,mrmac-rate" $MAC_PORT3_RATE_C0 string
+			set number 25000
+			hsi::utils::add_new_dts_param "${mrmac3_node}" "max-speed" $number int
 		}
 	}
 	add_prop_ifexists $drv_handle CONFIG.MAC_PORT3_RATE_C1 "xlnx,mac-port3-rate-c1" ${mrmac3_node}

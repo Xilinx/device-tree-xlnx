@@ -29,57 +29,89 @@ proc generate {drv_handle} {
 	set compatible [append compatible " " "xlnx,v-hdmi-tx-ss-3.1"]
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock int
+	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock hexint
 	set max_bits_per_component [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component int
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component hexint
 	set vid_interface [get_property CONFIG.C_VID_INTERFACE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-interface" $vid_interface int
+	hsi::utils::add_new_dts_param "${node}" "xlnx,vid-interface" $vid_interface hexint
+
+	set max_frl_rate [get_property CONFIG.C_MAX_FRL_RATE [get_cells -hier $drv_handle]]
+	if {[llength $max_frl_rate]} {
+	hsi::utils::add_new_dts_param "${node}" "xlnx,max-frl-rate" $max_frl_rate hextint
+	}
 
 	set phy_names ""
 	set phys ""
 	set link_data0 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA0_OUT"]
+	set link_data1 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA1_OUT"]
+	set link_data2 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA2_OUT"]
+	set link_data3 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA3_OUT"]
 	if {[llength $link_data0]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data0]
 		if {[llength $ip_mem_handles]} {
 			set link_data0_inst $link_data0
 			set link_data0 [get_property IP_NAME $link_data0]
-			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data0 "vid_phy_controller"] || [string match -nocase $link_data0 "hdmi_gt_controller"] || [string match -nocase $link_data0 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy0"
-				append phys  "${link_data0_inst}txphy_lane0 0 1 1 1>,"
+				if {[llength $link_data1]} {
+					append phys  "${link_data0_inst}txphy_lane0 0 1 1 1>,"
+				} else {
+					append phys  "${link_data0_inst}txphy_lane0 0 1 1 1"
+				}
 			}
 		}
 	} else {
 		dtg_warning "connected stream of LINK_DATA0_IN is NULL...check the design"
 	}
 
-	set link_data1 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA1_OUT"]
 	if {[llength $link_data1]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data1]
 		if {[llength $ip_mem_handles]} {
 			set link_data1_inst $link_data1
 			set link_data1 [get_property IP_NAME $link_data1]
-			if {[string match -nocase $link_data1 "vid_phy_controller"] || [string match -nocase $link_data1 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data1 "vid_phy_controller"] || [string match -nocase $link_data1 "hdmi_gt_controller"] || [string match -nocase $link_data1 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy1"
-				append phys  " <&${link_data1_inst}txphy_lane1 0 1 1 1>,"
+				if {[llength $link_data2]} {
+					append phys  " <&${link_data1_inst}txphy_lane1 0 1 1 1>,"
+				} else {
+					append phys  " <&${link_data1_inst}txphy_lane1 0 1 1 1"
+				}
 			}
 		}
 	} else {
 		dtg_warning "Connected stream of LINK_DATA1_IN is NULL...check the design"
 	}
 
-	set link_data2 [get_connected_stream_ip [get_cells -hier $drv_handle] "LINK_DATA2_OUT"]
 	if {[llength $link_data2]} {
 		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data2]
 		if {[llength $ip_mem_handles]} {
 			set link_data2_inst $link_data2
 			set link_data2 [get_property IP_NAME $link_data2]
-			if {[string match -nocase $link_data2 "vid_phy_controller"] || [string match -nocase $link_data2 "hdmi_gt_controller"]} {
+			if {[string match -nocase $link_data2 "vid_phy_controller"] || [string match -nocase $link_data2 "hdmi_gt_controller"] || [string match -nocase $link_data2 "v_hdmi_phy1"]} {
 				append phy_names " " "hdmi-phy2"
-				append phys " <&${link_data2_inst}txphy_lane2 0 1 1 1"
+				if {[llength $link_data3]} {
+					append phys  " <&${link_data2_inst}txphy_lane2 0 1 1 1>,"
+				} else {
+					append phys  " <&${link_data2_inst}txphy_lane2 0 1 1 1"
+				}
 			}
 		}
 	} else {
 		dtg_warning "Connected stream of LINK_DATA2_IN is NULL...check the design"
+	}
+
+	if {[llength $link_data3]} {
+		set ip_mem_handles [hsi::utils::get_ip_mem_ranges $link_data3]
+		if {[llength $ip_mem_handles]} {
+			set link_data3_inst $link_data3
+			set link_data3 [get_property IP_NAME $link_data3]
+			if {[string match -nocase $link_data3 "vid_phy_controller"] || [string match -nocase $link_data3 "hdmi_gt_controller"] || [string match -nocase $link_data3 "v_hdmi_phy1"]} {
+				append phy_names " " "hdmi-phy3"
+				append phys " <&${link_data3_inst}txphy_lane3 0 1 1 1"
+			}
+		}
+	} else {
+		dtg_warning "Connected stream of LINK_DATA3_IN is NULL...check the design"
 	}
 
 	if {![string match -nocase $phy_names ""]} {
