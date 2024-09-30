@@ -3328,6 +3328,8 @@ proc gen_frmbuf_rd_node {ip drv_handle sdi_port_node} {
 	hsi::utils::add_new_dts_param $pl_display "dma-names" "dma0" string
 	hsi::utils::add_new_dts_param "${pl_display}" "/* Fill the field xlnx,vformat based on user requirement */" "" comment
 	hsi::utils::add_new_dts_param $pl_display "xlnx,vformat" "YUYV" string
+	hsi::utils::add_new_dts_param "$pl_display" "#address-cells" 1 int
+	hsi::utils::add_new_dts_param "$pl_display" "#size-cells" 0 int
 	set pl_display_port_node [add_or_get_dt_node -n "port" -l pl_display_port$drv_handle -u 0 -p $pl_display]
 	hsi::utils::add_new_dts_param "$pl_display_port_node" "reg" 0 int
 	set pl_disp_crtc_node [add_or_get_dt_node -n "endpoint" -l $ip$drv_handle -p $pl_display_port_node]
