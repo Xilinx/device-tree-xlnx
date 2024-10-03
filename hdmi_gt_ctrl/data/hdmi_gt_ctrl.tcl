@@ -62,11 +62,11 @@ proc generate {drv_handle} {
 	set hdmi_fast_switch [get_property CONFIG.C_Hdmi_Fast_Switch [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,hdmi-fast-switch" $hdmi_fast_switch int
 
-	set linerate [get_property CONFIG.Tx_Max_GT_Line_Rate [get_cells -hier $drv_handle]]
-	scan $linerate %d tx_gt_linerate
+	set linerate_tx [get_property CONFIG.Tx_Max_GT_Line_Rate [get_cells -hier $drv_handle]]
+	scan $linerate_tx %d tx_gt_linerate
 	hsi::utils::add_new_dts_param "${node}" "xlnx,tx-max-gt-line-rate" $tx_gt_linerate hexint
-	set linerate [get_property CONFIG.Rx_Max_GT_Line_Rate [get_cells -hier $drv_handle]]
-	scan $linerate %d rx_gt_linerate
+	set linerate_rx [get_property CONFIG.Rx_Max_GT_Line_Rate [get_cells -hier $drv_handle]]
+	scan $linerate_rx %d rx_gt_linerate
 	hsi::utils::add_new_dts_param "${node}" "xlnx,rx-max-gt-line-rate" $rx_gt_linerate hexint
 
 	set primitive [get_property CONFIG.C_Rx_Clk_Primitive [get_cells -hier $drv_handle]]
@@ -84,8 +84,11 @@ proc generate {drv_handle} {
               set gt_ctrl 0
 	}
 	if {$gt_ctrl == 1} {
-		set compatible [get_comp_str $drv_handle]
-		set compatible [append compatible " " "xlnx,v-hdmi-gt-controller-1.0"]
+		if {$linerate_tx > 5.94 || $linerate_rx > 5.94} {
+			set compatible [append compatible " " "xlnx,v-hdmi-gt-controller-1.0"]
+		} else {
+			set compatible [get_comp_str $drv_handle]
+		}
 		set_drv_prop $drv_handle compatible "$compatible" stringlist
 	}
 	for {set ch 0} {$ch < $tx_no_of_channels} {incr ch} {
