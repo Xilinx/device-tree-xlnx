@@ -26,7 +26,9 @@ proc generate {drv_handle} {
 		return
 	}
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,v-hdmi-tx-ss-3.1"]
+	if {[string match -nocase [get_property IP_NAME [get_cells -hier $drv_handle]] "v_hdmi_tx_ss"]} {
+		set compatible [append compatible " " "xlnx,v-hdmi-tx-ss-3.1"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	set input_pixels_per_clock [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock hexint
