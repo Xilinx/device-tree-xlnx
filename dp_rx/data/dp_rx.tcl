@@ -72,7 +72,7 @@ proc generate {drv_handle} {
 		set rxpinname "s_axis_lnk_rx_lane$i"
 		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $rxpinname]
 		if {[llength $channelip] && [llength [hsi::utils::get_ip_mem_ranges $channelip]]} {
-			set phy_s "${channelip}rxphy_lane${i} 0 1 1 1"
+			set phy_s "${channelip}rxphy_lane${i} 0 1 1 0"
 			set clocks [lappend clocks $phy_s]
 			set updat  [lappend updat $phy_s]
 		}
