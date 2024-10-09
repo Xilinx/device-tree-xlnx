@@ -249,6 +249,13 @@ proc generate {drv_handle} {
 	set_property xlnx,rxcsum "$rxcsum" $drv_handle
 	set_property xlnx,phyaddr "$phyaddr" $drv_handle
 	set_property xlnx,rxmem "$rxmem" $drv_handle
+
+    # Speed is 1G by default
+    set max_speed 1000
+    if {[get_property CONFIG.speed_1_2p5 $eth_ip] == "2p5G"} {
+        set max_speed 2500
+    }
+    set_property max-speed $max_speed $drv_handle
     }
 
     set is_nobuf 0
