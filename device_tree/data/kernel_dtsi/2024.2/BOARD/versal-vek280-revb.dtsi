@@ -30,6 +30,7 @@
 		spi0 = &ospi;
 		usb0 = &usb0;
 		rtc0 = &rtc;
+		nvmem0 = &eeprom;
 	};
 };
 
@@ -87,6 +88,19 @@
 &sdhci1 { /* PMC_MIO26-36/51 */
 	xlnx,mio-bank = <1>;
 	no-1-8-v;
+};
+
+
+&i2c1 { /* PMC_MIO44/45 */
+	bootph-all;
+	clock-frequency = <100000>;
+
+	/* Use for storing information about SC board */
+	eeprom: eeprom@54 { /* u34 - m24128 16kB */
+		compatible = "st,24c128", "atmel,24c128";
+		reg = <0x54>; /* & 0x5c */
+		bootph-all;
+	};
 };
 
 
