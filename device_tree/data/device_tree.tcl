@@ -639,7 +639,26 @@ proc gen_versal_clk {} {
 	set periph_list [get_cells -hier]
 	foreach periph $periph_list {
 		set versal_ps [get_property IP_NAME $periph]
-		if { $versal_ps in { "versal_cips" "ps_wizard" }} {
+		if { $versal_ps in { "ps_wizard" }} {
+			set ps_wizard_params [get_property CONFIG.PS_PMC_CONFIG [get_cells -hier $periph]]
+			if {[llength $ps_wizard_params ]} {
+				if {[dict exists $ps_wizard_params "PMC_REF_CLK_FREQMHZ"]} {
+					set freq [dict get $ps_wizard_params PMC_REF_CLK_FREQMHZ]
+					if {![string match -nocase $freq "33.333"]} {
+						dtg_warning "Frequency $freq used instead of 33.333"
+						hsi::utils::add_new_dts_param "${ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+					}
+				}
+				if {[dict exists $ps_wizard_params "PMC_PL_ALT_REF_CLK_FREQMHZ"]} {
+					set freq [dict get $ps_wizard_params PMC_PL_ALT_REF_CLK_FREQMHZ]
+					if {![string match -nocase $freq "33.333"]} {
+						dtg_warning "Frequency $freq used instead of 33.333"
+						hsi::utils::add_new_dts_param "${pl_alt_ref_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
+					}
+				}
+			}
+		}
+		if { $versal_ps in { "versal_cips"}} {
 			set ver [get_comp_ver $periph]
 			if {$ver < 3.0} {
 				set avail_param [list_property [get_cells -hier $periph]]
