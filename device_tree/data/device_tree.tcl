@@ -527,18 +527,25 @@ proc gen_opp_freq {} {
 		}
 		if { $proc_ps in { "versal_cips" "ps_wizard" }} {
 			set ps_pmc_params [get_property CONFIG.PS_PMC_CONFIG [get_cells -hier $periph]]
-			if {[llength $ps_pmc_params ]} {
+			set ps_pmc_params_int [get_property CONFIG.PS_PMC_CONFIG_INTERNAL [get_cells -hier $periph]]
+			if {[llength $ps_pmc_params ] || [llength $ps_pmc_params_int] } {
 				set act_freq ""
 				set div ""
 				set clkoutdiv ""
 				if {[dict exists $ps_pmc_params "PMC_REF_CLK_FREQMHZ"]} {
 					set act_freq [dict get $ps_pmc_params PMC_REF_CLK_FREQMHZ]
+				} elseif {[dict exists $ps_pmc_params_int "PMC_REF_CLK_FREQMHZ"]} {
+					set act_freq [dict get $ps_pmc_params_int PMC_REF_CLK_FREQMHZ]
 				}
 				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_FBDIV"]} {
 					set div [dict get $ps_pmc_params PS_CRF_APLL_CTRL_FBDIV]
+				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_APLL_CTRL_FBDIV"]} {
+					set div [dict get $ps_pmc_params_int PS_CRF_APLL_CTRL_FBDIV]
 				}
 				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_CLKOUTDIV"]} {
 					set clkoutdiv [dict get $ps_pmc_params PS_CRF_APLL_CTRL_CLKOUTDIV]
+				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_APLL_CTRL_CLKOUTDIV"]} {
+					set clkoutdiv [dict get $ps_pmc_params_int PS_CRF_APLL_CTRL_CLKOUTDIV]
 				}
 				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
 					set opp_freq [expr ceil([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
