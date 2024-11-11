@@ -32,7 +32,7 @@ proc generate {drv_handle} {
 	set interface_block_names [get_property ADDRESS_BLOCK [get_mem_ranges -of_objects [get_cells -hier $sw_proc] $periph]]
 
 	set Supported_channels { \
-		"C*_DDR_LOW0*" "C*_DDR_LOW1*" "C*_DDR_LOW2*" "C*_DDR_LOW3*" "C*_DDR_CH0*" "C*_DDR_CH1*" "C*_DDR_CH2*"  "C*_DDR_CH3*" \
+		"*DDR_LOW*" "*DDR_CH*" \
 		"HBM0_*PC0*" "HBM0_*PC1*" "HBM1_*PC0*" "HBM1_*PC1*" "HBM2_*PC0*" "HBM2_*PC1*" "HBM3_*PC0*" "HBM3_*PC1*" "HBM4_*PC0*" \
 		"HBM4_*PC1*" "HBM5_*PC0*" "HBM5_*PC1*" "HBM6_*PC0*" "HBM6_*PC1*" "HBM7_*PC0*" "HBM7_*PC1*" "HBM8_*PC0*" "HBM8_*PC1*" \
 		"HBM9_*PC0*" "HBM9_*PC1*" "HBM10_*PC0*"  "HBM10_*PC1*" "HBM11_*PC0*" "HBM11_*PC1*" "HBM12_*PC0*" "HBM12_*PC1*" "HBM13_*PC0*" \
