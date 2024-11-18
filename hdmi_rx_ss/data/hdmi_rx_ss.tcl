@@ -144,18 +144,30 @@ proc generate {drv_handle} {
 	}
 	set in_ppc [get_property CONFIG.C_INPUT_PIXELS_PER_CLOCK [get_cells -hier $drv_handle]]
 	set inhex [format %x $in_ppc]
-	append input_pixels_per_clock "/bits/ 8 <0x$inhex>"
-	hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock noformating
-
+	set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
+	if {[string match -nocase $ip_name "v_hdmi_rx_ss"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $in_ppc int
+	} else {
+		append input_pixels_per_clock "/bits/ 8 <0x$inhex>"
+		hsi::utils::add_new_dts_param "${node}" "xlnx,input-pixels-per-clock" $input_pixels_per_clock noformating
+	}
 	set max_bpc [get_property CONFIG.C_MAX_BITS_PER_COMPONENT [get_cells -hier $drv_handle]]
 	set inhex [format %x $max_bpc]
-	append max_bits_per_component "/bits/ 8 <0x$inhex>"
-	hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component noformating
+	if {[string match -nocase $ip_name "v_hdmi_rx_ss"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bpc int
+	} else {
+		append max_bits_per_component "/bits/ 8 <0x$inhex>"
+		hsi::utils::add_new_dts_param "${node}" "xlnx,max-bits-per-component" $max_bits_per_component noformating
+	}
 
 	set edid_ram_size [get_property CONFIG.C_EDID_RAM_SIZE [get_cells -hier $drv_handle]]
 	set inhex [format %x $edid_ram_size]
-	append edid_ram "/bits/ 16 <0x$inhex>"
-	hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram noformating
+	if {[string match -nocase $ip_name "v_hdmi_rx_ss"]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram_size hexint
+	} else {
+		append edid_ram "/bits/ 16 <0x$inhex>"
+		hsi::utils::add_new_dts_param "${node}" "xlnx,edid-ram-size" $edid_ram noformating
+	}
 
 	set max_frl_rate [get_property CONFIG.C_MAX_FRL_RATE [get_cells -hier $drv_handle]]
 	if {[llength $max_frl_rate]} {
