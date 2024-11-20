@@ -3661,6 +3661,16 @@ proc get_broad_in_ip {ip} {
 							}
 						}
 						if {[llength $connectip]} {
+							set len [llength $connectip]
+							if {$len > 1} {
+								for {set i 0 } {$i < $len} {incr i} {
+									set ip [lindex $connectip $i]
+									if {[regexp -nocase "ila" $ip match]} {
+										continue
+									}
+									set connectip "$ip"
+								}
+							}
 							set ip_mem_handles [hsi::utils::get_ip_mem_ranges $connectip]
 							if {![llength $ip_mem_handles]} {
 								set master3_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $connectip] -filter {TYPE==SLAVE || TYPE ==TARGET}]
