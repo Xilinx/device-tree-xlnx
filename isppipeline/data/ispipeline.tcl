@@ -72,7 +72,12 @@ proc generate {drv_handle} {
 	}
 	set ip_name [get_property IP_NAME [get_cells -hier $drv_handle]]
 	set compatible [get_comp_str $drv_handle]
-	set compatible [append compatible " " "xlnx,isppipeline-1.0"]
+	set ip_version [get_comp_ver $drv_handle]
+	if {[string match -nocase $ip_version "2.0"]} {
+		set compatible [append compatible " " "xlnx,isppipeline-2.0"]
+	} else {
+		set compatible [append compatible " " "xlnx,isppipeline-1.0"]
+	}
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
 	hsi::utils::add_new_dts_param $node "xlnx,max-height" "/bits/ 16 <2160>" noformating
 	hsi::utils::add_new_dts_param $node "xlnx,max-width" "/bits/ 16 <3840>" noformating
