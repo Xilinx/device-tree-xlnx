@@ -531,24 +531,19 @@ proc gen_opp_freq {} {
 			if {[llength $ps_pmc_params ] || [llength $ps_pmc_params_int] } {
 				set act_freq ""
 				set div ""
-				set clkoutdiv ""
-				if {[dict exists $ps_pmc_params "PMC_REF_CLK_FREQMHZ"]} {
-					set act_freq [dict get $ps_pmc_params PMC_REF_CLK_FREQMHZ]
-				} elseif {[dict exists $ps_pmc_params_int "PMC_REF_CLK_FREQMHZ"]} {
-					set act_freq [dict get $ps_pmc_params_int PMC_REF_CLK_FREQMHZ]
+				if {[dict exists $ps_pmc_params "PS_CRF_ACPU_CTRL_ACT_FREQMHZ"]} {
+					set act_freq [dict get $ps_pmc_params PS_CRF_ACPU_CTRL_ACT_FREQMHZ]
+				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_ACPU_CTRL_ACT_FREQMHZ"]} {
+					set act_freq [dict get $ps_pmc_params_int PS_CRF_ACPU_CTRL_ACT_FREQMHZ]
 				}
-				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_FBDIV"]} {
-					set div [dict get $ps_pmc_params PS_CRF_APLL_CTRL_FBDIV]
-				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_APLL_CTRL_FBDIV"]} {
-					set div [dict get $ps_pmc_params_int PS_CRF_APLL_CTRL_FBDIV]
+				if {[dict exists $ps_pmc_params "PS_CRF_ACPU_CTRL_DIVISOR0"]} {
+					set div [dict get $ps_pmc_params PS_CRF_ACPU_CTRL_DIVISOR0]
+				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_ACPU_CTRL_DIVISOR0"] && \
+					[dict get $ps_pmc_params_int PS_CRF_ACPU_CTRL_DIVISOR0] > 0} {
+					set div [dict get $ps_pmc_params_int PS_CRF_ACPU_CTRL_DIVISOR0]
 				}
-				if {[dict exists $ps_pmc_params "PS_CRF_APLL_CTRL_CLKOUTDIV"]} {
-					set clkoutdiv [dict get $ps_pmc_params PS_CRF_APLL_CTRL_CLKOUTDIV]
-				} elseif {[dict exists $ps_pmc_params_int "PS_CRF_APLL_CTRL_CLKOUTDIV"]} {
-					set clkoutdiv [dict get $ps_pmc_params_int PS_CRF_APLL_CTRL_CLKOUTDIV]
-				}
-				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr ceil([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
+				if {[llength $act_freq] && [llength $div]} {
+					set opp_freq [expr ceil([expr ($act_freq * $div)]) * 1000000]
 				}
 				# if design don't have clock configs then skip adding new opps
 				if {$opp_freq == ""} {
@@ -573,28 +568,24 @@ proc gen_opp_freq {} {
 			if {[string match -nocase $board_dtsi_file "versal-net-ipp-rev1.9"]} {
 				return
 			}
-			#NOTE: CONFIG.PSX_PMCX_CONFIG_INTERNAL this may change
 			set psx_pmcx_params [get_property CONFIG.PSX_PMCX_CONFIG_INTERNAL [get_cells -hier $periph]]
 			if {[llength $psx_pmcx_params]} {
 				set act_freq ""
 				set div ""
-				set clkoutdiv ""
-				if {[dict exists $psx_pmcx_params "PMCX_REF_CLK_FREQMHZ"]} {
-					set act_freq [dict get $psx_pmcx_params PMCX_REF_CLK_FREQMHZ]
+				if {[dict exists $psx_pmcx_params "PSX_CRF_ACPU0_CTRL_ACT_FREQMHZ"]} {
+					set act_freq [dict get $psx_pmcx_params PSX_CRF_ACPU0_CTRL_ACT_FREQMHZ]
 				}
-				if {[dict exists $psx_pmcx_params "PSX_CRF_APLL1_CTRL_FBDIV"]} {
-					set div [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_FBDIV]
+				if {[dict exists $psx_pmcx_params "PSX_CRF_ACPU0_CTRL_DIVISOR0"] && \
+					[dict get $psx_pmcx_params PSX_CRF_ACPU0_CTRL_DIVISOR0] > 0} {
+					set div [dict get $psx_pmcx_params PSX_CRF_ACPU0_CTRL_DIVISOR0]
 				}
-				if {[dict exists $psx_pmcx_params "PSX_CRF_APLL1_CTRL_CLKOUTDIV"]} {
-					set clkoutdiv [dict get $psx_pmcx_params PSX_CRF_APLL1_CTRL_CLKOUTDIV]
+				if {[llength $act_freq] && [llength $div]} {
+					set opp_freq [expr ceil([expr ($act_freq * $div)]) * 1000000]
 				}
-				if {[llength $act_freq] && [llength $div] && [llength $clkoutdiv]} {
-					set opp_freq [expr ceil([expr ($act_freq * $div) / $clkoutdiv]) * 1000000]
+				# if design don't have clock configs then skip adding new opps
+				if {$opp_freq == ""} {
+					return
 				}
-			}
-			# if design don't have clock configs then skip adding new opps
-			if {$opp_freq == ""} {
-				return
 			}
 			# Remove default opps
 			hsi::utils::add_new_dts_param "$cpu_opp_table" "/delete-node/ opp-1066000000" "" boolean
