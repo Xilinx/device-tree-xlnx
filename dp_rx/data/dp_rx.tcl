@@ -43,6 +43,10 @@ proc generate {drv_handle} {
 	if {$hdcp_enable == 1} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-enable" "" boolean
 	}
+	set versal_gt [get_property CONFIG.C_VERSAL [get_cells -hier $drv_handle]]
+	if {$versal_gt == 1} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,versal-gt" "" boolean
+	}
 	set include_fec_ports [get_property CONFIG.INCLUDE_FEC_PORTS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,include-fec-ports" $include_fec_ports int
 	set edid_ip [get_cells -hier -filter IP_NAME==vid_edid]
@@ -57,11 +61,15 @@ proc generate {drv_handle} {
 		set updat [lappend updat $reg_val_1]
 		set reg_val [lindex $updat 0]
 		append reg_val ">, <[lindex $updat 1]"
-		set_drv_prop $drv_handle reg "$reg_val" hexintlist
+		set_drv_prop $drv_handle reg "$reg_val" hexint
 	}
 	lappend reg_names "dp_base" "edid_base"
 	hsi::utils::add_new_dts_param "${node}" "reg-names" $reg_names stringlist
-	lappend phy_names "dp-phy0" "dp-phy1" "dp-phy2" "dp-phy3"
+	if {$versal_gt == 1} {
+		lappend phy_names "dp-gtquad"
+	} else {
+		lappend phy_names "dp-phy0" "dp-phy1" "dp-phy2" "dp-phy3"
+	}
 	hsi::utils::add_new_dts_param "${node}" "phy-names" $phy_names stringlist
 	set lane_count [get_property CONFIG.LANE_COUNT [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,lane-count" $lane_count int
@@ -100,6 +108,20 @@ proc generate {drv_handle} {
 			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
 		}
 	}
+	if {$versal_gt == 1} {
+		set rxpinname "s_axis_lnk_rx_lane0"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $rxpinname]
+
+		set gtpinname "GT_RX0"
+		set gtip [get_connected_stream_ip [get_cells -hier $channelip] $gtpinname]
+
+		if {[llength $gtip] && [llength [hsi::utils::get_ip_mem_ranges $gtip]]} {
+			set phy_s "${gtip}"
+			set updat  [lappend updat $phy_s]
+			set refs [lindex $updat 0]
+			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
+		}
+	}
 	set mode [get_property CONFIG.MODE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,mode" $mode int
 	set num_streams [get_property CONFIG.NUM_STREAMS [get_cells -hier $drv_handle]]
@@ -121,6 +143,9 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$ports_node" "#size-cells" 0 int
 	set port0_node [add_or_get_dt_node -n "port" -u 0 -l dprx_port$drv_handle -p $ports_node]
 	hsi::utils::add_new_dts_param "$port0_node" "reg" 0 int
+	hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-format" 0 int
+	hsi::utils::add_new_dts_param "$port0_node" "xlnx,video-width" 8 int
+
 	set dprxip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video_stream1"]
 	foreach ip $dprxip {
 		if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
@@ -132,10 +157,13 @@ proc generate {drv_handle} {
 			set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
 			set dp_rx_node [add_or_get_dt_node -n "endpoint" -l dprx_out$drv_handle -p $port0_node]
 			gen_endpoint $drv_handle "dprx_out$drv_handle"
-			hsi::utils::add_new_dts_param "$dp_rx_node" "remote-endpoint" $ip$drv_handle reference
-			gen_remoteendpoint $drv_handle $ip$drv_handle
 			if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"]} {
+				hsi::utils::add_new_dts_param "$dp_rx_node" "remote-endpoint" $ip$drv_handle reference
+				gen_remoteendpoint $drv_handle $ip$drv_handle
 				gen_frmbuf_wr_node $ip $drv_handle
+			} else {
+				hsi::utils::add_new_dts_param "$dp_rx_node" "remote-endpoint" $ip reference
+				gen_remoteendpoint $drv_handle $ip$drv_handle
 			}
 		} else {
 			set connectip [get_connect_ip $ip $intfpins]
