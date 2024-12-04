@@ -47,11 +47,20 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,include-fec-ports" $include_fec_ports int
 	lappend reg_names "dp_base"
 	hsi::utils::add_new_dts_param "${node}" "reg-names" $reg_names stringlist
-	lappend phy_names "dp-phy0" "dp-phy1" "dp-phy2" "dp-phy3"
-	hsi::utils::add_new_dts_param "${node}" "phy-names" $phy_names stringlist
 	set lane_count [get_property CONFIG.LANE_COUNT [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,max-lanes" $lane_count int
 	hsi::utils::add_new_dts_param "${node}" "xlnx,dp-retimer" "xfmc" reference
+	set versal_gt [get_property CONFIG.C_VERSAL [get_cells -hier $drv_handle]]
+	if {$versal_gt == 1} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,versal-gt" "" boolean
+	}
+	if {$versal_gt == 1} {
+		lappend phy_names "dp-gtquad"
+	} else {
+		lappend phy_names "dp-phy0" "dp-phy1" "dp-phy2" "dp-phy3"
+	}
+	hsi::utils::add_new_dts_param "${node}" "phy-names" $phy_names stringlist
+
 	set hdcp_keymngmt [get_cells -hier -filter IP_NAME==hdcp_keymngmt_blk]
 	if {[llength $hdcp_keymngmt]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp1x-keymgmt" [lindex $hdcp_keymngmt 1] reference
@@ -89,6 +98,20 @@ proc generate {drv_handle} {
 		"4" {
 			set refs [lindex $updat 0]
 			append refs ">, <&[lindex $updat 1]>, <&[lindex $updat 2]>, <&[lindex $updat 3]"
+			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
+		}
+	}
+	if {$versal_gt == 1} {
+		set rxpinname "m_axis_lnk_tx_lane0"
+		set channelip [get_connected_stream_ip [get_cells -hier $drv_handle] $rxpinname]
+
+		set gtpinname "GT_TX0"
+		set gtip [get_connected_stream_ip [get_cells -hier $channelip] $gtpinname]
+
+		if {[llength $gtip] && [llength [hsi::utils::get_ip_mem_ranges $gtip]]} {
+			set phy_s "${gtip}"
+			set updat  [lappend updat $phy_s]
+			set refs [lindex $updat 0]
 			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
 		}
 	}
@@ -135,8 +158,13 @@ proc generate {drv_handle} {
 				hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" "mixer_crtc$ip" reference
 				gen_remoteendpoint $drv_handle "mixer_crtc$ip"
 			} else {
-				hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $ip$drv_handle reference
-				gen_remoteendpoint $drv_handle $ip$drv_handle
+				if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_rd"]} {
+					hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $ip$drv_handle reference
+					gen_remoteendpoint $drv_handle $ip$drv_handle
+				} else {
+					hsi::utils::add_new_dts_param "$dp_tx_node" "remote-endpoint" $ip reference
+					gen_remoteendpoint $drv_handle $ip$drv_handle
+				}
 			}
 			if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_rd"]} {
 				gen_pl_disp_node $ip $drv_handle
