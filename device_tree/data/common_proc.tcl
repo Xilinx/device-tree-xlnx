@@ -5620,6 +5620,7 @@ proc default_parameters {ip_handle {dont_generate ""}} {
 		# Ignore some parameters that are always handled specially
 		switch -glob $tmp_par {
 			$dont_generate - \
+			"C_ADDRESS_LIST" - \
 			"INSTANCE" - \
 			"C_INSTANCE" - \
 			"*BASEADDR" - \
