@@ -353,6 +353,11 @@
 };
 
 
+&rtc {
+	calibration = <0x7fff>;
+};
+
+
 &cpu_opp_table {
 	opp00 {
 		opp-hz = /bits/ 64 <1333333333>;
