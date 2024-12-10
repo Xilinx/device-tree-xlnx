@@ -47,43 +47,45 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "$port1_node" "reg" 1 int
 
 	set outip [get_connected_stream_ip [get_cells -hier $drv_handle] "m_axis_video"]
-	set outipname [get_property IP_NAME $outip]
-	set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
-	if {[lsearch  -nocase $valid_mmip_list $outipname] >= 0} {
-	foreach ip $outip {
-		if {[llength $ip]} {
-			set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
-			set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
-			if {[llength $ip_mem_handles]} {
-				set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
-				set demonode [add_or_get_dt_node -n "endpoint" -l demo_out$drv_handle -p $port1_node]
-				gen_endpoint $drv_handle "demo_out$drv_handle"
-				hsi::utils::add_new_dts_param "$demonode" "remote-endpoint" $ip$drv_handle reference
-				gen_remoteendpoint $drv_handle "$ip$drv_handle"
-				if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"]} {
-					gen_frmbuf_wr_node $ip $drv_handle
-				}
-			} else {
-				if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
-					continue
-				}
-				set connectip [get_connect_ip $ip $master_intf]
-				if {[llength $connectip]} {
+	if {[llength $outip]} {
+		set outipname [get_property IP_NAME $outip]
+		set valid_mmip_list "mipi_csi2_rx_subsystem v_tpg v_hdmi_rx_ss v_smpte_uhdsdi_rx_ss v_smpte_uhdsdi_tx_ss v_demosaic v_gamma_lut v_proc_ss v_frmbuf_rd v_frmbuf_wr v_hdmi_tx_ss v_hdmi_txss1 v_uhdsdi_audio audio_formatter i2s_receiver i2s_transmitter mipi_dsi_tx_subsystem v_mix v_multi_scaler v_scenechange"
+		if {[lsearch  -nocase $valid_mmip_list $outipname] >= 0} {
+		foreach ip $outip {
+			if {[llength $ip]} {
+				set master_intf [::hsi::get_intf_pins -of_objects [get_cells -hier $ip] -filter {TYPE==MASTER || TYPE ==INITIATOR}]
+				set ip_mem_handles [hsi::utils::get_ip_mem_ranges $ip]
+				if {[llength $ip_mem_handles]} {
+					set base [string tolower [get_property BASE_VALUE $ip_mem_handles]]
 					set demonode [add_or_get_dt_node -n "endpoint" -l demo_out$drv_handle -p $port1_node]
 					gen_endpoint $drv_handle "demo_out$drv_handle"
-					hsi::utils::add_new_dts_param "$demonode" "remote-endpoint" $connectip$drv_handle reference
-					gen_remoteendpoint $drv_handle "$connectip$drv_handle"
-					if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
-						gen_frmbuf_wr_node $connectip $drv_handle
+					hsi::utils::add_new_dts_param "$demonode" "remote-endpoint" $ip$drv_handle reference
+					gen_remoteendpoint $drv_handle "$ip$drv_handle"
+					if {[string match -nocase [get_property IP_NAME $ip] "v_frmbuf_wr"]} {
+						gen_frmbuf_wr_node $ip $drv_handle
+					}
+				} else {
+					if {[string match -nocase [get_property IP_NAME $ip] "system_ila"]} {
+						continue
+					}
+					set connectip [get_connect_ip $ip $master_intf]
+					if {[llength $connectip]} {
+						set demonode [add_or_get_dt_node -n "endpoint" -l demo_out$drv_handle -p $port1_node]
+						gen_endpoint $drv_handle "demo_out$drv_handle"
+						hsi::utils::add_new_dts_param "$demonode" "remote-endpoint" $connectip$drv_handle reference
+						gen_remoteendpoint $drv_handle "$connectip$drv_handle"
+						if {[string match -nocase [get_property IP_NAME $connectip] "v_frmbuf_wr"]} {
+							gen_frmbuf_wr_node $connectip $drv_handle
+						}
 					}
 				}
+			} else {
+				dtg_warning "$drv_handle pin m_axis_video is not connected..check your design"
 			}
-		} else {
-			dtg_warning "$drv_handle pin m_axis_video is not connected..check your design"
 		}
 	}
+		gen_gpio_reset $drv_handle $node
 	}
-	gen_gpio_reset $drv_handle $node
 }
 
 proc gen_frmbuf_wr_node {outip drv_handle} {
