@@ -109,7 +109,7 @@ proc generate {drv_handle} {
 		set gtip [get_connected_stream_ip [get_cells -hier $channelip] $gtpinname]
 
 		if {[llength $gtip] && [llength [hsi::utils::get_ip_mem_ranges $gtip]]} {
-			set phy_s "${gtip}"
+			set phy_s "${gtip}txphy_lane0 0 1 1 1"
 			set updat  [lappend updat $phy_s]
 			set refs [lindex $updat 0]
 			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
