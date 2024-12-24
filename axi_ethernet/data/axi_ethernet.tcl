@@ -422,12 +422,8 @@ proc generate {drv_handle} {
 				regsub -all "\{||\t" $intr_val1 {} intr_val1
 				regsub -all "\}||\t" $intr_val1 {} intr_val1
 				if {![string match -nocase $proctype "microblaze"]} {
-					if {[string match -nocase $intr_parent "intc"]} {
-						set_property "interrupts" $intr_val1 $drv_handle
-					} else {
-						set_property "interrupts" "<$intr_val1>" $drv_handle
-					}
-					set_property "interrupt-names" $intr_names $drv_handle
+					set_drv_prop $drv_handle "interrupts" $intr_val1 intlist
+					set_drv_prop $drv_handle "interrupt-names" $intr_names stringlist
 				}
 				hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val1 int
 			} else {
