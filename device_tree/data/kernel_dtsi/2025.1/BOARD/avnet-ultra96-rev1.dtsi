@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * dts file for Avnet Ultra96 rev1
+ *
+ * (C) Copyright 2018-2022 Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@amd.com>
+ */
+
+
+#include "zcu100-revc.dtsi"
+
+/ {
+	model = "Avnet Ultra96 Rev1";
+	compatible = "avnet,ultra96-rev1", "avnet,ultra96",
+		     "xlnx,zynqmp-zcu100-revC", "xlnx,zynqmp-zcu100",
+		     "xlnx,zynqmp";
+};
