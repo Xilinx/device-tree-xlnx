@@ -43,6 +43,11 @@ proc generate {drv_handle} {
 	if {$hdcp_enable == 1} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp-enable" "" boolean
 	}
+	set hdcp_keymngmt [get_cells -hier -filter IP_NAME==hdcp_keymngmt_blk]
+	if {[llength $hdcp_keymngmt]} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,hdcp1x_keymgmt" [lindex $hdcp_keymngmt 0] reference
+	}
+
 	set versal_gt [get_property CONFIG.C_VERSAL [get_cells -hier $drv_handle]]
 	if {$versal_gt == 1} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,versal-gt" "" boolean
@@ -116,7 +121,7 @@ proc generate {drv_handle} {
 		set gtip [get_connected_stream_ip [get_cells -hier $channelip] $gtpinname]
 
 		if {[llength $gtip] && [llength [hsi::utils::get_ip_mem_ranges $gtip]]} {
-			set phy_s "${gtip}"
+			set phy_s "${gtip}rxphy_lane0 0 1 1 0"
 			set updat  [lappend updat $phy_s]
 			set refs [lindex $updat 0]
 			hsi::utils::add_new_dts_param "${node}" "phys" "$refs" reference
