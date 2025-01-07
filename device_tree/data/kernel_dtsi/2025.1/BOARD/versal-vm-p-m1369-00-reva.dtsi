@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal
+ *
+ * (C) Copyright 2024-2022 Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@amd.com>
+ */
+
+
+/ {
+	compatible = "xlnx,versal-vm-p-m1369-00-revA",
+		     "xlnx,versal-vm-p-m1369-00",
+		     "xlnx,versal-vm-p-m1369", "xlnx,versal";
+	model = "Xilinx Versal m1369 Processor board revA";
+
+	aliases {
+		serial2 = &dcc;
+	};
+
+};
+
+
+&sdhci0 {
+	no-1-8-v;
+};
+
+&sdhci1 {
+	no-1-8-v;
+};
