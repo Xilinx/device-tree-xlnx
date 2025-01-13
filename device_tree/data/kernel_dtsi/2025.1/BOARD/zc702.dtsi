@@ -2,7 +2,7 @@
 /*
  *  Copyright (C) 2011 - 2015 Xilinx
  *  Copyright (C) 2012 National Instruments Corp.
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 #include "include/dt-bindings/gpio/gpio.h"
 

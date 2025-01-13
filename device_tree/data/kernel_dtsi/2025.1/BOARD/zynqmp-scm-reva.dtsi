@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx ZynqMP SCM RevA
+ *
+ * (C) Copyright 2020-2022 Xilinx, Inc.
+ * (C) Copyright 2023-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@amd.com>
+ */
+
+#include "zynqmp-sc-k24-reva.dtsi"
+
+/ {
+	model = "ZynqMP SCM RevA";
+	compatible = "xlnx,zynqmp-scm-revA", "xlnx,zynqmp-scm",
+		     "xlnx,zynqmp";
+
+};

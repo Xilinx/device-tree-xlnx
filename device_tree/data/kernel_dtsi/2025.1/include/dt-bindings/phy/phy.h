@@ -4,7 +4,7 @@
  * This header provides constants for the phy framework
  *
  * Copyright (C) 2014 STMicroelectronics
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  * Author: Gabriel Fernandez <gabriel.fernandez@st.com>
  */
 

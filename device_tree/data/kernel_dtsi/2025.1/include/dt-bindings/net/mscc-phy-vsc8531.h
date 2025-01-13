@@ -5,7 +5,7 @@
  * Author: Nagaraju Lakkaraju
  *
  * Copyright (c) 2017 Microsemi Corporation
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 
 #ifndef _DT_BINDINGS_MSCC_VSC8531_H

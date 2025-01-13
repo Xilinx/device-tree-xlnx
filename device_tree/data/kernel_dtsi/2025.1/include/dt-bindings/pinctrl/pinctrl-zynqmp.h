@@ -3,7 +3,7 @@
  * MIO pin configuration defines for Xilinx ZynqMP
  *
  * Copyright (C) 2020 Xilinx-2022 Xilinx, Inc.
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  */
 
 #ifndef _DT_BINDINGS_PINCTRL_ZYNQMP_H
