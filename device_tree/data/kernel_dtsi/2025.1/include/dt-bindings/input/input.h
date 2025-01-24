@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * This header provides constants for most input bindings.
  *
@@ -9,7 +10,7 @@
 #ifndef _DT_BINDINGS_INPUT_INPUT_H
 #define _DT_BINDINGS_INPUT_INPUT_H
 
-#include <dt-bindings/input/linux-event-codes.h>
+#include <proj/yocto/ubootdtgsync/uboot/dts/upstream/include/dt-bindings/input/linux-event-codes.h>
 #define MATRIX_KEY(row, col, code)	\
 	((((row) & 0xFF) << 24) | (((col) & 0xFF) << 16) | ((code) & 0xFFFF))
 

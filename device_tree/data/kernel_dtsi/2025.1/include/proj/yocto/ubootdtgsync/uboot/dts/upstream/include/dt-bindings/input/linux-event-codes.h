@@ -8,7 +8,6 @@
  *
  * Copyright (c) 1999-2002 Vojtech Pavlik
  * Copyright (c) 2015 Hans de Goede <hdegoede@redhat.com>
- * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published by
