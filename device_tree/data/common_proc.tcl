@@ -6375,6 +6375,7 @@ proc gen_root_node {drv_handle} {
 			}
 			update_system_dts_include [file tail ${dtsi_fname}]
 			update_system_dts_include [file tail "zynqmp-clk-ccf.dtsi"]
+			update_system_dts_include [file tail "zynqmp-u-boot.dtsi"]
 			# no root_node required as zynqmp.dtsi
 			return 0
 		}
