@@ -881,6 +881,8 @@ proc gen_zocl_node {} {
 
 proc generate {lib_handle} {
 	add_skeleton
+	dtg_warning "The DTG tool is scheduled to be deprecated in a future release.\
+			It is recommended to adopt the SDTGEN tool for Device Tree generation"
 	foreach drv_handle [get_drivers] {
 		if {[string match -nocase [common::get_property IP_NAME [get_cells -hier $drv_handle]] "axi_intc"]} {
 			gen_peripheral_nodes $drv_handle "create_node_only"
