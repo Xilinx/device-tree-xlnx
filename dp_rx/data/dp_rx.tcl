@@ -170,7 +170,7 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,sim-mode" $sim_mode string
 	set video_interface [get_property CONFIG.VIDEO_INTERFACE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,video-interface" $video_interface int
-	set vid_phy_ctlr [get_cells -hier -filter IP_NAME==vid_phy_controller]
+	set vid_phy_ctlr [find_best_match $node [get_cells -hier -filter IP_NAME==vid_phy_controller]]
 	if {[llength $vid_phy_ctlr]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vidphy" $vid_phy_ctlr reference
 	}
