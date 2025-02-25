@@ -13,6 +13,37 @@
 # GNU General Public License for more details.
 #
 
+# If there are multiple dp_rx nodes, the bindings to the corresponding
+# sub nodes (edid, vidphy, ..) can be specified by putting them
+# into the same hierarchical subblock.
+# This way their names will have common prefixes.
+# 'find_best_match' is used to return the sub node whose name matches
+# best the name of the dp_rx node
+
+proc common_prefix {a b} {
+	set res {}
+	foreach i [split $a {}] j [split $b {}] {
+		if {$i eq $j} {append res $i} else break
+	}
+	set res
+}
+
+proc find_best_match {dp cells} {
+	set idx 0
+	set max_len 0
+	set nr 0
+	foreach cell $cells {
+		set sub [common_prefix $cell $dp]
+		set len [string length $sub]
+		if {$len > $max_len} {
+			set max_len $len
+			set idx $nr
+		}
+	        incr nr
+	}
+	set res [lindex $cells $idx]
+}
+
 proc generate {drv_handle} {
 	# try to source the common tcl procs
 	# assuming the order of return is based on repo priority
@@ -54,7 +85,7 @@ proc generate {drv_handle} {
 	}
 	set include_fec_ports [get_property CONFIG.INCLUDE_FEC_PORTS [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,include-fec-ports" $include_fec_ports int
-	set edid_ip [get_cells -hier -filter IP_NAME==vid_edid]
+	set edid_ip [find_best_match $node [get_cells -hier -filter IP_NAME==vid_edid]]
 	if {[llength $edid_ip]} {
 		set baseaddr_dp_rx [get_property CONFIG.C_BASEADDR [get_cells -hier $drv_handle]]
 		set highaddr_dp_rx [get_property CONFIG.C_HIGHADDR [get_cells -hier $drv_handle]]
@@ -139,7 +170,7 @@ proc generate {drv_handle} {
 	hsi::utils::add_new_dts_param "${node}" "xlnx,sim-mode" $sim_mode string
 	set video_interface [get_property CONFIG.VIDEO_INTERFACE [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,video-interface" $video_interface int
-	set vid_phy_ctlr [get_cells -hier -filter IP_NAME==vid_phy_controller]
+	set vid_phy_ctlr [find_best_match $node [get_cells -hier -filter IP_NAME==vid_phy_controller]]
 	if {[llength $vid_phy_ctlr]} {
 		hsi::utils::add_new_dts_param "${node}" "xlnx,vidphy" $vid_phy_ctlr reference
 	}
