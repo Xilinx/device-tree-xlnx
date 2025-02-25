@@ -3,7 +3,7 @@
  * dts file for Xilinx ZynqMP vp-x-a2785-00 RevA System Controller
  *
  * (C) Copyright 2021-2022 Xilinx, Inc.
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -187,7 +187,7 @@
 			reg = <0>;
 			/* On connector J325 */
 			reg_vccint: tps53681@60 { /* u266 - 0xc0 */
-				compatible = "ti,tps53681", "ti,tps53679";
+				compatible = "ti,tps53681";
 				reg = <0x60>;
 			};
 			reg_vcc1v1_lp4: tps544@d { /* u85 */
