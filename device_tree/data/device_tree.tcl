@@ -1024,6 +1024,7 @@ proc update_chosen {os_handle} {
 
 proc update_cpu_node {os_handle} {
     set default_dts [get_property CONFIG.master_dts [get_os]]
+    set pcwdts_file [get_property CONFIG.pcw_dts [get_os]]
     set system_root_node [add_or_get_dt_node -n "/" -d ${default_dts}]
     set avail_cpu_cores 0
     set proctype [get_property IP_NAME [get_cells -hier [get_sw_processor]]]
@@ -1078,6 +1079,8 @@ proc update_cpu_node {os_handle} {
         set proc_name [lindex [get_cells -hier -filter {IP_TYPE==PROCESSOR} *$proctype*] $i]
         if {[llength $proc_name] == 0} {
             set cpu_node [add_or_get_dt_node -n "cpus" -d ${default_dts} -p ${system_root_node}]
+            set amba_node [add_or_get_dt_node -n "&cpu${i}_debug" -d ${pcwdts_file}]
+	    hsi::utils::add_new_dts_param "${amba_node}" "/delete-property/ cpu" "" boolean
             hsi::utils::add_new_dts_param "${cpu_node}" "/delete-node/ cpu@$i" "" boolean
             continue
         }
@@ -1088,18 +1091,23 @@ proc update_cpu_node {os_handle} {
             continue
         } else {
             set cpu_node [add_or_get_dt_node -n "cpus" -d ${default_dts} -p ${system_root_node}]
+            set amba_node [add_or_get_dt_node -n "&cpu${i}_debug" -d ${pcwdts_file}]
+	    hsi::utils::add_new_dts_param "${amba_node}" "/delete-property/ cpu" "" boolean
             hsi::utils::add_new_dts_param "${cpu_node}" "/delete-node/ cpu@$i" "" boolean
         }
     }
 
     # zynqmp.dtsi pmu node has cpu references hense generating them as per design
     set pmc_prop_value ""
+    set cpu_cooling_maps ""
     if { $avail_cpu_cores < $total_cores } {
         for {set i 0} {$i < $avail_cpu_cores} {incr i} {
 	    if { $i > 0 } {
 	        append pmc_prop_value ">, <&cpu$i"
+		append cpu_cooling_maps ">, <&cpu$i THERMAL_NO_LIMIT THERMAL_NO_LIMIT"
 	    } else {
 		append pmc_prop_value "&cpu$i"
+		append cpu_cooling_maps "&cpu$i THERMAL_NO_LIMIT THERMAL_NO_LIMIT"
 	    }
         }
     }
@@ -1107,6 +1115,16 @@ proc update_cpu_node {os_handle} {
         set pmu_node [add_or_get_dt_node -n "pmu" -d ${default_dts} -p ${system_root_node}]
         hsi::utils::add_new_dts_param "${pmu_node}" "interrupt-affinity" "$pmc_prop_value" intlist
     }
+
+    # zynqmp.dtsi thermal-zones maps has cpu references hense generating them as per design
+    if {[llength "${cpu_cooling_maps}"]} {
+	set thermal_zone_node [add_or_get_dt_node -n "thermal-zones" -d ${default_dts} -p ${system_root_node}]
+	set apu_thermal_node [add_or_get_dt_node -n "apu-thermal" -d ${default_dts} -p ${thermal_zone_node}]
+	set cooling_maps_node [add_or_get_dt_node -n "cooling-maps" -d ${default_dts} -p ${apu_thermal_node}]
+	set maps_node [add_or_get_dt_node -n "map" -d ${default_dts} -p ${cooling_maps_node}]
+	hsi::utils::add_new_dts_param "${maps_node}" "cooling-device" "$cpu_cooling_maps" intlist
+    }
+
 }
 
 proc update_alias {os_handle} {
