@@ -3,7 +3,7 @@
  * dts file for Xilinx Versal with PM
  *
  * Copyright (C) 2022, Xilinx, Inc.
- * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -55,8 +55,8 @@
 				bootph-all;
 				#clock-cells = <1>;
 				compatible = "xlnx,versal-net-clk", "xlnx,versal-clk";
-				clocks = <&ref_clk>, <&ref_clk>;
-				clock-names = "ref_clk", "pl_alt_ref_clk";
+				clocks = <&ref_clk>, <&ref_clk>, <&ref_clk>;
+				clock-names = "ref", "pl_alt_ref", "alt_ref";
 			};
 
 			versal_net_power: zynqmp-power { /* untested */
