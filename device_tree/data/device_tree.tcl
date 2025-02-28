@@ -632,8 +632,8 @@ proc gen_opp_freq {} {
 
 proc gen_versal_clk {} {
 	set default_dts [get_property CONFIG.pcw_dts [get_os]]
-	set ref_node [add_or_get_dt_node -n "&ref_clk" -d $default_dts]
-	set pl_alt_ref_node [add_or_get_dt_node -n "&pl_alt_ref_clk" -d $default_dts]
+	set ref_node [add_or_get_dt_node -n "&ref" -d $default_dts]
+	set pl_alt_ref_node [add_or_get_dt_node -n "&pl_alt_ref" -d $default_dts]
 	set periph_list [get_cells -hier]
 	foreach periph $periph_list {
 		set versal_ps [get_property IP_NAME $periph]
