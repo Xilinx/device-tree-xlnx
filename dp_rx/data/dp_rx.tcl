@@ -60,10 +60,12 @@ proc generate {drv_handle} {
 	}
 	lappend compatible "xlnx,v-dp-rxss-3.0" "xlnx,v-dp-rxss-3.1"
 	set_drv_prop $drv_handle compatible "$compatible" stringlist
-	set audio_channels [get_property CONFIG.AUDIO_CHANNELS [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-channels" $audio_channels int
 	set audio_enable [get_property CONFIG.AUDIO_ENABLE [get_cells -hier $drv_handle]]
-	hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enable" $audio_enable int
+	if {$audio_enable == 1} {
+		hsi::utils::add_new_dts_param "${node}" "xlnx,audio-enable" "" boolean
+		set audio_channels [get_property CONFIG.AUDIO_CHANNELS [get_cells -hier $drv_handle]]
+		hsi::utils::add_new_dts_param "${node}" "xlnx,audio-channels" $audio_channels int
+	}
 	set bits_per_color [get_property CONFIG.BITS_PER_COLOR [get_cells -hier $drv_handle]]
 	hsi::utils::add_new_dts_param "${node}" "xlnx,bpc" $bits_per_color int
 	set hdcp22_enable [get_property CONFIG.HDCP22_ENABLE [get_cells -hier $drv_handle]]
