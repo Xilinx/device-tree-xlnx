@@ -1311,26 +1311,26 @@
 			       <&zynqmp_dpdma ZYNQMP_DPDMA_AUDIO0>,
 			       <&zynqmp_dpdma ZYNQMP_DPDMA_AUDIO1>;
 
-			ports {
+			zynqmp_dpsub_ports: ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
 
-				port@0 {
+				zynqmp_dpsub_port0: port@0 {
 					reg = <0>;
 				};
-				port@1 {
+				zynqmp_dpsub_port1: port@1 {
 					reg = <1>;
 				};
-				port@2 {
+				zynqmp_dpsub_port2: port@2 {
 					reg = <2>;
 				};
-				port@3 {
+				zynqmp_dpsub_port3: port@3 {
 					reg = <3>;
 				};
-				port@4 {
+				zynqmp_dpsub_port4: port@4 {
 					reg = <4>;
 				};
-				port@5 {
+				zynqmp_dpsub_port5: port@5 {
 					reg = <5>;
 				};
 			};
