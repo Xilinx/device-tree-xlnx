@@ -14,7 +14,7 @@
 #include "include/dt-bindings/reset/xlnx-versal-resets.h"
 
 / {
-	pl_alt_ref: pl-alt-ref {
+	pl_alt_ref_clk: pl-alt-ref-clk {
 		bootph-all;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -22,7 +22,7 @@
 		clock-output-names = "pl_alt_ref_clk";
 	};
 
-	ref: ref {
+	ref_clk: ref-clk {
 		bootph-all;
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -60,8 +60,8 @@
 				bootph-all;
 				#clock-cells = <1>;
 				compatible = "xlnx,versal-clk";
-				clocks = <&ref>, <&pl_alt_ref>;
-				clock-names = "ref", "pl_alt_ref";
+				clocks = <&ref_clk>, <&pl_alt_ref_clk>;
+				clock-names = "ref_clk", "pl_alt_ref_clk";
 			};
 
 			zynqmp_power: zynqmp-power {
