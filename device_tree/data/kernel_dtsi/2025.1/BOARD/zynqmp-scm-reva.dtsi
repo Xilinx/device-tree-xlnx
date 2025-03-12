@@ -16,3 +16,7 @@
 		     "xlnx,zynqmp";
 
 };
+
+&zynqmp_dpsub {
+	status = "disabled";
+};

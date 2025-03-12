@@ -2,7 +2,7 @@
 /*
  * dts file for Xilinx Versal VEK280 revB
  *
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -69,9 +69,15 @@
 		spi-max-frequency = <20000000>;
 		no-wp;
 		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
-		partition@0 {
-			label = "spi0-flash0";
-			reg = <0 0x8000000>;
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "spi0-flash0";
+				reg = <0 0x10000000>;
+			};
 		};
 	};
 };
