@@ -64,7 +64,7 @@
 				clock-names = "ref", "pl_alt_ref";
 			};
 
-			zynqmp_power: zynqmp-power {
+			zynqmp_power: power-management {
 				compatible = "xlnx,zynqmp-power";
 			};
 
