@@ -5725,18 +5725,27 @@ proc gen_peripheral_nodes {drv_handle {node_only ""}} {
 		# So reading proper xsct configs to add status okay
 		if {[string match -nocase $ip_type "psv_cpm"]} {
 			set rev_num -1
+			set port_type_0 -1
+			set port_type_1 -1
 			set cpm_unit_addr ""
 			foreach drv [get_cells -hier -filter IP_NAME==psv_cpm] {
 				if {![regexp "pspmc.*" "$drv" match]} {
 					set rev_num [llength [get_cells -hier $drv -filter CONFIG.CPM_REVISION_NUMBER==1]]
+					set avail_param [list_property $drv]
+					if {[lsearch -nocase $avail_param "CONFIG.C_CPM_PCIE0_PORT_TYPE"] >= 0} {
+						set port_type_0 [get_property CONFIG.C_CPM_PCIE0_PORT_TYPE $drv]
+					}
+					if {[lsearch -nocase $avail_param "CONFIG.C_CPM_PCIE1_PORT_TYPE"] >= 0} {
+						set port_type_1 [get_property CONFIG.C_CPM_PCIE1_PORT_TYPE $drv]
+					}
 				}
 			}
 			#for CPM4 designs the revision number will be 0
 			#for CPM5 designs the revision number will be 1
-			if {$rev_num == 0} {
+			if {($rev_num == 0) && ($port_type_0 || $port_type_1)} {
 				# CONFIG.CPM_SLCR is for cpm4
 				set cpm_unit_addr [get_property CONFIG.CPM_SLCR [get_cells -hier $ip]]
-			} elseif {$rev_num == 1} {
+			} elseif {($rev_num == 1) && ($port_type_0 || $port_type_1)} {
 				# CONFIG.CPM5_SLCR_ADDR is for cpm5
 				set cpm_unit_addr [get_property CONFIG.CPM5_SLCR_ADDR [get_cells -hier $ip]]
 			}
