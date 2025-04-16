@@ -73,12 +73,8 @@ proc generate {drv_handle} {
     set eth_node ""
     for {set core 0} {$core < $num_cores} {incr core} {
           if {(($ip_name == "xxv_ethernet") || ($ip_name == "ethernet_1_10_25g")) && ($core != 0)} {
-               if {$dt_overlay} {
-                     set bus_node "amba"
-               } else {
-                    set bus_node "amba_pl"
-               }
                set dts_file [current_dt_tree]
+               set bus_node [add_or_get_bus_node $drv_handle $dts_file]
 	       set ipmem_len [llength $ip_mem_handles]
 	       if {$ipmem_len > 1} {
                   set base_addr [string tolower [get_property BASE_VALUE [lindex $ip_mem_handles $core]]]
