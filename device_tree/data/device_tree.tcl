@@ -499,20 +499,14 @@ proc gen_opp_freq {} {
 			if {[lsearch -nocase $avail_param "CONFIG.PSU__CRF_APB__ACPU_CTRL__FREQMHZ"] >= 0} {
 				set act_freq ""
 				set div ""
-				set freq [get_property CONFIG.PSU__CRF_APB__ACPU_CTRL__FREQMHZ [get_cells -hier $periph]]
-				if {[string match -nocase $freq "1200"]} {
-					# This is the default value set, so no need to calcualte
-					return
-				}
 				if {[lsearch -nocase $avail_param "CONFIG.PSU__CRF_APB__ACPU_CTRL__ACT_FREQMHZ"] >= 0} {
 					set act_freq [get_property CONFIG.PSU__CRF_APB__ACPU_CTRL__ACT_FREQMHZ [get_cells -hier $periph]]
-					set act_freq [expr $act_freq * 1000000]
 				}
 				if {[lsearch -nocase $avail_param "CONFIG.PSU__CRF_APB__ACPU_CTRL__DIVISOR0"] >= 0} {
 					set div [get_property CONFIG.PSU__CRF_APB__ACPU_CTRL__DIVISOR0 [get_cells -hier $periph]]
 				}
 				if {[llength $act_freq] && [llength $div]} {
-					set opp_freq  [expr $act_freq * $div]
+					set opp_freq  [expr ceil([expr ($act_freq * $div)]) * 1000000]
 				}
 				# if design don't have clock configs then skip adding new opps
 				if {$opp_freq == ""} {
