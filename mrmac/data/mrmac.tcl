@@ -1639,9 +1639,15 @@ proc generate_intr_info {drv_handle node fifo_ip} {
 	set intr_val [get_property CONFIG.interrupts $target_handle]
 	set intr_parent [get_property CONFIG.interrupt-parent $target_handle]
 	set int_names  [get_property CONFIG.interrupt-names $target_handle]
-	hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
-	hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
-	hsi::utils::add_new_dts_param "${node}" "interrupt-names" $int_names stringlist
+	if {[llength $intr_val]} {
+		hsi::utils::add_new_dts_param "${node}" "interrupts" $intr_val int
+	}
+	if {[llength $intr_parent]} {
+		hsi::utils::add_new_dts_param "${node}" "interrupt-parent" $intr_parent reference
+	}
+	if {[llength $int_names]} {
+		hsi::utils::add_new_dts_param "${node}" "interrupt-names" $int_names stringlist
+	}
 }
 
 proc check_size {base node} {
