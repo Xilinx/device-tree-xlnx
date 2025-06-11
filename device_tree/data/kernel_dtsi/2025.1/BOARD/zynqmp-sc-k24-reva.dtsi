@@ -83,7 +83,6 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
-
 			eeprom_cc: eeprom@54 { /* u35 - required by spec - also at address 0x5C */
 				compatible = "atmel,24c128";
 				label = "eeprom_cc";
