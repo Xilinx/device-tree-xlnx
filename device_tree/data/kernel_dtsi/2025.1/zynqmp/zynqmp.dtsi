@@ -126,6 +126,7 @@
 		};
 	};
 
+
 	zynqmp_ipi: zynqmp-ipi {
 		bootph-all;
 		compatible = "xlnx,zynqmp-ipi-mailbox";
