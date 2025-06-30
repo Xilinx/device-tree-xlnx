@@ -5116,8 +5116,8 @@ proc gen_interrupt_property {drv_handle {intr_port_name ""}} {
 					set cur_intr_info "$intr_id $intr_type"
 				}
 			} elseif {[string match -nocase $intc "psu_acpu_gic"] \
-				|| [string match -nocase [get_property IP_NAME $intc] "psv_acpu_gic"] \
-				|| [string match -nocase [get_property IP_NAME $intc] "psx_acpu_gic"]} {
+				|| [string match -nocase [get_property IP_NAME [get_cells -hier $intc]] "psv_acpu_gic"] \
+				|| [string match -nocase [get_property IP_NAME [get_cells -hier $intc]] "psx_acpu_gic"]} {
 			    set cur_intr_info "0 $intr_id $intr_type"
 			    for { set i 1 } {$i < $intrpin_width} {incr i} {
 				    set intr_id_inc [expr $intr_id + $i]
