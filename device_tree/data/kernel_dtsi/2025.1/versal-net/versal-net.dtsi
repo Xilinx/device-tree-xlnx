@@ -3,7 +3,7 @@
  * dts file for Xilinx Versal NET
  *
  * Copyright (C) 2022, Xilinx, Inc.
- * Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -598,7 +598,7 @@
 			reg = <0 0xf12a0000 0 0x100>;
 			interrupts = <0 200 4>, <0 201 4>;
 			interrupt-names = "alarm", "sec";
-			calibration = <0x8000>;
+			calibration = <0x7FFF>;
 		};
 
 		sdhci0: mmc@f1040000 {
