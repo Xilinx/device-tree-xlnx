@@ -263,19 +263,24 @@ proc generate {drv_handle} {
 				}
 				if {[llength $sink_periph]} {
 					set val [get_property CONFIG.CONST_VAL $sink_periph]
-					set inhex [format %x $val]
-					set_drv_prop $drv_handle phy-handle "phy$inhex" reference
-					set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
-					hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
-					set phy_type [get_property CONFIG.Standard $connected_ip]
-					set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
-					if {$phy_type == "1000BASEX"} {
-						hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x5 int
-					} elseif { $is_sgmii == "true"} {
-						hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x4 int
+					if {[llength $val]} {
+						set inhex [format %x $val]
+						set_drv_prop $drv_handle phy-handle "phy$inhex" reference
+						set pcspma_phy_node [add_or_get_dt_node -l phy$inhex -n phy -u $inhex -p $node]
+						hsi::utils::add_new_dts_param "${pcspma_phy_node}" "reg" $val int
+						set phy_type [get_property CONFIG.Standard $connected_ip]
+						set is_sgmii [get_property CONFIG.c_is_sgmii $connected_ip]
+						if {$phy_type == "1000BASEX"} {
+							hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x5 int
+							} elseif { $is_sgmii == "true"} {
+							hsi::utils::add_new_dts_param "${pcspma_phy_node}" "xlnx,phy-type" 0x4 int
+						} else {
+							dtg_warning "unsupported phytype:$phy_type"
+						}
 					} else {
-						dtg_warning "unsupported phytype:$phy_type"
-					}
+						dtg_warning "Unable to determine PHY address of PCS PMA.\
+						Phy node will not be generated. Please edit device tree with PCS PMA information manually if required."
+						}
 				}
 			}
 		}
