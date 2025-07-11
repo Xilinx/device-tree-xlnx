@@ -58,10 +58,7 @@ proc generate {drv_handle} {
 	if { $axiethernetfound != 1 && $is_xxv != 1 && $is_mrmac != 1} {
 		set ip_prop CONFIG.c_include_mm2s_dre
 		add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
-		set addr_width [get_property CONFIG.c_addr_width $mcdma_ip]
-		set inhex [format %x $addr_width]
-		append addrwidth "/bits/ 8 <0x0 0x0 0x0 0x$inhex>"
-		hsi::utils::add_new_dts_param "$node" "xlnx,addrwidth" $addrwidth noformating
+		set_drv_conf_prop $drv_handle c_addr_width xlnx,addrwidth
 		set baseaddr [get_baseaddr $mcdma_ip no_prefix]
 		set tx_chan [hsi::utils::get_ip_param_value $mcdma_ip C_INCLUDE_MM2S]
 		if { $tx_chan == 1 } {
@@ -98,10 +95,7 @@ proc generate {drv_handle} {
 	} else {
 		set ip_prop CONFIG.c_include_mm2s_dre
 		add_cross_property $drv_handle $ip_prop $drv_handle "xlnx,include-dre" boolean
-		set addr_width [get_property CONFIG.c_addr_width $mcdma_ip]
-		set inhex [format %x $addr_width]
-		append addrwidth "/bits/ 8 <0x0 0x0 0x0 0x$inhex>"
-		hsi::utils::add_new_dts_param "$node" "xlnx,addrwidth" $addrwidth noformating
+		set_drv_conf_prop $drv_handle c_addr_width xlnx,addrwidth
 	}
 	incr dma_count
 	hsi::utils::set_os_parameter_value "dma_count" $dma_count
