@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * dts file for Xilinx Versal Net VNX board
+ *
+ * (C) Copyright 2022, Xilinx, Inc.
+ * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ *
+ * Michal Simek <michal.simek@amd.com>
+ */
+
+
+#include "include/dt-bindings/gpio/gpio.h"
+
+/ {
+	compatible = "xlnx,versal-net-vn-x-b2197-00-revA",
+		     "xlnx,versal-net-vn-x-b2197-00", "xlnx,versal-net";
+	model = "Xilinx Versal Net VNX";
+
+
+	chosen {
+		bootargs = "console=ttyAMA1,115200";
+		stdout-path = "serial1:115200";
+	};
+
+	aliases {
+		nvmem0 = &eeprom0;
+	};
+};
+
+
+&gem1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	phy-handle = <&phy>;
+	phy-mode = "rmii";
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy: ethernet-phy {
+			reg = <4>;
+		};
+	};
+};
+
+
+&i2c0 {
+	eeprom0: eeprom@51 {
+		compatible = "st,24c128", "atmel,24c128";
+		reg = <0x51>;
+		bootph-all;
+	};
+};
+
+&i2c1 {
+	eeprom1: eeprom@55 {
+		compatible = "st,24c128", "atmel,24c128";
+		reg = <0x55>;
+		bootph-all;
+	};
+};
+
+&ospi {
+	num-cs = <2>;
+	reset-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+	reset-names = "qspi";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	mt35xu02g: flash@0 {
+		compatible = "micron,m25p80", "jedec,spi-nor";
+		reg = <0>, <1>;
+		stacked-memories = /bits/ 64 <0x8000000 0x8000000>; /* 128MB */
+		#address-cells = <1>;
+		#size-cells = <1>;
+		cdns,read-delay = <0>;
+		cdns,tshsl-ns = <0>;
+		cdns,tsd2d-ns = <0>;
+		cdns,tchsh-ns = <1>;
+		cdns,tslch-ns = <1>;
+		spi-tx-bus-width = <8>;
+		spi-rx-bus-width = <8>;
+		spi-max-frequency = <5000000>;
+		broken-flash-reset;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			partition@0 {
+				label = "ospi-flash0";
+				reg = <0 0x8000000>;
+			};
+		};
+	};
+};
+
+&sdhci1 {
+	non-removable;
+	disable-wp;
+	bus-width = <8>;
+	no-1-8-v;
+};
+
+
+&spi1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	num-cs = <3>;
+};
+
+
+&dwc3_1 {
+	snps,refclk_fladj;
+	snps,mask_phy_reset;
+	phy-names = "usb3-phy";
+};

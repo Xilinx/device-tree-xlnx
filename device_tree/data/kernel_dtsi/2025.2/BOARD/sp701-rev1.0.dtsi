@@ -1,0 +1,35 @@
+&axi_ethernet_0 {
+	phy-handle = <&phy0>;
+	/delete-node/ mdio;
+	axi_ethernet_mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy0: phy@1 {
+			device_type = "ethernet-phy";
+			reg = <1>;
+			ti,rx-internal-delay = <0x3>;
+			ti,tx-internal-delay = <0x3>;
+			ti,fifo-depth = <0x1>;
+		};
+	};
+};
+
+&axi_iic_0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	i2c-mux@75 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x75>;
+		i2c@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			eeprom@50 {
+				compatible = "atmel,24c08";
+				reg = <0x50>;
+			};
+		};
+	};
+};
