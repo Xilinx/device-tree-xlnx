@@ -457,12 +457,7 @@ proc gen_zynqmp_ccf_clk {} {
 			set avail_param [list_property [get_cells -hier $periph]]
 			if {[lsearch -nocase $avail_param "CONFIG.PSU__PSS_REF_CLK__FREQMHZ"] >= 0} {
 				set freq [get_property CONFIG.PSU__PSS_REF_CLK__FREQMHZ [get_cells -hier $periph]]
-				if {[string match -nocase $freq "33.333"]} {
-					return
-				} else {
-					dtg_warning "Frequency $freq used instead of 33.333"
-					hsi::utils::add_new_dts_param "${ccf_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
-				}
+				hsi::utils::add_new_dts_param "${ccf_node}" "clock-frequency" [scan [expr $freq * 1000000] "%d"] int
 			}
 		}
 	}

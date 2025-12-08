@@ -1,0 +1,59 @@
+&axi_ethernet_0 {
+	phy-handle = <&phy0>;
+	/delete-property/ pcs-handle ;
+	/delete-property/ managed ;
+	/delete-property/ xlnx,switch-x-sgmii ;
+	/delete-node/ mdio;
+	axi_ethernet_mdio: mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		phy0: phy@3 {
+			device_type = "ethernet-phy";
+			ti,sgmii-ref-clock-output-enable;
+			ti,dp83867-rxctrl-strap-quirk;
+			ti,rx-internal-delay = <0x8>;
+			ti,tx-internal-delay = <0xa>;
+			ti,fifo-depth = <0x1>;
+			reg = <3>;
+		};
+	};
+};
+
+&axi_iic_0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	i2c-mux@75 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x75>;
+		i2c@3 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <3>;
+			eeprom@54 {
+				compatible = "atmel,24c08";
+				reg = <0x54>;
+			};
+		};
+	};
+	i2c-mux@74 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x74>;
+		i2c@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			si570: clock-generator@5d {
+				#clock-cells = <0>;
+				compatible = "silabs,si570";
+				temperature-stability = <50>;
+				reg = <0x5d>;
+				factory-fout = <156250000>;
+				clock-frequency = <148500000>;
+			};
+		};
+	};
+};
