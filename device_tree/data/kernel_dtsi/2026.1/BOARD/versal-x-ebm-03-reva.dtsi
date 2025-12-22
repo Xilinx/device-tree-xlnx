@@ -9,7 +9,7 @@
  */
 
 #include "include/dt-bindings/gpio/gpio.h"
-#include "include/dt-bindings/reset/xlnx-versal-resets.h"
+#include "include/dt-bindings/dts/xlnx-versal-resets.h"
 
 /* U97 MT35XU02G */
 bus-num = <2>;

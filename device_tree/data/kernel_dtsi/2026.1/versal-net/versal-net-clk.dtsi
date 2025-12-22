@@ -8,7 +8,7 @@
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/reset/xlnx-versal-resets.h"
+#include "include/dt-bindings/dts/xlnx-versal-resets.h"
 
 / {
 	clk60: clk60 {
