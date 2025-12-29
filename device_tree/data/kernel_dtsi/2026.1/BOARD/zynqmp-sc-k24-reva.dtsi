@@ -3,7 +3,7 @@
  * dts file for Xilinx ZynqMP SC k24 RevA
  *
  * (C) Copyright 2020-2022 Xilinx, Inc.
- * (C) Copyright 2023-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2023-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -136,7 +136,7 @@
 };
 
 &dwc3_0 {
-	dr_mode = "otg";
+	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	maximum-speed = "super-speed";
 };

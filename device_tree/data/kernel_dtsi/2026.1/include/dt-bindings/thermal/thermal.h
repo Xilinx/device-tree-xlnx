@@ -3,7 +3,7 @@
  * This header provides constants for most thermal bindings.
  *
  * Copyright (C) 2013 Texas Instruments
- * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *	Eduardo Valentin <eduardo.valentin@ti.com>
  */
 

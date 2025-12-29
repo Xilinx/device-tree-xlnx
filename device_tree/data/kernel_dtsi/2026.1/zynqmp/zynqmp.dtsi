@@ -3,7 +3,7 @@
  * dts file for Xilinx ZynqMP
  *
  * (C) Copyright 2014-2022 Xilinx, Inc.
- * (C) Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  *
@@ -17,8 +17,8 @@
 #include "include/dt-bindings/gpio/gpio.h"
 #include "include/dt-bindings/interrupt-controller/arm-gic.h"
 #include "include/dt-bindings/interrupt-controller/irq.h"
-#include "include/dt-bindings/power/xlnx-zynqmp-power.h"
-#include "include/dt-bindings/reset/xlnx-zynqmp-resets.h"
+#include "include/dt-bindings/dts/xlnx-zynqmp-power.h"
+#include "include/dt-bindings/dts/xlnx-zynqmp-resets.h"
 #include "include/dt-bindings/thermal/thermal.h"
 
 / {

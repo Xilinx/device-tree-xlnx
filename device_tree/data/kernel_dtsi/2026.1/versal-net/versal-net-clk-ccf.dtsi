@@ -3,14 +3,14 @@
  * dts file for Xilinx Versal with PM
  *
  * Copyright (C) 2022, Xilinx, Inc.
- * Copyright (C) 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
 
-#include "include/dt-bindings/clock/xlnx-versal-net-clk.h"
-#include "include/dt-bindings/power/xlnx-versal-net-power.h"
-#include "include/dt-bindings/reset/xlnx-versal-net-resets.h"
+#include "include/dt-bindings/dts/xlnx-versal-net-clk.h"
+#include "include/dt-bindings/dts/xlnx-versal-net-power.h"
+#include "include/dt-bindings/dts/xlnx-versal-net-resets.h"
 
 / {
 	ref_clk: ref-clk {
