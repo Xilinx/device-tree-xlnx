@@ -761,7 +761,7 @@
 				};
 			};
 
-		};
+
 		versal_thermal_aie: versal-aie-thermal {
 			polling-delay-passive = <250>; /* milliseconds */
 			polling-delay = <1000>; /* milliseconds */
@@ -781,7 +781,6 @@
 				};
 			};
 
-		};
 	};
 
 	amba: axi {

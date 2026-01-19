@@ -17,5 +17,5 @@
 };
 
 &sdhci1 {
-#include "versal-x-ebm-02-reva.dtsi"
+	#include "versal-x-ebm-02-reva.dtsi"
 };
