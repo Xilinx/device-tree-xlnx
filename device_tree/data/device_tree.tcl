@@ -344,7 +344,7 @@ proc gen_include_dtfile {args} {
 	set fp [open $kernel_dtsi r]
 	set file_data [read $fp]
 	set data [split $file_data "\n"]
-	set include_regexp {^#include \".*\.dts.*\"$}
+	set include_regexp {^[ \t]*#include \".*\.dts.*\"$}
 	foreach line $data {
 		if {[regexp $include_regexp $line matched]} {
 			set include_dt [lindex [split $line " "] 1]

@@ -179,6 +179,7 @@
 					type = "critical";
 				};
 			};
+		};
 
 		versal_thermal_aie: versal-aie-thermal {
 			polling-delay-passive = <250>; /* milliseconds */
@@ -198,7 +199,7 @@
 					type = "critical";
 				};
 			};
-
+		};
 	};
 
 	amba: axi {
