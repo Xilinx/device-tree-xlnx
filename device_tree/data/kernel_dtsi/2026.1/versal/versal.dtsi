@@ -179,8 +179,8 @@
 					type = "critical";
 				};
 			};
-
 		};
+
 		versal_thermal_aie: versal-aie-thermal {
 			polling-delay-passive = <250>; /* milliseconds */
 			polling-delay = <1000>; /* milliseconds */
@@ -199,7 +199,6 @@
 					type = "critical";
 				};
 			};
-
 		};
 	};
 
@@ -440,7 +439,7 @@
 			#size-cells = <0>;
 		};
 
-		mc0: memory-controller@f6150000	{
+		mc0: memory-controller@f6150000 {
 			compatible = "xlnx,versal-ddrmc";
 			status = "disabled";
 			reg = <0x0 0xf6150000 0x0 0x2000>, <0x0 0xf6070000 0x0 0x20000>;
@@ -484,7 +483,7 @@
 			reg = <0 0xf12a0000 0 0x100>;
 			interrupt-names = "alarm", "sec";
 			interrupts = <0 142 4>, <0 143 4>;
-			calibration = <0x7FFF>;
+			calibration = <0x7fff>;
 		};
 
 		sdhci0: mmc@f1040000 {
@@ -557,7 +556,7 @@
 			cdns,fifo-depth = <256>;
 			cdns,fifo-width = <4>;
 			cdns,is-dma = <1>;
-			cdns,trigger-address = <0xC0000000>;
+			cdns,trigger-address = <0xc0000000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 		};
@@ -719,7 +718,7 @@
 			pcie_intc_0: interrupt-controller {
 				#address-cells = <0>;
 				#interrupt-cells = <1>;
-				interrupt-controller ;
+				interrupt-controller;
 			};
 		};
 

@@ -21,5 +21,5 @@
 };
 
 &ospi {
-#include "versal-x-ebm-03-reva.dtsi"
+	#include "versal-x-ebm-03-reva.dtsi"
 };

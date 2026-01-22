@@ -3,7 +3,7 @@
  * dts file for Xilinx Versal a2197 RevA System Controller
  *
  * (C) Copyright 2019-2022 Xilinx, Inc.
- * (C) Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -142,7 +142,8 @@
 	};
 	ina226-vcc-1v2-ddr4 {
 		compatible = "iio-hwmon";
-		io-channels = <&vcc_1v2_ddr4 0>, <&vcc_1v2_ddr4 1>, <&vcc_1v2_ddr4 2>, <&vcc_1v2_ddr4 3>;
+		io-channels = <&vcc_1v2_ddr4 0>, <&vcc_1v2_ddr4 1>, <&vcc_1v2_ddr4 2>,
+			      <&vcc_1v2_ddr4 3>;
 	};
 	ina226-vcc-1v1-lp4 {
 		compatible = "iio-hwmon";
@@ -493,7 +494,6 @@
 				clock-output-names = "si570_user1";
 				silabs,skip-recall;
 			};
-
 		};
 		i2c@7 { /* USER_SI570_2 */
 			#address-cells = <1>;

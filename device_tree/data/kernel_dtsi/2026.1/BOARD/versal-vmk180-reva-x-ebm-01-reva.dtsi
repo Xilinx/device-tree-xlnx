@@ -17,5 +17,5 @@
 };
 
 &qspi {
-#include "versal-x-ebm-01-reva.dtsi"
+	#include "versal-x-ebm-01-reva.dtsi"
 };

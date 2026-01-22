@@ -2,8 +2,8 @@
 /*
  * dts file for Xilinx Versal NET
  *
- * Copyright (C) 2022, Xilinx, Inc.
- * Copyright (C) 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+ * (C) Copyright 2022, Xilinx, Inc.
+ * (C) Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  * Michal Simek <michal.simek@amd.com>
  */
@@ -760,8 +760,8 @@
 					type = "critical";
 				};
 			};
-
 		};
+
 		versal_thermal_aie: versal-aie-thermal {
 			polling-delay-passive = <250>; /* milliseconds */
 			polling-delay = <1000>; /* milliseconds */
@@ -780,7 +780,6 @@
 					type = "critical";
 				};
 			};
-
 		};
 	};
 

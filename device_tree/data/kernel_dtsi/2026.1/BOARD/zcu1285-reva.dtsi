@@ -29,13 +29,11 @@
 		stdout-path = "serial0:115200n8";
 	};
 
-
 };
 
 
 &i2c0 {
 	clock-frequency = <400000>;
-
 };
 
 &gem1 {
