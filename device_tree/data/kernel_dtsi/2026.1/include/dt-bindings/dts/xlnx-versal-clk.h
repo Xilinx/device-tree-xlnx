@@ -1,11 +1,19 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  *  Copyright (C) 2019 Xilinx Inc.-2022 Xilinx, Inc.
+ * (C) Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
  *
  */
 
 #ifndef _DT_BINDINGS_CLK_VERSAL_H
 #define _DT_BINDINGS_CLK_VERSAL_H
+
+/*
+ * These bindings are deprecated, because they do not match the actual
+ * concept of bindings but rather contain pure firmware values.
+ * Instead include the header in the DTS source directory.
+ */
+#warning "These bindings are deprecated. Instead use the header in the DTS source directory."
 
 #define PMC_PLL					1
 #define APU_PLL					2

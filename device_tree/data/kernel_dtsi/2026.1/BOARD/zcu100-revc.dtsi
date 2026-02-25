@@ -54,6 +54,7 @@
 
 	iio-hwmon {
 		compatible = "iio-hwmon";
+		status = "disabled";
 		io-channels = <&xilinx_ams 0>, <&xilinx_ams 1>, <&xilinx_ams 2>,
 			      <&xilinx_ams 3>, <&xilinx_ams 4>, <&xilinx_ams 5>,
 			      <&xilinx_ams 6>, <&xilinx_ams 7>, <&xilinx_ams 8>,
@@ -113,6 +114,7 @@
 
 	ina226 {
 		compatible = "iio-hwmon";
+		status = "disabled";
 		io-channels = <&u35 0>, <&u35 1>, <&u35 2>, <&u35 3>;
 	};
 
@@ -578,12 +580,10 @@
 	phy-names = "dp-phy0", "dp-phy1";
 	phys = <&psgtr 1 PHY_TYPE_DP 0 1>,
 	       <&psgtr 0 PHY_TYPE_DP 1 1>;
+};
 
-	ports {
-		port@5 {
-			dpsub_dp_out: endpoint {
-				remote-endpoint = <&dpcon_in>;
-			};
-		};
+&out_dp {
+	dpsub_dp_out: endpoint {
+		remote-endpoint = <&dpcon_in>;
 	};
 };
